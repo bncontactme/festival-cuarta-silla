@@ -1,0 +1,49 @@
+---
+/** Encabezado de página: número de sección + título display gigante. */
+interface Props {
+  indice: string;
+  titulo: string;
+  bajada?: string;
+  fondo?: 'amarillo' | 'rojo' | 'hueso' | 'pizarra';
+}
+
+const { indice, titulo, bajada, fondo = 'amarillo' } = Astro.props;
+
+const paleta = {
+  amarillo: 'bg-amarillo text-tinta',
+  rojo: 'bg-rojo text-amarillo',
+  hueso: 'bg-hueso text-tinta',
+  pizarra: 'bg-pizarra text-hueso',
+}[fondo];
+---
+
+<section class={`relative overflow-hidden border-b-2 border-current ${paleta}`}>
+  <div class="cuadricula absolute inset-0 opacity-70" aria-hidden="true"></div>
+
+  <div class="relative px-4 pt-16 pb-10 sm:px-6 lg:px-10 lg:pt-24">
+    <p class="meta mb-6 flex items-center gap-4" data-reveal="lado">
+      <span class="inline-block h-[2px] w-12 bg-current"></span>
+      {indice}
+    </p>
+
+    <h1
+      class="display text-[17vw] leading-[0.92] sm:text-[15vw] lg:text-[11vw]"
+      data-lineas
+      data-reveal="lineas"
+    >
+      {titulo}
+    </h1>
+
+    {
+      bajada && (
+        <p
+          class="mt-8 max-w-2xl text-lg leading-relaxed sm:text-xl"
+          data-reveal="arriba"
+          data-retraso="150"
+        >
+          {bajada}
+        </p>
+      )
+    }
+  </div>
+</section>

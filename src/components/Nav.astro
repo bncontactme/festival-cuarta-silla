@@ -1,0 +1,115 @@
+---
+import { nav, festival } from '../data/site';
+
+const ruta = Astro.url.pathname.replace(/\/$/, '') || '/';
+const activo = (href: string) => (ruta === href ? 'page' : undefined);
+---
+
+<header
+  class="sticky top-0 z-50 border-b-2 border-tinta bg-amarillo/95 backdrop-blur-sm"
+>
+  <!-- Progreso de lectura: 0 KB de JS donde hay scroll-driven animations -->
+  <div
+    class="progreso absolute inset-x-0 bottom-0 h-[3px] origin-left scale-x-0 bg-rojo"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="flex items-stretch justify-between">
+    <a
+      href="/"
+      class="vt-wordmark group flex items-center gap-3 border-r-2 border-tinta px-4 py-3 sm:px-6"
+      aria-label={`${festival.nombreCompleto} — Inicio`}
+    >
+      <img
+        src="/logos/silla-roja.png"
+        alt=""
+        width="640"
+        height="830"
+        class="h-8 w-auto transition-transform duration-500 ease-[var(--ease-salida)] group-hover:-rotate-6 sm:h-10"
+      />
+      <span class="leading-none">
+        <span class="meta block text-[0.5rem] text-rojo sm:text-[0.55rem]"
+          >Festival de arte</span
+        >
+        <span class="wordmark block text-xl text-rojo sm:text-2xl"
+          >Cuarta Silla</span
+        >
+      </span>
+    </a>
+
+    <!-- Escritorio -->
+    <nav class="hidden items-stretch lg:flex" aria-label="Principal">
+      {
+        nav.map((item) => (
+          <a
+            href={item.href}
+            aria-current={activo(item.href)}
+            class="meta flex items-center border-l-2 border-tinta px-5 transition-colors duration-300 hover:bg-rojo hover:text-amarillo aria-[current=page]:bg-tinta aria-[current=page]:text-amarillo"
+          >
+            {item.label}
+          </a>
+        ))
+      }
+      <a
+        href={festival.convocatoriaPDF}
+        target="_blank"
+        rel="noopener"
+        class="meta flex items-center gap-2 border-l-2 border-tinta bg-rojo px-6 font-bold text-amarillo transition-colors duration-300 hover:bg-tinta"
+      >
+        ★ Convocatoria ★
+      </a>
+    </nav>
+
+    <!-- Móvil -->
+    <button
+      type="button"
+      data-menu-boton
+      aria-expanded="false"
+      aria-controls="menu-movil"
+      class="menu-boton meta relative z-50 flex items-center gap-2 border-l-2 border-tinta px-5 font-bold lg:hidden"
+    >
+      <span class="menu-abrir">Menú</span>
+      <span class="menu-cerrar">Cerrar</span>
+      <span class="menu-aspas" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </button>
+  </div>
+</header>
+
+<!-- Panel móvil: cortina roja de arriba a abajo -->
+<div
+  id="menu-movil"
+  data-menu-panel
+  data-abierto="false"
+  class="menu-panel fixed inset-0 z-40 bg-rojo lg:hidden"
+>
+  <nav
+    class="flex h-full flex-col justify-center gap-2 px-6 pt-20"
+    aria-label="Principal (móvil)"
+  >
+    {
+      nav.map((item, i) => (
+        <a
+          href={item.href}
+          aria-current={activo(item.href)}
+          class="display display-centro block text-[13vw] text-amarillo transition-colors duration-300 hover:text-tinta aria-[current=page]:text-tinta"
+          style={`transition-delay: ${i * 40}ms`}
+        >
+          {item.label}
+        </a>
+      ))
+    }
+    <a
+      href={festival.convocatoriaPDF}
+      target="_blank"
+      rel="noopener"
+      class="meta mt-8 inline-flex items-center justify-center gap-2 border-2 border-amarillo px-6 py-4 font-bold text-amarillo"
+    >
+      ★ Convocatoria (PDF) ★
+    </a>
+  </nav>
+</div>

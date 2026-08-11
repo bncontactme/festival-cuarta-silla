@@ -1,0 +1,434 @@
+@import 'tailwindcss';
+
+/* ── Tipografías autoalojadas (sin peticiones a terceros) ───────────────── */
+@import '@fontsource/anton/400.css'; /* display condensada — sustituto de Tusker Grotesk */
+@import '@fontsource/unifrakturcook/700.css'; /* gótica — sustituto de Old London (wordmark) */
+@import '@fontsource-variable/archivo'; /* texto — sustituto de Acumin Variable Concept */
+@import '@fontsource/courier-prime/400.css'; /* mono — sustituto de Truetypewriter Polyglott */
+@import '@fontsource/courier-prime/700.css';
+
+@theme {
+  /* Paleta oficial, tal cual el manual de identidad */
+  --color-rojo: #ff0100;
+  --color-amarillo: #fffd00;
+  --color-hueso: #cfd8d7;
+  --color-ladrillo: #99272d;
+  --color-pizarra: #23404a;
+  --color-tinta: #1e1e1e;
+
+  --font-display: 'Anton', 'Arial Narrow', sans-serif;
+  --font-gotica: 'UnifrakturCook', serif;
+  --font-texto: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-mono: 'Courier Prime', ui-monospace, monospace;
+
+  /* Curvas de animación: una sola familia para todo el sitio */
+  --ease-salida: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-cortina: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+@layer base {
+  :root {
+    --borde: 2px;
+    color-scheme: light;
+  }
+
+  html {
+    /* Lenis maneja el scroll suave; esto cubre el caso sin JS y los anclajes */
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  body {
+    background-color: var(--color-amarillo);
+    color: var(--color-tinta);
+    font-family: var(--font-texto);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-pizarra);
+    outline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  /* ── Tipografía display ─────────────────────────────────────────────── */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    /* 0.95 y no menos: en mayúsculas el español lleva tildes (É, Ó, Í) que
+       suben por encima de la altura de caja y chocan con la línea anterior.
+       Para bloques de una sola línea sin tilde se aprieta caso por caso. */
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    /* Anton no es tan estrecha como Tusker: la comprimimos ópticamente */
+    transform: scaleX(0.92);
+    transform-origin: left center;
+  }
+
+  .display-centro {
+    transform-origin: center;
+  }
+
+  .wordmark {
+    font-family: var(--font-gotica);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1;
+  }
+
+  .meta {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.72rem;
+  }
+
+  /* ── Regla / marco: el sitio se lee como una hoja cuadriculada ──────── */
+  .regla {
+    border-top: var(--borde) solid currentColor;
+  }
+
+  .cuadricula {
+    background-image: linear-gradient(
+        to right,
+        color-mix(in srgb, currentColor 12%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, currentColor 12%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 4rem 4rem;
+  }
+
+  /* ── Botón ──────────────────────────────────────────────────────────── */
+  .boton {
+    --desfase: 6px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.8rem;
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
+    border: var(--borde) solid var(--color-tinta);
+    box-shadow: var(--desfase) var(--desfase) 0 var(--color-tinta);
+    transition:
+      transform 0.25s var(--ease-salida),
+      box-shadow 0.25s var(--ease-salida);
+  }
+
+  .boton:hover {
+    transform: translate(var(--desfase), var(--desfase));
+    box-shadow: 0 0 0 var(--color-tinta);
+  }
+
+  .boton--hueso {
+    background-color: var(--color-hueso);
+    color: var(--color-tinta);
+  }
+
+  /* ── Enlace subrayado que se dibuja ─────────────────────────────────── */
+  .enlace {
+    position: relative;
+    display: inline-block;
+  }
+  .enlace::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -0.15em;
+    width: 100%;
+    height: var(--borde);
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s var(--ease-salida);
+  }
+  .enlace:hover::after,
+  .enlace[aria-current='page']::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/* ── Cortina del menú móvil ───────────────────────────────────────────────
+   Sin @layer y sin variantes `data-[]`: dos utilidades de clip-path con la
+   misma especificidad dependen del orden en que Tailwind las genere, y eso no
+   es algo sobre lo que valga la pena apostar. Fuera de capa, esto siempre
+   gana. */
+.menu-panel {
+  clip-path: inset(0 0 100% 0);
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    clip-path 0.5s var(--ease-cortina),
+    visibility 0s linear 0.5s;
+}
+
+/* Botón: "Menú" ⇄ "Cerrar", y las tres barras se cruzan en aspa. */
+.menu-boton[aria-expanded='true'] .menu-abrir,
+.menu-boton[aria-expanded='false'] .menu-cerrar {
+  display: none;
+}
+
+.menu-aspas {
+  display: grid;
+  gap: 3px;
+}
+
+.menu-aspas > span {
+  display: block;
+  width: 1.25rem;
+  height: 2px;
+  background-color: currentColor;
+  transition: transform 0.35s var(--ease-salida), opacity 0.2s linear;
+}
+
+.menu-boton[aria-expanded='true'] .menu-aspas > span:nth-child(1) {
+  transform: translateY(5px) rotate(45deg);
+}
+.menu-boton[aria-expanded='true'] .menu-aspas > span:nth-child(2) {
+  opacity: 0;
+}
+.menu-boton[aria-expanded='true'] .menu-aspas > span:nth-child(3) {
+  transform: translateY(-5px) rotate(-45deg);
+}
+
+.menu-panel[data-abierto='true'] {
+  clip-path: inset(0 0 0 0);
+  pointer-events: auto;
+  visibility: visible;
+  transition:
+    clip-path 0.5s var(--ease-cortina),
+    visibility 0s;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOTION
+   Tres capas, de la más barata a la más cara:
+   1. reveals por IntersectionObserver (~1 KB, universal)
+   2. animaciones CSS ligadas al scroll (0 KB de JS, donde haya soporte)
+   3. View Transitions nativas entre páginas (0 KB de JS)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* — Capa 1: reveals ——————————————————————————————————————————————— */
+/* Todo esto vive detrás de `.js`, que pone un script en línea en el <head>.
+   Sin JS (o si el script falla) el contenido se ve tal cual: nunca se queda
+   escondido esperando una animación que no va a llegar. */
+/* NO esconder un elemento observado con `clip-path` que lo recorte a cero.
+   IntersectionObserver mide el área ya recortada: un elemento con
+   `clip-path: inset(0 0 100% 0)` reporta ratio 0 e `isIntersecting: false`
+   aunque esté en mitad de la pantalla. Nunca entra, nunca recibe `.dentro`,
+   y se queda invisible para siempre. El efecto de cortina lo hace `.linea`,
+   que recorta un HIJO y deja intacta el área del elemento observado. */
+.js [data-reveal] {
+  --retraso: 0ms;
+  opacity: 0;
+  transition:
+    opacity 0.9s var(--ease-salida) var(--retraso),
+    translate 0.9s var(--ease-salida) var(--retraso);
+}
+
+.js [data-reveal='arriba'] {
+  translate: 0 2.5rem;
+}
+.js [data-reveal='lado'] {
+  translate: -2.5rem 0;
+}
+.js [data-reveal='escala'] {
+  translate: 0 1.5rem;
+  scale: 0.96;
+  transition-property: opacity, translate, scale;
+}
+
+.js [data-reveal].dentro {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+}
+
+/* Si el titular se parte en líneas, la máscara la hace cada línea:
+   el clip-path del contenedor sobraría. */
+.js [data-reveal='lineas'] {
+  opacity: 1;
+}
+
+/* Líneas de texto partidas por el splitter.
+   El padding deja aire para las descendentes, que con line-height < 1
+   sobresalen de la caja y el overflow:hidden recortaría. */
+.linea {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+.linea > span {
+  display: block;
+  translate: 0 110%;
+  transition: translate 1s var(--ease-cortina) var(--retraso);
+}
+.dentro .linea > span,
+.linea.dentro > span {
+  translate: 0 0;
+}
+
+/* — Capa 2: scroll-driven (progresivo) ————————————————————————————— */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Barra de progreso de lectura */
+    .progreso {
+      animation: crecer linear;
+      animation-timeline: scroll(root block);
+      transform-origin: left center;
+    }
+
+    /* Deriva vertical suave: la silla y los fondos */
+    .deriva {
+      animation: derivar linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    /* Tickers que aceleran según el scroll no son accesibles; se deja el
+       marquee a velocidad constante y sólo se mueve el fondo. */
+  }
+}
+
+@keyframes crecer {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes derivar {
+  from {
+    translate: 0 6%;
+  }
+  to {
+    translate: 0 -6%;
+  }
+}
+
+/* — Marquee ————————————————————————————————————————————————————————— */
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: desfilar var(--duracion, 30s) linear infinite;
+}
+.marquee--inverso {
+  animation-direction: reverse;
+}
+.marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes desfilar {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* — Capa 3: View Transitions ——————————————————————————————————————— */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-group(root) {
+  animation-duration: 0.5s;
+  animation-timing-function: var(--ease-cortina);
+}
+
+/* El wordmark del header persiste entre páginas */
+.vt-wordmark {
+  view-transition-name: wordmark;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: salir 0.4s var(--ease-cortina) both;
+  }
+  ::view-transition-new(root) {
+    animation: entrar 0.5s var(--ease-cortina) both;
+  }
+}
+
+@keyframes salir {
+  to {
+    opacity: 0;
+    translate: 0 -2rem;
+  }
+}
+@keyframes entrar {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* ── Respeto por prefers-reduced-motion ──────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .js [data-reveal] {
+    opacity: 1 !important;
+    translate: 0 !important;
+    scale: 1 !important;
+  }
+  .linea > span {
+    translate: 0 !important;
+  }
+  .marquee {
+    animation: none;
+  }
+  @view-transition {
+    navigation: none;
+  }
+}

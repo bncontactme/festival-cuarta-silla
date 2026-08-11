@@ -1,0 +1,107 @@
+---
+import Base from '../layouts/Base.astro';
+import Encabezado from '../components/Encabezado.astro';
+import Silla from '../components/Silla.astro';
+import { registro, festival } from '../data/site';
+---
+
+<Base
+  titulo={registro.titulo}
+  descripcion={`${registro.titulo} del ${festival.nombre}. ${registro.estado}.`}
+>
+  <Encabezado
+    indice={`Registro / ${festival.anio}`}
+    titulo={registro.titulo}
+    fondo="rojo"
+  />
+
+  <section class="relative overflow-hidden border-b-2 border-tinta bg-hueso">
+    <Silla
+      variante="roja"
+      deriva
+      class="absolute -right-8 -bottom-12 w-48 opacity-15 lg:w-80"
+    />
+
+    <div class="relative px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
+      <!-- Tarjeta de evento en estado "por definir" -->
+      <article
+        class="max-w-2xl border-2 border-tinta bg-amarillo shadow-[10px_10px_0_var(--color-tinta)]"
+        data-reveal="escala"
+      >
+        <header class="border-b-2 border-tinta bg-tinta px-6 py-5 text-hueso">
+          <p class="meta text-amarillo">{registro.ciudad}</p>
+          <h2 class="display mt-3 text-5xl leading-none lg:text-6xl">
+            {registro.estado}
+          </h2>
+        </header>
+
+        <div class="px-6 py-8">
+          <dl class="space-y-4">
+            <div class="flex items-baseline gap-4 border-b border-tinta/20 pb-4">
+              <dt class="meta w-24 shrink-0 text-rojo">Fecha</dt>
+              <dd class="font-mono text-base">A determinar</dd>
+            </div>
+            <div class="flex items-baseline gap-4 border-b border-tinta/20 pb-4">
+              <dt class="meta w-24 shrink-0 text-rojo">Hora</dt>
+              <dd class="font-mono text-base">A determinar</dd>
+            </div>
+            <div class="flex items-baseline gap-4">
+              <dt class="meta w-24 shrink-0 text-rojo">Lugar</dt>
+              <dd class="font-mono text-base">{registro.ciudad}</dd>
+            </div>
+          </dl>
+
+          <p class="meta mt-8 leading-relaxed text-tinta/55">
+            {registro.nota}
+          </p>
+        </div>
+
+        <footer class="flex flex-wrap gap-3 border-t-2 border-tinta px-6 py-5">
+          <button type="button" class="boton" disabled>
+            {registro.acciones.registro}
+          </button>
+          <a href="/programa" class="boton boton--hueso">
+            {registro.acciones.leerMas}
+          </a>
+        </footer>
+      </article>
+
+      <p class="meta mt-10 max-w-md text-tinta/50" data-reveal="arriba">
+        {registro.estado} — el registro abrirá junto con el programa.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-pizarra text-hueso">
+    <div class="px-4 py-20 sm:px-6 lg:px-10">
+      <p
+        class="display max-w-4xl text-[9vw] leading-[0.95] lg:text-[5.5vw]"
+        data-lineas
+        data-reveal="lineas"
+      >
+        {festival.fechas}
+      </p>
+      <a
+        href={festival.convocatoriaPDF}
+        target="_blank"
+        rel="noopener"
+        class="boton mt-10"
+        data-reveal="arriba"
+      >
+        ★ Convocatoria ★
+      </a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .boton:disabled {
+    cursor: not-allowed;
+    background-color: var(--color-tinta);
+    color: color-mix(in srgb, var(--color-hueso) 45%, transparent);
+    box-shadow: 6px 6px 0 color-mix(in srgb, var(--color-tinta) 30%, transparent);
+  }
+  .boton:disabled:hover {
+    transform: none;
+  }
+</style>

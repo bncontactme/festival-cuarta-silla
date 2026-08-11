@@ -1,0 +1,43 @@
+---
+/**
+ * Cinta que desfila. Duplica el contenido para que el bucle no tenga costura.
+ * `aria-hidden` en la copia: el lector de pantalla lee el texto una sola vez.
+ */
+interface Props {
+  items: string[];
+  duracion?: string;
+  inverso?: boolean;
+  separador?: string;
+  class?: string;
+}
+
+const {
+  items,
+  duracion = '38s',
+  inverso = false,
+  separador = '✦',
+  class: clase = '',
+} = Astro.props;
+---
+
+<div class={`overflow-hidden ${clase}`} role="marquee">
+  <div
+    class={`marquee ${inverso ? 'marquee--inverso' : ''}`}
+    style={`--duracion: ${duracion}`}
+  >
+    {
+      [0, 1].map((copia) => (
+        <div class="flex shrink-0 items-center" aria-hidden={copia === 1}>
+          {items.map((item) => (
+            <span class="flex shrink-0 items-center">
+              <span class="whitespace-nowrap">{item}</span>
+              <span class="px-6 opacity-60 select-none" aria-hidden="true">
+                {separador}
+              </span>
+            </span>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</div>

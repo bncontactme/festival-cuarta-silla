@@ -1,0 +1,378 @@
+---
+import Base from '../layouts/Base.astro';
+import Marquee from '../components/Marquee.astro';
+import Silla from '../components/Silla.astro';
+import {
+  festival,
+  manifiesto,
+  sedes,
+  patrocinadores,
+  programa,
+} from '../data/site';
+
+const cuenta = [
+  { campo: 'dias', label: 'Días' },
+  { campo: 'horas', label: 'Horas' },
+  { campo: 'minutos', label: 'Min' },
+  { campo: 'segundos', label: 'Seg' },
+] as const;
+---
+
+<Base titulo="Inicio">
+  <!-- ══ HERO ═══════════════════════════════════════════════════════════ -->
+  <section
+    class="relative overflow-hidden border-b-2 border-tinta bg-amarillo"
+  >
+    <div class="cuadricula absolute inset-0 opacity-60" aria-hidden="true"></div>
+
+    <!-- Sillas de fondo, en deriva con el scroll -->
+    <Silla
+      variante="roja"
+      deriva
+      class="absolute -top-8 -right-10 w-40 rotate-12 opacity-25 sm:w-64 lg:w-80"
+    />
+    <Silla
+      variante="roja"
+      deriva
+      class="absolute -bottom-16 -left-12 w-32 -rotate-12 opacity-20 sm:w-52 lg:w-64"
+    />
+
+    <div class="relative px-4 pt-14 pb-8 sm:px-6 lg:px-10 lg:pt-20">
+      <p
+        class="meta flex flex-wrap items-center gap-x-4 gap-y-2 text-rojo"
+        data-reveal="lado"
+      >
+        <span class="inline-block h-[2px] w-10 bg-rojo"></span>
+        {festival.ciudad}
+        <span aria-hidden="true">/</span>
+        {festival.anio}
+      </p>
+
+      <h1 class="mt-8">
+        <span class="sr-only">
+          {festival.nombre} — {festival.fechas} — {festival.ciudad}
+        </span>
+
+        <span
+          class="display block text-[15vw] leading-[0.86] text-rojo"
+          aria-hidden="true"
+          data-lineas
+          data-reveal="lineas"
+        >
+          Festival
+        </span>
+        <span
+          class="display block text-[15vw] leading-[0.86] text-tinta"
+          aria-hidden="true"
+          data-lineas
+          data-reveal="lineas"
+          data-retraso="90"
+        >
+          de Arte
+        </span>
+        <span
+          class="display block text-[15vw] leading-[0.86] text-rojo"
+          aria-hidden="true"
+          data-lineas
+          data-reveal="lineas"
+          data-retraso="180"
+        >
+          Conceptual
+        </span>
+      </h1>
+
+      <!-- Franja de datos: fecha + wordmark + CTA -->
+      <div
+        class="mt-12 grid gap-8 border-t-2 border-tinta pt-8 lg:grid-cols-[1fr_auto] lg:items-end"
+      >
+        <div data-reveal="arriba">
+          <p class="meta mb-3 text-rojo">Cuándo</p>
+          <p
+            class="font-mono text-xl leading-tight font-bold sm:text-2xl lg:text-3xl"
+          >
+            {festival.fechas}
+          </p>
+          <p class="font-mono text-xl leading-tight sm:text-2xl lg:text-3xl">
+            {festival.ciudad}
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4" data-reveal="arriba" data-retraso="120">
+          <a
+            href={festival.convocatoriaPDF}
+            target="_blank"
+            rel="noopener"
+            class="boton"
+          >
+            ★ Convocatoria ★
+          </a>
+          <a href="/programa" class="boton boton--hueso">Programa</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cuenta regresiva -->
+    <div
+      class="relative border-t-2 border-tinta bg-tinta text-hueso"
+      data-cuenta={festival.inicioISO}
+    >
+      <dl class="grid grid-cols-4 divide-x-2 divide-hueso/25">
+        {
+          cuenta.map(({ campo, label }) => (
+            <div class="px-3 py-5 text-center sm:py-7">
+              <dd
+                class="display display-centro text-[13vw] leading-none text-amarillo sm:text-6xl lg:text-7xl"
+                data-campo={campo}
+              >
+                --
+              </dd>
+              <dt class="meta mt-3 text-hueso/60">{label}</dt>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- ══ CINTA ══════════════════════════════════════════════════════════ -->
+  <Marquee
+    items={[
+      'Cuarta Silla',
+      festival.fechas,
+      'Arte Conceptual',
+      festival.ciudad,
+    ]}
+    duracion="40s"
+    class="meta border-b-2 border-tinta bg-rojo py-4 text-amarillo"
+  />
+
+  <!-- ══ MANIFIESTO ═════════════════════════════════════════════════════ -->
+  <section
+    id="manifiesto"
+    class="relative overflow-hidden border-b-2 border-tinta bg-hueso"
+  >
+    <div class="px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
+      <p class="meta mb-8 flex items-center gap-4 text-rojo" data-reveal="lado">
+        <span class="inline-block h-[2px] w-12 bg-rojo"></span>
+        01 / Manifiesto
+      </p>
+
+      <h2
+        class="display max-w-5xl text-[9vw] leading-[0.95] text-tinta lg:text-[6.5vw]"
+        data-lineas
+        data-reveal="lineas"
+      >
+        {manifiesto.titulo}
+      </h2>
+
+      <div
+        class="mt-16 grid gap-x-16 gap-y-8 lg:grid-cols-[1fr_1fr] lg:items-start"
+      >
+        <div class="space-y-6">
+          {
+            manifiesto.parrafos.slice(0, 2).map((p, i) => (
+              <p
+                class="text-lg leading-relaxed text-tinta/85 sm:text-xl"
+                data-reveal="arriba"
+                data-retraso={i * 100}
+              >
+                {p}
+              </p>
+            ))
+          }
+        </div>
+
+        <div class="space-y-6">
+          {
+            manifiesto.parrafos.slice(2).map((p) => (
+              <p
+                class="text-lg leading-relaxed text-tinta/85 sm:text-xl"
+                data-reveal="arriba"
+              >
+                {p}
+              </p>
+            ))
+          }
+
+          <figure
+            class="relative mt-10 border-l-4 border-rojo pl-6"
+            data-reveal="arriba"
+            data-retraso="150"
+          >
+            <blockquote
+              class="font-mono text-xl leading-snug font-bold text-rojo sm:text-2xl"
+            >
+              {manifiesto.cierre}
+            </blockquote>
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <Silla
+      variante="roja"
+      deriva
+      class="pointer-events-none absolute -right-10 bottom-0 w-44 opacity-[0.07] lg:w-72"
+    />
+  </section>
+
+  <!-- ══ SEDES ══════════════════════════════════════════════════════════ -->
+  <section class="border-b-2 border-amarillo bg-pizarra text-hueso">
+    <div class="px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
+      <div
+        class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-hueso/25 pb-8"
+      >
+        <div>
+          <p
+            class="meta mb-6 flex items-center gap-4 text-amarillo"
+            data-reveal="lado"
+          >
+            <span class="inline-block h-[2px] w-12 bg-amarillo"></span>
+            02 / {sedes.titulo}
+          </p>
+          <h2
+            class="display text-[13vw] leading-[0.82] text-hueso lg:text-[8vw]"
+            data-lineas
+            data-reveal="lineas"
+          >
+            {sedes.titulo}
+          </h2>
+        </div>
+        <a href="/sedes" class="boton" data-reveal="arriba">Ver las {sedes.lista.length}</a>
+      </div>
+
+      <ul class="mt-4">
+        {
+          sedes.lista.map((sede, i) => (
+            <li
+              class="group border-b border-hueso/20"
+              data-reveal="arriba"
+              data-retraso={i * 50}
+            >
+              <a
+                href={sede.mapa}
+                target="_blank"
+                rel="noopener"
+                class="flex flex-wrap items-baseline gap-x-6 gap-y-1 py-5 transition-colors duration-300 group-hover:text-amarillo"
+              >
+                <span class="meta w-8 shrink-0 text-hueso/40">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span class="display text-3xl leading-none sm:text-4xl lg:text-5xl">
+                  {sede.nombre}
+                </span>
+                <span class="meta ml-auto text-hueso/50 group-hover:text-amarillo/70">
+                  {sedes.acciones.ubicacion} ↗
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- ══ PROGRAMA (adelanto) ════════════════════════════════════════════ -->
+  <section class="border-b-2 border-tinta bg-amarillo">
+    <div class="px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
+      <p class="meta mb-8 flex items-center gap-4 text-rojo" data-reveal="lado">
+        <span class="inline-block h-[2px] w-12 bg-rojo"></span>
+        03 / {programa.titulo}
+      </p>
+
+      <div
+        class="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end"
+      >
+        <h2
+          class="display text-[15vw] leading-[0.95] text-tinta lg:text-[9vw]"
+          data-reveal="arriba"
+        >
+          {programa.titulo}
+          <span class="block text-rojo">{programa.estado}</span>
+        </h2>
+
+        <div data-reveal="arriba">
+          <ul class="mb-8 divide-y-2 divide-tinta border-y-2 border-tinta">
+            {
+              programa.dias.map((d) => (
+                <li class="flex items-baseline justify-between gap-4 py-3">
+                  <span class="font-mono text-base font-bold sm:text-lg">
+                    {d.dia}
+                  </span>
+                  <span class="meta text-tinta/60">{d.fecha}</span>
+                </li>
+              ))
+            }
+          </ul>
+          <a href="/programa" class="boton">Ver el programa</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PATROCINADORES ═════════════════════════════════════════════════ -->
+  <section class="border-b-2 border-tinta bg-hueso">
+    <div class="px-4 py-20 sm:px-6 lg:px-10">
+      <p class="meta mb-8 flex items-center gap-4 text-rojo" data-reveal="lado">
+        <span class="inline-block h-[2px] w-12 bg-rojo"></span>
+        04 / {patrocinadores.titulo}
+      </p>
+
+      <h2
+        class="display text-[11vw] leading-[0.82] text-tinta lg:text-[6vw]"
+        data-lineas
+        data-reveal="lineas"
+      >
+        {patrocinadores.titulo}
+      </h2>
+
+      {
+        patrocinadores.lista.length === 0 ? (
+          <div
+            class="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4"
+            data-reveal="arriba"
+          >
+            {[0, 1, 2, 3].map(() => (
+              <div class="flex aspect-[3/2] items-center justify-center border-2 border-dashed border-tinta/30">
+                <span class="meta text-tinta/35">Próximamente</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <ul class="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {patrocinadores.lista.map((p) => (
+              <li class="flex aspect-[3/2] items-center justify-center border-2 border-tinta bg-white p-6">
+                <img src={p.logo} alt={p.nombre} class="max-h-full w-auto" />
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- ══ CIERRE ═════════════════════════════════════════════════════════ -->
+  <section class="relative overflow-hidden bg-rojo text-amarillo">
+    <div
+      class="relative px-4 py-24 text-center sm:px-6 lg:px-10 lg:py-32"
+    >
+      <p class="wordmark text-[16vw] leading-[0.9] lg:text-[11vw]" data-reveal="escala">
+        Cuarta Silla
+      </p>
+      <p class="meta mt-6 text-amarillo/80" data-reveal="arriba">
+        {festival.fechas} · {festival.ciudad}
+      </p>
+      <div class="mt-12 flex flex-wrap justify-center gap-4" data-reveal="arriba" data-retraso="120">
+        <a
+          href={festival.convocatoriaPDF}
+          target="_blank"
+          rel="noopener"
+          class="boton boton--hueso"
+        >
+          ★ Convocatoria ★
+        </a>
+        <a href="/registro" class="boton boton--hueso">Registro a eventos</a>
+      </div>
+    </div>
+  </section>
+</Base>

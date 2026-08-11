@@ -1,0 +1,88 @@
+---
+import Base from '../layouts/Base.astro';
+import Encabezado from '../components/Encabezado.astro';
+import Silla from '../components/Silla.astro';
+import { sedes, festival } from '../data/site';
+---
+
+<Base
+  titulo={sedes.titulo}
+  descripcion={`Las ${sedes.lista.length} sedes del ${festival.nombre} en ${festival.ciudad}.`}
+>
+  <Encabezado
+    indice={`${sedes.titulo} / ${String(sedes.lista.length).padStart(2, '0')}`}
+    titulo={sedes.titulo}
+    fondo="pizarra"
+  />
+
+  <section class="bg-hueso">
+    <ul class="grid sm:grid-cols-2 lg:grid-cols-3">
+      {
+        sedes.lista.map((sede, i) => (
+          <li
+            class="group relative flex flex-col justify-between overflow-hidden border-r-2 border-b-2 border-tinta"
+            data-reveal="escala"
+            data-retraso={(i % 3) * 90}
+          >
+            {/* Cortina roja que sube al pasar el cursor */}
+            <span
+              class="absolute inset-0 -z-0 origin-bottom scale-y-0 bg-rojo transition-transform duration-500 ease-[var(--ease-cortina)] group-hover:scale-y-100"
+              aria-hidden="true"
+            />
+
+            <div class="relative p-6 transition-colors duration-500 group-hover:text-amarillo lg:p-8">
+              <p class="meta text-rojo transition-colors duration-500 group-hover:text-amarillo">
+                {String(i + 1).padStart(2, '0')}
+              </p>
+
+              <h2 class="display mt-4 text-4xl leading-[0.95] lg:text-5xl">
+                {sede.nombre}
+              </h2>
+
+              <address class="mt-5 min-h-[3.5rem] text-base leading-snug not-italic opacity-70">
+                {sede.direccion}
+              </address>
+            </div>
+
+            <div class="relative flex divide-x-2 divide-tinta border-t-2 border-tinta">
+              <a
+                href={sede.instagram}
+                target="_blank"
+                rel="noopener"
+                class="meta flex-1 bg-amarillo px-4 py-4 text-center font-bold transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
+              >
+                {sedes.acciones.conoce} ↗
+              </a>
+              <a
+                href={sede.mapa}
+                target="_blank"
+                rel="noopener"
+                class="meta flex-1 bg-tinta px-4 py-4 text-center font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
+              >
+                {sedes.acciones.ubicacion} ↗
+              </a>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="relative overflow-hidden border-t-2 border-tinta bg-amarillo">
+    <Silla
+      variante="roja"
+      deriva
+      class="absolute -bottom-10 right-4 w-40 opacity-20 lg:w-64"
+    />
+    <div class="relative px-4 py-20 sm:px-6 lg:px-10">
+      <p class="meta mb-6 text-rojo" data-reveal="lado">{festival.ciudad}</p>
+      <p
+        class="display max-w-4xl text-[9vw] leading-[0.95] text-tinta lg:text-[5.5vw]"
+        data-lineas
+        data-reveal="lineas"
+      >
+        {festival.fechas}
+      </p>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import Silla from '../components/Silla.astro';
+import { nav } from '../data/site';
+---
+
+<Base titulo="Página no encontrada" descripcion="Esta página no existe.">
+  <section
+    class="relative flex min-h-[70vh] items-center overflow-hidden bg-rojo text-amarillo"
+  >
+    <Silla
+      variante="amarilla"
+      class="absolute -right-12 bottom-0 w-56 rotate-6 opacity-20 lg:w-96"
+    />
+
+    <div class="relative px-4 py-24 sm:px-6 lg:px-10">
+      <p class="meta mb-6">Error 404</p>
+      <h1 class="display text-[22vw] leading-[0.95] lg:text-[13vw]">
+        Silla<br />vacía
+      </h1>
+      <p class="mt-8 max-w-md text-lg">
+        Esta página no existe. Estas sí:
+      </p>
+      <ul class="mt-8 flex flex-wrap gap-3">
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} class="boton boton--hueso">
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>

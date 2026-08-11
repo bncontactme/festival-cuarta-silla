@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro';
+import Encabezado from '../components/Encabezado.astro';
+import Marquee from '../components/Marquee.astro';
+import { programa, festival } from '../data/site';
+---
+
+<Base
+  titulo={programa.titulo}
+  descripcion={`Programa del ${festival.nombre}. ${festival.fechas}, ${festival.ciudad}.`}
+>
+  <Encabezado indice={`Programa ${festival.anio}`} titulo={programa.titulo} />
+
+  <Marquee
+    items={[programa.estado, festival.fechas, programa.estado, festival.ciudad]}
+    duracion="34s"
+    class="meta border-b-2 border-tinta bg-rojo py-4 text-amarillo"
+  />
+
+  <!-- Cuatro días, uno por columna en escritorio y en acordeón vertical en móvil -->
+  <section class="bg-hueso">
+    <div class="grid lg:grid-cols-4 lg:divide-x-2 lg:divide-tinta">
+      {
+        programa.dias.map((dia, i) => (
+          <article
+            class="border-b-2 border-tinta lg:border-b-0"
+            data-reveal="arriba"
+            data-retraso={i * 90}
+          >
+            <header class="sticky top-[73px] z-10 border-b-2 border-tinta bg-tinta px-4 py-5 text-hueso lg:top-[81px]">
+              <p class="meta text-amarillo">{String(i + 1).padStart(2, '0')}</p>
+              <h2 class="display mt-2 text-4xl leading-none lg:text-5xl">
+                {dia.dia}
+              </h2>
+              <p class="meta mt-2 text-hueso/60">{dia.fecha}</p>
+            </header>
+
+            <ul class="divide-y divide-tinta/15">
+              {dia.slots.map((slot) => (
+                <li class="group flex items-baseline gap-4 px-4 py-4 transition-colors duration-200 hover:bg-amarillo">
+                  <span class="font-mono text-sm font-bold text-rojo tabular-nums">
+                    {slot.hora}
+                  </span>
+                  <span aria-hidden="true" class="text-tinta/25">//</span>
+                  {slot.actividad ? (
+                    <span class="text-base leading-snug">{slot.actividad}</span>
+                  ) : (
+                    <span class="meta text-tinta/30 group-hover:text-tinta/50">
+                      Por anunciar
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="border-t-2 border-tinta bg-amarillo">
+    <div class="px-4 py-20 text-center sm:px-6 lg:py-24">
+      <p
+        class="display display-centro mx-auto max-w-4xl text-[10vw] leading-[0.95] text-rojo lg:text-[6vw]"
+        data-lineas
+        data-reveal="lineas"
+      >
+        {programa.estado}
+      </p>
+      <div class="mt-10 flex flex-wrap justify-center gap-4" data-reveal="arriba">
+        <a
+          href={festival.convocatoriaPDF}
+          target="_blank"
+          rel="noopener"
+          class="boton"
+        >
+          ★ Convocatoria ★
+        </a>
+        <a href="/registro" class="boton boton--hueso">Registro a eventos</a>
+      </div>
+    </div>
+  </section>
+</Base>

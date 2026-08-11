@@ -1,0 +1,27 @@
+---
+/** La silla del logo, como elemento gráfico recurrente. */
+interface Props {
+  variante?: 'roja' | 'amarilla';
+  class?: string;
+  deriva?: boolean;
+  alt?: string;
+}
+
+const {
+  variante = 'roja',
+  class: clase = '',
+  deriva = false,
+  alt = '',
+} = Astro.props;
+---
+
+<img
+  src={`/logos/silla-${variante}.png`}
+  alt={alt}
+  aria-hidden={alt === '' ? 'true' : undefined}
+  loading="lazy"
+  decoding="async"
+  width="640"
+  height="830"
+  class={`pointer-events-none select-none ${deriva ? 'deriva' : ''} ${clase}`}
+/>

@@ -1,0 +1,59 @@
+---
+import { festival, nav, privacidad } from '../data/site';
+import Marquee from './Marquee.astro';
+---
+
+<footer class="border-t-2 border-amarillo bg-tinta text-hueso">
+  <Marquee
+    items={[festival.fechas, festival.ciudad, 'Cuarta Silla', 'Arte Conceptual']}
+    duracion="46s"
+    inverso
+    separador="●"
+    class="meta border-b-2 border-amarillo py-3 text-amarillo"
+  />
+
+  <div class="px-4 py-14 sm:px-6 lg:px-10">
+    <div class="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr]">
+      <div>
+        <p class="wordmark text-4xl text-amarillo sm:text-5xl">Cuarta Silla</p>
+        <p class="meta mt-4 max-w-xs text-hueso/70">
+          {festival.nombre} · {festival.ciudad}
+        </p>
+      </div>
+
+      <nav aria-label="Pie de página">
+        <p class="meta mb-4 text-rojo">Navegación</p>
+        <ul class="space-y-2">
+          {
+            nav.map((item) => (
+              <li>
+                <a href={item.href} class="enlace text-lg">
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+          <li>
+            <a href="/privacidad" class="enlace text-lg">{privacidad.titulo}</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div>
+        <p class="meta mb-4 text-rojo">Participa</p>
+        <a
+          href={festival.convocatoriaPDF}
+          target="_blank"
+          rel="noopener"
+          class="boton boton--hueso"
+        >
+          ★ Convocatoria ★
+        </a>
+      </div>
+    </div>
+
+    <p class="meta mt-16 border-t-2 border-hueso/20 pt-6 text-hueso/50">
+      {festival.creditoFooter}
+    </p>
+  </div>
+</footer>

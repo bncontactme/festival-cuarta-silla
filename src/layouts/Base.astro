@@ -1,0 +1,91 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { festival } from '../data/site';
+
+interface Props {
+  titulo: string;
+  descripcion?: string;
+}
+
+const {
+  titulo,
+  descripcion = `${festival.nombre} · ${festival.fechas} · ${festival.ciudad}`,
+} = Astro.props;
+
+const tituloCompleto = `${titulo} — ${festival.nombreCompleto}`;
+const canonica = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descripcion} />
+    <link rel="canonical" href={canonica} />
+    <link rel="icon" href="/logos/silla-roja.png" type="image/png" />
+    <meta name="theme-color" content="#fffd00" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={festival.nombreCompleto} />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:locale" content="es_MX" />
+    <meta property="og:url" content={canonica} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Marca que hay JS antes del primer pintado: las reglas de reveal
+         cuelgan de `.js`, así que sin esto el contenido se ve directamente. -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Festival',
+        name: festival.nombreCompleto,
+        startDate: '2026-09-24',
+        endDate: '2026-09-27',
+        eventStatus: 'https://schema.org/EventScheduled',
+        location: {
+          '@type': 'Place',
+          name: 'Guadalajara, Jalisco',
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Guadalajara',
+            addressRegion: 'Jalisco',
+            addressCountry: 'MX',
+          },
+        },
+        description: descripcion,
+        url: canonica.toString(),
+      })}
+    />
+  </head>
+
+  <body>
+    <a
+      href="#contenido"
+      class="meta sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:bg-tinta focus:px-4 focus:py-2 focus:text-amarillo"
+    >
+      Saltar al contenido
+    </a>
+
+    <Nav />
+
+    <main id="contenido">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <script>
+      import '../scripts/motion.ts';
+    </script>
+  </body>
+</html>
