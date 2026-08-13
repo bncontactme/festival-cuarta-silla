@@ -7,6 +7,11 @@
 @import '@fontsource/courier-prime/400.css'; /* mono — sustituto de Truetypewriter Polyglott */
 @import '@fontsource/courier-prime/700.css';
 
+/* El sitio móvil, que es otro sitio y no una adaptación de éste. Sus reglas
+   viven fuera de @layer para poder anular utilidades de Tailwind sin
+   !important; por eso da igual que el @import vaya arriba. */
+@import './movil.css';
+
 @theme {
   /* Paleta oficial, tal cual el manual de identidad */
   --color-rojo: #ff0100;
@@ -161,6 +166,19 @@
   .boton--hueso {
     background-color: var(--color-hueso);
     color: var(--color-tinta);
+  }
+
+  /* En una pantalla de 390px, dos botones con este relleno se parten en dos
+     filas y se comen 100px de alto. Comprimirlos los devuelve a una sola
+     línea sin tocar la forma. */
+  @media (width < 40rem) {
+    .boton {
+      --desfase: 4px;
+      gap: 0.5rem;
+      padding: 0.7rem 1.1rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+    }
   }
 
   /* ── Enlace subrayado que se dibuja ─────────────────────────────────── */

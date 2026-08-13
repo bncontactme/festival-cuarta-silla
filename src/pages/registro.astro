@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Encabezado from '../components/Encabezado.astro';
 import Silla from '../components/Silla.astro';
+import Pantalla from '../components/movil/Pantalla.astro';
 import { registro, festival } from '../data/site';
 ---
 
@@ -9,6 +10,65 @@ import { registro, festival } from '../data/site';
   titulo={registro.titulo}
   descripcion={`${registro.titulo} del ${festival.nombre}. ${registro.estado}.`}
 >
+  {/* ── Móvil: la ficha y poco más ─────────────────────────────────────── */}
+  <Fragment slot="movil">
+    <Pantalla
+      titulo={registro.titulo}
+      indice="04"
+      nota={registro.estado}
+      fondo="rojo"
+    >
+      <div class="p-4">
+        <article
+          class="border-2 border-tinta bg-amarillo text-tinta shadow-[6px_6px_0_var(--color-tinta)]"
+        >
+          <header class="border-b-2 border-tinta bg-tinta px-4 py-4 text-hueso">
+            <p class="meta text-[0.55rem] text-amarillo">{registro.ciudad}</p>
+            <h2 class="display mt-2 text-4xl leading-none">
+              {registro.estado}
+            </h2>
+          </header>
+
+          <dl class="divide-y divide-tinta/20 px-4">
+            {
+              [
+                ['Fecha', 'A determinar'],
+                ['Hora', 'A determinar'],
+                ['Lugar', registro.ciudad],
+              ].map(([k, v]) => (
+                <div class="flex items-baseline gap-4 py-3">
+                  <dt class="meta w-16 shrink-0 text-[0.55rem] text-rojo">
+                    {k}
+                  </dt>
+                  <dd class="font-mono text-sm">{v}</dd>
+                </div>
+              ))
+            }
+          </dl>
+
+          <p
+            class="meta border-t-2 border-tinta px-4 py-3 text-[0.5rem] leading-relaxed text-tinta/55"
+          >
+            {registro.nota}
+          </p>
+        </article>
+
+        <p class="meta mt-5 text-[0.55rem] leading-relaxed text-amarillo/70">
+          {registro.estado} — el registro abrirá junto con el programa.
+        </p>
+
+        <a
+          href={festival.convocatoriaPDF}
+          target="_blank"
+          rel="noopener"
+          class="boton boton--hueso mt-5"
+        >
+          ★ Convocatoria ★
+        </a>
+      </div>
+    </Pantalla>
+  </Fragment>
+
   <Encabezado
     indice={`Registro / ${festival.anio}`}
     titulo={registro.titulo}

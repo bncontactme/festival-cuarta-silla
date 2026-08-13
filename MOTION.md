@@ -33,7 +33,7 @@ sillas de fondo (`animation-timeline: view()`). Todo dentro de
 `@supports (animation-timeline: view())`; sin soporte, los elementos se
 quedan quietos y el diseño no depende de ellos.
 
-**3. JS, 6.4 KB gzip.** Sólo lo que no se puede hacer sin él:
+**3. JS, 7.1 KB gzip.** Sólo lo que no se puede hacer sin él:
 
 - **Lenis** (~3 KB) — inercia de scroll. Es lo que separa un sitio de festival
   de una página corporativa. Se desactiva entero con `prefers-reduced-motion`
@@ -46,6 +46,11 @@ quedan quietos y el diseño no depende de ellos.
   contenedor con `overflow: hidden` para deslizarla desde abajo. Es lo único
   que se usaba de SplitText, y respeta el salto de línea que el navegador ya
   decidió (importante: los titulares llevan `text-wrap: balance`).
+- **Entrada de la portada móvil (~0.2 KB)** — el montaje es CSS entero (cinco
+  `@keyframes` y unos retrasos), o sea capa 2. El JS sólo decide **si toca
+  jugarla** —una vez por sesión, sólo en la portada— y le pone puerta de
+  salida: al primer toque se va al final. Nadie debería tener que esperar a
+  que una animación termine para poder usar un sitio.
 
 ## Detalles que costaron
 
@@ -78,3 +83,20 @@ quedan quietos y el diseño no depende de ellos.
   `clip-path` con la misma especificidad dependen del orden en que Tailwind
   las genere. La cortina del menú móvil se escribió en CSS plano fuera de
   `@layer`, donde el resultado no depende de eso.
+- **La entrada tiene que decidirse antes del primer pintado.** Si el flag de
+  «toca jugarla» se pusiera desde `motion.ts`, el teléfono llegaría a pintar
+  la portada terminada y la entrada arrancaría con un salto hacia atrás. Va
+  en el script en línea del `<head>`, junto a la clase `.js`.
+- **Un enlace invisible sigue siendo pulsable.** Durante la entrada, las
+  puertas están a opacidad 0 pero vivas: un destino que no se ve y responde
+  al dedo es una trampa. Llevan `pointer-events: none` hasta que aparecen, y
+  el toque para saltar la entrada lo recoge el `<html>`, así que no se pierde.
+- **Todo paso acaba en el estado natural del elemento.** La silla termina en
+  su opacidad de marca de agua, las capas en su recorte completo, los textos
+  a opacidad 1. Por eso el atributo `data-intro` se puede quitar en cualquier
+  momento —al tocar, o solo al terminar— sin que nada dé un salto.
+- **La silla arranca centrada en la pantalla, no en su hueco.** Mientras el
+  resto no ha aparecido, el sitio definitivo de la silla queda 160px por
+  encima del centro óptico y se nota mucho. Se compensa con un `translate`
+  que la animación resuelve a cero: la silla sube a su sitio según llega el
+  resto de la composición.

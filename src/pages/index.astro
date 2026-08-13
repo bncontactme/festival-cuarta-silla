@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Marquee from '../components/Marquee.astro';
 import Silla from '../components/Silla.astro';
+import Portada from '../components/movil/Portada.astro';
 import {
   festival,
   manifiesto,
@@ -19,6 +20,8 @@ const cuenta = [
 ---
 
 <Base titulo="Inicio">
+  <Fragment slot="movil"><Portada /></Fragment>
+
   <!-- ══ HERO ═══════════════════════════════════════════════════════════ -->
   <section
     class="relative overflow-hidden border-b-2 border-tinta bg-amarillo"
