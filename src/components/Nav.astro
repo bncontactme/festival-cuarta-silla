@@ -22,19 +22,27 @@ const activo = (href: string) => (ruta === href ? 'page' : undefined);
       aria-label={`${festival.nombreCompleto} — Inicio`}
     >
       <img
-        src="/logos/silla-roja.png"
+        src="/logos/silla-roja.svg"
         alt=""
-        width="640"
-        height="830"
+        width="316"
+        height="420"
         class="h-8 w-auto transition-transform duration-500 ease-[var(--ease-salida)] group-hover:-rotate-6 sm:h-10"
       />
       <span class="leading-none">
         <span class="meta block text-[0.5rem] text-rojo sm:text-[0.55rem]"
           >Festival de arte</span
         >
-        <span class="wordmark block text-xl text-rojo sm:text-2xl"
-          >Cuarta Silla</span
-        >
+        <!-- El wordmark va en vector, con las formas reales de Old London del
+             manual, en vez de recomponerlo con la gótica sustituta. El
+             lockup completo (`logotipo-*.svg`) no cabe aquí: a la altura de
+             la barra su texto secundario quedaría en ~3 px. -->
+        <img
+          src="/logos/wordmark-roja.svg"
+          alt=""
+          width="533"
+          height="85"
+          class="mt-0.5 block h-5 w-auto sm:h-6"
+        />
       </span>
     </a>
 

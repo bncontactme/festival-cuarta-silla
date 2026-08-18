@@ -50,19 +50,43 @@ sin recompresión. Su resolución nativa es baja; no dan para ampliar.
 - `identidad-visual-completo.png` — el tablero entero a 4× (5760 × 10240)
 - `panel-*.png` — cada sección recortada (hero, sillas, paleta, tipografías, mockups)
 
-## Limitación: no hay vectores
+## `svg/` — los vectores (lo que hay que usar)
 
-Los recortes son PNG, no SVG. El arte de las sillas y el logotipo **sí es vectorial** dentro
-del `.ai`, pero en esta máquina no hay ninguna herramienta de conversión PDF→SVG instalada
-(poppler, inkscape, mutool, imagemagick). Dos caminos para obtener SVG real:
+Convertidos con `pdftocairo -svg` desde la capa PDF del `.ai`, así que son
+**trazados reales**, no calcos. Las letras vienen como contornos: no hace falta
+tener Old London ni Acumin instaladas, y no hay problema de licencia de fuente.
 
-1. Exportar desde Illustrator: `Archivo → Exportar → Exportar como… → SVG`.
-2. Instalar poppler y convertir:
+| Archivo | viewBox | Qué es |
+|---|---|---|
+| `silla.svg` | 316 × 420 | La silla, un solo trazo de 474 puntos |
+| `logotipo.svg` | 534 × 115 | Lockup completo: "Festival de arte / Cuarta Silla / Conceptual" |
+| `wordmark.svg` | 533 × 85 | Sólo "Cuarta Silla", recortado al tinta |
 
-   ```
-   brew install poppler
-   pdftocairo -svg "identidad visual.ai" identidad.svg
-   ```
+Cada uno viene además en tres variantes de color ya resueltas
+(`-roja` `#ff0100`, `-amarilla` `#fffd00`, `-hueso` `#cfd8d7`) para poder usarlas
+desde `<img>`, donde `currentColor` no funciona.
 
-   El logotipo saldría con el texto convertido a trazados sólo si ya está expandido en el
-   archivo; si no, hará falta OldLondon instalada o convertir el texto a contornos antes.
+### Dos decisiones sobre el arte
+
+**El respaldo va calado.** En el tablero original la silla se dibuja con el texto
+del respaldo pintado del color del fondo del panel (negro sobre la silla roja,
+pizarra sobre la blanca). Eso ata cada silla a un fondo concreto. Aquí el texto
+es una máscara: la silla es de un solo color y el fondo se ve por debajo del
+logotipo. Así la misma silla funciona sobre cualquier color, que es como se
+comporta en el manual.
+
+**Se quitaron dos motas.** El arte original trae dos trazos sueltos junto a la
+pata derecha (3,4 × 2,6 pt y 0,9 × 5,2 pt) que no forman parte del dibujo. Están
+en los PNG, no en los SVG. Si resulta que son intencionales, se recuperan
+volviendo a correr la conversión sin el filtro.
+
+## Cómo se regeneran
+
+```
+brew install poppler
+pdftocairo -svg "identidad visual.ai" board.svg
+```
+
+Para reproducir los recortes individuales hay que fijar el `MediaBox` de la
+página por región antes de convertir: `pdftocairo` ignora `-x/-y/-W/-H` cuando
+la salida es SVG.
