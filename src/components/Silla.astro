@@ -1,7 +1,12 @@
 ---
-/** La silla del logo, como elemento gráfico recurrente. */
+import { conBase } from '../lib/base';
+/** La silla del logo, como elemento gráfico recurrente.
+ *
+ * Vector extraído de `identidad visual.ai`. El respaldo lleva el logotipo
+ * calado (transparente, no pintado), así que la silla es de un solo color y
+ * deja ver el fondo por debajo del texto, como en el manual. */
 interface Props {
-  variante?: 'roja' | 'amarilla';
+  variante?: 'roja' | 'amarilla' | 'hueso';
   class?: string;
   deriva?: boolean;
   alt?: string;
@@ -16,12 +21,12 @@ const {
 ---
 
 <img
-  src={`/logos/silla-${variante}.png`}
+  src={conBase(`/logos/silla-${variante}.svg`)}
   alt={alt}
   aria-hidden={alt === '' ? 'true' : undefined}
   loading="lazy"
   decoding="async"
-  width="640"
-  height="830"
+  width="316"
+  height="420"
   class={`pointer-events-none select-none ${deriva ? 'deriva' : ''} ${clase}`}
 />

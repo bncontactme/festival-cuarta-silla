@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { conBase } from '../lib/base';
 import Silla from '../components/Silla.astro';
 import { nav } from '../data/site';
 ---
@@ -25,7 +26,7 @@ import { nav } from '../data/site';
         {
           nav.map((item) => (
             <li>
-              <a href={item.href} class="boton boton--hueso">
+              <a href={conBase(item.href)} class="boton boton--hueso">
                 {item.label}
               </a>
             </li>

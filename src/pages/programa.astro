@@ -1,7 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
+import { conBase } from '../lib/base';
 import Encabezado from '../components/Encabezado.astro';
 import Marquee from '../components/Marquee.astro';
+import Pantalla from '../components/movil/Pantalla.astro';
 import { programa, festival } from '../data/site';
 ---
 
@@ -9,6 +11,74 @@ import { programa, festival } from '../data/site';
   titulo={programa.titulo}
   descripcion={`Programa del ${festival.nombre}. ${festival.fechas}, ${festival.ciudad}.`}
 >
+  {/* ── Móvil: cuatro días plegados, cuatro filas, una pantalla ────────── */}
+  {/* En escritorio los 48 horarios son cuatro columnas que se leen de un
+      vistazo. En un teléfono eran cinco pantallas de scroll por unos huecos
+      que aún dicen «Por anunciar». Plegados caben los cuatro días a la vez y
+      el que quiera ver las horas de un día, las abre. */}
+  <Fragment slot="movil">
+    <Pantalla
+      titulo={programa.titulo}
+      indice="02"
+      nota={programa.estado}
+      fondo="hueso"
+    >
+      {
+        programa.dias.map((dia, i) => (
+          <details class="plegable">
+            <summary>
+              <span class="meta text-[0.6rem] text-rojo">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span>
+                <span class="display block text-3xl leading-none">
+                  {dia.dia}
+                </span>
+                <span class="meta mt-1 block text-[0.5rem] opacity-50">
+                  {dia.fecha}
+                </span>
+              </span>
+              <span class="plegable-signo" aria-hidden="true">
+                +
+              </span>
+            </summary>
+
+            <ul class="divide-y divide-tinta/15 bg-amarillo">
+              {dia.slots.map((slot) => (
+                <li class="flex items-baseline gap-3 px-4 py-2.5">
+                  <span class="font-mono text-sm font-bold text-rojo tabular-nums">
+                    {slot.hora}
+                  </span>
+                  <span aria-hidden="true" class="text-tinta/25">
+                    //
+                  </span>
+                  {slot.actividad ? (
+                    <span class="text-sm leading-snug">{slot.actividad}</span>
+                  ) : (
+                    <span class="meta text-[0.5rem] text-tinta/35">
+                      Por anunciar
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </details>
+        ))
+      }
+
+      <div class="p-4">
+        <a
+          href={festival.convocatoriaPDF}
+          target="_blank"
+          rel="noopener"
+          class="boton"
+        >
+          ★ Convocatoria ★
+        </a>
+      </div>
+    </Pantalla>
+  </Fragment>
+
   <Encabezado indice={`Programa ${festival.anio}`} titulo={programa.titulo} />
 
   <Marquee
@@ -76,7 +146,7 @@ import { programa, festival } from '../data/site';
         >
           ★ Convocatoria ★
         </a>
-        <a href="/registro" class="boton boton--hueso">Registro a eventos</a>
+        <a href={conBase("/registro")} class="boton boton--hueso">Registro a eventos</a>
       </div>
     </div>
   </section>

@@ -1,7 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
+import { conBase } from '../lib/base';
 import Marquee from '../components/Marquee.astro';
 import Silla from '../components/Silla.astro';
+import Portada from '../components/movil/Portada.astro';
 import {
   festival,
   manifiesto,
@@ -19,6 +21,8 @@ const cuenta = [
 ---
 
 <Base titulo="Inicio">
+  <Fragment slot="movil"><Portada /></Fragment>
+
   <!-- ══ HERO ═══════════════════════════════════════════════════════════ -->
   <section
     class="relative overflow-hidden border-b-2 border-tinta bg-amarillo"
@@ -106,7 +110,7 @@ const cuenta = [
           >
             ★ Convocatoria ★
           </a>
-          <a href="/programa" class="boton boton--hueso">Programa</a>
+          <a href={conBase("/programa")} class="boton boton--hueso">Programa</a>
         </div>
       </div>
     </div>
@@ -238,7 +242,7 @@ const cuenta = [
             {sedes.titulo}
           </h2>
         </div>
-        <a href="/sedes" class="boton" data-reveal="arriba">Ver las {sedes.lista.length}</a>
+        <a href={conBase("/sedes")} class="boton" data-reveal="arriba">Ver las {sedes.lista.length}</a>
       </div>
 
       <ul class="mt-4">
@@ -304,7 +308,7 @@ const cuenta = [
               ))
             }
           </ul>
-          <a href="/programa" class="boton">Ver el programa</a>
+          <a href={conBase("/programa")} class="boton">Ver el programa</a>
         </div>
       </div>
     </div>
@@ -356,9 +360,14 @@ const cuenta = [
     <div
       class="relative px-4 py-24 text-center sm:px-6 lg:px-10 lg:py-32"
     >
-      <p class="wordmark text-[16vw] leading-[0.9] lg:text-[11vw]" data-reveal="escala">
-        Cuarta Silla
-      </p>
+      <img
+        src={conBase("/logos/wordmark-amarilla.svg")}
+        alt="Cuarta Silla"
+        width="533"
+        height="85"
+        class="mx-auto w-[78vw] lg:w-[54vw]"
+        data-reveal="escala"
+      />
       <p class="meta mt-6 text-amarillo/80" data-reveal="arriba">
         {festival.fechas} · {festival.ciudad}
       </p>
@@ -371,7 +380,7 @@ const cuenta = [
         >
           ★ Convocatoria ★
         </a>
-        <a href="/registro" class="boton boton--hueso">Registro a eventos</a>
+        <a href={conBase("/registro")} class="boton boton--hueso">Registro a eventos</a>
       </div>
     </div>
   </section>

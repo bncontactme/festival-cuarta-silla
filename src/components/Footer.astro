@@ -1,5 +1,6 @@
 ---
 import { festival, nav, privacidad } from '../data/site';
+import { conBase } from '../lib/base';
 import Marquee from './Marquee.astro';
 ---
 
@@ -15,7 +16,13 @@ import Marquee from './Marquee.astro';
   <div class="px-4 py-14 sm:px-6 lg:px-10">
     <div class="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr]">
       <div>
-        <p class="wordmark text-4xl text-amarillo sm:text-5xl">Cuarta Silla</p>
+        <img
+          src={conBase("/logos/wordmark-amarilla.svg")}
+          alt="Cuarta Silla"
+          width="533"
+          height="85"
+          class="w-44 sm:w-56"
+        />
         <p class="meta mt-4 max-w-xs text-hueso/70">
           {festival.nombre} · {festival.ciudad}
         </p>
@@ -27,14 +34,14 @@ import Marquee from './Marquee.astro';
           {
             nav.map((item) => (
               <li>
-                <a href={item.href} class="enlace text-lg">
+                <a href={conBase(item.href)} class="enlace text-lg">
                   {item.label}
                 </a>
               </li>
             ))
           }
           <li>
-            <a href="/privacidad" class="enlace text-lg">{privacidad.titulo}</a>
+            <a href={conBase("/privacidad")} class="enlace text-lg">{privacidad.titulo}</a>
           </li>
         </ul>
       </nav>

@@ -1,0 +1,404 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   SITIO MÓVIL
+   ═══════════════════════════════════════════════════════════════════════
+
+   Esto no es el sitio de escritorio reflotado: es otro sitio. Misma paleta,
+   misma tipografía, mismos cantos de 2px — otra estructura. El de escritorio
+   es una revista que se lee de arriba abajo; éste es una portada con cuatro
+   puertas, y detrás de cada puerta una pantalla que cabe entera.
+
+   Por eso las páginas traen dos contenidos y no uno adaptado: `<Fragment
+   slot="movil">` y el resto. Sólo se pinta uno de los dos, nunca los dos.
+
+   ── Por qué fuera de @layer ──────────────────────────────────────────
+   Igual que la cortina del menú en global.css: estas reglas tienen que
+   ganarle a utilidades de Tailwind que ya están en el marcado, y el CSS sin
+   capa siempre le gana al CSS con capa sin importar el orden ni subir la
+   especificidad.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Por defecto manda el escritorio: si esta hoja no cargara, el sitio sigue
+   siendo el de siempre. */
+.movil {
+  display: none;
+}
+
+@media (width < 64rem) {
+  .escritorio {
+    display: none;
+  }
+
+  .movil {
+    display: block;
+  }
+
+  /* El móvil es una aplicación de pantallas: no hay scroll de página, y la
+     cabecera y el pie del sitio grande no pintan nada aquí — este sitio trae
+     los suyos, más pequeños. */
+  body[data-movil] {
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  body[data-movil] > header,
+  body[data-movil] > footer {
+    display: none;
+  }
+
+  /* En tablet en vertical la pantalla se ensancha pero el diseño está pensado
+     para un pulgar. Se centra en vez de estirarse.
+     `container-type` es lo que hace que ese tope funcione: los titulares se
+     miden en `cqw` (ancho del marco) y no en `vw` (ancho de la ventana). Con
+     `vw`, en una tablet de 820px el rótulo pedía 131px dentro de una columna
+     de 512 y «CONCEPTUAL» se quedaba sin la L. */
+  .movil-marco {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    max-width: 32rem;
+    margin-inline: auto;
+    position: relative;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+
+  /* ── Cabecera ───────────────────────────────────────────────────────── */
+  .movil-barra {
+    flex: none;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    border-bottom: var(--borde) solid var(--color-tinta);
+    min-height: 3.25rem;
+  }
+
+  /* Sólo los hijos directos: dentro de la barra hay un wordmark de dos líneas
+     apiladas, y convertirlo en fila las encabalga. */
+  .movil-barra > a,
+  .movil-barra > span {
+    display: flex;
+    align-items: center;
+  }
+
+  /* ── Cuerpo ─────────────────────────────────────────────────────────── */
+  .movil-cuerpo {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     PORTADA
+     ═════════════════════════════════════════════════════════════════════ */
+
+  .portada {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    isolation: isolate;
+  }
+
+  /* Las capas de color que inundan la pantalla. Van detrás de todo y no
+     participan del flujo. */
+  .portada-lienzo {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+  }
+
+  .portada-capa {
+    position: absolute;
+    inset: 0;
+  }
+
+  .capa--tinta {
+    background-color: var(--color-tinta);
+  }
+  .capa--amarillo {
+    background-color: var(--color-amarillo);
+  }
+
+  /* ── El bloque de la silla ──────────────────────────────────────────── */
+  .portada-escena {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+  }
+
+  /* La silla ocupa el centro y, cuando llega el color, se retira al fondo:
+     empieza siendo el sujeto y acaba siendo el suelo. */
+  .portada-silla {
+    grid-area: 1 / 1;
+    width: min(58vw, 15rem);
+    height: auto;
+    opacity: 0.16;
+  }
+
+  .portada-rotulo {
+    grid-area: 1 / 1;
+    position: relative;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* ── Franja de datos ────────────────────────────────────────────────────
+     Es el tercer color de la portada, y por eso es un elemento de verdad y no
+     una capa de la animación: un rojo que aparece y luego queda tapado por
+     las puertas se lee como un error. Éste entra barriendo y se queda. */
+  .portada-datos {
+    flex: none;
+    border-top: var(--borde) solid var(--color-tinta);
+    border-bottom: var(--borde) solid var(--color-tinta);
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
+    padding: 0.6rem 1rem;
+  }
+
+  /* ── Las cuatro puertas ─────────────────────────────────────────────── */
+  .portada-puertas {
+    flex: none;
+  }
+
+  .puerta {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.7rem 1rem;
+    border-bottom: var(--borde) solid var(--color-tinta);
+    background-color: var(--color-amarillo);
+    transition: background-color 0.25s var(--ease-salida);
+  }
+
+  .puerta:last-child {
+    border-bottom: 0;
+  }
+
+  .puerta:active {
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
+  }
+
+  .puerta-flecha {
+    margin-left: auto;
+  }
+
+  .portada-legal {
+    flex: none;
+    border-top: var(--borde) solid var(--color-tinta);
+    background-color: var(--color-amarillo);
+    padding: 0.45rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.45rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.4;
+    color: var(--color-tinta);
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     ENTRADA
+     La silla en medio y, sobre ella, el color llenando la pantalla.
+
+     Todo cuelga de `[data-intro='si']`, que pone el script en línea del
+     <head> antes del primer pintado y sólo en la portada y una vez por
+     sesión. Sin ese atributo — sin JS, con movimiento reducido, o en la
+     segunda visita — los elementos ya están en su estado final y aquí no
+     pasa nada. Nunca hay contenido esperando una animación que no llegará.
+     ═════════════════════════════════════════════════════════════════════ */
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* La silla, a tamaño y opacidad de sujeto, sobre el fondo oscuro */
+    [data-intro='si'] .portada-silla {
+      animation:
+        silla-entra 0.5s var(--ease-salida) both,
+        silla-cede 0.5s var(--ease-salida) 1.05s both;
+    }
+
+    /* El amarillo sube desde el canto inferior y se come la pantalla */
+    [data-intro='si'] .capa--amarillo {
+      animation: inundar 0.6s var(--ease-cortina) 0.5s both;
+    }
+
+    /* El rótulo rojo cae sobre el amarillo ya asentado */
+    [data-intro='si'] .portada-rotulo {
+      animation: asomar 0.5s var(--ease-salida) 1.05s both;
+    }
+
+    /* La franja roja barre de izquierda a derecha, como un tachón */
+    [data-intro='si'] .portada-datos {
+      animation: tachar 0.45s var(--ease-cortina) 1.25s both;
+    }
+
+    /* Y las puertas, al final */
+    [data-intro='si'] .portada-puertas,
+    [data-intro='si'] .portada-legal {
+      animation: asomar 0.5s var(--ease-salida) 1.45s both;
+    }
+
+    /* La barra de arriba entra con el texto */
+    [data-intro='si'] .portada-barra {
+      animation: asomar 0.5s var(--ease-salida) 1.15s both;
+    }
+
+    /* Durante la entrada, lo interactivo todavía es invisible. Un enlace a
+       opacidad 0 sigue siendo pulsable, y un destino que no se ve es una
+       trampa: se desactivan hasta que aparecen. El toque para saltar la
+       entrada lo recoge el <html>, así que no se pierde. */
+    [data-intro='si'] .portada-barra,
+    [data-intro='si'] .portada-puertas,
+    [data-intro='si'] .portada-legal {
+      pointer-events: none;
+    }
+  }
+
+  /* La silla arranca centrada en la PANTALLA, no en su hueco de la retícula:
+     mientras el resto no ha aparecido, su sitio definitivo queda un palmo
+     por encima del centro óptico y se nota. `--desvio` es la mitad de lo que
+     ocupan la franja, las puertas y el legal menos la barra: bloques de alto
+     fijo — el único que estira con la pantalla es la escena — así que el
+     número vale igual en cualquier teléfono. */
+  .portada-silla {
+    --desvio: 10rem;
+  }
+
+  @keyframes silla-entra {
+    from {
+      opacity: 0;
+      scale: 0.82;
+      translate: 0 var(--desvio);
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+      translate: 0 var(--desvio);
+    }
+  }
+
+  /* De sujeto a fondo: sube a su sitio y baja a la opacidad de marca de agua,
+     que es la que tiene el resto del tiempo. */
+  @keyframes silla-cede {
+    from {
+      opacity: 1;
+      translate: 0 var(--desvio);
+    }
+    to {
+      opacity: 0.16;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes inundar {
+    from {
+      clip-path: inset(100% 0 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes tachar {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes asomar {
+    from {
+      opacity: 0;
+      translate: 0 1.25rem;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     PANTALLAS CON :target
+     El manifiesto no tiene página propia — en escritorio es una sección de
+     la portada. En móvil necesita pantalla, y `:target` la da con URL de
+     verdad y botón atrás que funciona, sin una línea de JS.
+     ═════════════════════════════════════════════════════════════════════ */
+
+  .movil-modal {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+    transition:
+      clip-path 0.45s var(--ease-cortina),
+      visibility 0s linear 0.45s;
+  }
+
+  .movil-modal:target {
+    clip-path: inset(0 0 0 0);
+    visibility: visible;
+    transition:
+      clip-path 0.45s var(--ease-cortina),
+      visibility 0s;
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     ACORDEONES
+     Cuatro días o ocho sedes caben en una pantalla si vienen plegados.
+     `<details>` lo hace nativo: sin JS, accesible y con búsqueda del
+     navegador dentro.
+     ═════════════════════════════════════════════════════════════════════ */
+
+  .plegable {
+    border-bottom: var(--borde) solid var(--color-tinta);
+  }
+
+  .plegable > summary {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    list-style: none;
+    transition: background-color 0.25s var(--ease-salida);
+  }
+
+  /* El triángulo por defecto de Safari/Chrome no es de esta casa */
+  .plegable > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .plegable > summary::marker {
+    content: '';
+  }
+
+  .plegable-signo {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    transition: rotate 0.3s var(--ease-salida);
+  }
+
+  .plegable[open] > summary {
+    background-color: var(--color-tinta);
+    color: var(--color-hueso);
+  }
+
+  .plegable[open] .plegable-signo {
+    rotate: 45deg;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .movil-modal {
+      transition: none;
+    }
+  }
+}

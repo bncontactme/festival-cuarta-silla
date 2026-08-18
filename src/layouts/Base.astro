@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { conBase } from '../lib/base';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { festival } from '../data/site';
@@ -14,6 +15,14 @@ const {
   descripcion = `${festival.nombre} · ${festival.fechas} · ${festival.ciudad}`,
 } = Astro.props;
 
+/**
+ * El móvil no es este sitio adaptado: es otro sitio. Una página que trae
+ * `slot="movil"` se pinta de dos maneras distintas según el ancho, y sólo
+ * una de las dos existe a la vez. Las que no lo traen (privacidad, 404) ya
+ * caben en un teléfono tal cual y se sirven igual en todas partes.
+ */
+const conMovil = Astro.slots.has('movil');
+
 const tituloCompleto = `${titulo} — ${festival.nombreCompleto}`;
 const canonica = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -26,7 +35,8 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
     <title>{tituloCompleto}</title>
     <meta name="description" content={descripcion} />
     <link rel="canonical" href={canonica} />
-    <link rel="icon" href="/logos/silla-roja.png" type="image/png" />
+    <link rel="icon" href={conBase("/logos/silla-roja.svg")} type="image/svg+xml" />
+    <link rel="alternate icon" href={conBase("/logos/silla-roja.png")} type="image/png" />
     <meta name="theme-color" content="#fffd00" />
 
     <meta property="og:type" content="website" />
@@ -38,9 +48,29 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:card" content="summary_large_image" />
 
     <!-- Marca que hay JS antes del primer pintado: las reglas de reveal
-         cuelgan de `.js`, así que sin esto el contenido se ve directamente. -->
+         cuelgan de `.js`, así que sin esto el contenido se ve directamente.
+
+         Aquí se decide también si la portada móvil juega su entrada. Tiene
+         que ser en línea y en el <head>: si se decidiera más tarde, el
+         teléfono llegaría a pintar la portada terminada y la entrada
+         empezaría con un salto hacia atrás. -->
     <script is:inline>
       document.documentElement.classList.add('js');
+
+      // Una vez por sesión y sólo en la portada. Verla en cada navegación
+      // sería un peaje, no una bienvenida.
+      try {
+        if (
+          location.pathname === '/' &&
+          !sessionStorage.getItem('cs-entrada')
+        ) {
+          sessionStorage.setItem('cs-entrada', '1');
+          document.documentElement.dataset.intro = 'si';
+        }
+      } catch (e) {
+        // Safari en navegación privada tira al tocar sessionStorage. Sin
+        // entrada se ve igual de bien.
+      }
     </script>
 
     <script
@@ -68,7 +98,7 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
     />
   </head>
 
-  <body>
+  <body data-movil={conMovil ? 'si' : undefined}>
     <a
       href="#contenido"
       class="meta sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:bg-tinta focus:px-4 focus:py-2 focus:text-amarillo"
@@ -78,8 +108,12 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
 
     <Nav />
 
-    <main id="contenido">
-      <slot />
+    <!-- tabindex="-1": el enlace de salto tiene que poder dejar el foco aquí -->
+    <main id="contenido" tabindex="-1">
+      {conMovil && <div class="movil"><slot name="movil" /></div>}
+      <div class={conMovil ? 'escritorio' : undefined}>
+        <slot />
+      </div>
     </main>
 
     <Footer />

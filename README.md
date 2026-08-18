@@ -74,7 +74,8 @@ usa, en tres capas de menor a mayor coste:
    donde no hay soporte.
 3. **JS**: Lenis para la inercia del scroll, un `IntersectionObserver` para
    los reveals y un partidor de líneas propio de ~20 líneas que sustituye a
-   SplitText. **6.4 KB gzip en total**, incluida la cuenta regresiva y el menú.
+   SplitText. **6.6 KB gzip en total**, incluidos la cuenta regresiva, el menú
+   y la entrada de la portada móvil.
 
 Reglas que se respetan en todo el sitio:
 
@@ -84,15 +85,88 @@ Reglas que se respetan en todo el sitio:
   `<head>`. **Sin JS el contenido se ve igual**: nunca se queda escondido
   esperando una animación que no va a llegar.
 
+## Móvil: otro sitio, no éste encogido
+
+En un teléfono la portada medía **5 300px — más de seis pantallas de scroll**,
+y el programa cinco más. Recortar y reordenar ese mismo contenido no bastaba:
+seguía siendo demasiado. Así que el móvil **es otro sitio**. Misma paleta,
+misma tipografía, mismos cantos de 2px; otra estructura y menos texto.
+
+El de escritorio es una revista que se lee de arriba abajo. El móvil es una
+portada con cuatro puertas, y detrás de cada puerta una pantalla que cabe
+entera —sin scroll— porque lo que no cabía viene plegado.
+
+| Página     | Antes (móvil)   | Ahora                          |
+| ---------- | --------------- | ------------------------------ |
+| Inicio     | ~6,3 pantallas  | 1 (+ manifiesto a un toque)    |
+| Programa   | ~5 pantallas    | 1 (días plegados)              |
+| Sedes      | ~7 pantallas    | 1 (sedes plegadas)             |
+| Registro   | ~2,5 pantallas  | 1                              |
+
+### La entrada
+
+La portada arranca con la silla roja sola, centrada en el fondo oscuro. Luego
+el amarillo inunda la pantalla desde abajo con un canto duro que corta la
+silla por la mitad; la silla se retira al fondo hasta quedar en marca de agua;
+cae el rótulo rojo; la franja de fechas entra barriendo de izquierda a
+derecha; y aparecen las puertas. **1,9 s**, y se salta con tocar la pantalla.
+
+Es CSS entero: cinco `@keyframes` y unos retrasos. El JS sólo decide si toca
+jugarla —una vez por sesión, sólo en la portada— y le pone puerta de salida.
+La decisión se toma en un script en línea del `<head>`, antes del primer
+pintado: si se tomara más tarde, el teléfono llegaría a pintar la portada
+terminada y la entrada empezaría con un salto hacia atrás.
+
+Durante la entrada, la barra y las puertas llevan `pointer-events: none`. Un
+enlace a opacidad 0 sigue siendo pulsable, y un destino que no se ve es una
+trampa.
+
+### Cómo está montado
+
+Una página trae los dos contenidos y el ancho decide cuál se pinta:
+
+```astro
+<Base titulo="Sedes">
+  <Fragment slot="movil"> … la pantalla de móvil … </Fragment>
+  … el sitio de escritorio de siempre …
+</Base>
+```
+
+Nunca se pintan los dos. `Base.astro` detecta el slot, marca el `<body>` y
+apaga la cabecera y el pie del sitio grande en móvil, que ahí no pintan nada:
+este sitio trae los suyos, más pequeños. Todo lo específico vive en
+[`src/styles/movil.css`](src/styles/movil.css), dentro de una sola media
+query — por encima de 1024px ese archivo no existe.
+
+Las páginas que no traen `slot="movil"` (privacidad, 404) ya cabían en un
+teléfono y se sirven igual en todas partes.
+
+### Reglas que conviene no romper
+
+- **Los acordeones son `<details>` nativos.** Cuatro días u ocho sedes caben
+  en una pantalla si vienen plegados, y `<details>` lo da sin JS, accesible y
+  con la búsqueda del navegador funcionando dentro.
+- **El manifiesto es una pantalla con `:target`.** No tiene página propia —en
+  escritorio es una sección de la home— y no merecía una URL nueva. `:target`
+  da la pantalla, la URL y el botón atrás del teléfono, sin una línea de JS.
+- **El pie del sitio grande no se pinta en móvil**, y con él se iba el único
+  enlace al aviso de privacidad. Está en la línea legal del final de la
+  portada; si se rehace esa zona, no se puede perder.
+- **`--desvio`** (movil.css) es la mitad de lo que ocupan la franja, las
+  puertas y el legal: coloca la silla en el centro de la *pantalla* al empezar
+  la entrada, no en el centro de su hueco. Si cambian esos bloques, cambia.
+
 ## Estructura
 
 ```
 src/
-  data/site.ts        todo el texto
+  data/site.ts        todo el texto, compartido por los dos sitios
   styles/global.css   tokens, componentes, las tres capas de movimiento
-  scripts/motion.ts   Lenis + reveals + partidor + cuenta + menú
-  layouts/Base.astro  head, SEO, JSON-LD, nav, footer
+  styles/movil.css    el sitio móvil entero (una sola media query)
+  scripts/motion.ts   Lenis + reveals + partidor + cuenta + menú + entrada
+  layouts/Base.astro  head, SEO, JSON-LD, nav, pie, reparto móvil/escritorio
   components/         Nav, Footer, Marquee, Silla, Encabezado
+  components/movil/   Portada (con la entrada), Pantalla
   pages/              index, programa, sedes, registro, privacidad, 404
 ```
 

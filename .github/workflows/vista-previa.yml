@@ -1,0 +1,54 @@
+# Publica una vista previa del sitio en GitHub Pages, para enseñársela al
+# cliente sin tocar el dominio de producción.
+#
+# Pages sirve el repo desde /festival-cuarta-silla/, así que el build se hace
+# con PAGES_BASE puesto; en producción esa variable no existe y el sitio
+# vuelve a colgar de la raíz.
+name: Vista previa
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+        env:
+          PAGES_SITE: https://bncontactme.github.io
+          PAGES_BASE: /festival-cuarta-silla
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v4

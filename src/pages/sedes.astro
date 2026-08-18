@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Encabezado from '../components/Encabezado.astro';
 import Silla from '../components/Silla.astro';
+import Pantalla from '../components/movil/Pantalla.astro';
 import { sedes, festival } from '../data/site';
 ---
 
@@ -9,6 +10,60 @@ import { sedes, festival } from '../data/site';
   titulo={sedes.titulo}
   descripcion={`Las ${sedes.lista.length} sedes del ${festival.nombre} en ${festival.ciudad}.`}
 >
+  {/* ── Móvil: las ocho a la vez, la dirección a un toque ──────────────── */}
+  {/* La cuadrícula de tarjetas de escritorio, en una columna, eran ocho
+      pantallas. Aquí lo primero que hace falta es el nombre — «¿cuáles
+      son?» —; la dirección y los enlaces sólo importan de la que te
+      interesa. */}
+  <Fragment slot="movil">
+    <Pantalla
+      titulo={sedes.titulo}
+      indice="03"
+      nota={`${sedes.lista.length} lugares en ${festival.ciudad}`}
+      fondo="pizarra"
+    >
+      {
+        sedes.lista.map((sede, i) => (
+          <details class="plegable border-current">
+            <summary>
+              <span class="meta text-[0.6rem] text-amarillo">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span class="display text-2xl leading-none">{sede.nombre}</span>
+              <span class="plegable-signo" aria-hidden="true">
+                +
+              </span>
+            </summary>
+
+            <div class="bg-hueso px-4 py-4 text-tinta">
+              <address class="text-sm leading-snug not-italic opacity-70">
+                {sede.direccion}
+              </address>
+              <div class="mt-4 flex divide-x-2 divide-tinta border-2 border-tinta">
+                <a
+                  href={sede.instagram}
+                  target="_blank"
+                  rel="noopener"
+                  class="meta flex-1 bg-amarillo px-3 py-3 text-center text-[0.55rem] font-bold"
+                >
+                  {sedes.acciones.conoce} ↗
+                </a>
+                <a
+                  href={sede.mapa}
+                  target="_blank"
+                  rel="noopener"
+                  class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
+                >
+                  {sedes.acciones.ubicacion} ↗
+                </a>
+              </div>
+            </div>
+          </details>
+        ))
+      }
+    </Pantalla>
+  </Fragment>
+
   <Encabezado
     indice={`${sedes.titulo} / ${String(sedes.lista.length).padStart(2, '0')}`}
     titulo={sedes.titulo}

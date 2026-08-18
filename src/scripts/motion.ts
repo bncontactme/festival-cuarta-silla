@@ -13,11 +13,20 @@ import Lenis from 'lenis';
 const reducido = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/** ¿Se está pintando el sitio móvil, que es otro sitio y no lleva scroll? */
+const enMovil = () =>
+  window.matchMedia('(width < 64rem)').matches &&
+  document.body.dataset.movil === 'si';
+
 let lenis: Lenis | null = null;
 
-/** Inercia de scroll. Se detiene si el usuario pide menos movimiento. */
+/**
+ * Inercia de scroll. Se detiene si el usuario pide menos movimiento — y no
+ * llega a arrancar en el sitio móvil, donde la página no tiene scroll
+ * vertical que suavizar: lo hace cada pantalla por su cuenta.
+ */
 function iniciarScroll() {
-  if (reducido() || lenis) return;
+  if (reducido() || enMovil() || lenis) return;
 
   lenis = new Lenis({
     duration: 1.1,
@@ -128,40 +137,76 @@ function iniciarTitulares() {
     .forEach(partirLineas);
 }
 
-/** Cuenta regresiva al arranque del festival. */
+/**
+ * Cuenta regresiva al arranque del festival.
+ *
+ * Puede haber más de una en la página: en la portada conviven la del sitio de
+ * escritorio (cuatro cajas) y la del móvil (una línea, sólo días). Sólo se ve
+ * una, pero las dos están en el DOM, así que se pintan todas — con
+ * `querySelector` a secas la escondida se quedaba con el reloj y la visible
+ * con los guiones.
+ */
 function iniciarCuenta() {
-  const raiz = document.querySelector<HTMLElement>('[data-cuenta]');
-  if (!raiz) return;
+  const raices = document.querySelectorAll<HTMLElement>('[data-cuenta]');
+  if (!raices.length) return;
 
-  const destino = new Date(raiz.dataset.cuenta!).getTime();
   const campos = ['dias', 'horas', 'minutos', 'segundos'] as const;
-  const nodos = Object.fromEntries(
-    campos.map((c) => [c, raiz.querySelector(`[data-campo="${c}"]`)]),
-  ) as Record<(typeof campos)[number], HTMLElement | null>;
+
+  const relojes = [...raices].map((raiz) => ({
+    raiz,
+    destino: new Date(raiz.dataset.cuenta!).getTime(),
+    nodos: Object.fromEntries(
+      campos.map((c) => [c, raiz.querySelector(`[data-campo="${c}"]`)]),
+    ) as Record<(typeof campos)[number], HTMLElement | null>,
+  }));
 
   const pintar = () => {
-    const falta = destino - Date.now();
-    if (falta <= 0) {
-      raiz.dataset.estado = 'enCurso';
-      campos.forEach((c) => nodos[c] && (nodos[c]!.textContent = '00'));
-      return;
-    }
-    const s = Math.floor(falta / 1000);
-    const valores = {
-      dias: Math.floor(s / 86400),
-      horas: Math.floor((s % 86400) / 3600),
-      minutos: Math.floor((s % 3600) / 60),
-      segundos: s % 60,
-    };
-    for (const c of campos) {
-      if (nodos[c]) {
-        nodos[c]!.textContent = String(valores[c]).padStart(2, '0');
+    const ahora = Date.now();
+    for (const { raiz, destino, nodos } of relojes) {
+      const falta = destino - ahora;
+      if (falta <= 0) {
+        raiz.dataset.estado = 'enCurso';
+        campos.forEach((c) => nodos[c] && (nodos[c]!.textContent = '00'));
+        continue;
+      }
+      const s = Math.floor(falta / 1000);
+      const valores = {
+        dias: Math.floor(s / 86400),
+        horas: Math.floor((s % 86400) / 3600),
+        minutos: Math.floor((s % 3600) / 60),
+        segundos: s % 60,
+      };
+      for (const c of campos) {
+        if (nodos[c]) {
+          nodos[c]!.textContent = String(valores[c]).padStart(2, '0');
+        }
       }
     }
   };
 
   pintar();
   setInterval(pintar, 1000);
+}
+
+/**
+ * La entrada de la portada móvil.
+ *
+ * El montaje lo hace CSS entero; esto sólo le pone puerta de salida. Al
+ * primer toque se va al final: nadie debería tener que esperar a que una
+ * animación termine para poder usar un sitio. Y al terminar sola, el
+ * atributo se retira para no dejar estado vivo — todos los pasos acaban
+ * exactamente en el estado natural del elemento, así que quitarlo en
+ * cualquier momento no da ningún salto.
+ */
+function iniciarEntrada() {
+  const raiz = document.documentElement;
+  if (raiz.dataset.intro !== 'si') return;
+
+  const terminar = () => delete raiz.dataset.intro;
+
+  raiz.addEventListener('pointerdown', terminar, { once: true, passive: true });
+  raiz.addEventListener('keydown', terminar, { once: true });
+  setTimeout(terminar, 2200);
 }
 
 /** Menú móvil. */
@@ -195,6 +240,7 @@ function iniciarMenu() {
  */
 function arrancar() {
   const pasos = [
+    iniciarEntrada,
     iniciarScroll,
     iniciarTitulares,
     iniciarReveals,

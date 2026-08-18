@@ -1,0 +1,172 @@
+---
+/**
+ * La portada móvil: la silla en medio y, encima, el color llenando la
+ * pantalla. Luego cuatro puertas.
+ *
+ * No es la home de escritorio recortada — no lleva manifiesto, ni adelanto de
+ * sedes, ni patrocinadores. Es un índice: dice cuándo, dónde, y a dónde ir.
+ * Todo lo demás está a un toque de distancia y cabe en su propia pantalla.
+ *
+ * La secuencia de entrada vive entera en movil.css; aquí sólo están las
+ * piezas que anima.
+ */
+import Silla from '../Silla.astro';
+import { conBase } from '../../lib/base';
+import {
+  festival,
+  manifiesto,
+  privacidad,
+  programa,
+  sedes,
+} from '../../data/site';
+
+const puertas = [
+  { n: '01', label: 'Manifiesto', href: '#manifiesto', nota: 'Qué es esto' },
+  { n: '02', label: programa.titulo, href: '/programa', nota: programa.estado },
+  {
+    n: '03',
+    label: sedes.titulo,
+    href: '/sedes',
+    nota: `${sedes.lista.length} lugares`,
+  },
+  {
+    n: '04',
+    label: 'Convocatoria',
+    href: festival.convocatoriaPDF,
+    nota: 'PDF',
+    externa: true,
+  },
+];
+---
+
+<div class="movil-marco" id="portada">
+  <div class="portada">
+    {/* El fondo oscuro del que arranca todo y el amarillo que lo inunda */}
+    <div class="portada-lienzo" aria-hidden="true">
+      <span class="portada-capa capa--tinta"></span>
+      <span class="portada-capa capa--amarillo"></span>
+    </div>
+
+    <header class="movil-barra portada-barra">
+      <span class="px-4">
+        <span class="leading-none">
+          <span class="meta block text-[0.45rem] text-rojo">
+            Festival de arte
+          </span>
+          <img
+            src={conBase("/logos/wordmark-roja.svg")}
+            alt="Cuarta Silla"
+            width="533"
+            height="85"
+            class="mt-0.5 block h-4 w-auto"
+          />
+        </span>
+      </span>
+      <a
+        href={conBase("/registro")}
+        class="meta border-l-2 border-tinta px-4 font-bold text-rojo"
+      >
+        Registro
+      </a>
+    </header>
+
+    {/* La silla en medio, con el rótulo encima */}
+    <div class="portada-escena">
+      <Silla variante="roja" class="portada-silla" />
+
+      <h1 class="portada-rotulo">
+        <span class="sr-only">
+          {festival.nombre} — {festival.fechas} — {festival.ciudad}
+        </span>
+        <span
+          class="display display-centro block text-[16cqw] leading-[0.88] text-rojo"
+          aria-hidden="true"
+        >
+          Festival<br />de Arte<br />Conceptual
+        </span>
+      </h1>
+    </div>
+
+    {/* Cuándo y cuánto falta, en una línea en vez de cuatro cajas */}
+    <div class="portada-datos" data-cuenta={festival.inicioISO}>
+      <p class="meta text-[0.6rem]">
+        24 — 27 SEP {festival.anio}
+        <span class="opacity-50" aria-hidden="true">/</span>
+        Guadalajara
+      </p>
+      <p class="meta mt-1 text-[0.6rem] opacity-70">
+        Faltan <span class="font-bold opacity-100" data-campo="dias">--</span> días
+      </p>
+    </div>
+
+    <nav class="portada-puertas" aria-label="Secciones">
+      {
+        puertas.map((p) => (
+          <a
+            href={conBase(p.href)}
+            class="puerta"
+            target={p.externa ? '_blank' : undefined}
+            rel={p.externa ? 'noopener' : undefined}
+          >
+            <span class="meta text-[0.6rem] text-rojo">{p.n}</span>
+            <span>
+              <span class="display block text-3xl leading-none text-tinta">
+                {p.label}
+              </span>
+              <span class="meta mt-1 block text-[0.5rem] text-tinta/45">
+                {p.nota}
+              </span>
+            </span>
+            <span class="puerta-flecha display text-2xl" aria-hidden="true">
+              {p.externa ? '↗' : '→'}
+            </span>
+          </a>
+        ))
+      }
+    </nav>
+
+    {/* El pie del sitio grande no se pinta aquí, y con él se iba el único
+        enlace al aviso de privacidad. Una línea basta. */}
+    <p class="portada-legal">
+      <a href={conBase("/privacidad")} class="enlace">{privacidad.titulo}</a>
+      <span class="opacity-40"> · {festival.creditoFooter}</span>
+    </p>
+  </div>
+
+  {/* ── Manifiesto: pantalla con :target ─────────────────────────────── */}
+  {/* En escritorio es una sección de la home; aquí necesita pantalla propia
+      y no merece una URL nueva. `:target` da las dos cosas y el botón atrás
+      del teléfono funciona solo. */}
+  <section
+    id="manifiesto"
+    class="movil-modal bg-hueso"
+    aria-label={manifiesto.titulo}
+  >
+    <div class="movil-barra bg-hueso">
+      <a href="#portada" class="meta px-4 font-bold text-rojo">
+        <span aria-hidden="true">←</span>&nbsp; Volver
+      </a>
+      <span class="meta border-l-2 border-tinta px-4 text-tinta/45">01</span>
+    </div>
+
+    <div class="movil-cuerpo px-4 py-6">
+      <h2 class="display text-[9cqw] leading-[1] text-tinta">
+        {manifiesto.titulo}
+      </h2>
+
+      <div class="mt-6 space-y-4">
+        {
+          manifiesto.parrafos.map((p) => (
+            <p class="text-[0.95rem] leading-relaxed text-tinta/85">{p}</p>
+          ))
+        }
+      </div>
+
+      <blockquote
+        class="mt-8 border-l-4 border-rojo pl-4 font-mono text-base leading-snug font-bold text-rojo"
+      >
+        {manifiesto.cierre}
+      </blockquote>
+    </div>
+  </section>
+</div>

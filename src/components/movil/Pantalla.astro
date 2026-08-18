@@ -1,0 +1,44 @@
+---
+import { conBase } from '../../lib/base';
+/**
+ * Marco de una pantalla interior del sitio móvil: barra con vuelta a la
+ * portada y un cuerpo que cabe entero (o hace scroll él solo, sin arrastrar
+ * la página).
+ *
+ * `fondo` decide la pareja de colores, siempre dentro de la paleta del
+ * manual — nunca se inventa una combinación nueva por conveniencia.
+ */
+interface Props {
+  titulo: string;
+  indice: string;
+  nota?: string;
+  fondo?: 'amarillo' | 'hueso' | 'pizarra' | 'rojo';
+}
+
+const { titulo, indice, nota, fondo = 'amarillo' } = Astro.props;
+
+const paleta = {
+  amarillo: 'bg-amarillo text-tinta',
+  hueso: 'bg-hueso text-tinta',
+  pizarra: 'bg-pizarra text-hueso',
+  rojo: 'bg-rojo text-amarillo',
+}[fondo];
+---
+
+<div class={`movil-marco ${paleta}`}>
+  <header class="movil-barra">
+    <a href={conBase("/")} class="meta px-4 font-bold">
+      <span aria-hidden="true">←</span>&nbsp; Portada
+    </a>
+    <span class="meta border-l-2 border-current px-4 opacity-45">{indice}</span>
+  </header>
+
+  <div class="movil-cuerpo">
+    <div class="border-b-2 border-current px-4 py-5">
+      <h1 class="display text-[12cqw] leading-[0.92]">{titulo}</h1>
+      {nota && <p class="meta mt-2 text-[0.6rem] opacity-55">{nota}</p>}
+    </div>
+
+    <slot />
+  </div>
+</div>

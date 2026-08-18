@@ -2,10 +2,14 @@
 
 /* ── Tipografías autoalojadas (sin peticiones a terceros) ───────────────── */
 @import '@fontsource/anton/400.css'; /* display condensada — sustituto de Tusker Grotesk */
-@import '@fontsource/unifrakturcook/700.css'; /* gótica — sustituto de Old London (wordmark) */
 @import '@fontsource-variable/archivo'; /* texto — sustituto de Acumin Variable Concept */
 @import '@fontsource/courier-prime/400.css'; /* mono — sustituto de Truetypewriter Polyglott */
 @import '@fontsource/courier-prime/700.css';
+
+/* El sitio móvil, que es otro sitio y no una adaptación de éste. Sus reglas
+   viven fuera de @layer para poder anular utilidades de Tailwind sin
+   !important; por eso da igual que el @import vaya arriba. */
+@import './movil.css';
 
 @theme {
   /* Paleta oficial, tal cual el manual de identidad */
@@ -17,7 +21,6 @@
   --color-tinta: #1e1e1e;
 
   --font-display: 'Anton', 'Arial Narrow', sans-serif;
-  --font-gotica: 'UnifrakturCook', serif;
   --font-texto: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
   --font-mono: 'Courier Prime', ui-monospace, monospace;
 
@@ -98,13 +101,6 @@
     transform-origin: center;
   }
 
-  .wordmark {
-    font-family: var(--font-gotica);
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    line-height: 1;
-  }
-
   .meta {
     font-family: var(--font-mono);
     text-transform: uppercase;
@@ -161,6 +157,19 @@
   .boton--hueso {
     background-color: var(--color-hueso);
     color: var(--color-tinta);
+  }
+
+  /* En una pantalla de 390px, dos botones con este relleno se parten en dos
+     filas y se comen 100px de alto. Comprimirlos los devuelve a una sola
+     línea sin tocar la forma. */
+  @media (width < 40rem) {
+    .boton {
+      --desfase: 4px;
+      gap: 0.5rem;
+      padding: 0.7rem 1.1rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+    }
   }
 
   /* ── Enlace subrayado que se dibuja ─────────────────────────────────── */
