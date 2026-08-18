@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { conBase } from '../lib/base';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { festival } from '../data/site';
@@ -34,8 +35,8 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
     <title>{tituloCompleto}</title>
     <meta name="description" content={descripcion} />
     <link rel="canonical" href={canonica} />
-    <link rel="icon" href="/logos/silla-roja.svg" type="image/svg+xml" />
-    <link rel="alternate icon" href="/logos/silla-roja.png" type="image/png" />
+    <link rel="icon" href={conBase("/logos/silla-roja.svg")} type="image/svg+xml" />
+    <link rel="alternate icon" href={conBase("/logos/silla-roja.png")} type="image/png" />
     <meta name="theme-color" content="#fffd00" />
 
     <meta property="og:type" content="website" />

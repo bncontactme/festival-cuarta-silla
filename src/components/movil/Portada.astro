@@ -11,6 +11,7 @@
  * piezas que anima.
  */
 import Silla from '../Silla.astro';
+import { conBase } from '../../lib/base';
 import {
   festival,
   manifiesto,
@@ -53,7 +54,7 @@ const puertas = [
             Festival de arte
           </span>
           <img
-            src="/logos/wordmark-roja.svg"
+            src={conBase("/logos/wordmark-roja.svg")}
             alt="Cuarta Silla"
             width="533"
             height="85"
@@ -62,7 +63,7 @@ const puertas = [
         </span>
       </span>
       <a
-        href="/registro"
+        href={conBase("/registro")}
         class="meta border-l-2 border-tinta px-4 font-bold text-rojo"
       >
         Registro
@@ -102,7 +103,7 @@ const puertas = [
       {
         puertas.map((p) => (
           <a
-            href={p.href}
+            href={conBase(p.href)}
             class="puerta"
             target={p.externa ? '_blank' : undefined}
             rel={p.externa ? 'noopener' : undefined}
@@ -127,7 +128,7 @@ const puertas = [
     {/* El pie del sitio grande no se pinta aquí, y con él se iba el único
         enlace al aviso de privacidad. Una línea basta. */}
     <p class="portada-legal">
-      <a href="/privacidad" class="enlace">{privacidad.titulo}</a>
+      <a href={conBase("/privacidad")} class="enlace">{privacidad.titulo}</a>
       <span class="opacity-40"> · {festival.creditoFooter}</span>
     </p>
   </div>

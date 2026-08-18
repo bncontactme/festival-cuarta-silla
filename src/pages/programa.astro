@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { conBase } from '../lib/base';
 import Encabezado from '../components/Encabezado.astro';
 import Marquee from '../components/Marquee.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
@@ -145,7 +146,7 @@ import { programa, festival } from '../data/site';
         >
           ★ Convocatoria ★
         </a>
-        <a href="/registro" class="boton boton--hueso">Registro a eventos</a>
+        <a href={conBase("/registro")} class="boton boton--hueso">Registro a eventos</a>
       </div>
     </div>
   </section>

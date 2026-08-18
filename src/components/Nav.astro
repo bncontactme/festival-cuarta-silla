@@ -1,8 +1,13 @@
 ---
 import { nav, festival } from '../data/site';
+import { conBase } from '../lib/base';
 
-const ruta = Astro.url.pathname.replace(/\/$/, '') || '/';
-const activo = (href: string) => (ruta === href ? 'page' : undefined);
+// `Astro.url.pathname` ya trae la base incorporada, así que el enlace se
+// normaliza igual antes de comparar; si no, bajo un subdirectorio ninguna
+// entrada quedaría marcada como la actual.
+const limpia = (p: string) => p.replace(/\/$/, '') || '/';
+const ruta = limpia(Astro.url.pathname);
+const activo = (href: string) => (ruta === limpia(conBase(href)) ? 'page' : undefined);
 ---
 
 <header
@@ -17,12 +22,12 @@ const activo = (href: string) => (ruta === href ? 'page' : undefined);
 
   <div class="flex items-stretch justify-between">
     <a
-      href="/"
+      href={conBase("/")}
       class="vt-wordmark group flex items-center gap-3 border-r-2 border-tinta px-4 py-3 sm:px-6"
       aria-label={`${festival.nombreCompleto} — Inicio`}
     >
       <img
-        src="/logos/silla-roja.svg"
+        src={conBase("/logos/silla-roja.svg")}
         alt=""
         width="316"
         height="420"
@@ -37,7 +42,7 @@ const activo = (href: string) => (ruta === href ? 'page' : undefined);
              lockup completo (`logotipo-*.svg`) no cabe aquí: a la altura de
              la barra su texto secundario quedaría en ~3 px. -->
         <img
-          src="/logos/wordmark-roja.svg"
+          src={conBase("/logos/wordmark-roja.svg")}
           alt=""
           width="533"
           height="85"
@@ -51,7 +56,7 @@ const activo = (href: string) => (ruta === href ? 'page' : undefined);
       {
         nav.map((item) => (
           <a
-            href={item.href}
+            href={conBase(item.href)}
             aria-current={activo(item.href)}
             class="meta flex items-center border-l-2 border-tinta px-5 transition-colors duration-300 hover:bg-rojo hover:text-amarillo aria-[current=page]:bg-tinta aria-[current=page]:text-amarillo"
           >
@@ -102,7 +107,7 @@ const activo = (href: string) => (ruta === href ? 'page' : undefined);
     {
       nav.map((item, i) => (
         <a
-          href={item.href}
+          href={conBase(item.href)}
           aria-current={activo(item.href)}
           class="display display-centro block text-[13vw] text-amarillo transition-colors duration-300 hover:text-tinta aria-[current=page]:text-tinta"
           style={`transition-delay: ${i * 40}ms`}

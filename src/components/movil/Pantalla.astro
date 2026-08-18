@@ -1,4 +1,5 @@
 ---
+import { conBase } from '../../lib/base';
 /**
  * Marco de una pantalla interior del sitio móvil: barra con vuelta a la
  * portada y un cuerpo que cabe entero (o hace scroll él solo, sin arrastrar
@@ -26,7 +27,7 @@ const paleta = {
 
 <div class={`movil-marco ${paleta}`}>
   <header class="movil-barra">
-    <a href="/" class="meta px-4 font-bold">
+    <a href={conBase("/")} class="meta px-4 font-bold">
       <span aria-hidden="true">←</span>&nbsp; Portada
     </a>
     <span class="meta border-l-2 border-current px-4 opacity-45">{indice}</span>

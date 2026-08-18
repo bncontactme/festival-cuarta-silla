@@ -1,4 +1,5 @@
 ---
+import { conBase } from '../lib/base';
 /** La silla del logo, como elemento gráfico recurrente.
  *
  * Vector extraído de `identidad visual.ai`. El respaldo lleva el logotipo
@@ -20,7 +21,7 @@ const {
 ---
 
 <img
-  src={`/logos/silla-${variante}.svg`}
+  src={conBase(`/logos/silla-${variante}.svg`)}
   alt={alt}
   aria-hidden={alt === '' ? 'true' : undefined}
   loading="lazy"

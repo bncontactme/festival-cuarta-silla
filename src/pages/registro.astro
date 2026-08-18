@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { conBase } from '../lib/base';
 import Encabezado from '../components/Encabezado.astro';
 import Silla from '../components/Silla.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
@@ -120,7 +121,7 @@ import { registro, festival } from '../data/site';
           <button type="button" class="boton" disabled>
             {registro.acciones.registro}
           </button>
-          <a href="/programa" class="boton boton--hueso">
+          <a href={conBase("/programa")} class="boton boton--hueso">
             {registro.acciones.leerMas}
           </a>
         </footer>
