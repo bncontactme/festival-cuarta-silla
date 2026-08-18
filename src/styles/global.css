@@ -2,7 +2,6 @@
 
 /* ── Tipografías autoalojadas (sin peticiones a terceros) ───────────────── */
 @import '@fontsource/anton/400.css'; /* display condensada — sustituto de Tusker Grotesk */
-@import '@fontsource/unifrakturcook/700.css'; /* gótica — sustituto de Old London (wordmark) */
 @import '@fontsource-variable/archivo'; /* texto — sustituto de Acumin Variable Concept */
 @import '@fontsource/courier-prime/400.css'; /* mono — sustituto de Truetypewriter Polyglott */
 @import '@fontsource/courier-prime/700.css';
@@ -22,7 +21,6 @@
   --color-tinta: #1e1e1e;
 
   --font-display: 'Anton', 'Arial Narrow', sans-serif;
-  --font-gotica: 'UnifrakturCook', serif;
   --font-texto: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
   --font-mono: 'Courier Prime', ui-monospace, monospace;
 
@@ -101,13 +99,6 @@
 
   .display-centro {
     transform-origin: center;
-  }
-
-  .wordmark {
-    font-family: var(--font-gotica);
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    line-height: 1;
   }
 
   .meta {
