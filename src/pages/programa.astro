@@ -4,7 +4,8 @@ import { conBase } from '../lib/base';
 import Encabezado from '../components/Encabezado.astro';
 import Marquee from '../components/Marquee.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
-import { programa, festival } from '../data/site';
+import Gantt from '../components/Gantt.astro';
+import { programa, festival, ganttEsEjemplo, ganttAviso } from '../data/site';
 ---
 
 <Base
@@ -128,16 +129,42 @@ import { programa, festival } from '../data/site';
     </div>
   </section>
 
+  {/* ── Rejilla de barras ────────────────────────────────────────────────
+      Vive donde estaba el cartel de «Próximamente», que no decía nada que no
+      dijeran ya la cinta de arriba y la tabla entera vacía. La tabla se queda
+      como está: son dos lecturas del mismo programa —la de listado y la de
+      reloj— y cada una contesta una pregunta distinta. */}
+  <section class="border-t-2 border-tinta bg-hueso">
+    <div class="px-4 py-14 sm:px-6 lg:px-10 lg:py-16">
+      <div class="mb-10">
+        <p class="meta mb-4 flex items-center gap-4 text-rojo" data-reveal="lado">
+          <span class="inline-block h-[2px] w-12 bg-rojo"></span>
+          Rejilla por horas
+        </p>
+        <h2 class="display text-[8vw] leading-[0.95] text-tinta lg:text-[3.6vw]">
+          Qué pasa y cuándo
+        </h2>
+        <p class="mt-4 max-w-[52ch] font-mono text-sm leading-relaxed text-tinta/60">
+          Cada línea es una sede y el tiempo corre a lo ancho. Tocá una barra
+          para ver de qué va, quién la da y cómo entrar.
+        </p>
+      </div>
+
+      {
+        ganttEsEjemplo && (
+          <p class="meta mb-8 border-2 border-rojo bg-rojo/10 px-4 py-3 leading-relaxed text-rojo">
+            ⚠ {ganttAviso}
+          </p>
+        )
+      }
+
+      <Gantt />
+    </div>
+  </section>
+
   <section class="border-t-2 border-tinta bg-amarillo">
-    <div class="px-4 py-20 text-center sm:px-6 lg:py-24">
-      <p
-        class="display display-centro mx-auto max-w-4xl text-[10vw] leading-[0.95] text-rojo lg:text-[6vw]"
-        data-lineas
-        data-reveal="lineas"
-      >
-        {programa.estado}
-      </p>
-      <div class="mt-10 flex flex-wrap justify-center gap-4" data-reveal="arriba">
+    <div class="px-4 py-16 text-center sm:px-6">
+      <div class="flex flex-wrap justify-center gap-4" data-reveal="arriba">
         <a
           href={festival.convocatoriaPDF}
           target="_blank"

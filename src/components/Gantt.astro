@@ -1,0 +1,970 @@
+---
+import {
+  actividades,
+  coloresGantt,
+  festival,
+  programa,
+  sedeDe,
+  enlaceMapa,
+} from '../data/site';
+
+/**
+ * La rejilla de barras del programa.
+ *
+ * El tiempo corre de izquierda a derecha y cada línea es una sede —o un día,
+ * en el resumen de la portada—, así que de un vistazo se ve qué hay a la vez
+ * y dónde. La lista del programa dice qué pasa; esto dice cómo se pisan las
+ * cosas entre sí, que es la pregunta que no contesta una lista.
+ *
+ * Todo se coloca en el build: cada barra llega al navegador con su columna de
+ * inicio y su largo puestos. El JS sólo cambia de día y abre la ficha.
+ */
+interface Props {
+  /** `sede`: una línea por sede del día elegido, con selector de día.
+   *  `dia`: una línea por día, todo el festival a la vez y sin selector. */
+  agrupar?: 'sede' | 'dia';
+  /** Sin ficha ni leyenda: el resumen de la portada sólo enseña la forma. */
+  resumen?: boolean;
+  /** Versión de bolsillo: un solo día —el que toca hoy—, barras finas y sin
+   *  texto, y una hora de cada tres. Cabe dentro de una columna. */
+  mini?: boolean;
+  class?: string;
+}
+
+const {
+  agrupar = 'sede',
+  resumen = false,
+  mini = false,
+  class: clase = '',
+} = Astro.props;
+
+const PASO = 30; // minutos por columna: media hora es lo mínimo que se ve
+
+const aMinutos = (hhmm: string) => {
+  const [h, m] = hhmm.split(':').map(Number);
+  return h * 60 + m;
+};
+const aReloj = (min: number) => `${String(Math.floor(min / 60)).padStart(2, '0')}:00`;
+
+/* El rango sale de las actividades, no de una constante: si el programa
+   arranca a las ocho o termina a la una, la rejilla se estira sola. */
+const desde = Math.floor(Math.min(...actividades.map((a) => aMinutos(a.inicio))) / 60) * 60;
+const hasta = Math.ceil(Math.max(...actividades.map((a) => aMinutos(a.fin))) / 60) * 60;
+const columnas = (hasta - desde) / PASO;
+const horas = Array.from({ length: (hasta - desde) / 60 }, (_, i) => desde + i * 60);
+/** En mini se rotula una hora de cada tres: trece rótulos en una columna de
+ *  portada se tocan entre sí y no se lee ninguno. */
+const cadaHora = mini ? 3 : 1;
+
+/** La fecha de cada día del festival, en ISO, para que el navegador pueda
+ *  comparar con la de hoy. Se cuentan a partir del arranque: los cuatro días
+ *  son consecutivos y la fecha de inicio ya está en los datos. */
+const primerDia = new Date(festival.inicioISO);
+const fechaISO = (i: number) => {
+  const d = new Date(primerDia);
+  d.setDate(d.getDate() + i);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+/** Una barra ya colocada: +2 en la columna porque la 1 es la de etiquetas. */
+const aBarra = (a: (typeof actividades)[number]) => ({
+  ...a,
+  col: (aMinutos(a.inicio) - desde) / PASO + 2,
+  largo: Math.max(1, (aMinutos(a.fin) - aMinutos(a.inicio)) / PASO),
+  sedeInfo: sedeDe(a.sede),
+  cuando: `${programa.dias[a.dia].dia} ${programa.dias[a.dia].fecha} · ${a.inicio}–${a.fin}`,
+});
+
+/**
+ * Carriles: cuántas líneas hace falta apilar para que dos cosas que pasan a
+ * la vez no se pisen.
+ *
+ * Sin esto la rejilla se apaña sola —el grid empuja a una fila nueva lo que
+ * no cabe—, pero la etiqueta se queda arriba y las líneas de abajo salen sin
+ * nombre a la izquierda: parecen de otro. Repartiéndolas aquí, cada barra
+ * sabe su fila exacta y la etiqueta puede abarcar de la primera a la última.
+ *
+ * El reparto es el de toda la vida: cada actividad va al primer carril que ya
+ * esté libre a esa hora, y si no hay ninguno se abre otro.
+ */
+let siguienteFila = 2; // la 1 es la cabecera de horas
+
+const enCarriles = (lista: ReturnType<typeof aBarra>[]) => {
+  const ocupadoHasta: number[] = [];
+  const barras = [...lista]
+    .sort((x, y) => aMinutos(x.inicio) - aMinutos(y.inicio))
+    .map((b) => {
+      const inicio = aMinutos(b.inicio);
+      let carril = ocupadoHasta.findIndex((fin) => fin <= inicio);
+      if (carril === -1) carril = ocupadoHasta.push(0) - 1;
+      ocupadoHasta[carril] = aMinutos(b.fin);
+      return { ...b, fila: siguienteFila + carril };
+    });
+
+  const alto = Math.max(1, ocupadoHasta.length);
+  const filaBase = siguienteFila;
+  siguienteFila += alto;
+  return { barras, filaBase, alto };
+};
+
+/* Dos formas de agrupar la misma lista. Por sede son cuatro rejillas, una por
+   día; por día es una sola con los cuatro días como líneas. */
+const paneles =
+  agrupar === 'sede'
+    ? programa.dias.map((d, i) => {
+        // Cada día es su propia rejilla y empieza a contar filas de cero.
+        siguienteFila = 2;
+        const delDia = actividades.filter((a) => a.dia === i);
+        const lineas = [...new Set(delDia.map((a) => a.sede))].map((sede) => {
+          const propias = delDia.filter((a) => a.sede === sede);
+          return {
+            etiqueta: sede,
+            nota: `${propias.length}`,
+            ...enCarriles(propias.map(aBarra)),
+          };
+        });
+        return {
+          clave: String(i),
+          titulo: d.dia,
+          fecha: d.fecha,
+          iso: fechaISO(i),
+          total: delDia.length,
+          lineas,
+          filas: siguienteFila - 2,
+        };
+      })
+    : (() => {
+        siguienteFila = 2;
+        const lineas = programa.dias.map((d, i) => ({
+          etiqueta: mini ? d.dia.slice(0, 3) : d.dia,
+          nota: mini ? '' : d.fecha.replace(' de septiembre', ' sep'),
+          ...enCarriles(actividades.filter((a) => a.dia === i).map(aBarra)),
+        }));
+        return [
+          {
+            clave: '0',
+            titulo: '',
+            fecha: '',
+            iso: '',
+            total: actividades.length,
+            lineas,
+            filas: siguienteFila - 2,
+          },
+        ];
+      })();
+---
+
+<div class={`gantt-marco ${mini ? 'gantt-marco--mini' : ''} ${clase}`} data-gantt>
+  {
+    mini && (
+      <p class="gantt-rotulo">
+        <span data-rotulo-dia>{paneles[0].titulo}</span>
+        <span class="gantt-rotulo-fecha" data-rotulo-fecha>
+          {paneles[0].fecha}
+        </span>
+      </p>
+    )
+  }
+
+  {
+    agrupar === 'sede' && !mini && (
+      <div class="gantt-dias" data-selector-dia>
+        {paneles.map((p, i) => (
+          <button
+            type="button"
+            class="gantt-tab"
+            data-dia={i}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+          >
+            <span class="gantt-tab-dia">{p.titulo}</span>
+            <span class="gantt-tab-nota">
+              {p.fecha.replace(' de septiembre', '')} / {p.total}
+            </span>
+          </button>
+        ))}
+      </div>
+    )
+  }
+
+  {/* `overflow-x`: en una ventana angosta la rejilla no se comprime hasta ser
+      ilegible, se arrastra. Media hora tiene que seguir midiendo lo que mide. */}
+  <div class="gantt-scroll">
+    {
+      paneles.map((panel, i) => (
+        <div
+          class="gantt"
+          style={`--columnas:${columnas};--filas:${panel.filas}`}
+          data-panel={i}
+          data-fecha={panel.iso}
+          data-nombre={panel.titulo}
+          data-dia-fecha={panel.fecha}
+          hidden={i !== 0}
+        >
+          {/* Guías: una celda por hora, de la cabecera al suelo. Es lo que deja
+              leer a qué hora cae una barra sin seguir la fila con el dedo. */}
+          {horas.map((_, h) => (
+            <div class="gantt-guia" style={`grid-column:${h * 2 + 2} / span 2`} aria-hidden="true" />
+          ))}
+
+          <div class="gantt-esquina" />
+          {horas.map((hora, h) => (
+            <div class="gantt-hora">{h % cadaHora === 0 ? aReloj(hora) : ''}</div>
+          ))}
+
+          {panel.lineas.map((linea) => (
+            <>
+              {/* Banda de la fila: existe para que el filete cruce la rejilla
+                  entera. Puesto en la etiqueta se cortaba donde terminaba el
+                  nombre y las filas no se leían como filas. */}
+              <div
+                class="gantt-fila"
+                style={`grid-row:${linea.filaBase} / span ${linea.alto}`}
+                aria-hidden="true"
+              />
+              <div
+                class="gantt-etiqueta"
+                style={`grid-row:${linea.filaBase} / span ${linea.alto}`}
+              >
+                <span class="gantt-etiqueta-nombre" title={linea.etiqueta}>
+                  {linea.etiqueta}
+                </span>
+                <span class="gantt-etiqueta-nota">{linea.nota}</span>
+              </div>
+
+              {linea.barras.map((a) => (
+                <button
+                  type="button"
+                  class="gantt-barra"
+                  style={`grid-column:${a.col} / span ${a.largo};grid-row:${a.fila};--fondo:${coloresGantt[a.tipo].fondo};--texto:${coloresGantt[a.tipo].texto}`}
+                  title={`${a.titulo} · ${a.inicio}–${a.fin} · ${a.sede}`}
+                  data-barra
+                  data-titulo={a.titulo}
+                  data-tipo={a.tipo}
+                  data-artista={a.artista ?? ''}
+                  data-cuando={a.cuando}
+                  data-sede={a.sede}
+                  data-direccion={a.sedeInfo?.direccion ?? ''}
+                  data-mapa={a.sedeInfo ? enlaceMapa(a.sedeInfo) : ''}
+                  data-registro={a.registro ?? ''}
+                  data-color={coloresGantt[a.tipo].fondo}
+                >
+                  <span class="gantt-barra-titulo">{a.titulo}</span>
+                  <span class="gantt-barra-hora">
+                    {a.inicio}–{a.fin}
+                  </span>
+                </button>
+              ))}
+            </>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+
+  {
+    !resumen && (
+      <ul class="gantt-leyenda">
+        {Object.entries(coloresGantt).map(([tipo, color]) => (
+          <li>
+            <span class="gantt-muestra" style={`background:${color.fondo}`} aria-hidden="true" />
+            {tipo}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</div>
+
+{
+  /* La ficha. Una sola para todas las barras: se rellena al abrirla.
+     No es un `title` del navegador ni un tooltip de un renglón —hay que poder
+     leer quién la da, dónde es y entrar al registro—, así que es una tarjeta
+     de verdad: se queda abierta, se puede señalar con el ratón y tiene
+     botones. */
+  !resumen && (
+    <div class="gantt-ficha" data-ficha hidden>
+      <button type="button" class="gantt-ficha-cerrar" data-ficha-cerrar aria-label="Cerrar">
+        ✕
+      </button>
+
+      <p class="gantt-ficha-tipo" data-f-tipo />
+      <h3 class="gantt-ficha-titulo" data-f-titulo />
+      <p class="gantt-ficha-artista" data-f-artista />
+
+      <dl class="gantt-ficha-datos">
+        <div>
+          <dt>Cuándo</dt>
+          <dd data-f-cuando />
+        </div>
+        <div>
+          <dt>Dónde</dt>
+          <dd>
+            <span class="gantt-ficha-sede" data-f-sede />
+            <span class="gantt-ficha-direccion" data-f-direccion />
+          </dd>
+        </div>
+      </dl>
+
+      <div class="gantt-ficha-acciones">
+        <a class="gantt-ficha-boton" target="_blank" rel="noopener" data-f-registro>
+          Registrarme ↗
+        </a>
+        <a
+          class="gantt-ficha-boton gantt-ficha-boton--suave"
+          target="_blank"
+          rel="noopener"
+          data-f-mapa
+        >
+          Ver en el mapa ↗
+        </a>
+      </div>
+
+      <p class="gantt-ficha-sin" data-f-sin hidden>Sin registro previo</p>
+    </div>
+  )
+}
+
+<style>
+  /* ── Marco ─────────────────────────────────────────────────────────── */
+  .gantt-marco {
+    --alto-fila: 3.75rem;
+    --etiqueta: 11rem;
+  }
+
+  /* Rótulo del mini: qué día se está enseñando. Sin él, cuatro barras sueltas
+     sobre el amarillo no dicen de cuándo son. */
+  .gantt-rotulo {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .gantt-rotulo-fecha {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    opacity: 0.45;
+    text-transform: uppercase;
+  }
+
+  /* ── Pestañas de día ───────────────────────────────────────────────── */
+  .gantt-dias {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .gantt-tab {
+    border: 2px solid var(--color-tinta);
+    background-color: transparent;
+    padding: 0.6rem 1.1rem;
+    text-align: left;
+    transition:
+      background-color 0.2s var(--ease-salida),
+      color 0.2s var(--ease-salida),
+      box-shadow 0.2s var(--ease-salida);
+  }
+  .gantt-tab:hover {
+    box-shadow: 4px 4px 0 var(--color-tinta);
+  }
+  .gantt-tab[aria-pressed='true'] {
+    background-color: var(--color-tinta);
+    color: var(--color-amarillo);
+    box-shadow: 4px 4px 0 var(--color-rojo);
+  }
+  .gantt-tab-dia {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .gantt-tab-nota {
+    display: block;
+    margin-top: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    opacity: 0.55;
+    text-transform: uppercase;
+  }
+
+  /* ── Rejilla ───────────────────────────────────────────────────────── */
+  .gantt-scroll {
+    overflow-x: auto;
+    border: 2px solid var(--color-tinta);
+    background-color: var(--color-hueso);
+  }
+  .gantt {
+    display: grid;
+    grid-template-columns: var(--etiqueta) repeat(var(--columnas), minmax(1.75rem, 1fr));
+    /* Las filas, explícitas. No es cosmético: las guías van de la fila 2 a la
+       `-1`, y los índices negativos sólo cuentan líneas *explícitas*. Con las
+       filas implícitas, esa `-1` se resolvía a la línea 1 y las guías caían
+       encima de la cabecera, empujando las horas media rejilla a la derecha. */
+    grid-template-rows: auto repeat(var(--filas), minmax(var(--alto-fila), auto));
+    align-items: center;
+  }
+
+  /* `min-width: 0` en todo lo que lleva texto: sin esto un título largo con
+     `nowrap` reclama su ancho intrínseco, infla su columna y arrastra a las
+     demás. Con el mínimo a cero manda el reparto de la rejilla y el título se
+     corta con puntos suspensivos, que para eso están. */
+  .gantt-barra,
+  .gantt-etiqueta {
+    min-width: 0;
+  }
+
+  /* Cabecera: amarilla y no negra. La negra pesaba tanto que la rejilla
+     parecía una terminal; en amarillo la fila de horas es un rótulo más. */
+  .gantt-esquina,
+  .gantt-hora {
+    /* Fila 1 a mano: en cuanto las barras traen su `grid-row` calculado, el
+       colocado automático deja de servir y las horas se colaban entre medias
+       de las actividades. */
+    grid-row: 1;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    border-bottom: 2px solid var(--color-tinta);
+    background-color: var(--color-hueso);
+    align-self: stretch;
+  }
+  .gantt-esquina {
+    left: 0;
+    z-index: 4;
+    border-right: 2px solid var(--color-tinta);
+  }
+  .gantt-hora {
+    grid-row: 1;
+    grid-column: span 2;
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 0 0.8rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    color: color-mix(in srgb, var(--color-tinta) 55%, transparent);
+  }
+
+  /* La etiqueta se queda pegada al arrastrar: una barra a las diez de la noche
+     sin saber de qué sede es no dice nada. */
+  .gantt-etiqueta {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: var(--alto-fila);
+    border-right: 2px solid var(--color-tinta);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-tinta) 12%, transparent);
+    background-color: var(--color-hueso);
+    padding: 0.5rem 0.9rem;
+    align-self: stretch;
+  }
+  .gantt-etiqueta-nombre {
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1.05;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .gantt-etiqueta-nota {
+    margin-top: 0.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    opacity: 0.45;
+    text-transform: uppercase;
+  }
+
+  .gantt-fila {
+    grid-column: 1 / -1;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .gantt-guia {
+    grid-row: 2 / -1;
+    z-index: 0;
+    border-left: 1px solid color-mix(in srgb, var(--color-tinta) 10%, transparent);
+    pointer-events: none;
+  }
+
+  /* ── Barras ────────────────────────────────────────────────────────── */
+  /* Todas del mismo color —tinta sobre hueso— y el tipo en un filete de color
+     a la izquierda.
+     Antes cada tipo pintaba la barra entera y la rejilla salía a cuatro
+     colores planos a la vez: rojo, amarillo, pizarra y ladrillo compitiendo
+     en la misma pantalla. Eso no es una rejilla, es un carnaval, y encima el
+     que manda es el color y no la hora, que es lo que se viene a leer aquí.
+     Con la barra en tinta se lee la forma del día de un golpe y el color pasa
+     a lo que debe ser: un dato más, en el canto. */
+  .gantt-barra {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    min-height: calc(var(--alto-fila) - 1.1rem);
+    margin: 0.5rem 2px;
+    border: 0;
+    border-left: 5px solid var(--fondo);
+    background-color: var(--color-tinta);
+    padding: 0.42rem 0.6rem;
+    text-align: left;
+    color: var(--color-hueso);
+    transition:
+      background-color 0.18s var(--ease-salida),
+      color 0.18s var(--ease-salida);
+  }
+  .gantt-barra:hover,
+  .gantt-barra[data-activa] {
+    background-color: var(--color-rojo);
+    border-left-color: var(--color-amarillo);
+    color: var(--color-amarillo);
+  }
+  .gantt-barra-titulo {
+    display: block;
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: 0.92rem;
+    line-height: 1.05;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .gantt-barra-hora {
+    display: block;
+    margin-top: 0.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    opacity: 0.6;
+    white-space: nowrap;
+  }
+
+  /* ── Leyenda ───────────────────────────────────────────────────────── */
+  .gantt-leyenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1rem;
+  }
+  .gantt-leyenda li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    opacity: 0.6;
+    text-transform: uppercase;
+  }
+  .gantt-muestra {
+    display: inline-block;
+    width: 1.5rem;
+    height: 0.75rem;
+    border: 2px solid var(--color-tinta);
+  }
+
+  /* ── Ficha ─────────────────────────────────────────────────────────── */
+  /* `fixed` y colocada por JS junto a la barra. Ancha de verdad —22rem— y con
+     sitio para los dos botones: es una ficha, no un globo de ayuda. */
+  .gantt-ficha {
+    position: fixed;
+    z-index: 60;
+    width: min(22rem, calc(100vw - 2rem));
+    border: 2px solid var(--color-tinta);
+    box-shadow: 8px 8px 0 var(--color-tinta);
+    background-color: var(--color-hueso);
+    color: var(--color-tinta);
+    padding: 1.5rem 1.5rem 1.25rem;
+  }
+  .gantt-ficha[hidden] {
+    display: none;
+  }
+  .gantt-ficha-cerrar {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--color-tinta);
+    background-color: transparent;
+    font-size: 0.7rem;
+    line-height: 1;
+  }
+  .gantt-ficha-cerrar:hover {
+    background-color: var(--color-tinta);
+    color: var(--color-amarillo);
+  }
+  .gantt-ficha-tipo {
+    display: inline-block;
+    border: 2px solid var(--color-tinta);
+    background-color: var(--color-acento, var(--color-rojo));
+    padding: 0.25rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .gantt-ficha-titulo {
+    margin-top: 0.9rem;
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .gantt-ficha-artista {
+    margin-top: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-rojo);
+  }
+  .gantt-ficha-artista:empty {
+    display: none;
+  }
+  .gantt-ficha-datos {
+    margin-top: 1.25rem;
+    border-top: 2px solid var(--color-tinta);
+  }
+  .gantt-ficha-datos > div {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    gap: 0.75rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-tinta) 15%, transparent);
+    padding: 0.7rem 0;
+  }
+  .gantt-ficha-datos dt {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    color: var(--color-rojo);
+    text-transform: uppercase;
+  }
+  .gantt-ficha-datos dd {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .gantt-ficha-sede {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+  .gantt-ficha-direccion {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    opacity: 0.65;
+  }
+  .gantt-ficha-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.1rem;
+  }
+  .gantt-ficha-boton {
+    flex: 1 1 auto;
+    border: 2px solid var(--color-tinta);
+    background-color: var(--color-rojo);
+    padding: 0.7rem 0.9rem;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--color-amarillo);
+    text-transform: uppercase;
+    transition: box-shadow 0.2s var(--ease-salida);
+  }
+  .gantt-ficha-boton:hover {
+    box-shadow: 3px 3px 0 var(--color-tinta);
+  }
+  .gantt-ficha-boton--suave {
+    background-color: transparent;
+    color: var(--color-tinta);
+  }
+  .gantt-ficha-boton[hidden] {
+    display: none;
+  }
+  .gantt-ficha-sin {
+    margin-top: 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    opacity: 0.45;
+    text-transform: uppercase;
+  }
+
+  /* ── Mini ──────────────────────────────────────────────────────────── */
+  /* Un bloque de tinta a sangre, como la franja de la cuenta regresiva del
+     hero. Es la tercera versión y las dos anteriores fallaban por lo mismo,
+     por los dos lados opuestos: encerrado en su caja hueso parecía un panel
+     de control pegado con cinta, y vestido con los filetes y el Courier de la
+     lista de días acababa siendo su hermano gemelo, dos bloques calcados uno
+     al lado del otro compitiendo por lo mismo.
+     En negativo no se parece a nada de la sección y sigue siendo de la casa:
+     la portada ya se apoya en bandas de tinta, y sobre ellas el amarillo pega
+     como en ningún otro sitio. */
+  .gantt-marco--mini {
+    --alto-fila: 2.4rem;
+    --etiqueta: 9rem;
+  }
+  .gantt-marco--mini .gantt-scroll {
+    border: 2px solid var(--color-tinta);
+    background-color: var(--color-tinta);
+    color: var(--color-hueso);
+  }
+
+  /* El rótulo se sube al bloque: es su cabecera, no un pie de foto encima. */
+  .gantt-marco--mini .gantt-rotulo {
+    margin: 0;
+    border: 2px solid var(--color-tinta);
+    border-bottom: 0;
+    background-color: var(--color-tinta);
+    padding: 0.8rem 1rem;
+    color: var(--color-amarillo);
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .gantt-marco--mini .gantt-rotulo-fecha {
+    color: var(--color-hueso);
+    opacity: 0.5;
+  }
+
+  .gantt-marco--mini .gantt-esquina,
+  .gantt-marco--mini .gantt-hora {
+    border-bottom: 1px solid color-mix(in srgb, var(--color-hueso) 20%, transparent);
+    background-color: var(--color-tinta);
+  }
+  .gantt-marco--mini .gantt-esquina {
+    border-right: 0;
+  }
+  .gantt-marco--mini .gantt-hora {
+    padding: 0.5rem 0 0.5rem 0.4rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    color: color-mix(in srgb, var(--color-hueso) 45%, transparent);
+  }
+
+  .gantt-marco--mini .gantt-fila {
+    border-top: 1px solid color-mix(in srgb, var(--color-hueso) 12%, transparent);
+  }
+  .gantt-marco--mini .gantt-guia {
+    border-left: 1px solid color-mix(in srgb, var(--color-hueso) 10%, transparent);
+  }
+
+  .gantt-marco--mini .gantt-etiqueta {
+    border-right: 0;
+    background-color: var(--color-tinta);
+    padding: 0.35rem 0.9rem;
+  }
+  .gantt-marco--mini .gantt-etiqueta-nombre {
+    font-size: 0.85rem;
+    color: var(--color-hueso);
+  }
+  .gantt-marco--mini .gantt-etiqueta-nota {
+    display: none;
+  }
+
+  /* Amarillo macizo y sin filete de tipo: aquí no hay leyenda, así que el
+     color no significaba nada para quien mira. Lo que importa es dónde caen
+     los bultos en el día, y eso se lee mejor con una sola tinta. */
+  .gantt-marco--mini .gantt-barra {
+    min-height: 1.1rem;
+    margin: 0.4rem 2px;
+    border: 0;
+    background-color: var(--color-amarillo);
+  }
+  .gantt-marco--mini .gantt-barra:hover {
+    background-color: var(--color-rojo);
+  }
+  .gantt-marco--mini .gantt-barra-titulo,
+  .gantt-marco--mini .gantt-barra-hora {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gantt-barra {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  /** Pestañas de día y ficha de la actividad.
+   *
+   * Las barras ya vienen colocadas del build; aquí sólo se enseña un panel,
+   * se rellena la ficha y se la coloca al lado de la barra que la abrió.
+   */
+  for (const marco of document.querySelectorAll<HTMLElement>('[data-gantt]')) {
+    const selector = marco.querySelector('[data-selector-dia]');
+    const paneles = marco.querySelectorAll<HTMLElement>('[data-panel]');
+
+    /* El mini enseña un día y punto: el de hoy, si el festival está en marcha,
+       y si no el primero. Se decide aquí y no en el build porque el sitio es
+       estático: la página se genera una vez y se sirve durante meses, así que
+       «hoy» sólo lo sabe el navegador de quien entra. */
+    if (marco.classList.contains('gantt-marco--mini') && paneles.length > 1) {
+      const ahora = new Date();
+      const hoy = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
+      const elegido =
+        [...paneles].find((p) => p.dataset.fecha === hoy) ?? paneles[0];
+
+      for (const panel of paneles) panel.hidden = panel !== elegido;
+
+      // El nombre y la fecha viajan en el propio panel: el script de un
+      // componente Astro es un módulo aparte y no ve el frontmatter.
+      const dia = marco.querySelector('[data-rotulo-dia]');
+      const fecha = marco.querySelector('[data-rotulo-fecha]');
+      if (dia) dia.textContent = elegido.dataset.nombre ?? '';
+      if (fecha) fecha.textContent = elegido.dataset.diaFecha ?? '';
+    }
+
+    selector?.addEventListener('click', (e) => {
+      const boton = (e.target as HTMLElement).closest<HTMLElement>('[data-dia]');
+      if (!boton) return;
+      for (const otro of selector.querySelectorAll('[data-dia]')) {
+        otro.setAttribute('aria-pressed', String(otro === boton));
+      }
+      for (const panel of paneles) {
+        panel.hidden = panel.dataset.panel !== boton.dataset.dia;
+      }
+      cerrar();
+    });
+
+    const ficha = document.querySelector<HTMLElement>('[data-ficha]');
+    let abierta: HTMLElement | null = null;
+
+    function cerrar() {
+      if (!ficha) return;
+      ficha.hidden = true;
+      abierta?.removeAttribute('data-activa');
+      abierta = null;
+    }
+
+    /** La ficha se abre pegada a la barra y se mete para dentro si no cabe:
+     *  una tarjeta de 22rem colgando de una barra del borde derecho se saldría
+     *  de la ventana. */
+    function colocar(barra: HTMLElement) {
+      if (!ficha) return;
+      const b = barra.getBoundingClientRect();
+      const f = ficha.getBoundingClientRect();
+      const margen = 12;
+
+      let izq = b.left;
+      izq = Math.min(izq, window.innerWidth - f.width - margen);
+      izq = Math.max(margen, izq);
+
+      // Debajo si cabe, y si no encima: nunca tapando la propia barra.
+      let arriba = b.bottom + 10;
+      if (arriba + f.height > window.innerHeight - margen) {
+        arriba = Math.max(margen, b.top - f.height - 10);
+      }
+
+      ficha.style.left = `${Math.round(izq)}px`;
+      ficha.style.top = `${Math.round(arriba)}px`;
+    }
+
+    function abrir(barra: HTMLElement) {
+      if (!ficha) return;
+      const d = barra.dataset;
+
+      const pon = (sel: string, texto: string) => {
+        const el = ficha.querySelector<HTMLElement>(sel);
+        if (el) el.textContent = texto;
+      };
+
+      pon('[data-f-tipo]', d.tipo ?? '');
+      pon('[data-f-titulo]', d.titulo ?? '');
+      pon('[data-f-artista]', d.artista ?? '');
+      pon('[data-f-cuando]', d.cuando ?? '');
+      pon('[data-f-sede]', d.sede ?? '');
+      pon('[data-f-direccion]', d.direccion ?? '');
+
+      // La etiqueta de tipo se pinta del color de la barra: es lo que ata la
+      // ficha a la barra que la abrió cuando hay varias abiertas seguidas.
+      ficha.style.setProperty('--color-acento', d.color ?? '');
+
+      const registro = ficha.querySelector<HTMLAnchorElement>('[data-f-registro]');
+      const sin = ficha.querySelector<HTMLElement>('[data-f-sin]');
+      if (registro && sin) {
+        if (d.registro) {
+          registro.href = d.registro;
+          registro.hidden = false;
+          sin.hidden = true;
+        } else {
+          registro.removeAttribute('href');
+          registro.hidden = true;
+          sin.hidden = false;
+        }
+      }
+
+      const mapa = ficha.querySelector<HTMLAnchorElement>('[data-f-mapa]');
+      if (mapa) {
+        if (d.mapa) {
+          mapa.href = d.mapa;
+          mapa.hidden = false;
+        } else {
+          mapa.hidden = true;
+        }
+      }
+
+      abierta?.removeAttribute('data-activa');
+      barra.setAttribute('data-activa', '');
+      abierta = barra;
+
+      // Visible antes de medir: con `hidden` puesto, la caja mide cero y la
+      // colocación saldría siempre pegada arriba a la izquierda.
+      ficha.hidden = false;
+      colocar(barra);
+    }
+
+    marco.addEventListener('click', (e) => {
+      const barra = (e.target as HTMLElement).closest<HTMLElement>('[data-barra]');
+      if (!barra) return;
+      if (barra === abierta) return cerrar();
+      abrir(barra);
+    });
+
+    /* El hover la enseña, pero sólo si no hay una fijada con un clic: si no,
+       pasar el ratón por encima de camino al botón de registro te cambiaba la
+       ficha bajo el cursor. */
+    marco.addEventListener('pointerover', (e) => {
+      if ((e as PointerEvent).pointerType !== 'mouse') return;
+      const barra = (e.target as HTMLElement).closest<HTMLElement>('[data-barra]');
+      if (!barra || barra === abierta || ficha?.matches(':hover')) return;
+      abrir(barra);
+    });
+
+    ficha?.querySelector('[data-ficha-cerrar]')?.addEventListener('click', cerrar);
+
+    document.addEventListener('click', (e) => {
+      const dentro = (e.target as HTMLElement).closest('[data-ficha],[data-barra]');
+      if (!dentro) cerrar();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') cerrar();
+    });
+    // La ficha vive en coordenadas de ventana: si la página se mueve por
+    // debajo, deja de apuntar a su barra.
+    window.addEventListener('scroll', cerrar, { passive: true });
+    window.addEventListener('resize', cerrar, { passive: true });
+  }
+</script>

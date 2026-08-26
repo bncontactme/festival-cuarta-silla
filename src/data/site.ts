@@ -257,3 +257,77 @@ export const privacidad = {
 export const cta = {
   convocatoria: 'Convocatoria',
 };
+
+/** ── Rejilla del programa (Gantt) ─────────────────────────────────────────
+ *
+ * ⚠️  ESTOS EVENTOS SON DE EJEMPLO Y HAY QUE REEMPLAZARLOS ENTEROS. ⚠️
+ *
+ * Están sólo para poder ver y probar la vista de barras antes de tener el
+ * programa real. La regla de arriba —no inventar copy— sigue en pie: esto es
+ * un andamio, no contenido, y la página lo anuncia como tal a la vista.
+ *
+ * Va aparte de `programa` y no dentro: `programa.dias` son los cuatro días
+ * con sus horarios tal y como vinieron de Wix, y de ahí cuelgan la tabla de
+ * la portada y la lista del móvil. Esto no los toca.
+ */
+export type ActividadGantt = {
+  titulo: string;
+  /** Índice del día dentro de `programa.dias`: 0 = jueves … 3 = domingo. */
+  dia: number;
+  /** 24 h, 'HH:MM'. El fin es lo que le da largo a la barra. */
+  inicio: string;
+  fin: string;
+  /** Tiene que coincidir con un `nombre` de `sedes.lista`. */
+  sede: string;
+  /** Colorea la barra: uno de `coloresGantt`. */
+  tipo: 'taller' | 'charla' | 'muestra' | 'escena';
+  /** Quién la da. Sale en la ficha, debajo del título. */
+  artista?: string;
+  /** Formulario de Tally de esta actividad. Sin él, la ficha sale sin botón. */
+  registro?: string;
+};
+
+/** La sede completa de una actividad: nombre, dirección y enlace al mapa
+ *  salen de `sedes.lista`, que ya los tiene. No se repiten aquí. */
+export const sedeDe = (nombre: string) =>
+  sedes.lista.find((s) => s.nombre === nombre);
+
+export const coloresGantt = {
+  taller: { fondo: 'var(--color-rojo)', texto: 'var(--color-amarillo)' },
+  charla: { fondo: 'var(--color-amarillo)', texto: 'var(--color-tinta)' },
+  muestra: { fondo: 'var(--color-pizarra)', texto: 'var(--color-hueso)' },
+  escena: { fondo: 'var(--color-ladrillo)', texto: 'var(--color-amarillo)' },
+} as const;
+
+export const ganttEsEjemplo = true;
+export const ganttAviso =
+  'Rejilla de ejemplo — las actividades que se ven abajo son un montaje para probar la vista, no la programación del festival.';
+
+export const actividades: ActividadGantt[] = [
+  // Jueves
+  { titulo: 'Montaje y acreditaciones', dia: 0, inicio: '10:00', fin: '13:00', sede: 'Foro AM', tipo: 'muestra', artista: 'Equipo del festival' },
+  { titulo: 'Inauguración', dia: 0, inicio: '18:00', fin: '20:00', sede: 'Foro AM', tipo: 'escena', artista: 'Comité organizador', registro: 'https://tally.so/r/ejemplo1' },
+  { titulo: 'Muestra: archivo abierto', dia: 0, inicio: '12:00', fin: '20:00', sede: 'No Museo', tipo: 'muestra', artista: 'Colectivo Archivo Vivo' },
+  { titulo: 'Cuerpo y espacio', dia: 0, inicio: '19:00', fin: '21:00', sede: 'Cuerpos Parlante', tipo: 'escena', artista: 'Mariana Ruvalcaba', registro: 'https://tally.so/r/ejemplo2' },
+
+  // Viernes
+  { titulo: 'Taller de risografía', dia: 1, inicio: '10:00', fin: '13:00', sede: 'Taller Industria Grafica', tipo: 'taller', artista: 'Taller Industria Gráfica', registro: 'https://tally.so/r/ejemplo3' },
+  { titulo: 'Conceptualismo hoy', dia: 1, inicio: '12:00', fin: '13:30', sede: 'Temporal', tipo: 'charla', artista: 'Panel invitado', registro: 'https://tally.so/r/ejemplo4' },
+  { titulo: 'Muestra: archivo abierto', dia: 1, inicio: '11:00', fin: '20:00', sede: 'No Museo', tipo: 'muestra', artista: 'Colectivo Archivo Vivo' },
+  { titulo: 'Lectura de portafolios', dia: 1, inicio: '15:00', fin: '18:00', sede: 'Estudio Arrechiga', tipo: 'taller', artista: 'Andrea Sandoval', registro: 'https://tally.so/r/ejemplo5' },
+  { titulo: 'Mesa: arte y ciudad', dia: 1, inicio: '17:00', fin: '18:30', sede: 'Foro AM', tipo: 'charla', artista: 'Panel invitado', registro: 'https://tally.so/r/ejemplo6' },
+  { titulo: 'Performance nocturno', dia: 1, inicio: '20:30', fin: '22:00', sede: 'Cuerpos Parlante', tipo: 'escena', artista: 'Kali Zurita' },
+
+  // Sábado
+  { titulo: 'Recorrido por el centro', dia: 2, inicio: '11:00', fin: '14:00', sede: 'No Museo', tipo: 'muestra', artista: 'Guía del festival', registro: 'https://tally.so/r/ejemplo7' },
+  { titulo: 'Escritura sobre obra', dia: 2, inicio: '10:30', fin: '12:30', sede: 'Estudio Arrechiga', tipo: 'taller', artista: 'Ximena Prado', registro: 'https://tally.so/r/ejemplo8' },
+  { titulo: 'Grabado expandido', dia: 2, inicio: '13:00', fin: '16:00', sede: 'Taller Industria Grafica', tipo: 'taller', artista: 'Rubén Ortega', registro: 'https://tally.so/r/ejemplo9' },
+  { titulo: 'Charla: qué pone en discusión', dia: 2, inicio: '16:30', fin: '18:00', sede: 'Temporal', tipo: 'charla', artista: 'Panel invitado', registro: 'https://tally.so/r/ejemplo10' },
+  { titulo: 'Proyección al aire libre', dia: 2, inicio: '20:30', fin: '22:30', sede: 'Casa Dos Guayabos', tipo: 'escena', artista: 'Cine Errante' },
+
+  // Domingo
+  { titulo: 'Muestra: archivo abierto', dia: 3, inicio: '11:00', fin: '17:00', sede: 'No Museo', tipo: 'muestra', artista: 'Colectivo Archivo Vivo' },
+  { titulo: 'Taller para público infantil', dia: 3, inicio: '11:30', fin: '13:00', sede: 'Casa Feria', tipo: 'taller', artista: 'Casa Feria', registro: 'https://tally.so/r/ejemplo11' },
+  { titulo: 'Conversatorio de cierre', dia: 3, inicio: '16:00', fin: '17:30', sede: 'Foro AM', tipo: 'charla', artista: 'Comité organizador', registro: 'https://tally.so/r/ejemplo12' },
+  { titulo: 'Clausura', dia: 3, inicio: '19:00', fin: '22:00', sede: 'Casa Feria', tipo: 'escena', artista: 'Todas las sedes' },
+];

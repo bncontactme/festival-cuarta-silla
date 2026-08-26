@@ -5,6 +5,7 @@ import Marquee from '../components/Marquee.astro';
 import Silla from '../components/Silla.astro';
 import Mosaico from '../components/Mosaico.astro';
 import Portada from '../components/movil/Portada.astro';
+import Gantt from '../components/Gantt.astro';
 import {
   festival,
   manifiesto,
@@ -316,7 +317,7 @@ const cuenta = [
 
   <!-- ══ SEDES ══════════════════════════════════════════════════════════ -->
   <section class="border-b-2 border-amarillo bg-pizarra text-hueso">
-    <div class="px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
+    <div class="px-4 pt-12 pb-20 sm:px-6 lg:px-10 lg:pt-16 lg:pb-28">
       <div
         class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-hueso/25 pb-8"
       >
@@ -475,24 +476,44 @@ const cuenta = [
 
   <!-- ══ PROGRAMA (adelanto) ════════════════════════════════════════════ -->
   <section class="border-b-2 border-tinta bg-amarillo">
-    <div class="px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
+    <div class="px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
       <p class="meta mb-8 flex items-center gap-4 text-rojo" data-reveal="lado">
         <span class="inline-block h-[2px] w-12 bg-rojo"></span>
         03 / {programa.titulo}
       </p>
 
-      <div
-        class="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end"
+      {/* El titular, a lo ancho y fuera del grid. Metido en la columna
+          izquierda dejaba el mini colgando por debajo y la lista de días
+          arrancando a media altura: dos bloques desalineados con un socavón en
+          medio. Fuera, las dos columnas empiezan a la misma línea. */}
+      <h2
+        class="display mb-12 text-[15vw] leading-[0.95] text-tinta lg:mb-14 lg:text-[9vw]"
+        data-reveal="arriba"
       >
-        <h2
-          class="display text-[15vw] leading-[0.95] text-tinta lg:text-[9vw]"
-          data-reveal="arriba"
-        >
-          {programa.titulo}
-          <span class="block text-rojo">{programa.estado}</span>
-        </h2>
+        {programa.titulo}
+      </h2>
+
+      <div class="grid gap-10 lg:grid-cols-[1.35fr_1fr] lg:items-start lg:gap-14">
+        <div>
+        {/* El mini: la silueta de los cuatro días, sin texto en las barras.
+            No es para leer qué hay —eso está a la derecha y en el programa—,
+            es para ver de un golpe cómo se reparte la semana. Vive en esta
+            columna y no a lo ancho de la sección: abajo empieza la cinta de
+            patrocinios y una rejilla a sangre entre las dos no es un resumen,
+            es otra sección. */}
+        <div data-reveal="arriba" data-retraso="120">
+          {/* El rótulo del día vive dentro del bloque de tinta, así que aquí
+              sólo queda el de la sección. */}
+          <p class="meta mb-4 text-tinta/45">Hoy en el festival</p>
+          <Gantt agrupar="sede" resumen mini />
+        </div>
+        </div>
 
         <div data-reveal="arriba">
+          {/* El mismo rótulo que lleva el mini a la izquierda. No es adorno:
+              sin él la lista arranca 34 px más arriba que la rejilla y los dos
+              bloques de la sección no casan por ningún lado. */}
+          <p class="meta mb-4 text-tinta/45">Los cuatro días</p>
           <ul class="mb-8 divide-y-2 divide-tinta border-y-2 border-tinta">
             {
               programa.dias.map((d) => (
@@ -508,6 +529,7 @@ const cuenta = [
           <a href={conBase("/programa")} class="boton">Ver el programa</a>
         </div>
       </div>
+
     </div>
   </section>
 
@@ -541,7 +563,7 @@ const cuenta = [
           data-dormida
           data-grupo="patrocinadores"
         >
-          <div class="cinta-cabecera px-4 pt-20 pb-10 sm:px-6 lg:px-10">
+          <div class="cinta-cabecera px-4 pt-12 pb-10 sm:px-6 lg:px-10 lg:pt-16">
             <p class="meta cinta-acento mb-8 flex items-center gap-4">
               <span class="inline-block h-[2px] w-12 bg-current" />
               <span data-rotulo>04 / {patrocinadores.titulo}</span>
