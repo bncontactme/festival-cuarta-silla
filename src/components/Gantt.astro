@@ -28,6 +28,12 @@ interface Props {
   /** Versión de bolsillo: un solo día —el que toca hoy—, barras finas y sin
    *  texto, y una hora de cada tres. Cabe dentro de una columna. */
   mini?: boolean;
+  /** Selector CSS de una lista de días que vive FUERA del componente y hace
+   *  de pestañas. La portada lo usa: la lista de los cuatro días de la
+   *  derecha manda sobre la rejilla de la izquierda. Sin esto había dos
+   *  mandos para lo mismo —el rótulo del mini decía un día y la lista de al
+   *  lado los cuatro, sin que uno supiera del otro—. */
+  selector?: string;
   class?: string;
 }
 
@@ -35,6 +41,7 @@ const {
   agrupar = 'sede',
   resumen = false,
   mini = false,
+  selector,
   class: clase = '',
 } = Astro.props;
 
@@ -129,6 +136,7 @@ const paneles =
           fecha: d.fecha,
           iso: fechaISO(i),
           total: delDia.length,
+          sedes: lineas.length,
           lineas,
           filas: siguienteFila - 2,
         };
@@ -147,6 +155,7 @@ const paneles =
             fecha: '',
             iso: '',
             total: actividades.length,
+            sedes: lineas.length,
             lineas,
             filas: siguienteFila - 2,
           },
@@ -154,30 +163,40 @@ const paneles =
       })();
 ---
 
-<div class={`gantt-marco ${mini ? 'gantt-marco--mini' : ''} ${clase}`} data-gantt>
+<div
+  class={`gantt-marco ${mini ? 'gantt-marco--mini ficha' : ''} ${clase}`}
+  data-gantt
+  data-selector={selector}
+>
+  {/* El rótulo del mini es una línea de Courier y nada más: qué día se está
+      enseñando y cuánto tiene. Antes era una cabecera de tinta a sangre que
+      repetía el nombre del día que la lista de al lado ya decía. */}
   {
     mini && (
       <p class="gantt-rotulo">
-        <span data-rotulo-dia>{paneles[0].titulo}</span>
-        <span class="gantt-rotulo-fecha" data-rotulo-fecha>
-          {paneles[0].fecha}
+        <span data-rotulo-dia>
+          {paneles[0].titulo} {paneles[0].fecha}
+        </span>
+        <span class="gantt-rotulo-nota" data-rotulo-nota>
+          {paneles[0].total} actividades · {paneles[0].sedes} sedes
         </span>
       </p>
     )
   }
 
   {
-    agrupar === 'sede' && !mini && (
-      <div class="gantt-dias" data-selector-dia>
+    agrupar === 'sede' && !mini && !selector && (
+      <div class="conmutador conmutador--dias gantt-dias" data-selector-dia>
+        <span class="conmutador-burbuja" aria-hidden="true" />
         {paneles.map((p, i) => (
           <button
             type="button"
-            class="gantt-tab"
+            class="conmutador-opcion"
             data-dia={i}
             aria-pressed={i === 0 ? 'true' : 'false'}
           >
-            <span class="gantt-tab-dia">{p.titulo}</span>
-            <span class="gantt-tab-nota">
+            <span class="conmutador-opcion-dia">{p.titulo}</span>
+            <span class="conmutador-opcion-nota">
               {p.fecha.replace(' de septiembre', '')} / {p.total}
             </span>
           </button>
@@ -198,6 +217,8 @@ const paneles =
           data-fecha={panel.iso}
           data-nombre={panel.titulo}
           data-dia-fecha={panel.fecha}
+          data-total={panel.total}
+          data-sedes={panel.sedes}
           hidden={i !== 0}
         >
           {/* Guías: una celda por hora, de la cabecera al suelo. Es lo que deja
@@ -208,7 +229,9 @@ const paneles =
 
           <div class="gantt-esquina" />
           {horas.map((hora, h) => (
-            <div class="gantt-hora">{h % cadaHora === 0 ? aReloj(hora) : ''}</div>
+            <div class="gantt-hora" data-ultima={h === horas.length - 1 ? '' : undefined}>
+              {h % cadaHora === 0 ? aReloj(hora) : ''}
+            </div>
           ))}
 
           {panel.lineas.map((linea) => (
@@ -261,16 +284,34 @@ const paneles =
     }
   </div>
 
+  {/* El pie del mini. Las barras van sin texto —a esta escala no cabe—, así
+      que lo que dicen se lee aquí al pasarles por encima. Reserva su alto
+      desde el principio para que la rejilla no dé un salto al llenarse. */}
+  {
+    mini && (
+      <p class="gantt-pista" data-pista aria-hidden="true">
+        Pasa el cursor sobre una barra
+      </p>
+    )
+  }
+
+  {/* El pie: la leyenda a un lado y, al otro, lo que la página quiera poner
+      ahí —en `/programa`, el aviso de que la rejilla es un montaje—. Juntos
+      en un renglón y no apilados: son dos notas al margen, y cada una en su
+      línea eran dos párrafos de más antes de llegar al gráfico. */}
   {
     !resumen && (
-      <ul class="gantt-leyenda">
-        {Object.entries(coloresGantt).map(([tipo, color]) => (
-          <li>
-            <span class="gantt-muestra" style={`background:${color.fondo}`} aria-hidden="true" />
-            {tipo}
-          </li>
-        ))}
-      </ul>
+      <div class="gantt-pie">
+        <ul class="gantt-leyenda">
+          {Object.entries(coloresGantt).map(([tipo, color]) => (
+            <li>
+              <span class="gantt-muestra" style={`background:${color.fondo}`} aria-hidden="true" />
+              {tipo}
+            </li>
+          ))}
+        </ul>
+        <slot name="pie" />
+      </div>
     )
   }
 </div>
@@ -329,76 +370,47 @@ const paneles =
   .gantt-marco {
     --alto-fila: 3.75rem;
     --etiqueta: 11rem;
+    /* El fondo sobre el que se apoya. Lo necesitan la columna de sedes y la
+       fila de horas, que van pegadas al arrastrar: transparentes dejarían
+       pasar las barras por debajo. */
+    --papel: var(--color-hueso);
   }
 
-  /* Rótulo del mini: qué día se está enseñando. Sin él, cuatro barras sueltas
-     sobre el amarillo no dicen de cuándo son. */
+  /* Cabecera de la tarjeta del mini: qué día se está enseñando y cuánto
+     tiene. Sin ella, unas barras sueltas no dicen de cuándo son.
+     Del mismo cuerpo que los rótulos «03 / Programa» de las secciones: es una
+     anotación, no un titular; el titular de la sección está justo encima y
+     dos titulares seguidos no se leen. */
   .gantt-rotulo {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 1rem;
-    padding-bottom: 0.6rem;
+    padding-bottom: 1.35rem;
     font-family: var(--font-mono);
-    font-size: 1.05rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    line-height: 1;
-  }
-  .gantt-rotulo-fecha {
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
     letter-spacing: 0.14em;
-    opacity: 0.45;
+    line-height: 1.4;
     text-transform: uppercase;
+  }
+  .gantt-rotulo-nota {
+    font-weight: 400;
+    color: color-mix(in srgb, var(--color-tinta) 45%, transparent);
   }
 
-  /* ── Pestañas de día ───────────────────────────────────────────────── */
+  /* Las pestañas de día son el conmutador de burbuja de `global.css`; aquí
+     sólo queda separarlas de la rejilla que mandan. */
   .gantt-dias {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
-  }
-  .gantt-tab {
-    border: 2px solid var(--color-tinta);
-    background-color: transparent;
-    padding: 0.6rem 1.1rem;
-    text-align: left;
-    transition:
-      background-color 0.2s var(--ease-salida),
-      color 0.2s var(--ease-salida),
-      box-shadow 0.2s var(--ease-salida);
-  }
-  .gantt-tab:hover {
-    box-shadow: 4px 4px 0 var(--color-tinta);
-  }
-  .gantt-tab[aria-pressed='true'] {
-    background-color: var(--color-tinta);
-    color: var(--color-amarillo);
-    box-shadow: 4px 4px 0 var(--color-rojo);
-  }
-  .gantt-tab-dia {
-    display: block;
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    line-height: 1;
-    text-transform: uppercase;
-  }
-  .gantt-tab-nota {
-    display: block;
-    margin-top: 0.25rem;
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    opacity: 0.55;
-    text-transform: uppercase;
+    margin-bottom: 1.5rem;
   }
 
   /* ── Rejilla ───────────────────────────────────────────────────────── */
+  /* Sin caja propia: en `/programa` la rejilla vive dentro de una ficha —canto
+     de 2 px, sombra dura, papel hueso— y una caja dentro de otra caja es
+     ruido; en la portada, dentro de la ficha del mini. */
   .gantt-scroll {
     overflow-x: auto;
-    border: 2px solid var(--color-tinta);
-    background-color: var(--color-hueso);
   }
   .gantt {
     display: grid;
@@ -420,8 +432,10 @@ const paneles =
     min-width: 0;
   }
 
-  /* Cabecera: amarilla y no negra. La negra pesaba tanto que la rejilla
-     parecía una terminal; en amarillo la fila de horas es un rótulo más. */
+  /* La cabecera de horas no es una banda: es el eje X de la gráfica, y por eso
+     lo que la cierra por debajo es un filete rojo —el mismo de 2 px que abre
+     cada rótulo de sección del sitio— y no una regla de tinta. Antes era una
+     banda negra que hacía parecer la rejilla una terminal. */
   .gantt-esquina,
   .gantt-hora {
     /* Fila 1 a mano: en cuanto las barras traen su `grid-row` calculado, el
@@ -431,14 +445,18 @@ const paneles =
     position: sticky;
     top: 0;
     z-index: 3;
-    border-bottom: 2px solid var(--color-tinta);
-    background-color: var(--color-hueso);
+    background-color: var(--papel);
     align-self: stretch;
   }
+  .gantt-hora {
+    border-bottom: 2px solid var(--color-rojo);
+  }
+  /* Eje Y. Va sin el filete de abajo para que los dos se encuentren en ángulo
+     y el eje X no asome por la izquierda del vertical. */
   .gantt-esquina {
     left: 0;
     z-index: 4;
-    border-right: 2px solid var(--color-tinta);
+    border-right: 2px solid var(--color-rojo);
   }
   .gantt-hora {
     grid-row: 1;
@@ -453,7 +471,14 @@ const paneles =
   }
 
   /* La etiqueta se queda pegada al arrastrar: una barra a las diez de la noche
-     sin saber de qué sede es no dice nada. */
+     sin saber de qué sede es no dice nada.
+     Su filete derecho es el eje Y, continuado hacia abajo fila a fila. Y no
+     lleva ninguno horizontal: ninguna línea separa las sedes, que es lo que
+     distingue una gráfica de una hoja de cálculo. Lo que separa las filas son
+     las propias barras.
+     Los nombres se apoyan contra el eje por la derecha, como las etiquetas de
+     cualquier gráfica, en vez de arrancar todos de un margen izquierdo, que
+     es lo que hacen las listas. */
   .gantt-etiqueta {
     position: sticky;
     left: 0;
@@ -462,11 +487,12 @@ const paneles =
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: flex-end;
     min-height: var(--alto-fila);
-    border-right: 2px solid var(--color-tinta);
-    border-bottom: 1px solid color-mix(in srgb, var(--color-tinta) 12%, transparent);
-    background-color: var(--color-hueso);
-    padding: 0.5rem 0.9rem;
+    border-right: 2px solid var(--color-rojo);
+    background-color: var(--papel);
+    padding: 0.5rem 0.9rem 0.5rem 0;
+    text-align: right;
     align-self: stretch;
   }
   .gantt-etiqueta-nombre {
@@ -496,7 +522,7 @@ const paneles =
   .gantt-guia {
     grid-row: 2 / -1;
     z-index: 0;
-    border-left: 1px solid color-mix(in srgb, var(--color-tinta) 10%, transparent);
+    border-left: 1px solid color-mix(in srgb, var(--color-tinta) 16%, transparent);
     pointer-events: none;
   }
 
@@ -551,12 +577,19 @@ const paneles =
     white-space: nowrap;
   }
 
-  /* ── Leyenda ───────────────────────────────────────────────────────── */
+  /* ── Pie: leyenda y notas ──────────────────────────────────────────── */
+  .gantt-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 2rem;
+    margin-top: 1.35rem;
+  }
   .gantt-leyenda {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem 1.5rem;
-    margin-top: 1rem;
   }
   .gantt-leyenda li {
     display: flex;
@@ -711,93 +744,141 @@ const paneles =
   }
 
   /* ── Mini ──────────────────────────────────────────────────────────── */
-  /* Un bloque de tinta a sangre, como la franja de la cuenta regresiva del
-     hero. Es la tercera versión y las dos anteriores fallaban por lo mismo,
-     por los dos lados opuestos: encerrado en su caja hueso parecía un panel
-     de control pegado con cinta, y vestido con los filetes y el Courier de la
-     lista de días acababa siendo su hermano gemelo, dos bloques calcados uno
-     al lado del otro compitiendo por lo mismo.
-     En negativo no se parece a nada de la sección y sigue siendo de la casa:
-     la portada ya se apoya en bandas de tinta, y sobre ellas el amarillo pega
-     como en ningún otro sitio. */
+  /* Quinta versión. Las cuatro anteriores, en orden: caja hueso sin aire
+     —un panel de control pegado con cinta—; filetes y Courier de la lista de
+     días —el hermano gemelo del bloque de al lado—; bloque de tinta a sangre
+     —un agujero negro en mitad del amarillo—; y un gráfico sin caja, con los
+     ejes tocando los cantos de la columna, que era la primera con la forma
+     correcta y ni un milímetro de margen: un dibujo suelto en la página, sin
+     nada que dijera dónde empieza y dónde acaba.
+
+     Ésta es la de antes metida en una tarjeta de la casa: canto de 2 px,
+     sombra dura de 6 px —la misma de los botones— y papel hueso, con
+     1.5 rem de aire por los cuatro lados. Dentro, el mismo gráfico: dos ejes
+     rojos en L —el vertical entre los nombres y el tiempo, el horizontal bajo
+     el reloj—, las verticales de las horas a un pelo de tinta y las barras
+     macizas. Ninguna línea horizontal separa las sedes: esto no es una tabla.
+
+     El papel hueso es lo que termina de separarla de la lista de días, que
+     vive directamente sobre el amarillo de la sección. Un panel y una lista
+     no se confunden aunque estén uno al lado del otro. */
   .gantt-marco--mini {
-    --alto-fila: 2.4rem;
-    --etiqueta: 9rem;
-  }
-  .gantt-marco--mini .gantt-scroll {
-    border: 2px solid var(--color-tinta);
-    background-color: var(--color-tinta);
-    color: var(--color-hueso);
+    --alto-fila: 2rem;
+    --etiqueta: 7.5rem;
   }
 
-  /* El rótulo se sube al bloque: es su cabecera, no un pie de foto encima. */
-  .gantt-marco--mini .gantt-rotulo {
-    margin: 0;
-    border: 2px solid var(--color-tinta);
-    border-bottom: 0;
-    background-color: var(--color-tinta);
-    padding: 0.8rem 1rem;
-    color: var(--color-amarillo);
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-    letter-spacing: -0.01em;
-    text-transform: uppercase;
-  }
-  .gantt-marco--mini .gantt-rotulo-fecha {
-    color: var(--color-hueso);
-    opacity: 0.5;
+  /* La media hora, mucho más estrecha que en la rejilla grande: aquí no hay
+     texto dentro de las barras que sostener. Con el mínimo de la grande
+     —1.75rem— la columna reclamaba 870 px de ancho mínimo, más que la parte
+     que le toca del grid de la sección, y se llevaba por delante el reparto:
+     la lista de la derecha se quedaba en un tercio de lo suyo.
+     El mínimo va holgado a propósito. Ajustado al ancho real de la columna en
+     una ventana de 1024 —la más angosta en que se ve este sitio— la rejilla
+     quedaba justo en su ancho mínimo y desbordaba por dos píxeles de redondeo:
+     nada que se vea, pero bastante para que Windows pinte una barra de
+     desplazamiento horizontal debajo. Como las columnas son `1fr`, sobra
+     ancho o no lo reparten igual: el mínimo sólo decide cuándo se rinden.
+
+     El `min-width: 0` de las horas va en el mismo paquete y por lo mismo: un
+     rótulo de reloj mide 33 px y, sin él, cada una de las cinco horas que se
+     rotulan reclamaba para sus dos columnas más de lo que valen. El rótulo
+     puede pisar el hueco de la derecha —está vacío, sólo se rotula una hora
+     de cada tres—; lo que no puede es decidir el ancho de la rejilla. */
+  .gantt-marco--mini .gantt {
+    grid-template-columns: var(--etiqueta) repeat(var(--columnas), minmax(0.6rem, 1fr));
   }
 
-  .gantt-marco--mini .gantt-esquina,
+  /* Sueltas del pegado y sin fondo. En el mini sólo se rotula una hora de cada
+     tres, y un rótulo de reloj es más ancho que sus dos columnas: se sale por
+     la derecha, sobre el hueco de la hora muda. Con fondo, la celda de al
+     lado —que se pinta después— le comía el último dígito y el reloj marcaba
+     «22:0». Nada scrollea por debajo de esta fila, así que el fondo no hacía
+     falta para nada más. */
   .gantt-marco--mini .gantt-hora {
-    border-bottom: 1px solid color-mix(in srgb, var(--color-hueso) 20%, transparent);
-    background-color: var(--color-tinta);
-  }
-  .gantt-marco--mini .gantt-esquina {
-    border-right: 0;
-  }
-  .gantt-marco--mini .gantt-hora {
-    padding: 0.5rem 0 0.5rem 0.4rem;
+    position: static;
+    min-width: 0;
+    border-bottom: 2px solid var(--color-rojo);
+    background-color: transparent;
+    padding: 0.15rem 0 0.55rem 0.4rem;
     font-size: 0.55rem;
     letter-spacing: 0.1em;
-    color: color-mix(in srgb, var(--color-hueso) 45%, transparent);
+    color: color-mix(in srgb, var(--color-tinta) 50%, transparent);
   }
-
-  .gantt-marco--mini .gantt-fila {
-    border-top: 1px solid color-mix(in srgb, var(--color-hueso) 12%, transparent);
-  }
-  .gantt-marco--mini .gantt-guia {
-    border-left: 1px solid color-mix(in srgb, var(--color-hueso) 10%, transparent);
+  /* La última no tiene hueco a la derecha por el que salirse: se sale de la
+     rejilla entera y le abre una barra de desplazamiento de nueve píxeles.
+     Pegada al canto queda además casi a plomo con su línea, porque el rótulo
+     mide más que la celda. */
+  .gantt-marco--mini .gantt-hora[data-ultima] {
+    justify-content: flex-end;
+    padding-right: 0.1rem;
+    padding-left: 0;
   }
 
   .gantt-marco--mini .gantt-etiqueta {
-    border-right: 0;
-    background-color: var(--color-tinta);
-    padding: 0.35rem 0.9rem;
+    padding: 0.25rem 0.65rem 0.25rem 0;
   }
+  /* En Courier y no en la display: a este cuerpo la condensada se apelmaza, y
+     además la display aquí competía con los nombres de los días de la lista
+     de al lado, que sí son titulares. */
   .gantt-marco--mini .gantt-etiqueta-nombre {
-    font-size: 0.85rem;
-    color: var(--color-hueso);
+    overflow: visible;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.2;
+    /* Partido en dos líneas antes que cortado con puntos suspensivos: media
+       columna de «TALLER INDUSTRI…» y «ESTUDIO ARRECHI…» no son nombres de
+       sede, son un error de maquetación. */
+    white-space: normal;
+    color: color-mix(in srgb, var(--color-tinta) 70%, transparent);
   }
   .gantt-marco--mini .gantt-etiqueta-nota {
     display: none;
   }
 
-  /* Amarillo macizo y sin filete de tipo: aquí no hay leyenda, así que el
-     color no significaba nada para quien mira. Lo que importa es dónde caen
-     los bultos en el día, y eso se lee mejor con una sola tinta. */
+  /* Tinta maciza sobre el hueso y sin filete de tipo: aquí no hay leyenda,
+     así que el color no significaba nada para quien mira. Lo que importa es
+     dónde caen los bultos en el día, y eso se lee mejor con una sola tinta.
+     El rojo queda para los ejes y para lo único que cambia de estado: la
+     barra que se está señalando. */
   .gantt-marco--mini .gantt-barra {
-    min-height: 1.1rem;
-    margin: 0.4rem 2px;
+    min-height: 0.9rem;
+    margin: 0 3px 0 0;
     border: 0;
-    background-color: var(--color-amarillo);
+    background-color: var(--color-tinta);
+    padding: 0;
   }
-  .gantt-marco--mini .gantt-barra:hover {
+  .gantt-marco--mini .gantt-barra:hover,
+  .gantt-marco--mini .gantt-barra:focus-visible,
+  .gantt-marco--mini .gantt-barra[data-mirada] {
     background-color: var(--color-rojo);
   }
   .gantt-marco--mini .gantt-barra-titulo,
   .gantt-marco--mini .gantt-barra-hora {
     display: none;
+  }
+
+  /* El pie que dice qué es la barra señalada. Alto reservado y una sola
+     línea: si creciera al llenarse, media portada daría un salto cada vez que
+     el cursor cruza la rejilla. */
+  .gantt-pista {
+    overflow: hidden;
+    min-height: 1.1rem;
+    margin-top: 1.1rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-tinta) 20%, transparent);
+    padding-top: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.09em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--color-tinta) 45%, transparent);
+    transition: color 0.18s var(--ease-salida);
+  }
+  .gantt-pista[data-lleno] {
+    color: var(--color-tinta);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -814,40 +895,117 @@ const paneles =
    * se rellena la ficha y se la coloca al lado de la barra que la abrió.
    */
   for (const marco of document.querySelectorAll<HTMLElement>('[data-gantt]')) {
-    const selector = marco.querySelector('[data-selector-dia]');
+    const esMini = marco.classList.contains('gantt-marco--mini');
+    /* Las pestañas propias del componente o, si se le pasó un selector, una
+       lista que vive fuera. La portada usa lo segundo: los cuatro días de la
+       columna de la derecha son el mando de esta rejilla. */
+    const selector =
+      marco.querySelector('[data-selector-dia]') ??
+      (marco.dataset.selector
+        ? document.querySelector(marco.dataset.selector)
+        : null);
     const paneles = marco.querySelectorAll<HTMLElement>('[data-panel]');
+
+    // El nombre, la fecha y las cuentas viajan en el propio panel: el script
+    // de un componente Astro es un módulo aparte y no ve el frontmatter.
+    const rotuloDia = marco.querySelector('[data-rotulo-dia]');
+    const rotuloNota = marco.querySelector('[data-rotulo-nota]');
+
+    function pintarRotulo(panel: HTMLElement) {
+      if (rotuloDia) {
+        rotuloDia.textContent =
+          `${panel.dataset.nombre ?? ''} ${panel.dataset.diaFecha ?? ''}`.trim();
+      }
+      if (rotuloNota) {
+        const actos = Number(panel.dataset.total ?? 0);
+        const sedes = Number(panel.dataset.sedes ?? 0);
+        rotuloNota.textContent =
+          `${actos} ${actos === 1 ? 'actividad' : 'actividades'} · ` +
+          `${sedes} ${sedes === 1 ? 'sede' : 'sedes'}`;
+      }
+    }
+
+    function marcarSelector(clave: string | undefined) {
+      if (!selector) return;
+      const botones = [...selector.querySelectorAll<HTMLElement>('[data-dia]')];
+      for (const otro of botones) {
+        otro.setAttribute('aria-pressed', String(otro.dataset.dia === clave));
+      }
+      // Y dónde se para la burbuja, cuando el mando es un conmutador. En la
+      // lista de días de la portada la variable no la lee nadie y no molesta.
+      const puesto = botones.findIndex((b) => b.dataset.dia === clave);
+      if (puesto >= 0) {
+        (selector as HTMLElement).style?.setProperty('--activa', String(puesto));
+      }
+    }
 
     /* El mini enseña un día y punto: el de hoy, si el festival está en marcha,
        y si no el primero. Se decide aquí y no en el build porque el sitio es
        estático: la página se genera una vez y se sirve durante meses, así que
        «hoy» sólo lo sabe el navegador de quien entra. */
-    if (marco.classList.contains('gantt-marco--mini') && paneles.length > 1) {
+    if (esMini && paneles.length > 1) {
       const ahora = new Date();
       const hoy = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
-      const elegido =
-        [...paneles].find((p) => p.dataset.fecha === hoy) ?? paneles[0];
+      const enCurso = [...paneles].find((p) => p.dataset.fecha === hoy);
+      const elegido = enCurso ?? paneles[0];
 
       for (const panel of paneles) panel.hidden = panel !== elegido;
+      pintarRotulo(elegido);
+      marcarSelector(elegido.dataset.panel);
 
-      // El nombre y la fecha viajan en el propio panel: el script de un
-      // componente Astro es un módulo aparte y no ve el frontmatter.
-      const dia = marco.querySelector('[data-rotulo-dia]');
-      const fecha = marco.querySelector('[data-rotulo-fecha]');
-      if (dia) dia.textContent = elegido.dataset.nombre ?? '';
-      if (fecha) fecha.textContent = elegido.dataset.diaFecha ?? '';
+      // Que la lista diga por qué arranca en ese día y no en el primero.
+      if (enCurso) {
+        selector
+          ?.querySelector(`[data-dia="${enCurso.dataset.panel}"]`)
+          ?.setAttribute('data-hoy', '');
+      }
     }
 
     selector?.addEventListener('click', (e) => {
       const boton = (e.target as HTMLElement).closest<HTMLElement>('[data-dia]');
-      if (!boton) return;
-      for (const otro of selector.querySelectorAll('[data-dia]')) {
-        otro.setAttribute('aria-pressed', String(otro === boton));
-      }
+      if (!boton || !selector.contains(boton)) return;
+      marcarSelector(boton.dataset.dia);
       for (const panel of paneles) {
         panel.hidden = panel.dataset.panel !== boton.dataset.dia;
+        if (!panel.hidden) pintarRotulo(panel);
       }
+      ponPista(null);
       cerrar();
     });
+
+    /* El pie del mini. Las barras van sin texto, así que lo que dicen se lee
+       abajo al señalarlas —con el ratón o con el tabulador—. `data-cuando`
+       trae «Jueves 24 de septiembre · 10:00–13:00»; aquí sólo hace falta el
+       tramo de horas, porque el día ya está en el rótulo de arriba. */
+    const pista = marco.querySelector<HTMLElement>('[data-pista]');
+    const pistaEnReposo = pista?.textContent ?? '';
+    let mirada: HTMLElement | null = null;
+
+    function ponPista(barra: HTMLElement | null) {
+      if (!pista) return;
+      mirada?.removeAttribute('data-mirada');
+      mirada = barra;
+      if (!barra) {
+        pista.textContent = pistaEnReposo;
+        delete pista.dataset.lleno;
+        return;
+      }
+      barra.setAttribute('data-mirada', '');
+      const horas = barra.dataset.cuando?.split('·').pop()?.trim() ?? '';
+      pista.textContent = [horas, barra.dataset.titulo, barra.dataset.sede]
+        .filter(Boolean)
+        .join(' · ');
+      pista.dataset.lleno = '';
+    }
+
+    if (esMini) {
+      const señalar = (e: Event) =>
+        ponPista((e.target as HTMLElement).closest<HTMLElement>('[data-barra]'));
+      marco.addEventListener('pointerover', señalar);
+      marco.addEventListener('focusin', señalar);
+      marco.addEventListener('pointerleave', () => ponPista(null));
+      marco.addEventListener('focusout', () => ponPista(null));
+    }
 
     const ficha = document.querySelector<HTMLElement>('[data-ficha]');
     let abierta: HTMLElement | null = null;

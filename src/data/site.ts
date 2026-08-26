@@ -300,8 +300,9 @@ export const coloresGantt = {
 } as const;
 
 export const ganttEsEjemplo = true;
-export const ganttAviso =
-  'Rejilla de ejemplo — las actividades que se ven abajo son un montaje para probar la vista, no la programación del festival.';
+/** Versión de un renglón, que es la que va al pie de la rejilla. La larga
+ *  ocupaba una banda entera arriba de todo, antes de que se viera nada. */
+export const ganttAviso = 'Rejilla de ejemplo — todavía no es la programación';
 
 export const actividades: ActividadGantt[] = [
   // Jueves

@@ -475,61 +475,93 @@ const cuenta = [
   </section>
 
   <!-- ══ PROGRAMA (adelanto) ════════════════════════════════════════════ -->
+  {/* La misma cabecera que Sedes: rótulo, titular y puerta apoyados en un
+      filete de 2 px. Antes el titular iba a 9vw —el mayor de la página
+      después del hero, para una sección de adelanto— y el botón colgaba al
+      pie de la columna derecha. Entre las dos cosas esto era un cartel
+      enorme con dos cajitas flotando en un charco de amarillo. */}
   <section class="border-b-2 border-tinta bg-amarillo">
     <div class="px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
-      <p class="meta mb-8 flex items-center gap-4 text-rojo" data-reveal="lado">
-        <span class="inline-block h-[2px] w-12 bg-rojo"></span>
-        03 / {programa.titulo}
-      </p>
-
-      {/* El titular, a lo ancho y fuera del grid. Metido en la columna
-          izquierda dejaba el mini colgando por debajo y la lista de días
-          arrancando a media altura: dos bloques desalineados con un socavón en
-          medio. Fuera, las dos columnas empiezan a la misma línea. */}
-      <h2
-        class="display mb-12 text-[15vw] leading-[0.95] text-tinta lg:mb-14 lg:text-[9vw]"
-        data-reveal="arriba"
+      <div
+        class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8"
       >
-        {programa.titulo}
-      </h2>
-
-      <div class="grid gap-10 lg:grid-cols-[1.35fr_1fr] lg:items-start lg:gap-14">
         <div>
-        {/* El mini: la silueta de los cuatro días, sin texto en las barras.
-            No es para leer qué hay —eso está a la derecha y en el programa—,
-            es para ver de un golpe cómo se reparte la semana. Vive en esta
-            columna y no a lo ancho de la sección: abajo empieza la cinta de
-            patrocinios y una rejilla a sangre entre las dos no es un resumen,
-            es otra sección. */}
-        <div data-reveal="arriba" data-retraso="120">
-          {/* El rótulo del día vive dentro del bloque de tinta, así que aquí
-              sólo queda el de la sección. */}
-          <p class="meta mb-4 text-tinta/45">Hoy en el festival</p>
-          <Gantt agrupar="sede" resumen mini />
+          <p
+            class="meta mb-6 flex items-center gap-4 text-rojo"
+            data-reveal="lado"
+          >
+            <span class="inline-block h-[2px] w-12 bg-rojo"></span>
+            03 / {programa.titulo}
+          </p>
+          <h2
+            class="display text-[13vw] leading-[0.82] text-tinta lg:text-[8vw]"
+            data-lineas
+            data-reveal="lineas"
+          >
+            {programa.titulo}
+          </h2>
         </div>
+        <a href={conBase("/programa")} class="boton" data-reveal="arriba">
+          Ver el programa
+        </a>
+      </div>
+
+      {/* Un solo instrumento partido en dos mitades: la lista de la derecha
+          manda y la rejilla de la izquierda enseña. Antes eran dos bloques
+          que hablaban de lo mismo sin mirarse —el día salía escrito dos
+          veces, una en la cabecera del mini y otra en la lista— y ninguno de
+          los dos se podía tocar. */}
+      <div
+        class="mt-10 grid gap-10 lg:mt-12 lg:grid-cols-[1.35fr_1fr] lg:items-start lg:gap-14"
+      >
+        {/* El mini: la silueta del día, sin texto en las barras. No es para
+            leer qué hay —eso está a la derecha y en el programa—, es para ver
+            de un golpe cómo se reparte la jornada entre las sedes. */}
+        <div data-reveal="arriba" data-retraso="120">
+          <Gantt agrupar="sede" resumen mini selector="[data-dias-portada]" />
         </div>
 
+        {/* Sin rótulo de columna: la tarjeta de la izquierda ya lleva el suyo
+            dentro y aquí sobra: cuatro días con su fecha, bajo un titular que
+            dice «Programa», no necesitan que nadie los presente. Sin él,
+            además, el canto de arriba de la lista arranca exactamente en el
+            canto de arriba de la tarjeta. */}
         <div data-reveal="arriba">
-          {/* El mismo rótulo que lleva el mini a la izquierda. No es adorno:
-              sin él la lista arranca 34 px más arriba que la rejilla y los dos
-              bloques de la sección no casan por ningún lado. */}
-          <p class="meta mb-4 text-tinta/45">Los cuatro días</p>
-          <ul class="mb-8 divide-y-2 divide-tinta border-y-2 border-tinta">
+          <ul class="border-y-2 border-tinta" data-dias-portada>
             {
-              programa.dias.map((d) => (
-                <li class="flex items-baseline justify-between gap-4 py-3">
-                  <span class="font-mono text-base font-bold sm:text-lg">
-                    {d.dia}
-                  </span>
-                  <span class="meta text-tinta/60">{d.fecha}</span>
+              programa.dias.map((d, i) => (
+                <li class="border-b border-tinta/15 last:border-b-0">
+                  {/* La fila entera cambia el día de la rejilla: el objetivo
+                      es la franja, no dos palabras. */}
+                  <button
+                    type="button"
+                    class="dia-portada flex w-full items-baseline gap-x-4 py-4 text-left"
+                    data-dia={i}
+                    aria-pressed={i === 0 ? 'true' : 'false'}
+                  >
+                    <span class="meta dia-num w-7 shrink-0 text-tinta/35 transition-colors duration-200">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span class="display dia-nombre flex-1 text-2xl leading-none transition-colors duration-200">
+                      {d.dia}
+                    </span>
+                    {/* Filete de 1 px y sin relleno vertical: con el de 2 px
+                        del resto del sitio la etiqueta medía más que el
+                        nombre del día y la fila crecía tres píxeles respecto
+                        a las otras tres. */}
+                    <span class="meta dia-hoy shrink-0 border border-rojo px-1.5 text-[0.55rem] leading-[1.7] text-rojo">
+                      Hoy
+                    </span>
+                    <span class="meta shrink-0 text-tinta/40">
+                      {d.fecha.replace(' de septiembre', ' sep')}
+                    </span>
+                  </button>
                 </li>
               ))
             }
           </ul>
-          <a href={conBase("/programa")} class="boton">Ver el programa</a>
         </div>
       </div>
-
     </div>
   </section>
 

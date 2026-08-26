@@ -551,6 +551,156 @@
   color: var(--color-amarillo);
 }
 
+/* — Ficha: la tarjeta de la casa ——————————————————————————————————— */
+/* Canto de 2 px, sombra dura y papel hueso: los botones del sitio y el modal
+   ya se construyen así, y sobre el amarillo de una sección es lo que hace que
+   un bloque se lea como un objeto puesto encima y no como un dibujo suelto
+   en la página. El relleno no es decorativo: es la diferencia entre una
+   tarjeta y una caja que aprieta a su contenido contra los cantos. */
+.ficha {
+  border: 2px solid var(--color-tinta);
+  box-shadow: 6px 6px 0 var(--color-tinta);
+  background-color: var(--color-hueso);
+  color: var(--color-tinta);
+  padding: 1.5rem;
+}
+
+/* A ancho de página —no dentro de una columna— seis píxeles de sombra y
+   1.5rem de aire se quedan cortos: la ficha se ve apretada y la sombra,
+   tímida. Todo escala con el tamaño del objeto. */
+.ficha--ancha {
+  box-shadow: 8px 8px 0 var(--color-tinta);
+  padding: 1.75rem;
+}
+
+@media (width >= 80rem) {
+  .ficha {
+    padding: 1.75rem 1.9rem;
+  }
+  .ficha--ancha {
+    padding: 2rem 2.25rem;
+  }
+}
+
+/* — Conmutador: el mando de burbuja ———————————————————————————————— */
+/* Dos o cuatro opciones y una burbuja de tinta que se desliza a la elegida.
+   Sin una sola esquina redonda, que en este sitio no hay ninguna: lo que lo
+   hace un mando y no cuatro botones sueltos es el canto que los abraza, la
+   sombra dura de los botones y que la burbuja se mueva en vez de encenderse.
+
+   `grid-auto-columns: 1fr` iguala todas las celdas al ancho de la más ancha.
+   No es cosmético: es lo que deja mover la burbuja en múltiplos exactos de
+   `100 / celdas` sin medir nada en JS. El script sólo cambia `--activa`. */
+.conmutador {
+  --celdas: 2;
+  --activa: 0;
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  border: 2px solid var(--color-tinta);
+  box-shadow: 4px 4px 0 var(--color-tinta);
+  background-color: transparent;
+}
+
+.conmutador-burbuja {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(100% / var(--celdas));
+  background-color: var(--color-tinta);
+  /* El porcentaje de `translate` se mide sobre la propia burbuja, que ya vale
+     una celda: por eso un salto de celda es exactamente 100%. */
+  translate: calc(var(--activa) * 100%) 0;
+  transition: translate 0.45s var(--ease-cortina);
+  pointer-events: none;
+}
+
+.conmutador-opcion {
+  position: relative;
+  z-index: 1;
+  padding: 0.78rem 1.4rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-tinta);
+  transition: color 0.3s var(--ease-salida);
+}
+.conmutador-opcion[aria-selected='true'],
+.conmutador-opcion[aria-pressed='true'] {
+  color: var(--color-amarillo);
+}
+
+/* Cuatro días: además del nombre va la fecha y cuántas actividades tiene, en
+   una segunda línea. Es el mismo mando, con más celdas y menos relleno. */
+.conmutador--dias {
+  --celdas: 4;
+}
+.conmutador--dias .conmutador-opcion {
+  padding: 0.6rem 1.15rem;
+}
+.conmutador-opcion-dia {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+}
+.conmutador-opcion-nota {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  opacity: 0.55;
+}
+
+/* La vista que entra sube desde abajo, como las cortinas del resto del sitio.
+   En rem y no en porcentaje: un 16% de la vista de los cuatro días —que mide
+   media pantalla— sería un salto de cien píxeles. */
+.panel-vista[data-estado='entrando'] {
+  animation: vista-entra 0.5s var(--ease-salida) both;
+}
+
+@keyframes vista-entra {
+  from {
+    opacity: 0;
+    translate: 0 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .conmutador-burbuja {
+    transition: none;
+  }
+}
+
+/* — Días de la portada ————————————————————————————————————————————— */
+/* La lista de los cuatro días del adelanto del programa es el mando de la
+   rejilla que tiene al lado. El día elegido se pinta en rojo entero —número
+   y nombre—, así que el estado se lee en la fila y no en el botón; es el
+   mismo trato que reciben las sedes, que se ponen en amarillo enteras.
+   Nada de fondo ni de relleno: en una sección amarilla, con un titular de
+   cartel encima, cualquier caja más sería otro bloque compitiendo. */
+.dia-portada:hover .dia-nombre,
+.dia-portada[aria-pressed='true'] .dia-nombre,
+.dia-portada[aria-pressed='true'] .dia-num {
+  color: var(--color-rojo);
+}
+
+/* «Hoy» sólo aparece si el festival está en marcha: lo pone el script de la
+   rejilla, que es quien sabe qué día es y por qué arrancó en ése. */
+.dia-hoy {
+  display: none;
+}
+.dia-portada[data-hoy] .dia-hoy {
+  display: inline-block;
+}
+
 /* — Cinta de marcas ———————————————————————————————————————————————— */
 /* Una sección con dos caras. El cambio de grupo lo dispara el JS al cerrar la
    vuelta de la cinta; acá sólo vive el color, que va en transición para que
