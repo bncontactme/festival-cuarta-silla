@@ -3,13 +3,18 @@ import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
 import Marquee from '../components/Marquee.astro';
 import Silla from '../components/Silla.astro';
+import Mosaico from '../components/Mosaico.astro';
 import Portada from '../components/movil/Portada.astro';
+import Gantt from '../components/Gantt.astro';
 import {
   festival,
   manifiesto,
   sedes,
   patrocinadores,
+  colaboradores,
   programa,
+  enlaceMapa,
+  mapaIncrustado,
 } from '../data/site';
 
 const cuenta = [
@@ -29,17 +34,41 @@ const cuenta = [
   >
     <div class="cuadricula absolute inset-0 opacity-60" aria-hidden="true"></div>
 
-    <!-- Sillas de fondo, en deriva con el scroll -->
-    <Silla
-      variante="roja"
-      deriva
-      class="absolute top-16 right-2 w-36 rotate-6 opacity-25 sm:top-20 sm:right-4 sm:w-56 lg:top-20 lg:right-10 lg:w-72"
-    />
-    <Silla
-      variante="roja"
-      deriva
-      class="absolute -bottom-16 -left-12 w-32 -rotate-12 opacity-20 sm:w-52 lg:w-64"
-    />
+    <!-- Sillas de fondo, en capas: `.flotador` es el ÁREA por la que puede
+         pasear —para la de la derecha, la mitad derecha del hero: el límite
+         es donde termina el titular—; `.sigue` es la deriva hacia el cursor
+         (JS); `.flota` es el vaivén de agua (CSS, en porcentajes del área); y
+         la silla misma lleva la deriva con el scroll.
+
+         Orden de pintado, por orden en el DOM y sin un solo z-index: la
+         cuadrícula, encima las sillas, encima el bloque de texto. Nada de
+         esto necesita recibir el cursor —quien las mueve es el puntero desde
+         la ventana, no el hover—, así que pueden ir debajo del texto sin
+         perder el movimiento. -->
+    <div
+      class="flotador absolute top-0 right-0 h-[64%] w-1/2 opacity-25"
+      data-area
+      aria-hidden="true"
+    >
+      <div class="sigue absolute inset-0">
+        <!-- El relleno corre el centro de la órbita un 6 % del área hacia la
+             derecha: queda más al borde, como estaba antes de darle sitio
+             para pasear, y de paso se aleja del límite del titular. -->
+        <div class="flota absolute inset-0 grid place-items-center pl-[12%]">
+          <Silla variante="roja" deriva class="w-56 rotate-6 xl:w-72" />
+        </div>
+      </div>
+    </div>
+    <div
+      class="flotador absolute -bottom-16 -left-12 w-32 opacity-20 sm:w-52 lg:w-64"
+      aria-hidden="true"
+    >
+      <div class="sigue">
+        <div class="flota flota--b">
+          <Silla variante="roja" deriva class="w-full -rotate-12" />
+        </div>
+      </div>
+    </div>
 
     <div class="relative px-4 pt-3 pb-8 sm:px-6 sm:pt-4 lg:px-10 lg:pt-5">
       <p
@@ -52,13 +81,18 @@ const cuenta = [
         {festival.anio}
       </p>
 
+      {/* `15vw` mide el titular por el ancho de la ventana y se olvida del
+          alto: en una pantalla ancha y baja las tres líneas no caben y
+          «CONCEPTUAL» entra cortada por el canto. El `min()` le pone techo
+          —lo que quede de alto entre la barra y el pie de la pantalla— y sólo
+          actúa ahí; en el resto sigue mandando el 15vw de siempre. */}
       <h1 class="mt-8">
         <span class="sr-only">
           {festival.nombre} — {festival.fechas} — {festival.ciudad}
         </span>
 
         <span
-          class="display block text-[15vw] leading-[0.86] text-rojo"
+          class="display block text-[min(15vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -66,7 +100,7 @@ const cuenta = [
           Festival
         </span>
         <span
-          class="display block text-[15vw] leading-[0.86] text-tinta"
+          class="display block text-[min(15vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-tinta"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -75,7 +109,7 @@ const cuenta = [
           de Arte
         </span>
         <span
-          class="display block text-[15vw] leading-[0.86] text-rojo"
+          class="display block text-[min(15vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -150,79 +184,140 @@ const cuenta = [
     class="meta border-b-2 border-tinta bg-rojo py-4 text-amarillo"
   />
 
-  <!-- ══ MANIFIESTO ═════════════════════════════════════════════════════ -->
+  {/* ══ MANIFIESTO ═══════════════════════════════════════════════════════
+      Una sola banda, baja y limpia: rótulo, pregunta y puerta. Nada más.
+      El manifiesto entero —los tres párrafos y el cierre— vive en el modal;
+      repetir aquí la tesis en una franja oscura duplicaba el texto y le daba
+      a la sección el doble de alto del que necesita para decir lo que dice.
+
+      Es el respiro entre la cuenta regresiva y las sedes: si esta sección
+      pesa lo mismo que ellas, la portada se vuelve una sucesión de bloques
+      del mismo tamaño y ninguno destaca.
+
+      El diálogo es un `<dialog>` nativo: el foco, la capa superior, Esc y el
+      inerte de lo que queda atrás ya vienen resueltos y bien. */}
   <section
     id="manifiesto"
-    class="relative overflow-hidden border-b-2 border-tinta bg-hueso"
+    {/* Borde amarillo: abajo sigue la sección de sedes, que también es
+        oscura, y un filete tinta contra tinta no se ve. */}
+    class="relative overflow-hidden border-b-2 border-amarillo bg-hueso"
   >
-    <div class="px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
-      <p class="meta mb-8 flex items-center gap-4 text-rojo" data-reveal="lado">
-        <span class="inline-block h-[2px] w-12 bg-rojo"></span>
-        01 / Manifiesto
-      </p>
-
-      <h2
-        class="display max-w-5xl text-[9vw] leading-[0.95] text-tinta lg:text-[6.5vw]"
-        data-lineas
-        data-reveal="lineas"
-      >
-        {manifiesto.titulo}
-      </h2>
-
-      <div
-        class="mt-16 grid gap-x-16 gap-y-8 lg:grid-cols-[1fr_1fr] lg:items-start"
-      >
-        <div class="space-y-6">
-          {
-            manifiesto.parrafos.slice(0, 2).map((p, i) => (
-              <p
-                class="text-lg leading-relaxed text-tinta/85 sm:text-xl"
-                data-reveal="arriba"
-                data-retraso={i * 100}
-              >
-                {p}
-              </p>
-            ))
-          }
-        </div>
-
-        <div class="space-y-6">
-          {
-            manifiesto.parrafos.slice(2).map((p) => (
-              <p
-                class="text-lg leading-relaxed text-tinta/85 sm:text-xl"
-                data-reveal="arriba"
-              >
-                {p}
-              </p>
-            ))
-          }
-
-          <figure
-            class="relative mt-10 border-l-4 border-rojo pl-6"
-            data-reveal="arriba"
-            data-retraso="150"
-          >
-            <blockquote
-              class="font-mono text-xl leading-snug font-bold text-rojo sm:text-2xl"
-            >
-              {manifiesto.cierre}
-            </blockquote>
-          </figure>
-        </div>
-      </div>
-    </div>
-
+    {/* La silla, muy apagada y recortada por el canto de la banda: entre la
+        pregunta y el botón queda un hueco ancho que en hueso liso se ve
+        plano. No sube el alto de la sección ni compite con nada. */}
     <Silla
       variante="roja"
       deriva
-      class="pointer-events-none absolute -right-10 bottom-0 w-44 opacity-[0.07] lg:w-72"
+      class="pointer-events-none absolute -top-10 right-[26%] w-52 opacity-[0.07] lg:w-64"
     />
+
+    {/* Alineadas por abajo: el botón se apoya en la última línea de la
+        pregunta, no flota a media altura. En columna estrecha se apila y el
+        botón queda debajo, que es el orden en que se lee de todos modos. */}
+    <div
+      class="relative flex flex-wrap items-end justify-between gap-x-10 gap-y-8 px-4 py-12 sm:px-6 lg:px-10 lg:py-14"
+    >
+      <div>
+        <p
+          class="meta mb-5 flex items-center gap-4 text-rojo"
+          data-reveal="lado"
+        >
+          <span class="inline-block h-[2px] w-12 bg-rojo"></span>
+          01 / Manifiesto
+        </p>
+
+        {/* Dos líneas, no cuatro: apilada en columna estrecha la pregunta
+            ocupaba un cuarto del ancho y dejaba un socavón de aire entre el
+            titular y el botón. Con la medida ancha llena la mitad izquierda
+            de la banda y la sección baja de alto, que es de lo que se
+            trata. */}
+        <h2
+          class="display max-w-[20ch] text-[9vw] leading-[0.95] text-tinta lg:text-[4.4vw]"
+          data-lineas
+          data-reveal="lineas"
+        >
+          {manifiesto.titulo}
+        </h2>
+
+        {/* La tesis, que antes iba en la franja oscura, aquí de subtítulo:
+            misma frase con la que cierra el modal —se ve el reclamo, se lee
+            el argumento y se vuelve a salir por el reclamo— pero a cuerpo de
+            pie de foto y en la misma banda, sin fondo propio ni segundo
+            bloque a sangre. */}
+        <p
+          class="mt-6 max-w-[54ch] font-mono text-sm leading-relaxed text-tinta/70 lg:text-[0.95rem]"
+          data-reveal="arriba"
+          data-retraso="80"
+        >
+          {manifiesto.cierre}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="boton shrink-0"
+        data-abre="manifiesto"
+        data-reveal="arriba"
+        data-retraso="120"
+      >
+        Leer el manifiesto ↗
+      </button>
+    </div>
   </section>
+
+  {/* El modal es una mini-página, no una tarjeta: tres bandas a sangre
+      —cabecera roja, cuerpo hueso, remate tinta— con los mismos filetes de
+      2 px que separan las secciones del sitio. */}
+  <dialog
+    class="modal"
+    data-modal="manifiesto"
+    aria-labelledby="modal-manifiesto-titulo"
+  >
+    {/* La ✕ cuelga del diálogo y no de la caja que scrollea: así no se va
+        con el texto. */}
+    <button type="button" class="modal-cerrar" data-cierra aria-label="Cerrar">
+      ✕
+    </button>
+
+    {/* `data-lenis-prevent`: sin eso la rueda dentro del modal se la queda
+        Lenis y mueve la página de atrás en lugar del texto. */}
+    <div class="modal-caja" data-lenis-prevent>
+      <header class="modal-cabecera">
+        <div class="cuadricula absolute inset-0 opacity-40" aria-hidden="true">
+        </div>
+        <p class="meta relative mb-6">01 / Manifiesto</p>
+        <h2
+          id="modal-manifiesto-titulo"
+          class="display relative max-w-[16ch] text-[8vw] leading-[0.92] sm:text-[5.5vw] lg:text-[3.4vw]"
+        >
+          {manifiesto.titulo}
+        </h2>
+      </header>
+
+      {/* Numerados: son tres argumentos encadenados, no tres párrafos
+          sueltos, y el número lo dice sin tener que escribirlo. */}
+      <ol class="modal-parrafos">
+        {
+          manifiesto.parrafos.map((parrafo, i) => (
+            <li>
+              <span class="modal-numero" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <p>{parrafo}</p>
+            </li>
+          ))
+        }
+      </ol>
+
+      <figure class="modal-cierre">
+        <blockquote>{manifiesto.cierre}</blockquote>
+      </figure>
+    </div>
+  </dialog>
 
   <!-- ══ SEDES ══════════════════════════════════════════════════════════ -->
   <section class="border-b-2 border-amarillo bg-pizarra text-hueso">
-    <div class="px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
+    <div class="px-4 pt-12 pb-20 sm:px-6 lg:px-10 lg:pt-16 lg:pb-28">
       <div
         class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-hueso/25 pb-8"
       >
@@ -245,115 +340,315 @@ const cuenta = [
         <a href={conBase("/sedes")} class="boton" data-reveal="arriba">Ver las {sedes.lista.length}</a>
       </div>
 
-      <ul class="mt-4">
-        {
-          sedes.lista.map((sede, i) => (
-            <li
-              class="group border-b border-hueso/20"
-              data-reveal="arriba"
-              data-retraso={i * 50}
+      {/* Mapa a la izquierda, lista a la derecha. El iframe no se carga
+          hasta que alguien elige una sede: catorce mapas de Google al entrar
+          serían catorce peticiones a un tercero que nadie pidió. */}
+      <div class="mt-10">
+      <div class="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-12">
+        <!-- ── Mapa ───────────────────────────────────────────────────── -->
+        <div
+          class="relative flex h-[55vh] flex-col border-2 border-hueso/25 lg:h-[60vh]"
+        >
+          {/* Columna flexible: al aparecer el pie, el mapa cede alto en vez
+              de estirar el marco. */}
+          <div class="relative flex-1 overflow-hidden bg-pizarra">
+            <!-- Lo que se ve antes de elegir -->
+            <div
+              class="absolute inset-0 grid place-items-center px-8 text-center"
+              data-mapa-vacio
             >
-              <a
-                href={sede.mapa}
-                target="_blank"
-                rel="noopener"
-                class="flex flex-wrap items-baseline gap-x-6 gap-y-1 py-5 transition-colors duration-300 group-hover:text-amarillo"
+              <div
+                class="cuadricula absolute inset-0 opacity-25"
+                aria-hidden="true"
               >
-                <span class="meta w-8 shrink-0 text-hueso/40">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <span class="display text-3xl leading-none sm:text-4xl lg:text-5xl">
-                  {sede.nombre}
-                </span>
-                <span class="meta ml-auto text-hueso/50 group-hover:text-amarillo/70">
-                  {sedes.acciones.ubicacion} ↗
-                </span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+              </div>
+              <Silla
+                variante="roja"
+                class="absolute -bottom-10 -left-10 w-48 opacity-20 lg:w-60"
+              />
+              <p class="meta relative max-w-xs leading-relaxed text-hueso/60">
+                {sedes.acciones.sinMapa}
+              </p>
+            </div>
+
+            <iframe
+              class="absolute inset-0 h-full w-full border-0"
+              title={`Mapa de las sedes del ${festival.nombre}`}
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen
+              hidden
+              data-mapa></iframe>
+          </div>
+
+          <!-- Pie: qué se está viendo -->
+          <div
+            class="flex shrink-0 flex-wrap items-center justify-between gap-4 border-t-2 border-hueso/25 bg-amarillo px-5 py-4 text-tinta"
+            hidden
+            data-mapa-pie
+          >
+            <div>
+              <p class="display text-xl leading-none" data-mapa-nombre></p>
+              <address
+                class="mt-2 text-sm leading-snug not-italic opacity-70"
+                data-mapa-direccion></address>
+            </div>
+            <a
+              class="meta border-2 border-tinta bg-tinta px-4 py-2.5 text-[0.6rem] font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
+              target="_blank"
+              rel="noopener"
+              data-mapa-enlace
+            >
+              {sedes.acciones.ubicacion} ↗
+            </a>
+          </div>
+        </div>
+
+        {/* ── Lista ────────────────────────────────────────────────────
+            Scrollea por dentro, al alto del mapa, y desde el primer momento:
+            con la barra pintada a un lado se ve que la caja se mueve, que era
+            lo que antes había que explicar bloqueándola.
+
+            Las filas entran escalonadas, una detrás de otra, pero las
+            catorce a la vez: quien dispara la cascada es la lista, no cada
+            fila por su cuenta. El observador de `motion.ts` mide contra la
+            ventana y no contra esta caja, así que las sedes que caen por
+            debajo del recorte no entraban nunca en cuadro y se quedaban
+            invisibles hasta que alguien scrolleaba dentro —catorce sedes de
+            las que se veían seis—. El script del final de la página se
+            encarga; aquí sólo va el retraso de cada una.
+
+            `data-lenis-prevent` es lo que hace que la rueda mueva la lista y
+            no la página: Lenis captura el scroll de toda la ventana y sin eso
+            esta caja no se entera. `overscroll-behavior: contain`, en la
+            hoja, es lo que evita que al llegar al final el gesto siga y
+            arrastre la portada. */}
+        <ul
+          class="lista-sedes h-[55vh] border-t-2 border-hueso/25 pr-3 lg:h-[60vh]"
+          data-lista-sedes
+          data-lenis-prevent
+        >
+          {
+            sedes.lista.map((sede, i) => (
+              <li
+                class="fila-sede flex items-center gap-4 border-b border-hueso/20"
+                data-reveal="arriba"
+                data-retraso={i * 45}
+              >
+                {/* La fila entera elige la sede: el objetivo es la franja,
+                    no un enlace de dos palabras. */}
+                <button
+                  type="button"
+                  class="group flex flex-1 items-baseline gap-x-5 py-3.5 text-left"
+                  aria-pressed="false"
+                  data-sede
+                  data-nombre={sede.nombre}
+                  data-direccion={sede.direccion}
+                  data-incrustado={mapaIncrustado(sede)}
+                  data-enlace={enlaceMapa(sede)}
+                >
+                  <span class="meta w-8 shrink-0 text-hueso/40 transition-colors group-hover:text-amarillo">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span class="display truncate text-2xl leading-none transition-colors group-hover:text-amarillo">
+                    {sede.nombre}
+                  </span>
+                </button>
+
+                {sede.instagram && (
+                  <a
+                    href={sede.instagram}
+                    target="_blank"
+                    rel="noopener"
+                    class="meta shrink-0 text-[0.6rem] text-hueso/40 transition-colors duration-300 hover:text-amarillo"
+                  >
+                    IG ↗
+                  </a>
+                )}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      </div>
     </div>
   </section>
 
   <!-- ══ PROGRAMA (adelanto) ════════════════════════════════════════════ -->
+  {/* La misma cabecera que Sedes: rótulo, titular y puerta apoyados en un
+      filete de 2 px. Antes el titular iba a 9vw —el mayor de la página
+      después del hero, para una sección de adelanto— y el botón colgaba al
+      pie de la columna derecha. Entre las dos cosas esto era un cartel
+      enorme con dos cajitas flotando en un charco de amarillo. */}
   <section class="border-b-2 border-tinta bg-amarillo">
-    <div class="px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
-      <p class="meta mb-8 flex items-center gap-4 text-rojo" data-reveal="lado">
-        <span class="inline-block h-[2px] w-12 bg-rojo"></span>
-        03 / {programa.titulo}
-      </p>
-
+    <div class="px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
       <div
-        class="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end"
+        class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8"
       >
-        <h2
-          class="display text-[15vw] leading-[0.95] text-tinta lg:text-[9vw]"
-          data-reveal="arriba"
-        >
-          {programa.titulo}
-          <span class="block text-rojo">{programa.estado}</span>
-        </h2>
+        <div>
+          <p
+            class="meta mb-6 flex items-center gap-4 text-rojo"
+            data-reveal="lado"
+          >
+            <span class="inline-block h-[2px] w-12 bg-rojo"></span>
+            03 / {programa.titulo}
+          </p>
+          <h2
+            class="display text-[13vw] leading-[0.82] text-tinta lg:text-[8vw]"
+            data-lineas
+            data-reveal="lineas"
+          >
+            {programa.titulo}
+          </h2>
+        </div>
+        <a href={conBase("/programa")} class="boton" data-reveal="arriba">
+          Ver el programa
+        </a>
+      </div>
 
+      {/* Un solo instrumento partido en dos mitades: la lista de la derecha
+          manda y la rejilla de la izquierda enseña. Antes eran dos bloques
+          que hablaban de lo mismo sin mirarse —el día salía escrito dos
+          veces, una en la cabecera del mini y otra en la lista— y ninguno de
+          los dos se podía tocar. */}
+      <div
+        class="mt-10 grid gap-10 lg:mt-12 lg:grid-cols-[1.35fr_1fr] lg:items-start lg:gap-14"
+      >
+        {/* El mini: la silueta del día, sin texto en las barras. No es para
+            leer qué hay —eso está a la derecha y en el programa—, es para ver
+            de un golpe cómo se reparte la jornada entre las sedes. */}
+        <div data-reveal="arriba" data-retraso="120">
+          <Gantt agrupar="sede" resumen mini selector="[data-dias-portada]" />
+        </div>
+
+        {/* Sin rótulo de columna: la tarjeta de la izquierda ya lleva el suyo
+            dentro y aquí sobra: cuatro días con su fecha, bajo un titular que
+            dice «Programa», no necesitan que nadie los presente. Sin él,
+            además, el canto de arriba de la lista arranca exactamente en el
+            canto de arriba de la tarjeta. */}
         <div data-reveal="arriba">
-          <ul class="mb-8 divide-y-2 divide-tinta border-y-2 border-tinta">
+          <ul class="border-y-2 border-tinta" data-dias-portada>
             {
-              programa.dias.map((d) => (
-                <li class="flex items-baseline justify-between gap-4 py-3">
-                  <span class="font-mono text-base font-bold sm:text-lg">
-                    {d.dia}
-                  </span>
-                  <span class="meta text-tinta/60">{d.fecha}</span>
+              programa.dias.map((d, i) => (
+                <li class="border-b border-tinta/15 last:border-b-0">
+                  {/* La fila entera cambia el día de la rejilla: el objetivo
+                      es la franja, no dos palabras. */}
+                  <button
+                    type="button"
+                    class="dia-portada flex w-full items-baseline gap-x-4 py-4 text-left"
+                    data-dia={i}
+                    aria-pressed={i === 0 ? 'true' : 'false'}
+                  >
+                    <span class="meta dia-num w-7 shrink-0 text-tinta/35 transition-colors duration-200">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span class="display dia-nombre flex-1 text-2xl leading-none transition-colors duration-200">
+                      {d.dia}
+                    </span>
+                    {/* Filete de 1 px y sin relleno vertical: con el de 2 px
+                        del resto del sitio la etiqueta medía más que el
+                        nombre del día y la fila crecía tres píxeles respecto
+                        a las otras tres. */}
+                    <span class="meta dia-hoy shrink-0 border border-rojo px-1.5 text-[0.55rem] leading-[1.7] text-rojo">
+                      Hoy
+                    </span>
+                    <span class="meta shrink-0 text-tinta/40">
+                      {d.fecha.replace(' de septiembre', ' sep')}
+                    </span>
+                  </button>
                 </li>
               ))
             }
           </ul>
-          <a href={conBase("/programa")} class="boton">Ver el programa</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ══ PATROCINADORES ═════════════════════════════════════════════════ -->
-  <section class="border-b-2 border-tinta bg-hueso">
-    <div class="px-4 py-20 sm:px-6 lg:px-10">
-      <p class="meta mb-8 flex items-center gap-4 text-rojo" data-reveal="lado">
-        <span class="inline-block h-[2px] w-12 bg-rojo"></span>
-        04 / {patrocinadores.titulo}
-      </p>
+  {/* ══ PATROCINADORES → COLABORADORES ═══════════════════════════════════
+      Una sola sección con dos caras. Al terminar el turno de un grupo cambia
+      la luz —fondo hueso ↔ pizarra, acento rojo ↔ amarillo—, el título y el
+      número; el relevo va en tres tiempos para que no se lea como un
+      parpadeo (ver el guion al pie).
 
-      <h2
-        class="display text-[11vw] leading-[0.82] text-tinta lg:text-[6vw]"
-        data-lineas
-        data-reveal="lineas"
-      >
-        {patrocinadores.titulo}
-      </h2>
+      El turno no dura lo que dura la vuelta de la cinta. Trece logos en una
+      fila son casi un minuto de recorrido, y esperar eso para ver un cambio
+      de color es demasiado. Así que el turno es corto y fijo, y la cinta,
+      cuando le toca esconderse, se queda **en pausa donde iba**: al volver
+      sigue desde ahí y no desde el principio. Por eso no se pierde ninguna
+      marca aunque el turno se corte a media pasada — sólo que se ven en dos o
+      tres vueltas en vez de una. */}
+  {
+    (() => {
+      const PASO = 224; // ancho del mosaico más su separación
+      const VELOCIDAD = 55; // px/s: ritmo de mirar un logo, no de un ticker
 
-      {
-        patrocinadores.lista.length === 0 ? (
-          <div
-            class="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4"
-            data-reveal="arriba"
-          >
-            {[0, 1, 2, 3].map(() => (
-              <div class="flex aspect-[3/2] items-center justify-center border-2 border-dashed border-tinta/30">
-                <span class="meta text-tinta/35">Próximamente</span>
-              </div>
-            ))}
+      const grupos = [
+        { clave: 'patrocinadores', indice: '04', datos: patrocinadores, turno: 20000 },
+        { clave: 'colaboradores', indice: '05', datos: colaboradores, turno: 10000 },
+      ];
+
+      return (
+        <section
+          class="cinta-marcas overflow-hidden border-b-2"
+          data-cinta
+          data-dormida
+          data-grupo="patrocinadores"
+        >
+          <div class="cinta-cabecera px-4 pt-12 pb-10 sm:px-6 lg:px-10 lg:pt-16">
+            <p class="meta cinta-acento mb-8 flex items-center gap-4">
+              <span class="inline-block h-[2px] w-12 bg-current" />
+              <span data-rotulo>04 / {patrocinadores.titulo}</span>
+            </p>
+            <h2
+              class="display text-[11vw] leading-[0.82] lg:text-[6vw]"
+              data-titulo
+            >
+              {patrocinadores.titulo}
+            </h2>
           </div>
-        ) : (
-          <ul class="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {patrocinadores.lista.map((p) => (
-              <li class="flex aspect-[3/2] items-center justify-center border-2 border-tinta bg-white p-6">
-                <img src={p.logo} alt={p.nombre} class="max-h-full w-auto" />
-              </li>
-            ))}
-          </ul>
-        )
-      }
-    </div>
-  </section>
+
+          {/* Los dos grupos comparten celda: el que no toca se apaga sin
+              salirse del flujo, así la sección no da un salto de alto. */}
+          <div class="cinta-pista pb-20">
+            {grupos.map(({ clave, indice, datos, turno }, n) => {
+              // La unidad tiene que pasar el ancho de una pantalla ancha: si
+              // no, la cinta deja un hueco a media vuelta. Con cinco logos eso
+              // significa repetir la tanda.
+              const repes = Math.max(1, Math.ceil(1500 / PASO / datos.lista.length));
+              const unidad = Array.from({ length: repes }, () => datos.lista).flat();
+              const duracion = ((unidad.length * PASO) / VELOCIDAD).toFixed(1);
+              return (
+                <div
+                  class="grupo-marcas"
+                  data-oculto={n === 0 ? undefined : ''}
+                  data-grupo-nombre={clave}
+                  data-indice={indice}
+                  data-titulo-grupo={datos.titulo}
+                  data-espera={turno}
+                >
+                  <p class="meta rotulo-grupo px-4 pb-4 sm:px-6 lg:px-10">
+                    {indice} / {datos.titulo}
+                  </p>
+                  <div class="overflow-hidden" role="marquee">
+                    <div class="marquee" style={`--duracion: ${duracion}s`}>
+                      {[0, 1].map((copia) => (
+                        <div class="flex shrink-0" aria-hidden={copia === 1}>
+                          {unidad.map((marca) => (
+                            <Mosaico marca={marca} class="mr-4" />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      );
+    })()
+  }
 
   <!-- ══ CIERRE ═════════════════════════════════════════════════════════ -->
   <section class="relative overflow-hidden bg-rojo text-amarillo">
@@ -384,4 +679,183 @@ const cuenta = [
       </div>
     </div>
   </section>
+
+
+  <script>
+    /** El mapa se llena al elegir una sede — antes no existe. */
+    const mapa = document.querySelector('[data-mapa]');
+    const vacio = document.querySelector('[data-mapa-vacio]');
+    const pie = document.querySelector('[data-mapa-pie]');
+    const nombre = document.querySelector('[data-mapa-nombre]');
+    const direccion = document.querySelector('[data-mapa-direccion]');
+    const enlace = document.querySelector('[data-mapa-enlace]');
+    const filas = document.querySelectorAll('[data-sede]');
+
+    if (mapa instanceof HTMLIFrameElement && filas.length) {
+      for (const fila of filas) {
+        fila.addEventListener('click', () => {
+          for (const otra of filas) {
+            otra.setAttribute('aria-pressed', 'false');
+            otra.closest('.fila-sede')?.classList.remove('sede-activa');
+          }
+          fila.setAttribute('aria-pressed', 'true');
+          fila.closest('.fila-sede')?.classList.add('sede-activa');
+
+          mapa.src = fila.dataset.incrustado ?? '';
+          mapa.hidden = false;
+          if (vacio instanceof HTMLElement) vacio.hidden = true;
+          if (pie instanceof HTMLElement) pie.hidden = false;
+          if (nombre) nombre.textContent = fila.dataset.nombre ?? '';
+          if (direccion) direccion.textContent = fila.dataset.direccion ?? '';
+          if (enlace instanceof HTMLAnchorElement) {
+            enlace.href = fila.dataset.enlace ?? '';
+          }
+
+          // En una ventana angosta el mapa queda arriba, fuera de vista.
+          if (!window.matchMedia('(width >= 64rem)').matches) {
+            mapa.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        });
+      }
+    }
+  </script>
+
+  <script>
+    /** La cinta de marcas alterna entre patrocinadores y colaboradores.
+     *
+     * No arranca hasta que la sección asoma, y al salir de cuadro vuelve a
+     * dormirse en patrocinadores: quien baja hasta acá la encuentra siempre
+     * empezada por el principio, no a mitad de un turno que corrió solo
+     * mientras nadie miraba.
+     *
+     * La cinta que se apaga queda **en pausa donde iba**, no se saca del
+     * flujo: con `display: none` la animación volvería a empezar de cero cada
+     * vez y las últimas marcas no se verían nunca.
+     *
+     * El relevo va en tres tiempos: primero cambia la luz —el color de la
+     * sección, que tarda más y arranca antes—, después se va el grupo que
+     * estaba y recién ahí, con la cinta tapada, se cambia el título. Cambiar
+     * las tres cosas en el mismo cuadro es lo que se veía como un parpadeo.
+     */
+    const cinta = document.querySelector('[data-cinta]');
+    if (cinta) {
+      const grupos = [...cinta.querySelectorAll('[data-grupo-nombre]')] as HTMLElement[];
+      const cabecera = cinta.querySelector('.cinta-cabecera');
+      const titulo = cinta.querySelector('[data-titulo]');
+      const rotulo = cinta.querySelector('[data-rotulo]');
+      const SALIDA = 420;
+      let actual = 0;
+      let mudando = false;
+      let reloj: ReturnType<typeof setTimeout> | undefined;
+
+      const armarTurno = (g: HTMLElement) => {
+        clearTimeout(reloj);
+        reloj = setTimeout(cambiar, Number(g.dataset.espera ?? 12000));
+      };
+
+      function cambiar() {
+        if (mudando) return;
+        mudando = true;
+        clearTimeout(reloj);
+
+        const saliente = grupos[actual];
+        actual = (actual + 1) % grupos.length;
+        const entrante = grupos[actual];
+
+        cinta.setAttribute('data-grupo', entrante.dataset.grupoNombre ?? '');
+        saliente.dataset.estado = 'saliendo';
+        if (cabecera instanceof HTMLElement) cabecera.dataset.estado = 'saliendo';
+
+        setTimeout(() => {
+          saliente.dataset.oculto = '';
+          delete saliente.dataset.estado;
+
+          const nombre = entrante.dataset.tituloGrupo ?? '';
+          if (titulo) titulo.textContent = nombre;
+          if (rotulo) rotulo.textContent = `${entrante.dataset.indice} / ${nombre}`;
+          if (cabecera instanceof HTMLElement) delete cabecera.dataset.estado;
+
+          delete entrante.dataset.oculto;
+          entrante.dataset.estado = 'entrando';
+          setTimeout(() => delete entrante.dataset.estado, 800);
+          armarTurno(entrante);
+          mudando = false;
+        }, SALIDA);
+      }
+
+      /** Vuelta a foja cero: primer grupo, sin turnos corriendo. */
+      const dormir = () => {
+        clearTimeout(reloj);
+        mudando = false;
+        actual = 0;
+        grupos.forEach((g, i) => {
+          delete g.dataset.estado;
+          if (i === 0) delete g.dataset.oculto;
+          else g.dataset.oculto = '';
+        });
+        cinta.setAttribute('data-grupo', grupos[0].dataset.grupoNombre ?? '');
+        const nombre = grupos[0].dataset.tituloGrupo ?? '';
+        if (titulo) titulo.textContent = nombre;
+        if (rotulo) rotulo.textContent = `${grupos[0].dataset.indice} / ${nombre}`;
+        cinta.setAttribute('data-dormida', '');
+      };
+
+      // Sin animación no hay turnos: se muestran los dos grupos, cada uno con
+      // su rótulo, y nadie cambia nada solo.
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        cinta.setAttribute('data-quieta', 'si');
+        cinta.removeAttribute('data-dormida');
+        grupos.forEach((g) => delete g.dataset.oculto);
+      } else {
+        const ojo = new IntersectionObserver(
+          ([entrada]) => {
+            if (entrada.isIntersecting) {
+              cinta.removeAttribute('data-dormida');
+              armarTurno(grupos[actual]);
+            } else {
+              dormir();
+            }
+          },
+          // Umbral 0: arranca en cuanto el borde de arriba entra en cuadro.
+          { threshold: 0 },
+        );
+        ojo.observe(cinta);
+      }
+    }
+  </script>
+
+  <script>
+    /** La cascada de la lista de sedes la dispara la lista, no cada fila.
+     *
+     * Las filas llevan `data-reveal`, pero el observador de `motion.ts` mide
+     * contra la ventana: dentro de una caja recortada, las que quedan por
+     * debajo del corte no entran en cuadro nunca y se quedan invisibles. Aquí
+     * se observa la caja entera y, en cuanto asoma, se destapan las catorce de
+     * una vez —cada una con su retraso, que es lo que las escalona—.
+     *
+     * El `--retraso` se pone aquí y no se espera al de `motion.ts`: los dos
+     * scripts leen el mismo `data-retraso` y da igual cuál llegue antes.
+     */
+    const lista = document.querySelector('[data-lista-sedes]');
+    if (lista) {
+      const filas = [
+        ...lista.querySelectorAll<HTMLElement>('[data-reveal]'),
+      ];
+      const ojo = new IntersectionObserver(
+        ([entrada], observador) => {
+          if (!entrada.isIntersecting) return;
+          // Una vez y se olvida: la cascada no se repite al volver a pasar.
+          observador.disconnect();
+          for (const fila of filas) {
+            fila.style.setProperty('--retraso', `${fila.dataset.retraso ?? 0}ms`);
+            fila.classList.add('dentro');
+          }
+        },
+        // El mismo margen que usan los reveals del resto del sitio.
+        { rootMargin: '0px 0px -12% 0px', threshold: 0 },
+      );
+      ojo.observe(lista);
+    }
+  </script>
+
 </Base>

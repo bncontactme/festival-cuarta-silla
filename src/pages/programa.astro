@@ -4,7 +4,8 @@ import { conBase } from '../lib/base';
 import Encabezado from '../components/Encabezado.astro';
 import Marquee from '../components/Marquee.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
-import { programa, festival } from '../data/site';
+import Gantt from '../components/Gantt.astro';
+import { programa, festival, ganttEsEjemplo, ganttAviso } from '../data/site';
 ---
 
 <Base
@@ -87,57 +88,159 @@ import { programa, festival } from '../data/site';
     class="meta border-b-2 border-tinta bg-rojo py-4 text-amarillo"
   />
 
-  <!-- Cuatro días, uno por columna en escritorio y en acordeón vertical en móvil -->
-  <section class="bg-hueso">
-    <div class="grid lg:grid-cols-4 lg:divide-x-2 lg:divide-tinta">
-      {
-        programa.dias.map((dia, i) => (
-          <article
-            class="border-b-2 border-tinta lg:border-b-0"
-            data-reveal="arriba"
-            data-retraso={i * 90}
-          >
-            <header class="sticky top-[73px] z-10 border-b-2 border-tinta bg-tinta px-4 py-5 text-hueso lg:top-[81px]">
-              <p class="meta text-amarillo">{String(i + 1).padStart(2, '0')}</p>
-              <h2 class="display mt-2 text-4xl leading-none lg:text-5xl">
-                {dia.dia}
-              </h2>
-              <p class="meta mt-2 text-hueso/60">{dia.fecha}</p>
-            </header>
+  {/* ── El programa, en dos lecturas ─────────────────────────────────────
+      Antes eran dos secciones seguidas contando lo mismo: primero cuatro
+      columnas a sangre con 48 celdas que dicen «Por anunciar», y debajo la
+      misma información en forma de reloj, con su propio rótulo y su propio
+      titular de cartel —el segundo de la página, después del PROGRAMA del
+      encabezado—. Media pantalla de scroll para llegar de una a la otra.
 
-            <ul class="divide-y divide-tinta/15">
-              {dia.slots.map((slot) => (
-                <li class="group flex items-baseline gap-4 px-4 py-4 transition-colors duration-200 hover:bg-amarillo">
-                  <span class="font-mono text-sm font-bold text-rojo tabular-nums">
-                    {slot.hora}
-                  </span>
-                  <span aria-hidden="true" class="text-tinta/25">//</span>
-                  {slot.actividad ? (
-                    <span class="text-base leading-snug">{slot.actividad}</span>
-                  ) : (
-                    <span class="meta text-tinta/30 group-hover:text-tinta/50">
-                      Por anunciar
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </article>
-        ))
-      }
-    </div>
-  </section>
-
+      Son dos lecturas del mismo programa, no dos secciones: comparten sitio
+      y se turnan. La rejilla contesta «qué se pisa con qué»; la tabla, «qué
+      hay a tal hora». El mando decide cuál se está preguntando. */}
   <section class="border-t-2 border-tinta bg-amarillo">
-    <div class="px-4 py-20 text-center sm:px-6 lg:py-24">
-      <p
-        class="display display-centro mx-auto max-w-4xl text-[10vw] leading-[0.95] text-rojo lg:text-[6vw]"
-        data-lineas
-        data-reveal="lineas"
+    <div class="px-4 py-14 sm:px-6 lg:px-10 lg:py-16">
+      {/* Una sola barra de mando, dentro de la ficha y con un control en cada
+          extremo: qué lectura a la izquierda, qué día a la derecha. Antes el
+          conmutador flotaba arriba a la derecha de la sección con un rótulo
+          solo al otro lado y novecientos píxeles de amarillo en medio, y las
+          pestañas de día caían dentro de la ficha pegadas a la izquierda con
+          otro tanto de vacío al lado. Dos mandos, dos huecos y ningún eje.
+
+          Las pestañas de día no se renderizan dentro de `<Gantt>`: se le pasa
+          este selector y él las obedece desde fuera, que es lo mismo que hace
+          la lista de días de la portada. En la vista de días se esconden — no
+          hay ningún día que elegir— y el script se encarga. */}
+      <div class="ficha ficha--ancha" data-reveal="arriba">
+        <div
+          class="mb-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-b-2 border-tinta pb-6"
+        >
+          <div
+            class="conmutador"
+            role="tablist"
+            aria-label="Cómo ver el programa"
+            data-vistas
+          >
+            <span class="conmutador-burbuja" aria-hidden="true"></span>
+            <button
+              type="button"
+              role="tab"
+              class="conmutador-opcion"
+              data-vista="rejilla"
+              aria-selected="true"
+              aria-controls="vista-rejilla"
+            >
+              Por horas
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="conmutador-opcion"
+              data-vista="dias"
+              aria-selected="false"
+              aria-controls="vista-dias"
+            >
+              Por días
+            </button>
+          </div>
+
+          <div class="conmutador conmutador--dias" data-dias-programa>
+            <span class="conmutador-burbuja" aria-hidden="true"></span>
+            {
+              programa.dias.map((d, i) => (
+                <button
+                  type="button"
+                  class="conmutador-opcion"
+                  data-dia={i}
+                  aria-pressed={i === 0 ? 'true' : 'false'}
+                >
+                  <span class="conmutador-opcion-dia">{d.dia}</span>
+                  <span class="conmutador-opcion-nota">
+                    {d.fecha.replace(' de septiembre', ' sep')}
+                  </span>
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        {/* ── Vista 1: la rejilla ──────────────────────────────────────── */}
+        <div
+          class="panel-vista"
+          id="vista-rejilla"
+          role="tabpanel"
+          data-panel-vista="rejilla"
+        >
+          <Gantt selector="[data-dias-programa]">
+            {
+              ganttEsEjemplo && (
+                <p slot="pie" class="meta text-[0.6rem] text-rojo">
+                  ⚠ {ganttAviso}
+                </p>
+              )
+            }
+          </Gantt>
+        </div>
+
+        {/* ── Vista 2: los cuatro días ─────────────────────────────────────
+            La tabla de siempre, metida en la ficha. Fuera las cabeceras
+            negras pegajosas: dentro de una tarjeta el `sticky` no tiene
+            contra qué pegarse, y cuatro bloques de tinta sobre el hueso
+            pesaban más que las doce horas que van debajo. Cada día se cierra
+            con el mismo filete rojo que hace de eje en la rejilla: es lo que
+            deja reconocer las dos vistas como la misma ficha. */}
+        <div
+          class="panel-vista"
+          id="vista-dias"
+          role="tabpanel"
+          data-panel-vista="dias"
+          hidden
+        >
+          <div class="grid gap-8 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-tinta/15">
+            {
+              programa.dias.map((dia, i) => (
+                <article class="lg:px-5 lg:first:pl-0 lg:last:pr-0">
+                  <header class="border-b-2 border-rojo pb-4">
+                    <p class="meta text-rojo">{String(i + 1).padStart(2, '0')}</p>
+                    <h2 class="display mt-2 text-4xl leading-none">{dia.dia}</h2>
+                    <p class="meta mt-2 text-tinta/45">{dia.fecha}</p>
+                  </header>
+
+                  <ul class="divide-y divide-tinta/12">
+                    {dia.slots.map((slot) => (
+                      <li class="flex items-baseline gap-3 py-3">
+                        <span class="font-mono text-sm font-bold text-rojo tabular-nums">
+                          {slot.hora}
+                        </span>
+                        <span aria-hidden="true" class="text-tinta/25">
+                          //
+                        </span>
+                        {slot.actividad ? (
+                          <span class="text-sm leading-snug">{slot.actividad}</span>
+                        ) : (
+                          <span class="meta text-[0.55rem] text-tinta/35">
+                            Por anunciar
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+
+      {/* Las dos puertas, dentro de la misma sección y no en una banda aparte.
+          Con banda propia hacían falta dos fondos seguidos: en amarillo se
+          fundía con ésta partida por un filete, y en hueso chocaba con el
+          papel de la ficha —dos grises separados por tres dedos de amarillo,
+          que se leía como un corte y no como un remate—. */}
+      <div
+        class="mt-14 flex flex-wrap justify-center gap-4 lg:mt-16"
+        data-reveal="arriba"
       >
-        {programa.estado}
-      </p>
-      <div class="mt-10 flex flex-wrap justify-center gap-4" data-reveal="arriba">
         <a
           href={festival.convocatoriaPDF}
           target="_blank"
@@ -150,4 +253,49 @@ import { programa, festival } from '../data/site';
       </div>
     </div>
   </section>
+
+  <script>
+    /** El mando de las dos vistas del programa.
+     *
+     * La burbuja no se mide: las celdas del conmutador son todas del mismo
+     * ancho, así que basta con decirle en cuál está y CSS la desliza.
+     *
+     * Los paneles se turnan con `hidden` y no escondiendo el que sobra en la
+     * misma celda: la ficha tiene que tomar el alto de la vista que se está
+     * viendo, y la de los cuatro días mide el triple que la rejilla.
+     */
+    const mando = document.querySelector<HTMLElement>('[data-vistas]');
+
+    if (mando) {
+      const opciones = [...mando.querySelectorAll<HTMLElement>('[data-vista]')];
+      const paneles = document.querySelectorAll<HTMLElement>('[data-panel-vista]');
+      // Las pestañas de día viven en la misma barra pero sólo mandan sobre la
+      // rejilla: en la vista de días no hay ningún día que elegir.
+      const dias = document.querySelector<HTMLElement>('[data-dias-programa]');
+
+      mando.addEventListener('click', (e) => {
+        const boton = (e.target as HTMLElement).closest<HTMLElement>('[data-vista]');
+        if (!boton || boton.getAttribute('aria-selected') === 'true') return;
+
+        opciones.forEach((opcion, i) => {
+          const activa = opcion === boton;
+          opcion.setAttribute('aria-selected', String(activa));
+          if (activa) mando.style.setProperty('--activa', String(i));
+        });
+
+        if (dias) dias.hidden = boton.dataset.vista !== 'rejilla';
+
+        for (const panel of paneles) {
+          const entra = panel.dataset.panelVista === boton.dataset.vista;
+          if (!entra) {
+            panel.hidden = true;
+            continue;
+          }
+          panel.hidden = false;
+          panel.dataset.estado = 'entrando';
+          setTimeout(() => delete panel.dataset.estado, 600);
+        }
+      });
+    }
+  </script>
 </Base>

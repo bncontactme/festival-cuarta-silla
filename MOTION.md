@@ -51,6 +51,14 @@ quedan quietos y el diseño no depende de ellos.
   jugarla** —una vez por sesión, sólo en la portada— y le pone puerta de
   salida: al primer toque se va al final. Nadie debería tener que esperar a
   que una animación termine para poder usar un sitio.
+- **Imán de las sillas del hero (~1 KB)** — la flotación en agua es CSS: cuatro
+  ciclos de duración prima entre sí sobre `translate`, `rotate`, `scale` y
+  `transform`, con las amplitudes en porcentajes del área de paseo. El JS hace
+  las dos cosas que CSS no sabe: llevar la silla hacia el puntero con inercia,
+  y medir cuánto puede llevarla sin que cruce la mitad de la pantalla —del
+  área se descuenta lo que ya se come la órbita y lo que sobresale por el
+  giro—. El bucle se corta al llegar al destino y no corre con el hero fuera
+  de pantalla.
 
 ## Detalles que costaron
 

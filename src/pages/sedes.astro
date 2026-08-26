@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import Encabezado from '../components/Encabezado.astro';
 import Silla from '../components/Silla.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
-import { sedes, festival } from '../data/site';
+import { sedes, festival, enlaceMapa } from '../data/site';
 ---
 
 <Base
@@ -40,16 +40,18 @@ import { sedes, festival } from '../data/site';
                 {sede.direccion}
               </address>
               <div class="mt-4 flex divide-x-2 divide-tinta border-2 border-tinta">
+                {sede.instagram && (
+                  <a
+                    href={sede.instagram}
+                    target="_blank"
+                    rel="noopener"
+                    class="meta flex-1 bg-amarillo px-3 py-3 text-center text-[0.55rem] font-bold"
+                  >
+                    {sedes.acciones.conoce} ↗
+                  </a>
+                )}
                 <a
-                  href={sede.instagram}
-                  target="_blank"
-                  rel="noopener"
-                  class="meta flex-1 bg-amarillo px-3 py-3 text-center text-[0.55rem] font-bold"
-                >
-                  {sedes.acciones.conoce} ↗
-                </a>
-                <a
-                  href={sede.mapa}
+                  href={enlaceMapa(sede)}
                   target="_blank"
                   rel="noopener"
                   class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
@@ -100,16 +102,18 @@ import { sedes, festival } from '../data/site';
             </div>
 
             <div class="relative flex divide-x-2 divide-tinta border-t-2 border-tinta">
+              {sede.instagram && (
+                <a
+                  href={sede.instagram}
+                  target="_blank"
+                  rel="noopener"
+                  class="meta flex-1 bg-amarillo px-4 py-4 text-center font-bold transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
+                >
+                  {sedes.acciones.conoce} ↗
+                </a>
+              )}
               <a
-                href={sede.instagram}
-                target="_blank"
-                rel="noopener"
-                class="meta flex-1 bg-amarillo px-4 py-4 text-center font-bold transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
-              >
-                {sedes.acciones.conoce} ↗
-              </a>
-              <a
-                href={sede.mapa}
+                href={enlaceMapa(sede)}
                 target="_blank"
                 rel="noopener"
                 class="meta flex-1 bg-tinta px-4 py-4 text-center font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"

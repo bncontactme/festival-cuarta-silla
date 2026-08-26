@@ -1,0 +1,36 @@
+---
+import { conBase } from '../lib/base';
+import type { Marca } from '../data/site';
+
+/** Un logo de la cinta de marcas.
+ *
+ * Las marcas de las que todavía no tenemos archivo se pintan con el nombre en
+ * display, en la misma caja y del mismo tamaño: un hueco honesto antes que un
+ * logo inventado. */
+interface Props {
+  marca: Marca;
+  class?: string;
+}
+
+const { marca, class: clase = '' } = Astro.props;
+---
+
+<div
+  class={`flex aspect-[3/2] w-52 shrink-0 items-center justify-center border-2 border-tinta bg-white p-4 ${clase}`}
+>
+  {
+    marca.logo ? (
+      <img
+        src={conBase(marca.logo)}
+        alt={marca.nombre}
+        loading="lazy"
+        decoding="async"
+        class="max-h-full w-auto max-w-full object-contain"
+      />
+    ) : (
+      <span class="display text-center text-xl leading-none text-tinta/70">
+        {marca.nombre}
+      </span>
+    )
+  }
+</div>

@@ -299,11 +299,17 @@
 }
 
 /* Líneas de texto partidas por el splitter.
-   El padding deja aire para las descendentes, que con line-height < 1
-   sobresalen de la caja y el overflow:hidden recortaría. */
+   El relleno deja aire arriba y abajo, que con line-height de cartel se sale
+   de la caja y el `overflow: hidden` recortaría: abajo las descendentes;
+   arriba las tildes de las mayúsculas —É, Á, Í suben por encima de la altura
+   de caja y en «¿QUÉ ENTENDEMOS» la tilde se estaba comiendo entera—. Los
+   márgenes negativos devuelven lo que el relleno agrega, así que la
+   maquetación no se mueve ni un píxel. */
 .linea {
   display: block;
   overflow: hidden;
+  padding-top: 0.12em;
+  margin-top: -0.12em;
   padding-bottom: 0.14em;
   margin-bottom: -0.14em;
 }
@@ -354,6 +360,644 @@
   }
   to {
     translate: 0 -6%;
+  }
+}
+
+/* — Silla en flotación ————————————————————————————————————————————— */
+/* La silla del hero pasea por la mitad derecha del hero como si estuviera
+   atrapada en agua. Un objeto suspendido en fluido no sube y baja en línea
+   recta: lo arrastran corrientes en los dos ejes a la vez, así que traza una
+   órbita irregular y cerrada; cabecea con retraso respecto a esa deriva,
+   porque el giro le cuesta más que el desplazamiento; y se acerca y se aleja,
+   que es lo que da la sensación de estar dentro de algo y no pegado al fondo.
+   Cuatro ciclos de duración prima entre sí (17 / 11 / 13 / 7 s), cada uno
+   sobre una propiedad distinta —translate, rotate, scale, transform— para que
+   convivan sin pisarse. La combinación tarda casi tres horas en repetirse.
+
+   Las amplitudes son porcentajes del ÁREA de paseo, no de la silla: el
+   contenedor `.flotador` marca hasta dónde puede llegar y todo se escala solo
+   con la ventana. `--nado` las multiplica de golpe cuando el cursor se
+   acerca —lo decide `iniciarIman`, que también mueve la capa `.sigue`—, así
+   que la órbita entera se ensancha en vez de acelerarse. Está registrada con
+   @property: por eso el empujón entra y la calma vuelve en rampa, sin salto. */
+@property --nado {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
+.flotador {
+  transition: --nado 1.6s var(--ease-salida);
+}
+
+/* Capa de la deriva hacia el cursor. Separada de `.flota` porque aquélla ya
+   usa las cuatro propiedades de transformación, y dos animaciones no pueden
+   compartir una. */
+.sigue {
+  will-change: translate, rotate;
+}
+
+/* El vaivén no es una órbita, son cuatro traslaciones sumadas.
+ *
+ * Antes era una sola: un recorrido de cinco puntos que cerraba cada 17 s. Un
+ * ciclo de 17 s se aprende, y en cuanto se aprende la silla deja de flotar y
+ * se ve el raíl. Aquí X, Y y la diagonal van cada una a su periodo —23, 17,
+ * 31 y 7 segundos, primos entre sí—, así que la trayectoria que sale de
+ * sumarlas no vuelve a pasar por el mismo sitio hasta dentro de tres horas
+ * largas. Nadie mira una silla tres horas: se lee como deriva libre.
+ *
+ * Lo que las suma en vez de pisarse es `animation-composition: accumulate`;
+ * sin él sólo contaría la última de la lista, que por eso es la diagonal —la
+ * degradación es una silla que deriva menos, no una silla quieta.
+ *
+ * Las amplitudes suman 9.2 % en cada eje, por debajo del 10 % que `medir()`
+ * de `iniciarIman` reserva para el vaivén al calcular hasta dónde puede
+ * llevarse el cursor la silla. Si crecen aquí, hay que crecer el `ORBITA` de
+ * allí o la silla se saldrá de su área. */
+.flota {
+  animation:
+    flotar-corriente 7s ease-in-out -2s infinite,
+    flotar-x 23s ease-in-out -7s infinite alternate,
+    flotar-y 17s ease-in-out -3s infinite alternate,
+    flotar-diagonal 31s ease-in-out -11s infinite alternate,
+    flotar-cabeceo 11s ease-in-out -3s infinite alternate,
+    flotar-fondo 13s ease-in-out -8s infinite alternate;
+  /* Las cuatro traslaciones se suman; el giro y la escala van cada uno en su
+     propiedad y no tienen con quién sumarse. */
+  animation-composition: accumulate, accumulate, accumulate, accumulate,
+    replace, replace;
+  will-change: translate, rotate, scale;
+}
+
+/* La segunda silla arranca en otro punto de cada ciclo: dos objetos en el
+   mismo tanque no se mecen al unísono. */
+.flota--b {
+  animation-delay: -5s, -16s, -11s, -24s, -8s, -2s;
+}
+
+/* Las tres traslaciones lentas, cada una a lo suyo. Por separado son vaivenes
+   de libro; lo que no se repite es la suma. */
+@keyframes flotar-x {
+  from {
+    translate: calc(-5% * var(--nado)) 0;
+  }
+  to {
+    translate: calc(5% * var(--nado)) 0;
+  }
+}
+
+@keyframes flotar-y {
+  from {
+    translate: 0 calc(-5% * var(--nado));
+  }
+  to {
+    translate: 0 calc(5% * var(--nado));
+  }
+}
+
+/* En diagonal y en sentidos cruzados: sin ella las otras dos dibujarían una
+   caja y la silla iría de esquina a esquina. */
+@keyframes flotar-diagonal {
+  from {
+    translate: calc(-3% * var(--nado)) calc(3% * var(--nado));
+  }
+  to {
+    translate: calc(3% * var(--nado)) calc(-3% * var(--nado));
+  }
+}
+
+/* Cabeceo: más lento que la órbita, para que el giro llegue tarde. */
+@keyframes flotar-cabeceo {
+  from {
+    rotate: calc(-5deg * var(--nado));
+  }
+  to {
+    rotate: calc(5deg * var(--nado));
+  }
+}
+
+/* Profundidad: se acerca y se aleja dentro del fluido. */
+@keyframes flotar-fondo {
+  from {
+    scale: calc(1 - 0.022 * var(--nado));
+  }
+  to {
+    scale: calc(1 + 0.022 * var(--nado));
+  }
+}
+
+/* Corriente corta encima de las tres lentas: le quita la suavidad de reloj.
+   En `translate` y no en `transform`, que es lo que le permite sumarse a las
+   otras en vez de vivir en una propiedad aparte. */
+@keyframes flotar-corriente {
+  0% {
+    translate: 0 0;
+  }
+  33% {
+    translate: calc(1.2% * var(--nado)) calc(-1.5% * var(--nado));
+  }
+  66% {
+    translate: calc(-1.4% * var(--nado)) calc(1% * var(--nado));
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+
+/* — Lista de sedes ————————————————————————————————————————————————— */
+/* Scrollea por dentro, al alto del mapa, y con la barra puesta desde el
+   principio: en Mac la barra flotante se esconde sola y una caja recortada
+   sin barra no se lee como scrollable —parece que la lista acaba ahí—. Un
+   carril de un pelo y un pulgar amarillo alcanzan para decir que hay más.
+
+   `scroll` y no `auto`: con `auto` el carril sólo se pinta si el contenido
+   desborda, y la caja cambiaría de ancho al aparecer. `contain` evita que al
+   llegar al final el gesto siga y arrastre la portada. */
+.lista-sedes {
+  overflow-y: scroll;
+  overscroll-behavior: contain;
+}
+
+/* Los pseudo-elementos y no `scrollbar-width`, que era el error: en cuanto se
+   declara la propiedad estándar, Chrome desactiva los pseudos y en macOS
+   `thin` le devuelve la barra flotante del sistema —cero píxeles de ancho y
+   escondida hasta que alguien scrollea, que es justo lo que no queremos—. Con
+   los pseudos a secas la barra es de las de siempre: ocupa sus 4 px y está
+   puesta desde que se pinta la caja. */
+.lista-sedes::-webkit-scrollbar {
+  width: 4px;
+}
+.lista-sedes::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--color-hueso) 12%, transparent);
+}
+.lista-sedes::-webkit-scrollbar-thumb {
+  background: var(--color-amarillo);
+}
+
+/* Firefox no tiene esos pseudos; allí manda la propiedad estándar, que además
+   pinta una barra que no se esconde. */
+@supports not selector(::-webkit-scrollbar) {
+  .lista-sedes {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-amarillo) color-mix(in srgb, var(--color-hueso) 12%, transparent);
+  }
+}
+
+/* La elegida queda en amarillo entera —número, nombre y el enlace de
+   Instagram—, así que el estado vive en el `li` y no en el botón. */
+.fila-sede.sede-activa,
+.fila-sede.sede-activa .meta,
+.fila-sede.sede-activa a {
+  color: var(--color-amarillo);
+}
+
+/* — Ficha: la tarjeta de la casa ——————————————————————————————————— */
+/* Canto de 2 px, sombra dura y papel hueso: los botones del sitio y el modal
+   ya se construyen así, y sobre el amarillo de una sección es lo que hace que
+   un bloque se lea como un objeto puesto encima y no como un dibujo suelto
+   en la página. El relleno no es decorativo: es la diferencia entre una
+   tarjeta y una caja que aprieta a su contenido contra los cantos. */
+.ficha {
+  border: 2px solid var(--color-tinta);
+  box-shadow: 6px 6px 0 var(--color-tinta);
+  background-color: var(--color-hueso);
+  color: var(--color-tinta);
+  padding: 1.5rem;
+}
+
+/* A ancho de página —no dentro de una columna— seis píxeles de sombra y
+   1.5rem de aire se quedan cortos: la ficha se ve apretada y la sombra,
+   tímida. Todo escala con el tamaño del objeto. */
+.ficha--ancha {
+  box-shadow: 8px 8px 0 var(--color-tinta);
+  padding: 1.75rem;
+}
+
+@media (width >= 80rem) {
+  .ficha {
+    padding: 1.75rem 1.9rem;
+  }
+  .ficha--ancha {
+    padding: 2rem 2.25rem;
+  }
+}
+
+/* — Conmutador: el mando de burbuja ———————————————————————————————— */
+/* Dos o cuatro opciones y una burbuja de tinta que se desliza a la elegida.
+   Sin una sola esquina redonda, que en este sitio no hay ninguna: lo que lo
+   hace un mando y no cuatro botones sueltos es el canto que los abraza, la
+   sombra dura de los botones y que la burbuja se mueva en vez de encenderse.
+
+   `grid-auto-columns: 1fr` iguala todas las celdas al ancho de la más ancha.
+   No es cosmético: es lo que deja mover la burbuja en múltiplos exactos de
+   `100 / celdas` sin medir nada en JS. El script sólo cambia `--activa`. */
+.conmutador {
+  --celdas: 2;
+  --activa: 0;
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  border: 2px solid var(--color-tinta);
+  box-shadow: 4px 4px 0 var(--color-tinta);
+  background-color: transparent;
+}
+
+.conmutador-burbuja {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(100% / var(--celdas));
+  background-color: var(--color-tinta);
+  /* El porcentaje de `translate` se mide sobre la propia burbuja, que ya vale
+     una celda: por eso un salto de celda es exactamente 100%. */
+  translate: calc(var(--activa) * 100%) 0;
+  transition: translate 0.45s var(--ease-cortina);
+  pointer-events: none;
+}
+
+.conmutador-opcion {
+  position: relative;
+  z-index: 1;
+  padding: 0.78rem 1.4rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-tinta);
+  transition: color 0.3s var(--ease-salida);
+}
+.conmutador-opcion[aria-selected='true'],
+.conmutador-opcion[aria-pressed='true'] {
+  color: var(--color-amarillo);
+}
+
+/* Cuatro días: además del nombre va la fecha y cuántas actividades tiene, en
+   una segunda línea. Es el mismo mando, con más celdas y menos relleno. */
+.conmutador--dias {
+  --celdas: 4;
+}
+.conmutador--dias .conmutador-opcion {
+  padding: 0.6rem 1.15rem;
+}
+.conmutador-opcion-dia {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+}
+.conmutador-opcion-nota {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  opacity: 0.55;
+}
+
+/* La vista que entra sube desde abajo, como las cortinas del resto del sitio.
+   En rem y no en porcentaje: un 16% de la vista de los cuatro días —que mide
+   media pantalla— sería un salto de cien píxeles. */
+.panel-vista[data-estado='entrando'] {
+  animation: vista-entra 0.5s var(--ease-salida) both;
+}
+
+@keyframes vista-entra {
+  from {
+    opacity: 0;
+    translate: 0 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .conmutador-burbuja {
+    transition: none;
+  }
+}
+
+/* — Días de la portada ————————————————————————————————————————————— */
+/* La lista de los cuatro días del adelanto del programa es el mando de la
+   rejilla que tiene al lado. El día elegido se pinta en rojo entero —número
+   y nombre—, así que el estado se lee en la fila y no en el botón; es el
+   mismo trato que reciben las sedes, que se ponen en amarillo enteras.
+   Nada de fondo ni de relleno: en una sección amarilla, con un titular de
+   cartel encima, cualquier caja más sería otro bloque compitiendo. */
+.dia-portada:hover .dia-nombre,
+.dia-portada[aria-pressed='true'] .dia-nombre,
+.dia-portada[aria-pressed='true'] .dia-num {
+  color: var(--color-rojo);
+}
+
+/* «Hoy» sólo aparece si el festival está en marcha: lo pone el script de la
+   rejilla, que es quien sabe qué día es y por qué arrancó en ése. */
+.dia-hoy {
+  display: none;
+}
+.dia-portada[data-hoy] .dia-hoy {
+  display: inline-block;
+}
+
+/* — Cinta de marcas ———————————————————————————————————————————————— */
+/* Una sección con dos caras. El cambio de grupo lo dispara el JS al cerrar la
+   vuelta de la cinta; acá sólo vive el color, que va en transición para que
+   el vuelco se lea como un cambio de luz y no como un parpadeo. */
+.cinta-marcas {
+  background-color: var(--color-hueso);
+  border-color: var(--color-tinta);
+  color: var(--color-tinta);
+  transition:
+    background-color 0.8s var(--ease-salida),
+    border-color 0.8s var(--ease-salida),
+    color 0.8s var(--ease-salida);
+}
+.cinta-marcas[data-grupo='colaboradores'] {
+  background-color: var(--color-pizarra);
+  border-color: var(--color-amarillo);
+  color: var(--color-hueso);
+}
+
+.cinta-acento {
+  color: var(--color-rojo);
+  transition: color 0.8s var(--ease-salida);
+}
+.cinta-marcas[data-grupo='colaboradores'] .cinta-acento {
+  color: var(--color-amarillo);
+}
+
+/* Los dos grupos comparten celda. El que no toca se apaga pero no se saca
+   del flujo: con `display: none` su cinta volvería a arrancar de cero cada
+   vez y los últimos logos no se verían nunca. Así queda en pausa donde iba. */
+.cinta-pista {
+  display: grid;
+}
+.cinta-pista > .grupo-marcas {
+  grid-area: 1 / 1;
+}
+.grupo-marcas[data-oculto] {
+  visibility: hidden;
+  opacity: 0;
+}
+.grupo-marcas[data-oculto] .marquee,
+.cinta-marcas[data-dormida] .marquee {
+  animation-play-state: paused;
+}
+
+/* El relevo entre grupos. La cinta que se va sube y se apaga; la que entra
+   sube desde abajo, como las cortinas del resto del sitio. Va en el
+   contenedor del grupo, no en `.marquee`, que ya tiene ocupada su animación
+   desfilando. */
+.grupo-marcas[data-estado='saliendo'] {
+  animation: marcas-salen 0.42s var(--ease-cortina) forwards;
+}
+.grupo-marcas[data-estado='entrando'] {
+  animation: marcas-entran 0.8s var(--ease-salida) both;
+}
+
+@keyframes marcas-salen {
+  to {
+    opacity: 0;
+    translate: 0 -14%;
+  }
+}
+@keyframes marcas-entran {
+  from {
+    opacity: 0;
+    translate: 0 16%;
+  }
+}
+
+/* El título se va y vuelve con el mismo gesto, medio tiempo antes. */
+.cinta-cabecera {
+  transition:
+    opacity 0.35s var(--ease-salida),
+    translate 0.35s var(--ease-salida);
+}
+.cinta-cabecera[data-estado='saliendo'] {
+  opacity: 0;
+  translate: 0 -0.6rem;
+}
+
+/* El rótulo de cada grupo sólo aparece cuando los dos están a la vista, que
+   es el caso de `prefers-reduced-motion`: ahí el título de arriba ya no puede
+   hablar por los dos. */
+.rotulo-grupo {
+  display: none;
+  color: var(--color-rojo);
+}
+.cinta-marcas[data-quieta] .rotulo-grupo {
+  display: block;
+}
+.cinta-marcas[data-quieta] .cinta-pista {
+  display: block;
+}
+.cinta-marcas[data-quieta] .grupo-marcas + .grupo-marcas {
+  margin-top: 3rem;
+}
+/* Sin animación la cinta no desfila sola: se arrastra a mano. */
+.cinta-marcas[data-quieta] .marquee {
+  width: auto;
+}
+.cinta-marcas[data-quieta] [role='marquee'] {
+  overflow-x: auto;
+}
+.cinta-marcas[data-quieta] .marquee > div[aria-hidden='true'] {
+  display: none;
+}
+
+/* — Modal ——————————————————————————————————————————————————————————— */
+/* Sobre un `<dialog>` nativo: sólo se le pone piel y las dos animaciones.
+   La piel son tres bandas a sangre —roja, hueso, tinta— separadas por los
+   mismos filetes de 2 px que separan las secciones del sitio. Una tarjeta con
+   relleno parejo y texto gris habría sido un modal de cualquier lado. */
+.modal {
+  /* `position: fixed` e `inset: 0` son los del user-agent, repuestos a mano.
+     Con `position: relative` —que es lo que había, para que la ✕ se cuelgue
+     del diálogo— el navegador lo trata como un elemento del flujo aunque esté
+     en la capa superior: al abrirlo lleva el foco dentro y, para enseñar lo
+     enfocado, hace scroll hasta donde el diálogo *cae en el documento*, que
+     es el principio. Resultado: abrir el manifiesto disparaba la página
+     hasta arriba. `fixed` lo saca del flujo y el scroll se queda donde está;
+     la ✕ sigue colgando igual, porque un elemento posicionado es contenedor
+     de sus hijos absolutos sea fixed o relative.
+
+     `margin: auto` es lo que centra un `<dialog>` modal, y el preflight de
+     Tailwind se lo borra junto con el margen de todo lo demás. Sin esto queda
+     pegado arriba a la izquierda. */
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  max-width: min(58rem, calc(100vw - 3rem));
+  max-height: min(86vh, 58rem);
+  padding: 0;
+  border: 2px solid var(--color-tinta);
+  /* Sombra dura, sin difuminar: la misma idea que los botones del sitio. */
+  box-shadow: 12px 12px 0 var(--color-tinta);
+  background-color: var(--color-hueso);
+  color: var(--color-tinta);
+  overflow: hidden;
+}
+.modal::backdrop {
+  background-color: color-mix(in srgb, var(--color-tinta) 85%, transparent);
+}
+
+.modal-caja {
+  max-height: min(86vh, 58rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-rojo) transparent;
+}
+
+/* Cabecera: la misma banda roja con cuadrícula que abre las páginas. */
+.modal-cabecera {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 2px solid var(--color-tinta);
+  background-color: var(--color-rojo);
+  color: var(--color-amarillo);
+  padding: 2rem 1.5rem 2.25rem;
+}
+@media (width >= 40rem) {
+  .modal-cabecera {
+    padding: 2.75rem 3rem 3rem;
+  }
+}
+
+/* La ✕ cuelga del diálogo, no de lo que scrollea: siempre está donde el ojo
+   la fue a buscar. */
+.modal-cerrar {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 2px solid var(--color-amarillo);
+  background-color: var(--color-tinta);
+  color: var(--color-amarillo);
+  font-size: 0.9rem;
+  line-height: 1;
+  transition:
+    background-color 0.25s var(--ease-salida),
+    color 0.25s var(--ease-salida);
+}
+.modal-cerrar:hover {
+  background-color: var(--color-amarillo);
+  color: var(--color-tinta);
+}
+@media (width >= 40rem) {
+  .modal-cerrar {
+    top: 1.5rem;
+    right: 1.5rem;
+  }
+}
+
+/* Cuerpo: el número manda, en display y del tamaño de un titular chico. */
+.modal-parrafos {
+  display: grid;
+  padding: 0;
+}
+.modal-parrafos > li {
+  display: grid;
+  gap: 0.25rem 1.5rem;
+  padding: 1.75rem 1.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-tinta) 15%, transparent);
+}
+.modal-parrafos > li:last-child {
+  border-bottom: 0;
+}
+@media (width >= 40rem) {
+  .modal-parrafos > li {
+    grid-template-columns: 5rem 1fr;
+    padding: 2rem 3rem;
+  }
+}
+.modal-numero {
+  font-family: var(--font-display, 'Anton', sans-serif);
+  font-size: 2.25rem;
+  line-height: 0.9;
+  color: var(--color-rojo);
+}
+.modal-parrafos p {
+  max-width: 58ch;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: color-mix(in srgb, var(--color-tinta) 88%, transparent);
+}
+
+/* Remate: banda tinta, la frase en amarillo. Es el cierre, no un párrafo. */
+.modal-cierre {
+  border-top: 2px solid var(--color-tinta);
+  background-color: var(--color-tinta);
+  padding: 2rem 1.5rem;
+}
+@media (width >= 40rem) {
+  .modal-cierre {
+    padding: 2.5rem 3rem;
+  }
+}
+.modal-cierre blockquote {
+  max-width: 46ch;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: var(--color-amarillo);
+}
+@media (width >= 40rem) {
+  .modal-cierre blockquote {
+    font-size: 1.3rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .modal[open] {
+    animation: modal-entra 0.5s var(--ease-cortina) both;
+  }
+  .modal[open]::backdrop {
+    animation: fondo-entra 0.5s linear both;
+  }
+  /* La salida hay que pedirla a mano: el diálogo se cierra en el mismo cuadro
+     en que se lo manda cerrar, así que el JS marca `data-cerrando`, deja
+     correr esto y cierra al terminar. */
+  .modal[data-cerrando] {
+    animation: modal-sale 0.35s var(--ease-cortina) both;
+  }
+  .modal[data-cerrando]::backdrop {
+    animation: fondo-sale 0.35s linear both;
+  }
+}
+
+@keyframes modal-entra {
+  from {
+    clip-path: inset(100% 0 0 0);
+    translate: 0 2rem;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    translate: 0 0;
+  }
+}
+@keyframes modal-sale {
+  to {
+    opacity: 0;
+    translate: 0 1.5rem;
+  }
+}
+@keyframes fondo-entra {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fondo-sale {
+  to {
+    opacity: 0;
   }
 }
 
@@ -435,6 +1079,9 @@
     translate: 0 !important;
   }
   .marquee {
+    animation: none;
+  }
+  .flota {
     animation: none;
   }
   @view-transition {
