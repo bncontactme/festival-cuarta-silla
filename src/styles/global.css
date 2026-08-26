@@ -623,11 +623,22 @@
    mismos filetes de 2 px que separan las secciones del sitio. Una tarjeta con
    relleno parejo y texto gris habría sido un modal de cualquier lado. */
 .modal {
-  /* `margin: auto` es lo que centra un `<dialog>` modal, y el preflight de
+  /* `position: fixed` e `inset: 0` son los del user-agent, repuestos a mano.
+     Con `position: relative` —que es lo que había, para que la ✕ se cuelgue
+     del diálogo— el navegador lo trata como un elemento del flujo aunque esté
+     en la capa superior: al abrirlo lleva el foco dentro y, para enseñar lo
+     enfocado, hace scroll hasta donde el diálogo *cae en el documento*, que
+     es el principio. Resultado: abrir el manifiesto disparaba la página
+     hasta arriba. `fixed` lo saca del flujo y el scroll se queda donde está;
+     la ✕ sigue colgando igual, porque un elemento posicionado es contenedor
+     de sus hijos absolutos sea fixed o relative.
+
+     `margin: auto` es lo que centra un `<dialog>` modal, y el preflight de
      Tailwind se lo borra junto con el margen de todo lo demás. Sin esto queda
      pegado arriba a la izquierda. */
+  position: fixed;
+  inset: 0;
   margin: auto;
-  position: relative;
   max-width: min(58rem, calc(100vw - 3rem));
   max-height: min(86vh, 58rem);
   padding: 0;

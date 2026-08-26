@@ -179,14 +179,14 @@ const cuenta = [
   />
 
   {/* ══ MANIFIESTO ═══════════════════════════════════════════════════════
-      La sección se queda con lo que se lee de pie: la pregunta. Los tres
-      párrafos y el cierre viven en un modal — el manifiesto es para quien
-      quiere leerlo, no para que le pase por encima a quien vino a ver fechas.
+      Una sola banda, baja y limpia: rótulo, pregunta y puerta. Nada más.
+      El manifiesto entero —los tres párrafos y el cierre— vive en el modal;
+      repetir aquí la tesis en una franja oscura duplicaba el texto y le daba
+      a la sección el doble de alto del que necesita para decir lo que dice.
 
-      Dos bandas, como las secciones del sitio y como el modal: la pregunta
-      sobre hueso y, abajo, una franja de tinta a sangre con la tesis y la
-      puerta de entrada. Sin esa franja los tres elementos quedaban flotando
-      sueltos en una caja gris, que era el problema.
+      Es el respiro entre la cuenta regresiva y las sedes: si esta sección
+      pesa lo mismo que ellas, la portada se vuelve una sucesión de bloques
+      del mismo tamaño y ninguno destaca.
 
       El diálogo es un `<dialog>` nativo: el foco, la capa superior, Esc y el
       inerte de lo que queda atrás ya vienen resueltos y bien. */}
@@ -196,52 +196,66 @@ const cuenta = [
         oscura, y un filete tinta contra tinta no se ve. */}
     class="relative overflow-hidden border-b-2 border-amarillo bg-hueso"
   >
+    {/* La silla, muy apagada y recortada por el canto de la banda: entre la
+        pregunta y el botón queda un hueco ancho que en hueso liso se ve
+        plano. No sube el alto de la sección ni compite con nada. */}
     <Silla
       variante="roja"
       deriva
-      class="pointer-events-none absolute -right-16 -top-8 w-56 opacity-[0.09] lg:w-80"
+      class="pointer-events-none absolute -top-10 right-[26%] w-52 opacity-[0.07] lg:w-64"
     />
 
-    <div class="relative px-4 pt-16 pb-14 sm:px-6 lg:px-10 lg:pt-20 lg:pb-16">
-      <p class="meta mb-8 flex items-center gap-4 text-rojo" data-reveal="lado">
-        <span class="inline-block h-[2px] w-12 bg-rojo"></span>
-        01 / Manifiesto
-      </p>
-
-      {/* Medida corta a propósito: la pregunta se apila en bloque de cartel
-          en vez de estirarse en una línea larga y dejar media sección vacía. */}
-      <h2
-        class="display max-w-[13ch] text-[10vw] leading-[0.95] text-tinta lg:text-[6.5vw]"
-        data-lineas
-        data-reveal="lineas"
-      >
-        {manifiesto.titulo}
-      </h2>
-    </div>
-
-    {/* La tesis es la misma frase con la que cierra el modal: se ve el
-        reclamo, se lee el argumento y se vuelve a salir por el reclamo. */}
-    <div class="relative border-t-2 border-tinta bg-tinta text-hueso">
-      <div
-        class="flex flex-wrap items-center justify-between gap-x-10 gap-y-6 px-4 py-8 sm:px-6 lg:px-10"
-      >
+    {/* Alineadas por abajo: el botón se apoya en la última línea de la
+        pregunta, no flota a media altura. En columna estrecha se apila y el
+        botón queda debajo, que es el orden en que se lee de todos modos. */}
+    <div
+      class="relative flex flex-wrap items-end justify-between gap-x-10 gap-y-8 px-4 py-12 sm:px-6 lg:px-10 lg:py-14"
+    >
+      <div>
         <p
-          class="max-w-2xl font-mono text-base leading-snug font-bold text-amarillo sm:text-lg"
+          class="meta mb-5 flex items-center gap-4 text-rojo"
+          data-reveal="lado"
+        >
+          <span class="inline-block h-[2px] w-12 bg-rojo"></span>
+          01 / Manifiesto
+        </p>
+
+        {/* Dos líneas, no cuatro: apilada en columna estrecha la pregunta
+            ocupaba un cuarto del ancho y dejaba un socavón de aire entre el
+            titular y el botón. Con la medida ancha llena la mitad izquierda
+            de la banda y la sección baja de alto, que es de lo que se
+            trata. */}
+        <h2
+          class="display max-w-[20ch] text-[9vw] leading-[0.95] text-tinta lg:text-[4.4vw]"
+          data-lineas
+          data-reveal="lineas"
+        >
+          {manifiesto.titulo}
+        </h2>
+
+        {/* La tesis, que antes iba en la franja oscura, aquí de subtítulo:
+            misma frase con la que cierra el modal —se ve el reclamo, se lee
+            el argumento y se vuelve a salir por el reclamo— pero a cuerpo de
+            pie de foto y en la misma banda, sin fondo propio ni segundo
+            bloque a sangre. */}
+        <p
+          class="mt-6 max-w-[54ch] font-mono text-sm leading-relaxed text-tinta/70 lg:text-[0.95rem]"
           data-reveal="arriba"
+          data-retraso="80"
         >
           {manifiesto.cierre}
         </p>
-
-        <button
-          type="button"
-          class="boton boton--hueso shrink-0"
-          data-abre="manifiesto"
-          data-reveal="arriba"
-          data-retraso="120"
-        >
-          Leer el manifiesto ↗
-        </button>
       </div>
+
+      <button
+        type="button"
+        class="boton shrink-0"
+        data-abre="manifiesto"
+        data-reveal="arriba"
+        data-retraso="120"
+      >
+        Leer el manifiesto ↗
+      </button>
     </div>
   </section>
 
