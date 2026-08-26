@@ -178,75 +178,122 @@ const cuenta = [
     class="meta border-b-2 border-tinta bg-rojo py-4 text-amarillo"
   />
 
-  <!-- ══ MANIFIESTO ═════════════════════════════════════════════════════ -->
+  {/* ══ MANIFIESTO ═══════════════════════════════════════════════════════
+      La sección se queda con lo que se lee de pie: la pregunta. Los tres
+      párrafos y el cierre viven en un modal — el manifiesto es para quien
+      quiere leerlo, no para que le pase por encima a quien vino a ver fechas.
+
+      Dos bandas, como las secciones del sitio y como el modal: la pregunta
+      sobre hueso y, abajo, una franja de tinta a sangre con la tesis y la
+      puerta de entrada. Sin esa franja los tres elementos quedaban flotando
+      sueltos en una caja gris, que era el problema.
+
+      El diálogo es un `<dialog>` nativo: el foco, la capa superior, Esc y el
+      inerte de lo que queda atrás ya vienen resueltos y bien. */}
   <section
     id="manifiesto"
-    class="relative overflow-hidden border-b-2 border-tinta bg-hueso"
+    {/* Borde amarillo: abajo sigue la sección de sedes, que también es
+        oscura, y un filete tinta contra tinta no se ve. */}
+    class="relative overflow-hidden border-b-2 border-amarillo bg-hueso"
   >
-    <div class="px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
+    <Silla
+      variante="roja"
+      deriva
+      class="pointer-events-none absolute -right-16 -top-8 w-56 opacity-[0.09] lg:w-80"
+    />
+
+    <div class="relative px-4 pt-16 pb-14 sm:px-6 lg:px-10 lg:pt-20 lg:pb-16">
       <p class="meta mb-8 flex items-center gap-4 text-rojo" data-reveal="lado">
         <span class="inline-block h-[2px] w-12 bg-rojo"></span>
         01 / Manifiesto
       </p>
 
+      {/* Medida corta a propósito: la pregunta se apila en bloque de cartel
+          en vez de estirarse en una línea larga y dejar media sección vacía. */}
       <h2
-        class="display max-w-5xl text-[9vw] leading-[0.95] text-tinta lg:text-[6.5vw]"
+        class="display max-w-[13ch] text-[10vw] leading-[0.95] text-tinta lg:text-[6.5vw]"
         data-lineas
         data-reveal="lineas"
       >
         {manifiesto.titulo}
       </h2>
-
-      <div
-        class="mt-16 grid gap-x-16 gap-y-8 lg:grid-cols-[1fr_1fr] lg:items-start"
-      >
-        <div class="space-y-6">
-          {
-            manifiesto.parrafos.slice(0, 2).map((p, i) => (
-              <p
-                class="text-lg leading-relaxed text-tinta/85 sm:text-xl"
-                data-reveal="arriba"
-                data-retraso={i * 100}
-              >
-                {p}
-              </p>
-            ))
-          }
-        </div>
-
-        <div class="space-y-6">
-          {
-            manifiesto.parrafos.slice(2).map((p) => (
-              <p
-                class="text-lg leading-relaxed text-tinta/85 sm:text-xl"
-                data-reveal="arriba"
-              >
-                {p}
-              </p>
-            ))
-          }
-
-          <figure
-            class="relative mt-10 border-l-4 border-rojo pl-6"
-            data-reveal="arriba"
-            data-retraso="150"
-          >
-            <blockquote
-              class="font-mono text-xl leading-snug font-bold text-rojo sm:text-2xl"
-            >
-              {manifiesto.cierre}
-            </blockquote>
-          </figure>
-        </div>
-      </div>
     </div>
 
-    <Silla
-      variante="roja"
-      deriva
-      class="pointer-events-none absolute -right-10 bottom-0 w-44 opacity-[0.07] lg:w-72"
-    />
+    {/* La tesis es la misma frase con la que cierra el modal: se ve el
+        reclamo, se lee el argumento y se vuelve a salir por el reclamo. */}
+    <div class="relative border-t-2 border-tinta bg-tinta text-hueso">
+      <div
+        class="flex flex-wrap items-center justify-between gap-x-10 gap-y-6 px-4 py-8 sm:px-6 lg:px-10"
+      >
+        <p
+          class="max-w-2xl font-mono text-base leading-snug font-bold text-amarillo sm:text-lg"
+          data-reveal="arriba"
+        >
+          {manifiesto.cierre}
+        </p>
+
+        <button
+          type="button"
+          class="boton boton--hueso shrink-0"
+          data-abre="manifiesto"
+          data-reveal="arriba"
+          data-retraso="120"
+        >
+          Leer el manifiesto ↗
+        </button>
+      </div>
+    </div>
   </section>
+
+  {/* El modal es una mini-página, no una tarjeta: tres bandas a sangre
+      —cabecera roja, cuerpo hueso, remate tinta— con los mismos filetes de
+      2 px que separan las secciones del sitio. */}
+  <dialog
+    class="modal"
+    data-modal="manifiesto"
+    aria-labelledby="modal-manifiesto-titulo"
+  >
+    {/* La ✕ cuelga del diálogo y no de la caja que scrollea: así no se va
+        con el texto. */}
+    <button type="button" class="modal-cerrar" data-cierra aria-label="Cerrar">
+      ✕
+    </button>
+
+    {/* `data-lenis-prevent`: sin eso la rueda dentro del modal se la queda
+        Lenis y mueve la página de atrás en lugar del texto. */}
+    <div class="modal-caja" data-lenis-prevent>
+      <header class="modal-cabecera">
+        <div class="cuadricula absolute inset-0 opacity-40" aria-hidden="true">
+        </div>
+        <p class="meta relative mb-6">01 / Manifiesto</p>
+        <h2
+          id="modal-manifiesto-titulo"
+          class="display relative max-w-[16ch] text-[8vw] leading-[0.92] sm:text-[5.5vw] lg:text-[3.4vw]"
+        >
+          {manifiesto.titulo}
+        </h2>
+      </header>
+
+      {/* Numerados: son tres argumentos encadenados, no tres párrafos
+          sueltos, y el número lo dice sin tener que escribirlo. */}
+      <ol class="modal-parrafos">
+        {
+          manifiesto.parrafos.map((parrafo, i) => (
+            <li>
+              <span class="modal-numero" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <p>{parrafo}</p>
+            </li>
+          ))
+        }
+      </ol>
+
+      <figure class="modal-cierre">
+        <blockquote>{manifiesto.cierre}</blockquote>
+      </figure>
+    </div>
+  </dialog>
 
   <!-- ══ SEDES ══════════════════════════════════════════════════════════ -->
   <section class="border-b-2 border-amarillo bg-pizarra text-hueso">

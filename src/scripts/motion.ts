@@ -407,6 +407,73 @@ function iniciarIman() {
 }
 
 /**
+ * Modales.
+ *
+ * El `<dialog>` nativo ya resuelve lo difícil —capa superior, foco atrapado,
+ * Esc, y el resto de la página inerte—, así que esto sólo agrega las dos
+ * cosas que le faltan: la animación de cierre, que sin ayuda no se ve porque
+ * el elemento desaparece en el mismo cuadro, y frenar a Lenis, que si no
+ * sigue moviendo la página por detrás.
+ */
+function iniciarModales() {
+  const modales = document.querySelectorAll<HTMLDialogElement>('[data-modal]');
+  if (!modales.length) return;
+
+  for (const modal of modales) {
+    const nombre = modal.dataset.modal;
+
+    const cerrar = () => {
+      if (modal.dataset.cerrando) return;
+      if (reducido()) {
+        modal.close();
+        return;
+      }
+      // Se marca, se deja correr la salida y recién ahí se cierra de verdad.
+      // El temporizador es la red: si la animación no llega a correr —una
+      // pestaña en segundo plano, un motor que la ignore— el modal se cerraría
+      // igual. Nunca se queda abierto esperando un evento que no viene.
+      modal.dataset.cerrando = 'si';
+      const rematar = () => {
+        clearTimeout(red);
+        modal.removeEventListener('animationend', rematar);
+        delete modal.dataset.cerrando;
+        modal.close();
+      };
+      const red = setTimeout(rematar, 500);
+      modal.addEventListener('animationend', rematar);
+    };
+
+    document
+      .querySelectorAll<HTMLElement>(`[data-abre="${nombre}"]`)
+      .forEach((boton) =>
+        boton.addEventListener('click', () => {
+          modal.showModal();
+          lenis?.stop();
+        }),
+      );
+
+    modal.querySelectorAll('[data-cierra]').forEach((boton) =>
+      boton.addEventListener('click', cerrar),
+    );
+
+    // Clic en el fondo: el `<dialog>` recibe el clic sólo si cayó fuera de la
+    // caja, porque la caja cubre todo el contenido.
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) cerrar();
+    });
+
+    // Esc cierra solo y sin animación; se intercepta para que también salga
+    // por la puerta.
+    modal.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      cerrar();
+    });
+
+    modal.addEventListener('close', () => lenis?.start());
+  }
+}
+
+/**
  * Cada pieza va por separado: si una falla, las demás siguen. Y si falla
  * `iniciarReveals`, se destapa todo a mano — más vale un sitio sin animación
  * que un sitio en blanco.
@@ -419,6 +486,7 @@ function arrancar() {
     iniciarReveals,
     iniciarCuenta,
     iniciarMenu,
+    iniciarModales,
     iniciarIman,
   ];
 

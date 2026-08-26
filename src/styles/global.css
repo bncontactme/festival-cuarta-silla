@@ -299,11 +299,17 @@
 }
 
 /* Líneas de texto partidas por el splitter.
-   El padding deja aire para las descendentes, que con line-height < 1
-   sobresalen de la caja y el overflow:hidden recortaría. */
+   El relleno deja aire arriba y abajo, que con line-height de cartel se sale
+   de la caja y el `overflow: hidden` recortaría: abajo las descendentes;
+   arriba las tildes de las mayúsculas —É, Á, Í suben por encima de la altura
+   de caja y en «¿QUÉ ENTENDEMOS» la tilde se estaba comiendo entera—. Los
+   márgenes negativos devuelven lo que el relleno agrega, así que la
+   maquetación no se mueve ni un píxel. */
 .linea {
   display: block;
   overflow: hidden;
+  padding-top: 0.12em;
+  margin-top: -0.12em;
   padding-bottom: 0.14em;
   margin-bottom: -0.14em;
 }
@@ -609,6 +615,188 @@
 }
 .cinta-marcas[data-quieta] .marquee > div[aria-hidden='true'] {
   display: none;
+}
+
+/* — Modal ——————————————————————————————————————————————————————————— */
+/* Sobre un `<dialog>` nativo: sólo se le pone piel y las dos animaciones.
+   La piel son tres bandas a sangre —roja, hueso, tinta— separadas por los
+   mismos filetes de 2 px que separan las secciones del sitio. Una tarjeta con
+   relleno parejo y texto gris habría sido un modal de cualquier lado. */
+.modal {
+  /* `margin: auto` es lo que centra un `<dialog>` modal, y el preflight de
+     Tailwind se lo borra junto con el margen de todo lo demás. Sin esto queda
+     pegado arriba a la izquierda. */
+  margin: auto;
+  position: relative;
+  max-width: min(58rem, calc(100vw - 3rem));
+  max-height: min(86vh, 58rem);
+  padding: 0;
+  border: 2px solid var(--color-tinta);
+  /* Sombra dura, sin difuminar: la misma idea que los botones del sitio. */
+  box-shadow: 12px 12px 0 var(--color-tinta);
+  background-color: var(--color-hueso);
+  color: var(--color-tinta);
+  overflow: hidden;
+}
+.modal::backdrop {
+  background-color: color-mix(in srgb, var(--color-tinta) 85%, transparent);
+}
+
+.modal-caja {
+  max-height: min(86vh, 58rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-rojo) transparent;
+}
+
+/* Cabecera: la misma banda roja con cuadrícula que abre las páginas. */
+.modal-cabecera {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 2px solid var(--color-tinta);
+  background-color: var(--color-rojo);
+  color: var(--color-amarillo);
+  padding: 2rem 1.5rem 2.25rem;
+}
+@media (width >= 40rem) {
+  .modal-cabecera {
+    padding: 2.75rem 3rem 3rem;
+  }
+}
+
+/* La ✕ cuelga del diálogo, no de lo que scrollea: siempre está donde el ojo
+   la fue a buscar. */
+.modal-cerrar {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 2px solid var(--color-amarillo);
+  background-color: var(--color-tinta);
+  color: var(--color-amarillo);
+  font-size: 0.9rem;
+  line-height: 1;
+  transition:
+    background-color 0.25s var(--ease-salida),
+    color 0.25s var(--ease-salida);
+}
+.modal-cerrar:hover {
+  background-color: var(--color-amarillo);
+  color: var(--color-tinta);
+}
+@media (width >= 40rem) {
+  .modal-cerrar {
+    top: 1.5rem;
+    right: 1.5rem;
+  }
+}
+
+/* Cuerpo: el número manda, en display y del tamaño de un titular chico. */
+.modal-parrafos {
+  display: grid;
+  padding: 0;
+}
+.modal-parrafos > li {
+  display: grid;
+  gap: 0.25rem 1.5rem;
+  padding: 1.75rem 1.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-tinta) 15%, transparent);
+}
+.modal-parrafos > li:last-child {
+  border-bottom: 0;
+}
+@media (width >= 40rem) {
+  .modal-parrafos > li {
+    grid-template-columns: 5rem 1fr;
+    padding: 2rem 3rem;
+  }
+}
+.modal-numero {
+  font-family: var(--font-display, 'Anton', sans-serif);
+  font-size: 2.25rem;
+  line-height: 0.9;
+  color: var(--color-rojo);
+}
+.modal-parrafos p {
+  max-width: 58ch;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: color-mix(in srgb, var(--color-tinta) 88%, transparent);
+}
+
+/* Remate: banda tinta, la frase en amarillo. Es el cierre, no un párrafo. */
+.modal-cierre {
+  border-top: 2px solid var(--color-tinta);
+  background-color: var(--color-tinta);
+  padding: 2rem 1.5rem;
+}
+@media (width >= 40rem) {
+  .modal-cierre {
+    padding: 2.5rem 3rem;
+  }
+}
+.modal-cierre blockquote {
+  max-width: 46ch;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: var(--color-amarillo);
+}
+@media (width >= 40rem) {
+  .modal-cierre blockquote {
+    font-size: 1.3rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .modal[open] {
+    animation: modal-entra 0.5s var(--ease-cortina) both;
+  }
+  .modal[open]::backdrop {
+    animation: fondo-entra 0.5s linear both;
+  }
+  /* La salida hay que pedirla a mano: el diálogo se cierra en el mismo cuadro
+     en que se lo manda cerrar, así que el JS marca `data-cerrando`, deja
+     correr esto y cierra al terminar. */
+  .modal[data-cerrando] {
+    animation: modal-sale 0.35s var(--ease-cortina) both;
+  }
+  .modal[data-cerrando]::backdrop {
+    animation: fondo-sale 0.35s linear both;
+  }
+}
+
+@keyframes modal-entra {
+  from {
+    clip-path: inset(100% 0 0 0);
+    translate: 0 2rem;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    translate: 0 0;
+  }
+}
+@keyframes modal-sale {
+  to {
+    opacity: 0;
+    translate: 0 1.5rem;
+  }
+}
+@keyframes fondo-entra {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fondo-sale {
+  to {
+    opacity: 0;
+  }
 }
 
 /* — Marquee ————————————————————————————————————————————————————————— */
