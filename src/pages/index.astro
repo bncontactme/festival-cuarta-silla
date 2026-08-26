@@ -338,11 +338,17 @@ const cuenta = [
         </div>
 
         {/* ── Lista ────────────────────────────────────────────────────
-            Scrollea por dentro, al alto del mapa. `data-lenis-prevent` es lo
-            que hace que la rueda mueva la lista y no la página: Lenis captura
-            el scroll de toda la ventana y sin eso esta caja no se entera. */}
+            Scrollea por dentro, al alto del mapa, pero **no desde el
+            principio**: hasta que la caja no se ve entera queda bloqueada. Si
+            no, al bajar por la portada la rueda cae dentro de la lista con
+            media sección todavía fuera de cuadro y la página se queda
+            trabada — el usuario cree que el sitio se rompió.
+            `data-lenis-prevent` es lo que hace que, ya desbloqueada, la rueda
+            mueva la lista y no la página: Lenis captura el scroll de toda la
+            ventana y sin eso esta caja no se entera. */}
         <ul
-          class="lista-sedes h-[55vh] overflow-y-auto border-t-2 border-hueso/25 pr-3 lg:h-[60vh]"
+          class="lista-sedes h-[55vh] border-t-2 border-hueso/25 pr-3 lg:h-[60vh]"
+          data-lista-sedes
           data-lenis-prevent
         >
           {
@@ -456,6 +462,7 @@ const cuenta = [
         <section
           class="cinta-marcas overflow-hidden border-b-2"
           data-cinta
+          data-dormida
           data-grupo="patrocinadores"
         >
           <div class="cinta-cabecera px-4 pt-20 pb-10 sm:px-6 lg:px-10">
@@ -586,10 +593,14 @@ const cuenta = [
   <script>
     /** La cinta de marcas alterna entre patrocinadores y colaboradores.
      *
-     * Cada grupo lleva su turno en `data-espera`. Al esconderse no se saca
-     * del flujo con `hidden`: se apaga con `data-oculto`, que además le pone
-     * la cinta en pausa. Con `display: none` la animación volvería a empezar
-     * de cero cada vez y los últimos logos no se verían nunca.
+     * No arranca hasta que la sección asoma, y al salir de cuadro vuelve a
+     * dormirse en patrocinadores: quien baja hasta acá la encuentra siempre
+     * empezada por el principio, no a mitad de un turno que corrió solo
+     * mientras nadie miraba.
+     *
+     * La cinta que se apaga queda **en pausa donde iba**, no se saca del
+     * flujo: con `display: none` la animación volvería a empezar de cero cada
+     * vez y las últimas marcas no se verían nunca.
      *
      * El relevo va en tres tiempos: primero cambia la luz —el color de la
      * sección, que tarda más y arranca antes—, después se va el grupo que
@@ -642,14 +653,66 @@ const cuenta = [
         }, SALIDA);
       }
 
+      /** Vuelta a foja cero: primer grupo, sin turnos corriendo. */
+      const dormir = () => {
+        clearTimeout(reloj);
+        mudando = false;
+        actual = 0;
+        grupos.forEach((g, i) => {
+          delete g.dataset.estado;
+          if (i === 0) delete g.dataset.oculto;
+          else g.dataset.oculto = '';
+        });
+        cinta.setAttribute('data-grupo', grupos[0].dataset.grupoNombre ?? '');
+        const nombre = grupos[0].dataset.tituloGrupo ?? '';
+        if (titulo) titulo.textContent = nombre;
+        if (rotulo) rotulo.textContent = `${grupos[0].dataset.indice} / ${nombre}`;
+        cinta.setAttribute('data-dormida', '');
+      };
+
       // Sin animación no hay turnos: se muestran los dos grupos, cada uno con
       // su rótulo, y nadie cambia nada solo.
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         cinta.setAttribute('data-quieta', 'si');
+        cinta.removeAttribute('data-dormida');
         grupos.forEach((g) => delete g.dataset.oculto);
       } else {
-        armarTurno(grupos[actual]);
+        const ojo = new IntersectionObserver(
+          ([entrada]) => {
+            if (entrada.isIntersecting) {
+              cinta.removeAttribute('data-dormida');
+              armarTurno(grupos[actual]);
+            } else {
+              dormir();
+            }
+          },
+          // Umbral 0: arranca en cuanto el borde de arriba entra en cuadro.
+          { threshold: 0 },
+        );
+        ojo.observe(cinta);
       }
+    }
+  </script>
+
+  <script>
+    /** La lista de sedes no se puede scrollear hasta verse entera.
+     *
+     * Una caja con scroll propio a media pantalla es una trampa: la rueda
+     * cae adentro cuando todavía falta bajar, la página deja de moverse y
+     * parece rota. Se desbloquea cuando la caja está completa en cuadro
+     * —y ahí aparece la barra, que es el aviso de que ahora sí se mueve.
+     */
+    const lista = document.querySelector('[data-lista-sedes]');
+    if (lista) {
+      const ojo = new IntersectionObserver(
+        ([entrada]) => {
+          lista.toggleAttribute('data-suelta', entrada.isIntersecting);
+        },
+        // 0.99 y no 1: con alturas en `vh` el redondeo a subpíxel puede dejar
+        // el umbral exacto sin cumplirse nunca.
+        { threshold: 0.99 },
+      );
+      ojo.observe(lista);
     }
   </script>
 </Base>

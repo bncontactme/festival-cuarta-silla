@@ -470,14 +470,29 @@
    invisible en una caja sin sombra no se lee como scrollable; `contain` evita
    que al llegar al final el gesto siga y arrastre la página. */
 .lista-sedes {
+  /* Nace bloqueada: sin `data-suelta` no hay scroll ni barra. Es el JS el que
+     la suelta cuando la caja se ve entera. */
+  overflow-y: hidden;
   overscroll-behavior: contain;
+}
+.lista-sedes[data-suelta] {
+  overflow-y: auto;
+}
+
+/* Barra mínima, pero siempre a la vista mientras la lista está suelta: en Mac
+   la barra flotante se esconde sola y nadie se entera de que la caja se
+   mueve. Un carril de un pelo y un pulgar amarillo alcanzan para decirlo. */
+.lista-sedes[data-suelta] {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-amarillo) transparent;
+  scrollbar-color: var(--color-amarillo) color-mix(in srgb, var(--color-hueso) 12%, transparent);
 }
-.lista-sedes::-webkit-scrollbar {
-  width: 6px;
+.lista-sedes[data-suelta]::-webkit-scrollbar {
+  width: 4px;
 }
-.lista-sedes::-webkit-scrollbar-thumb {
+.lista-sedes[data-suelta]::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--color-hueso) 12%, transparent);
+}
+.lista-sedes[data-suelta]::-webkit-scrollbar-thumb {
   background: var(--color-amarillo);
 }
 
@@ -529,7 +544,8 @@
   visibility: hidden;
   opacity: 0;
 }
-.grupo-marcas[data-oculto] .marquee {
+.grupo-marcas[data-oculto] .marquee,
+.cinta-marcas[data-dormida] .marquee {
   animation-play-state: paused;
 }
 

@@ -20,7 +20,14 @@ const paleta = {
 <section class={`relative overflow-hidden border-b-2 border-current ${paleta}`}>
   <div class="cuadricula absolute inset-0 opacity-70" aria-hidden="true"></div>
 
-  <div class="relative px-4 pt-16 pb-10 sm:px-6 lg:px-10 lg:pt-24">
+  {/* La banda va apretada, como la portada. Anton deja muy poco aire dentro
+      de su caja de línea, así que el aire de verdad es el relleno: con 96 px
+      arriba y 40 abajo el título quedaba flotando en el medio de una franja
+      vacía. Medido sobre las mayúsculas: 27 px entre el rótulo y el título y
+      33 debajo, contra los 27 / 42 de antes. Un pelo más abajo que arriba es
+      lo correcto: las mayúsculas no llenan su caja, y repartir exacto las
+      deja ópticamente caídas. */}
+  <div class="relative px-4 pt-8 pb-6 sm:px-6 lg:px-10 lg:pt-10">
     <p class="meta mb-6 flex items-center gap-4" data-reveal="lado">
       <span class="inline-block h-[2px] w-12 bg-current"></span>
       {indice}
