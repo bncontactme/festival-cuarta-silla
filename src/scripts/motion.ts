@@ -245,6 +245,12 @@ function iniciarMenu() {
  * lo acompaña. Mover algo que está al otro lado de la pantalla y que nadie
  * señaló se siente a fantasma; que reaccione a que la toquen, no.
  *
+ * Y deja de acompañarlo en cuanto el cursor abandona su área —la mitad
+ * derecha del hero para la silla grande, que es hasta donde llegan las
+ * letras—. Sin ese límite bastaba rozarla una vez para que se quedara
+ * pegada al puntero por todo el sitio: eso ya no es una silla flotando en
+ * agua, es un cursor con silla.
+ *
  * El alcance no es un número fijo: se mide del área de paseo (`[data-area]`)
  * lo que le sobra a la silla, se le descuenta lo que ya se come la órbita de
  * CSS y lo que sobresale por el giro, y lo que queda es hasta dónde puede
@@ -275,6 +281,12 @@ function iniciarIman() {
       alcanceY: 0,
       cx: 0,
       cy: 0,
+      // Límites del área de paseo, cacheados: son la caja de la que hay que
+      // salirse para que la silla suelte el cursor.
+      areaI: 0,
+      areaD: 0,
+      areaA: 0,
+      areaB: 0,
       destinoX: 0,
       destinoY: 0,
       x: 0,
@@ -295,6 +307,10 @@ function iniciarIman() {
       const r = c.caja.getBoundingClientRect();
       c.cx = r.x + r.width / 2;
       c.cy = r.y + r.height / 2;
+      c.areaI = r.left;
+      c.areaD = r.right;
+      c.areaA = r.top;
+      c.areaB = r.bottom;
 
       if (c.caja.dataset.area === undefined) {
         c.alcanceX = c.alcanceY = SUELTA;
@@ -354,8 +370,10 @@ function iniciarIman() {
       for (const c of capas) {
         // Arranca dormida: no sigue al cursor hasta que el cursor le pasa
         // por encima. Como va por debajo del texto no puede escuchar un
-        // `pointerenter` propio, así que se le pregunta a la geometría —y
-        // sólo mientras duerme: una vez despierta no vuelve a medirse.
+        // `pointerenter` propio, así que se le pregunta a la geometría. Sólo
+        // mientras duerme se mide la silla, que es lo caro: está animada y su
+        // caja cambia en cada cuadro. Para soltarla basta el área, que no se
+        // mueve y ya viene medida.
         if (!c.despierta) {
           const r = c.silla!.getBoundingClientRect();
           c.despierta =
@@ -363,10 +381,21 @@ function iniciarIman() {
             e.clientX <= r.right &&
             e.clientY >= r.top &&
             e.clientY <= r.bottom;
+        } else if (
+          e.clientX < c.areaI ||
+          e.clientX > c.areaD ||
+          e.clientY < c.areaA ||
+          e.clientY > c.areaB
+        ) {
+          c.despierta = false;
         }
+
         if (c.despierta) {
           c.destinoX = nx * c.alcanceX;
           c.destinoY = ny * c.alcanceY;
+        } else {
+          // Suelta el cursor y vuelve al centro de su órbita.
+          c.destinoX = c.destinoY = 0;
         }
 
         const d = Math.hypot(e.clientX - (c.cx + c.x), e.clientY - (c.cy + c.y));

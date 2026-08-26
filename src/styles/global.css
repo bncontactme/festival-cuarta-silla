@@ -397,41 +397,72 @@
   will-change: translate, rotate;
 }
 
+/* El vaivén no es una órbita, son cuatro traslaciones sumadas.
+ *
+ * Antes era una sola: un recorrido de cinco puntos que cerraba cada 17 s. Un
+ * ciclo de 17 s se aprende, y en cuanto se aprende la silla deja de flotar y
+ * se ve el raíl. Aquí X, Y y la diagonal van cada una a su periodo —23, 17,
+ * 31 y 7 segundos, primos entre sí—, así que la trayectoria que sale de
+ * sumarlas no vuelve a pasar por el mismo sitio hasta dentro de tres horas
+ * largas. Nadie mira una silla tres horas: se lee como deriva libre.
+ *
+ * Lo que las suma en vez de pisarse es `animation-composition: accumulate`;
+ * sin él sólo contaría la última de la lista, que por eso es la diagonal —la
+ * degradación es una silla que deriva menos, no una silla quieta.
+ *
+ * Las amplitudes suman 9.2 % en cada eje, por debajo del 10 % que `medir()`
+ * de `iniciarIman` reserva para el vaivén al calcular hasta dónde puede
+ * llevarse el cursor la silla. Si crecen aquí, hay que crecer el `ORBITA` de
+ * allí o la silla se saldrá de su área. */
 .flota {
   animation:
-    flotar-orbita 17s ease-in-out -6s infinite,
+    flotar-corriente 7s ease-in-out -2s infinite,
+    flotar-x 23s ease-in-out -7s infinite alternate,
+    flotar-y 17s ease-in-out -3s infinite alternate,
+    flotar-diagonal 31s ease-in-out -11s infinite alternate,
     flotar-cabeceo 11s ease-in-out -3s infinite alternate,
-    flotar-fondo 13s ease-in-out -8s infinite alternate,
-    flotar-corriente 7s ease-in-out -2s infinite;
-  will-change: translate, rotate, scale, transform;
+    flotar-fondo 13s ease-in-out -8s infinite alternate;
+  /* Las cuatro traslaciones se suman; el giro y la escala van cada uno en su
+     propiedad y no tienen con quién sumarse. */
+  animation-composition: accumulate, accumulate, accumulate, accumulate,
+    replace, replace;
+  will-change: translate, rotate, scale;
 }
 
 /* La segunda silla arranca en otro punto de cada ciclo: dos objetos en el
    mismo tanque no se mecen al unísono. */
 .flota--b {
-  animation-delay: -13.5s, -8s, -2s, -5s;
+  animation-delay: -5s, -16s, -11s, -24s, -8s, -2s;
 }
 
-/* Deriva mayor: la órbita. Cerrada pero asimétrica, para que no se lea como
-   un círculo ni como un vaivén. */
-@keyframes flotar-orbita {
-  0% {
-    translate: 0 calc(-10% * var(--nado));
+/* Las tres traslaciones lentas, cada una a lo suyo. Por separado son vaivenes
+   de libro; lo que no se repite es la suma. */
+@keyframes flotar-x {
+  from {
+    translate: calc(-5% * var(--nado)) 0;
   }
-  22% {
-    translate: calc(9% * var(--nado)) calc(-3.5% * var(--nado));
+  to {
+    translate: calc(5% * var(--nado)) 0;
   }
-  45% {
-    translate: calc(3.5% * var(--nado)) calc(9.5% * var(--nado));
+}
+
+@keyframes flotar-y {
+  from {
+    translate: 0 calc(-5% * var(--nado));
   }
-  68% {
-    translate: calc(-8% * var(--nado)) calc(3% * var(--nado));
+  to {
+    translate: 0 calc(5% * var(--nado));
   }
-  85% {
-    translate: calc(-4.5% * var(--nado)) calc(-6.5% * var(--nado));
+}
+
+/* En diagonal y en sentidos cruzados: sin ella las otras dos dibujarían una
+   caja y la silla iría de esquina a esquina. */
+@keyframes flotar-diagonal {
+  from {
+    translate: calc(-3% * var(--nado)) calc(3% * var(--nado));
   }
-  100% {
-    translate: 0 calc(-10% * var(--nado));
+  to {
+    translate: calc(3% * var(--nado)) calc(-3% * var(--nado));
   }
 }
 
@@ -455,51 +486,61 @@
   }
 }
 
-/* Corriente corta encima de la órbita: le quita la suavidad de reloj. */
+/* Corriente corta encima de las tres lentas: le quita la suavidad de reloj.
+   En `translate` y no en `transform`, que es lo que le permite sumarse a las
+   otras en vez de vivir en una propiedad aparte. */
 @keyframes flotar-corriente {
   0% {
-    transform: translate(0, 0);
+    translate: 0 0;
   }
   33% {
-    transform: translate(calc(1.2% * var(--nado)), calc(-1.5% * var(--nado)));
+    translate: calc(1.2% * var(--nado)) calc(-1.5% * var(--nado));
   }
   66% {
-    transform: translate(calc(-1.4% * var(--nado)), calc(1% * var(--nado)));
+    translate: calc(-1.4% * var(--nado)) calc(1% * var(--nado));
   }
   100% {
-    transform: translate(0, 0);
+    translate: 0 0;
   }
 }
 
 /* — Lista de sedes ————————————————————————————————————————————————— */
-/* Scrollea por dentro, al alto del mapa. La barra se pinta porque una barra
-   invisible en una caja sin sombra no se lee como scrollable; `contain` evita
-   que al llegar al final el gesto siga y arrastre la página. */
+/* Scrollea por dentro, al alto del mapa, y con la barra puesta desde el
+   principio: en Mac la barra flotante se esconde sola y una caja recortada
+   sin barra no se lee como scrollable —parece que la lista acaba ahí—. Un
+   carril de un pelo y un pulgar amarillo alcanzan para decir que hay más.
+
+   `scroll` y no `auto`: con `auto` el carril sólo se pinta si el contenido
+   desborda, y la caja cambiaría de ancho al aparecer. `contain` evita que al
+   llegar al final el gesto siga y arrastre la portada. */
 .lista-sedes {
-  /* Nace bloqueada: sin `data-suelta` no hay scroll ni barra. Es el JS el que
-     la suelta cuando la caja se ve entera. */
-  overflow-y: hidden;
+  overflow-y: scroll;
   overscroll-behavior: contain;
 }
-.lista-sedes[data-suelta] {
-  overflow-y: auto;
-}
 
-/* Barra mínima, pero siempre a la vista mientras la lista está suelta: en Mac
-   la barra flotante se esconde sola y nadie se entera de que la caja se
-   mueve. Un carril de un pelo y un pulgar amarillo alcanzan para decirlo. */
-.lista-sedes[data-suelta] {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-amarillo) color-mix(in srgb, var(--color-hueso) 12%, transparent);
-}
-.lista-sedes[data-suelta]::-webkit-scrollbar {
+/* Los pseudo-elementos y no `scrollbar-width`, que era el error: en cuanto se
+   declara la propiedad estándar, Chrome desactiva los pseudos y en macOS
+   `thin` le devuelve la barra flotante del sistema —cero píxeles de ancho y
+   escondida hasta que alguien scrollea, que es justo lo que no queremos—. Con
+   los pseudos a secas la barra es de las de siempre: ocupa sus 4 px y está
+   puesta desde que se pinta la caja. */
+.lista-sedes::-webkit-scrollbar {
   width: 4px;
 }
-.lista-sedes[data-suelta]::-webkit-scrollbar-track {
+.lista-sedes::-webkit-scrollbar-track {
   background: color-mix(in srgb, var(--color-hueso) 12%, transparent);
 }
-.lista-sedes[data-suelta]::-webkit-scrollbar-thumb {
+.lista-sedes::-webkit-scrollbar-thumb {
   background: var(--color-amarillo);
+}
+
+/* Firefox no tiene esos pseudos; allí manda la propiedad estándar, que además
+   pinta una barra que no se esconde. */
+@supports not selector(::-webkit-scrollbar) {
+  .lista-sedes {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-amarillo) color-mix(in srgb, var(--color-hueso) 12%, transparent);
+  }
 }
 
 /* La elegida queda en amarillo entera —número, nombre y el enlace de

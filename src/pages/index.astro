@@ -80,13 +80,18 @@ const cuenta = [
         {festival.anio}
       </p>
 
+      {/* `15vw` mide el titular por el ancho de la ventana y se olvida del
+          alto: en una pantalla ancha y baja las tres líneas no caben y
+          «CONCEPTUAL» entra cortada por el canto. El `min()` le pone techo
+          —lo que quede de alto entre la barra y el pie de la pantalla— y sólo
+          actúa ahí; en el resto sigue mandando el 15vw de siempre. */}
       <h1 class="mt-8">
         <span class="sr-only">
           {festival.nombre} — {festival.fechas} — {festival.ciudad}
         </span>
 
         <span
-          class="display block text-[15vw] leading-[0.86] text-rojo"
+          class="display block text-[min(15vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -94,7 +99,7 @@ const cuenta = [
           Festival
         </span>
         <span
-          class="display block text-[15vw] leading-[0.86] text-tinta"
+          class="display block text-[min(15vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-tinta"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -103,7 +108,7 @@ const cuenta = [
           de Arte
         </span>
         <span
-          class="display block text-[15vw] leading-[0.86] text-rojo"
+          class="display block text-[min(15vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -399,14 +404,24 @@ const cuenta = [
         </div>
 
         {/* ── Lista ────────────────────────────────────────────────────
-            Scrollea por dentro, al alto del mapa, pero **no desde el
-            principio**: hasta que la caja no se ve entera queda bloqueada. Si
-            no, al bajar por la portada la rueda cae dentro de la lista con
-            media sección todavía fuera de cuadro y la página se queda
-            trabada — el usuario cree que el sitio se rompió.
-            `data-lenis-prevent` es lo que hace que, ya desbloqueada, la rueda
-            mueva la lista y no la página: Lenis captura el scroll de toda la
-            ventana y sin eso esta caja no se entera. */}
+            Scrollea por dentro, al alto del mapa, y desde el primer momento:
+            con la barra pintada a un lado se ve que la caja se mueve, que era
+            lo que antes había que explicar bloqueándola.
+
+            Las filas entran escalonadas, una detrás de otra, pero las
+            catorce a la vez: quien dispara la cascada es la lista, no cada
+            fila por su cuenta. El observador de `motion.ts` mide contra la
+            ventana y no contra esta caja, así que las sedes que caen por
+            debajo del recorte no entraban nunca en cuadro y se quedaban
+            invisibles hasta que alguien scrolleaba dentro —catorce sedes de
+            las que se veían seis—. El script del final de la página se
+            encarga; aquí sólo va el retraso de cada una.
+
+            `data-lenis-prevent` es lo que hace que la rueda mueva la lista y
+            no la página: Lenis captura el scroll de toda la ventana y sin eso
+            esta caja no se entera. `overscroll-behavior: contain`, en la
+            hoja, es lo que evita que al llegar al final el gesto siga y
+            arrastre la portada. */}
         <ul
           class="lista-sedes h-[55vh] border-t-2 border-hueso/25 pr-3 lg:h-[60vh]"
           data-lista-sedes
@@ -417,7 +432,7 @@ const cuenta = [
               <li
                 class="fila-sede flex items-center gap-4 border-b border-hueso/20"
                 data-reveal="arriba"
-                data-retraso={Math.min(i, 8) * 50}
+                data-retraso={i * 45}
               >
                 {/* La fila entera elige la sede: el objetivo es la franja,
                     no un enlace de dos palabras. */}
@@ -756,24 +771,37 @@ const cuenta = [
   </script>
 
   <script>
-    /** La lista de sedes no se puede scrollear hasta verse entera.
+    /** La cascada de la lista de sedes la dispara la lista, no cada fila.
      *
-     * Una caja con scroll propio a media pantalla es una trampa: la rueda
-     * cae adentro cuando todavía falta bajar, la página deja de moverse y
-     * parece rota. Se desbloquea cuando la caja está completa en cuadro
-     * —y ahí aparece la barra, que es el aviso de que ahora sí se mueve.
+     * Las filas llevan `data-reveal`, pero el observador de `motion.ts` mide
+     * contra la ventana: dentro de una caja recortada, las que quedan por
+     * debajo del corte no entran en cuadro nunca y se quedan invisibles. Aquí
+     * se observa la caja entera y, en cuanto asoma, se destapan las catorce de
+     * una vez —cada una con su retraso, que es lo que las escalona—.
+     *
+     * El `--retraso` se pone aquí y no se espera al de `motion.ts`: los dos
+     * scripts leen el mismo `data-retraso` y da igual cuál llegue antes.
      */
     const lista = document.querySelector('[data-lista-sedes]');
     if (lista) {
+      const filas = [
+        ...lista.querySelectorAll<HTMLElement>('[data-reveal]'),
+      ];
       const ojo = new IntersectionObserver(
-        ([entrada]) => {
-          lista.toggleAttribute('data-suelta', entrada.isIntersecting);
+        ([entrada], observador) => {
+          if (!entrada.isIntersecting) return;
+          // Una vez y se olvida: la cascada no se repite al volver a pasar.
+          observador.disconnect();
+          for (const fila of filas) {
+            fila.style.setProperty('--retraso', `${fila.dataset.retraso ?? 0}ms`);
+            fila.classList.add('dentro');
+          }
         },
-        // 0.99 y no 1: con alturas en `vh` el redondeo a subpíxel puede dejar
-        // el umbral exacto sin cumplirse nunca.
-        { threshold: 0.99 },
+        // El mismo margen que usan los reveals del resto del sitio.
+        { rootMargin: '0px 0px -12% 0px', threshold: 0 },
       );
       ojo.observe(lista);
     }
   </script>
+
 </Base>
