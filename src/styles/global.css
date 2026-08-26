@@ -357,6 +357,244 @@
   }
 }
 
+/* — Silla en flotación ————————————————————————————————————————————— */
+/* La silla del hero pasea por la mitad derecha del hero como si estuviera
+   atrapada en agua. Un objeto suspendido en fluido no sube y baja en línea
+   recta: lo arrastran corrientes en los dos ejes a la vez, así que traza una
+   órbita irregular y cerrada; cabecea con retraso respecto a esa deriva,
+   porque el giro le cuesta más que el desplazamiento; y se acerca y se aleja,
+   que es lo que da la sensación de estar dentro de algo y no pegado al fondo.
+   Cuatro ciclos de duración prima entre sí (17 / 11 / 13 / 7 s), cada uno
+   sobre una propiedad distinta —translate, rotate, scale, transform— para que
+   convivan sin pisarse. La combinación tarda casi tres horas en repetirse.
+
+   Las amplitudes son porcentajes del ÁREA de paseo, no de la silla: el
+   contenedor `.flotador` marca hasta dónde puede llegar y todo se escala solo
+   con la ventana. `--nado` las multiplica de golpe cuando el cursor se
+   acerca —lo decide `iniciarIman`, que también mueve la capa `.sigue`—, así
+   que la órbita entera se ensancha en vez de acelerarse. Está registrada con
+   @property: por eso el empujón entra y la calma vuelve en rampa, sin salto. */
+@property --nado {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
+.flotador {
+  transition: --nado 1.6s var(--ease-salida);
+}
+
+/* Capa de la deriva hacia el cursor. Separada de `.flota` porque aquélla ya
+   usa las cuatro propiedades de transformación, y dos animaciones no pueden
+   compartir una. */
+.sigue {
+  will-change: translate, rotate;
+}
+
+.flota {
+  animation:
+    flotar-orbita 17s ease-in-out -6s infinite,
+    flotar-cabeceo 11s ease-in-out -3s infinite alternate,
+    flotar-fondo 13s ease-in-out -8s infinite alternate,
+    flotar-corriente 7s ease-in-out -2s infinite;
+  will-change: translate, rotate, scale, transform;
+}
+
+/* La segunda silla arranca en otro punto de cada ciclo: dos objetos en el
+   mismo tanque no se mecen al unísono. */
+.flota--b {
+  animation-delay: -13.5s, -8s, -2s, -5s;
+}
+
+/* Deriva mayor: la órbita. Cerrada pero asimétrica, para que no se lea como
+   un círculo ni como un vaivén. */
+@keyframes flotar-orbita {
+  0% {
+    translate: 0 calc(-10% * var(--nado));
+  }
+  22% {
+    translate: calc(9% * var(--nado)) calc(-3.5% * var(--nado));
+  }
+  45% {
+    translate: calc(3.5% * var(--nado)) calc(9.5% * var(--nado));
+  }
+  68% {
+    translate: calc(-8% * var(--nado)) calc(3% * var(--nado));
+  }
+  85% {
+    translate: calc(-4.5% * var(--nado)) calc(-6.5% * var(--nado));
+  }
+  100% {
+    translate: 0 calc(-10% * var(--nado));
+  }
+}
+
+/* Cabeceo: más lento que la órbita, para que el giro llegue tarde. */
+@keyframes flotar-cabeceo {
+  from {
+    rotate: calc(-5deg * var(--nado));
+  }
+  to {
+    rotate: calc(5deg * var(--nado));
+  }
+}
+
+/* Profundidad: se acerca y se aleja dentro del fluido. */
+@keyframes flotar-fondo {
+  from {
+    scale: calc(1 - 0.022 * var(--nado));
+  }
+  to {
+    scale: calc(1 + 0.022 * var(--nado));
+  }
+}
+
+/* Corriente corta encima de la órbita: le quita la suavidad de reloj. */
+@keyframes flotar-corriente {
+  0% {
+    transform: translate(0, 0);
+  }
+  33% {
+    transform: translate(calc(1.2% * var(--nado)), calc(-1.5% * var(--nado)));
+  }
+  66% {
+    transform: translate(calc(-1.4% * var(--nado)), calc(1% * var(--nado)));
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* — Lista de sedes ————————————————————————————————————————————————— */
+/* Scrollea por dentro, al alto del mapa. La barra se pinta porque una barra
+   invisible en una caja sin sombra no se lee como scrollable; `contain` evita
+   que al llegar al final el gesto siga y arrastre la página. */
+.lista-sedes {
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-amarillo) transparent;
+}
+.lista-sedes::-webkit-scrollbar {
+  width: 6px;
+}
+.lista-sedes::-webkit-scrollbar-thumb {
+  background: var(--color-amarillo);
+}
+
+/* La elegida queda en amarillo entera —número, nombre y el enlace de
+   Instagram—, así que el estado vive en el `li` y no en el botón. */
+.fila-sede.sede-activa,
+.fila-sede.sede-activa .meta,
+.fila-sede.sede-activa a {
+  color: var(--color-amarillo);
+}
+
+/* — Cinta de marcas ———————————————————————————————————————————————— */
+/* Una sección con dos caras. El cambio de grupo lo dispara el JS al cerrar la
+   vuelta de la cinta; acá sólo vive el color, que va en transición para que
+   el vuelco se lea como un cambio de luz y no como un parpadeo. */
+.cinta-marcas {
+  background-color: var(--color-hueso);
+  border-color: var(--color-tinta);
+  color: var(--color-tinta);
+  transition:
+    background-color 0.8s var(--ease-salida),
+    border-color 0.8s var(--ease-salida),
+    color 0.8s var(--ease-salida);
+}
+.cinta-marcas[data-grupo='colaboradores'] {
+  background-color: var(--color-pizarra);
+  border-color: var(--color-amarillo);
+  color: var(--color-hueso);
+}
+
+.cinta-acento {
+  color: var(--color-rojo);
+  transition: color 0.8s var(--ease-salida);
+}
+.cinta-marcas[data-grupo='colaboradores'] .cinta-acento {
+  color: var(--color-amarillo);
+}
+
+/* Los dos grupos comparten celda. El que no toca se apaga pero no se saca
+   del flujo: con `display: none` su cinta volvería a arrancar de cero cada
+   vez y los últimos logos no se verían nunca. Así queda en pausa donde iba. */
+.cinta-pista {
+  display: grid;
+}
+.cinta-pista > .grupo-marcas {
+  grid-area: 1 / 1;
+}
+.grupo-marcas[data-oculto] {
+  visibility: hidden;
+  opacity: 0;
+}
+.grupo-marcas[data-oculto] .marquee {
+  animation-play-state: paused;
+}
+
+/* El relevo entre grupos. La cinta que se va sube y se apaga; la que entra
+   sube desde abajo, como las cortinas del resto del sitio. Va en el
+   contenedor del grupo, no en `.marquee`, que ya tiene ocupada su animación
+   desfilando. */
+.grupo-marcas[data-estado='saliendo'] {
+  animation: marcas-salen 0.42s var(--ease-cortina) forwards;
+}
+.grupo-marcas[data-estado='entrando'] {
+  animation: marcas-entran 0.8s var(--ease-salida) both;
+}
+
+@keyframes marcas-salen {
+  to {
+    opacity: 0;
+    translate: 0 -14%;
+  }
+}
+@keyframes marcas-entran {
+  from {
+    opacity: 0;
+    translate: 0 16%;
+  }
+}
+
+/* El título se va y vuelve con el mismo gesto, medio tiempo antes. */
+.cinta-cabecera {
+  transition:
+    opacity 0.35s var(--ease-salida),
+    translate 0.35s var(--ease-salida);
+}
+.cinta-cabecera[data-estado='saliendo'] {
+  opacity: 0;
+  translate: 0 -0.6rem;
+}
+
+/* El rótulo de cada grupo sólo aparece cuando los dos están a la vista, que
+   es el caso de `prefers-reduced-motion`: ahí el título de arriba ya no puede
+   hablar por los dos. */
+.rotulo-grupo {
+  display: none;
+  color: var(--color-rojo);
+}
+.cinta-marcas[data-quieta] .rotulo-grupo {
+  display: block;
+}
+.cinta-marcas[data-quieta] .cinta-pista {
+  display: block;
+}
+.cinta-marcas[data-quieta] .grupo-marcas + .grupo-marcas {
+  margin-top: 3rem;
+}
+/* Sin animación la cinta no desfila sola: se arrastra a mano. */
+.cinta-marcas[data-quieta] .marquee {
+  width: auto;
+}
+.cinta-marcas[data-quieta] [role='marquee'] {
+  overflow-x: auto;
+}
+.cinta-marcas[data-quieta] .marquee > div[aria-hidden='true'] {
+  display: none;
+}
+
 /* — Marquee ————————————————————————————————————————————————————————— */
 .marquee {
   display: flex;
@@ -435,6 +673,9 @@
     translate: 0 !important;
   }
   .marquee {
+    animation: none;
+  }
+  .flota {
     animation: none;
   }
   @view-transition {

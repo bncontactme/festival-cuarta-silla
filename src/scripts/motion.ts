@@ -234,6 +234,179 @@ function iniciarMenu() {
 }
 
 /**
+ * Las sillas del hero siguen al cursor.
+ *
+ * El vaivén de fondo es CSS y no se toca; esto suma la deriva hacia el
+ * puntero, con retraso, como si al agua le costara transmitir el empujón, y
+ * avisa a CSS cuando el cursor se acerca para que la órbita se ensanche.
+ *
+ * Ninguna silla sigue al cursor de entrada: hay que tocarla primero. Hasta
+ * que el puntero le pasa por encima se queda en su vaivén, y a partir de ahí
+ * lo acompaña. Mover algo que está al otro lado de la pantalla y que nadie
+ * señaló se siente a fantasma; que reaccione a que la toquen, no.
+ *
+ * El alcance no es un número fijo: se mide del área de paseo (`[data-area]`)
+ * lo que le sobra a la silla, se le descuenta lo que ya se come la órbita de
+ * CSS y lo que sobresale por el giro, y lo que queda es hasta dónde puede
+ * llevarla el cursor. Así la silla de la derecha nunca cruza la mitad de la
+ * pantalla —el límite que marca el final del titular— en ninguna ventana, y
+ * en pantallas anchas pasea mucho más que en una angosta.
+ */
+function iniciarIman() {
+  if (reducido()) return;
+  // En táctil no hay puntero al que seguir: el dedo llega ya tocando.
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  const ORBITA = 0.1; // amplitud máxima del vaivén CSS, en fracción del área
+  const NADO = 1.3; // cuánto la ensancha tener el cursor cerca
+  const SOBRESALE = 28; // px que se salen de la caja por el giro y la escala
+  const TOPE = 110; // por muy grande que sea la pantalla, tanto y no más
+  const SUELTA = 26; // alcance de las sillas sin área que las limite
+  const SUAVE = 0.05; // fracción del camino por cuadro ≈ 0.3 s de retraso
+  const CERCA = 300; // radio en el que el cursor agita el agua
+  const LEJOS = 380; // y radio al que se calma: la histéresis evita el parpadeo
+
+  const capas = [...document.querySelectorAll<HTMLElement>('.sigue')]
+    .map((capa) => ({
+      capa,
+      caja: capa.parentElement as HTMLElement,
+      silla: capa.querySelector('img'),
+      alcanceX: 0,
+      alcanceY: 0,
+      cx: 0,
+      cy: 0,
+      destinoX: 0,
+      destinoY: 0,
+      x: 0,
+      y: 0,
+      cerca: false,
+      despierta: false,
+    }))
+    .filter((c) => c.caja && c.silla);
+  if (!capas.length) return;
+
+  let vivo = false;
+  let aLaVista = true;
+  let medidasViejas = true;
+
+  const medir = () => {
+    if (!medidasViejas) return;
+    for (const c of capas) {
+      const r = c.caja.getBoundingClientRect();
+      c.cx = r.x + r.width / 2;
+      c.cy = r.y + r.height / 2;
+
+      if (c.caja.dataset.area === undefined) {
+        c.alcanceX = c.alcanceY = SUELTA;
+        continue;
+      }
+      // offset* es la caja de maquetación: no la ensucian las animaciones.
+      const libreX = (c.caja.offsetWidth - c.silla!.offsetWidth) / 2;
+      const libreY = (c.caja.offsetHeight - c.silla!.offsetHeight) / 2;
+      const orbitaX = ORBITA * c.caja.offsetWidth * NADO;
+      const orbitaY = ORBITA * c.caja.offsetHeight * NADO;
+      const cabe = (libre: number, orbita: number) =>
+        Math.min(TOPE, Math.max(0, libre - orbita - SOBRESALE));
+      c.alcanceX = cabe(libreX, orbitaX);
+      c.alcanceY = cabe(libreY, orbitaY);
+    }
+    medidasViejas = false;
+  };
+
+  const cuadro = () => {
+    let quieta = true;
+    for (const c of capas) {
+      c.x += (c.destinoX - c.x) * SUAVE;
+      c.y += (c.destinoY - c.y) * SUAVE;
+      c.capa.style.translate = `${c.x.toFixed(2)}px ${c.y.toFixed(2)}px`;
+      // Un par de grados hacia el lado al que va: el arrastre del agua.
+      c.capa.style.rotate = `${((c.x / (c.alcanceX || 1)) * 2.2).toFixed(3)}deg`;
+      // Medio píxel ya no se ve: el bucle se corta en vez de perseguir
+      // decimales para siempre.
+      if (
+        Math.abs(c.destinoX - c.x) > 0.05 ||
+        Math.abs(c.destinoY - c.y) > 0.05
+      ) {
+        quieta = false;
+      }
+    }
+    if (quieta) {
+      vivo = false;
+      return;
+    }
+    requestAnimationFrame(cuadro);
+  };
+
+  const despertar = () => {
+    if (vivo || !aLaVista) return;
+    vivo = true;
+    requestAnimationFrame(cuadro);
+  };
+
+  window.addEventListener(
+    'pointermove',
+    (e) => {
+      medir();
+      // El destino sale de la posición del cursor en la ventana: aritmética
+      // pura, sin leer geometría en cada movimiento.
+      const nx = (e.clientX / window.innerWidth) * 2 - 1;
+      const ny = (e.clientY / window.innerHeight) * 2 - 1;
+      for (const c of capas) {
+        // Arranca dormida: no sigue al cursor hasta que el cursor le pasa
+        // por encima. Como va por debajo del texto no puede escuchar un
+        // `pointerenter` propio, así que se le pregunta a la geometría —y
+        // sólo mientras duerme: una vez despierta no vuelve a medirse.
+        if (!c.despierta) {
+          const r = c.silla!.getBoundingClientRect();
+          c.despierta =
+            e.clientX >= r.left &&
+            e.clientX <= r.right &&
+            e.clientY >= r.top &&
+            e.clientY <= r.bottom;
+        }
+        if (c.despierta) {
+          c.destinoX = nx * c.alcanceX;
+          c.destinoY = ny * c.alcanceY;
+        }
+
+        const d = Math.hypot(e.clientX - (c.cx + c.x), e.clientY - (c.cy + c.y));
+        const cerca = d < (c.cerca ? LEJOS : CERCA);
+        if (cerca !== c.cerca) {
+          c.cerca = cerca;
+          c.caja.style.setProperty('--nado', cerca ? String(NADO) : '1');
+        }
+      }
+      despertar();
+    },
+    { passive: true },
+  );
+
+  // Al salir el puntero de la ventana, todo vuelve al centro de su órbita.
+  document.addEventListener('pointerleave', () => {
+    for (const c of capas) {
+      c.destinoX = c.destinoY = 0;
+      if (c.cerca) {
+        c.cerca = false;
+        c.caja.style.setProperty('--nado', '1');
+      }
+    }
+    despertar();
+  });
+
+  const remedir = () => {
+    medidasViejas = true;
+  };
+  window.addEventListener('resize', remedir, { passive: true });
+  window.addEventListener('scroll', remedir, { passive: true });
+
+  const io = new IntersectionObserver((entradas) => {
+    aLaVista = entradas.some((entrada) => entrada.isIntersecting);
+    if (aLaVista) despertar();
+  });
+  capas.forEach((c) => io.observe(c.caja));
+}
+
+/**
  * Cada pieza va por separado: si una falla, las demás siguen. Y si falla
  * `iniciarReveals`, se destapa todo a mano — más vale un sitio sin animación
  * que un sitio en blanco.
@@ -246,6 +419,7 @@ function arrancar() {
     iniciarReveals,
     iniciarCuenta,
     iniciarMenu,
+    iniciarIman,
   ];
 
   for (const paso of pasos) {

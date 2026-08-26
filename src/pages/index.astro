@@ -3,13 +3,17 @@ import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
 import Marquee from '../components/Marquee.astro';
 import Silla from '../components/Silla.astro';
+import Mosaico from '../components/Mosaico.astro';
 import Portada from '../components/movil/Portada.astro';
 import {
   festival,
   manifiesto,
   sedes,
   patrocinadores,
+  colaboradores,
   programa,
+  enlaceMapa,
+  mapaIncrustado,
 } from '../data/site';
 
 const cuenta = [
@@ -29,17 +33,41 @@ const cuenta = [
   >
     <div class="cuadricula absolute inset-0 opacity-60" aria-hidden="true"></div>
 
-    <!-- Sillas de fondo, en deriva con el scroll -->
-    <Silla
-      variante="roja"
-      deriva
-      class="absolute top-16 right-2 w-36 rotate-6 opacity-25 sm:top-20 sm:right-4 sm:w-56 lg:top-20 lg:right-10 lg:w-72"
-    />
-    <Silla
-      variante="roja"
-      deriva
-      class="absolute -bottom-16 -left-12 w-32 -rotate-12 opacity-20 sm:w-52 lg:w-64"
-    />
+    <!-- Sillas de fondo, en capas: `.flotador` es el ÁREA por la que puede
+         pasear —para la de la derecha, la mitad derecha del hero: el límite
+         es donde termina el titular—; `.sigue` es la deriva hacia el cursor
+         (JS); `.flota` es el vaivén de agua (CSS, en porcentajes del área); y
+         la silla misma lleva la deriva con el scroll.
+
+         Orden de pintado, por orden en el DOM y sin un solo z-index: la
+         cuadrícula, encima las sillas, encima el bloque de texto. Nada de
+         esto necesita recibir el cursor —quien las mueve es el puntero desde
+         la ventana, no el hover—, así que pueden ir debajo del texto sin
+         perder el movimiento. -->
+    <div
+      class="flotador absolute top-0 right-0 h-[64%] w-1/2 opacity-25"
+      data-area
+      aria-hidden="true"
+    >
+      <div class="sigue absolute inset-0">
+        <!-- El relleno corre el centro de la órbita un 6 % del área hacia la
+             derecha: queda más al borde, como estaba antes de darle sitio
+             para pasear, y de paso se aleja del límite del titular. -->
+        <div class="flota absolute inset-0 grid place-items-center pl-[12%]">
+          <Silla variante="roja" deriva class="w-56 rotate-6 xl:w-72" />
+        </div>
+      </div>
+    </div>
+    <div
+      class="flotador absolute -bottom-16 -left-12 w-32 opacity-20 sm:w-52 lg:w-64"
+      aria-hidden="true"
+    >
+      <div class="sigue">
+        <div class="flota flota--b">
+          <Silla variante="roja" deriva class="w-full -rotate-12" />
+        </div>
+      </div>
+    </div>
 
     <div class="relative px-4 pt-3 pb-8 sm:px-6 sm:pt-4 lg:px-10 lg:pt-5">
       <p
@@ -245,34 +273,121 @@ const cuenta = [
         <a href={conBase("/sedes")} class="boton" data-reveal="arriba">Ver las {sedes.lista.length}</a>
       </div>
 
-      <ul class="mt-4">
-        {
-          sedes.lista.map((sede, i) => (
-            <li
-              class="group border-b border-hueso/20"
-              data-reveal="arriba"
-              data-retraso={i * 50}
+      {/* Mapa a la izquierda, lista a la derecha. El iframe no se carga
+          hasta que alguien elige una sede: catorce mapas de Google al entrar
+          serían catorce peticiones a un tercero que nadie pidió. */}
+      <div class="mt-10">
+      <div class="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-12">
+        <!-- ── Mapa ───────────────────────────────────────────────────── -->
+        <div
+          class="relative flex h-[55vh] flex-col border-2 border-hueso/25 lg:h-[60vh]"
+        >
+          {/* Columna flexible: al aparecer el pie, el mapa cede alto en vez
+              de estirar el marco. */}
+          <div class="relative flex-1 overflow-hidden bg-pizarra">
+            <!-- Lo que se ve antes de elegir -->
+            <div
+              class="absolute inset-0 grid place-items-center px-8 text-center"
+              data-mapa-vacio
             >
-              <a
-                href={sede.mapa}
-                target="_blank"
-                rel="noopener"
-                class="flex flex-wrap items-baseline gap-x-6 gap-y-1 py-5 transition-colors duration-300 group-hover:text-amarillo"
+              <div
+                class="cuadricula absolute inset-0 opacity-25"
+                aria-hidden="true"
               >
-                <span class="meta w-8 shrink-0 text-hueso/40">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <span class="display text-3xl leading-none sm:text-4xl lg:text-5xl">
-                  {sede.nombre}
-                </span>
-                <span class="meta ml-auto text-hueso/50 group-hover:text-amarillo/70">
-                  {sedes.acciones.ubicacion} ↗
-                </span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+              </div>
+              <Silla
+                variante="roja"
+                class="absolute -bottom-10 -left-10 w-48 opacity-20 lg:w-60"
+              />
+              <p class="meta relative max-w-xs leading-relaxed text-hueso/60">
+                {sedes.acciones.sinMapa}
+              </p>
+            </div>
+
+            <iframe
+              class="absolute inset-0 h-full w-full border-0"
+              title={`Mapa de las sedes del ${festival.nombre}`}
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen
+              hidden
+              data-mapa></iframe>
+          </div>
+
+          <!-- Pie: qué se está viendo -->
+          <div
+            class="flex shrink-0 flex-wrap items-center justify-between gap-4 border-t-2 border-hueso/25 bg-amarillo px-5 py-4 text-tinta"
+            hidden
+            data-mapa-pie
+          >
+            <div>
+              <p class="display text-xl leading-none" data-mapa-nombre></p>
+              <address
+                class="mt-2 text-sm leading-snug not-italic opacity-70"
+                data-mapa-direccion></address>
+            </div>
+            <a
+              class="meta border-2 border-tinta bg-tinta px-4 py-2.5 text-[0.6rem] font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
+              target="_blank"
+              rel="noopener"
+              data-mapa-enlace
+            >
+              {sedes.acciones.ubicacion} ↗
+            </a>
+          </div>
+        </div>
+
+        {/* ── Lista ────────────────────────────────────────────────────
+            Scrollea por dentro, al alto del mapa. `data-lenis-prevent` es lo
+            que hace que la rueda mueva la lista y no la página: Lenis captura
+            el scroll de toda la ventana y sin eso esta caja no se entera. */}
+        <ul
+          class="lista-sedes h-[55vh] overflow-y-auto border-t-2 border-hueso/25 pr-3 lg:h-[60vh]"
+          data-lenis-prevent
+        >
+          {
+            sedes.lista.map((sede, i) => (
+              <li
+                class="fila-sede flex items-center gap-4 border-b border-hueso/20"
+                data-reveal="arriba"
+                data-retraso={Math.min(i, 8) * 50}
+              >
+                {/* La fila entera elige la sede: el objetivo es la franja,
+                    no un enlace de dos palabras. */}
+                <button
+                  type="button"
+                  class="group flex flex-1 items-baseline gap-x-5 py-3.5 text-left"
+                  aria-pressed="false"
+                  data-sede
+                  data-nombre={sede.nombre}
+                  data-direccion={sede.direccion}
+                  data-incrustado={mapaIncrustado(sede)}
+                  data-enlace={enlaceMapa(sede)}
+                >
+                  <span class="meta w-8 shrink-0 text-hueso/40 transition-colors group-hover:text-amarillo">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span class="display truncate text-2xl leading-none transition-colors group-hover:text-amarillo">
+                    {sede.nombre}
+                  </span>
+                </button>
+
+                {sede.instagram && (
+                  <a
+                    href={sede.instagram}
+                    target="_blank"
+                    rel="noopener"
+                    class="meta shrink-0 text-[0.6rem] text-hueso/40 transition-colors duration-300 hover:text-amarillo"
+                  >
+                    IG ↗
+                  </a>
+                )}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      </div>
     </div>
   </section>
 
@@ -314,46 +429,89 @@ const cuenta = [
     </div>
   </section>
 
-  <!-- ══ PATROCINADORES ═════════════════════════════════════════════════ -->
-  <section class="border-b-2 border-tinta bg-hueso">
-    <div class="px-4 py-20 sm:px-6 lg:px-10">
-      <p class="meta mb-8 flex items-center gap-4 text-rojo" data-reveal="lado">
-        <span class="inline-block h-[2px] w-12 bg-rojo"></span>
-        04 / {patrocinadores.titulo}
-      </p>
+  {/* ══ PATROCINADORES → COLABORADORES ═══════════════════════════════════
+      Una sola sección con dos caras. Al terminar el turno de un grupo cambia
+      la luz —fondo hueso ↔ pizarra, acento rojo ↔ amarillo—, el título y el
+      número; el relevo va en tres tiempos para que no se lea como un
+      parpadeo (ver el guion al pie).
 
-      <h2
-        class="display text-[11vw] leading-[0.82] text-tinta lg:text-[6vw]"
-        data-lineas
-        data-reveal="lineas"
-      >
-        {patrocinadores.titulo}
-      </h2>
+      El turno no dura lo que dura la vuelta de la cinta. Trece logos en una
+      fila son casi un minuto de recorrido, y esperar eso para ver un cambio
+      de color es demasiado. Así que el turno es corto y fijo, y la cinta,
+      cuando le toca esconderse, se queda **en pausa donde iba**: al volver
+      sigue desde ahí y no desde el principio. Por eso no se pierde ninguna
+      marca aunque el turno se corte a media pasada — sólo que se ven en dos o
+      tres vueltas en vez de una. */}
+  {
+    (() => {
+      const PASO = 224; // ancho del mosaico más su separación
+      const VELOCIDAD = 55; // px/s: ritmo de mirar un logo, no de un ticker
 
-      {
-        patrocinadores.lista.length === 0 ? (
-          <div
-            class="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4"
-            data-reveal="arriba"
-          >
-            {[0, 1, 2, 3].map(() => (
-              <div class="flex aspect-[3/2] items-center justify-center border-2 border-dashed border-tinta/30">
-                <span class="meta text-tinta/35">Próximamente</span>
-              </div>
-            ))}
+      const grupos = [
+        { clave: 'patrocinadores', indice: '04', datos: patrocinadores, turno: 20000 },
+        { clave: 'colaboradores', indice: '05', datos: colaboradores, turno: 10000 },
+      ];
+
+      return (
+        <section
+          class="cinta-marcas overflow-hidden border-b-2"
+          data-cinta
+          data-grupo="patrocinadores"
+        >
+          <div class="cinta-cabecera px-4 pt-20 pb-10 sm:px-6 lg:px-10">
+            <p class="meta cinta-acento mb-8 flex items-center gap-4">
+              <span class="inline-block h-[2px] w-12 bg-current" />
+              <span data-rotulo>04 / {patrocinadores.titulo}</span>
+            </p>
+            <h2
+              class="display text-[11vw] leading-[0.82] lg:text-[6vw]"
+              data-titulo
+            >
+              {patrocinadores.titulo}
+            </h2>
           </div>
-        ) : (
-          <ul class="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {patrocinadores.lista.map((p) => (
-              <li class="flex aspect-[3/2] items-center justify-center border-2 border-tinta bg-white p-6">
-                <img src={p.logo} alt={p.nombre} class="max-h-full w-auto" />
-              </li>
-            ))}
-          </ul>
-        )
-      }
-    </div>
-  </section>
+
+          {/* Los dos grupos comparten celda: el que no toca se apaga sin
+              salirse del flujo, así la sección no da un salto de alto. */}
+          <div class="cinta-pista pb-20">
+            {grupos.map(({ clave, indice, datos, turno }, n) => {
+              // La unidad tiene que pasar el ancho de una pantalla ancha: si
+              // no, la cinta deja un hueco a media vuelta. Con cinco logos eso
+              // significa repetir la tanda.
+              const repes = Math.max(1, Math.ceil(1500 / PASO / datos.lista.length));
+              const unidad = Array.from({ length: repes }, () => datos.lista).flat();
+              const duracion = ((unidad.length * PASO) / VELOCIDAD).toFixed(1);
+              return (
+                <div
+                  class="grupo-marcas"
+                  data-oculto={n === 0 ? undefined : ''}
+                  data-grupo-nombre={clave}
+                  data-indice={indice}
+                  data-titulo-grupo={datos.titulo}
+                  data-espera={turno}
+                >
+                  <p class="meta rotulo-grupo px-4 pb-4 sm:px-6 lg:px-10">
+                    {indice} / {datos.titulo}
+                  </p>
+                  <div class="overflow-hidden" role="marquee">
+                    <div class="marquee" style={`--duracion: ${duracion}s`}>
+                      {[0, 1].map((copia) => (
+                        <div class="flex shrink-0" aria-hidden={copia === 1}>
+                          {unidad.map((marca) => (
+                            <Mosaico marca={marca} class="mr-4" />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      );
+    })()
+  }
 
   <!-- ══ CIERRE ═════════════════════════════════════════════════════════ -->
   <section class="relative overflow-hidden bg-rojo text-amarillo">
@@ -384,4 +542,114 @@ const cuenta = [
       </div>
     </div>
   </section>
+
+
+  <script>
+    /** El mapa se llena al elegir una sede — antes no existe. */
+    const mapa = document.querySelector('[data-mapa]');
+    const vacio = document.querySelector('[data-mapa-vacio]');
+    const pie = document.querySelector('[data-mapa-pie]');
+    const nombre = document.querySelector('[data-mapa-nombre]');
+    const direccion = document.querySelector('[data-mapa-direccion]');
+    const enlace = document.querySelector('[data-mapa-enlace]');
+    const filas = document.querySelectorAll('[data-sede]');
+
+    if (mapa instanceof HTMLIFrameElement && filas.length) {
+      for (const fila of filas) {
+        fila.addEventListener('click', () => {
+          for (const otra of filas) {
+            otra.setAttribute('aria-pressed', 'false');
+            otra.closest('.fila-sede')?.classList.remove('sede-activa');
+          }
+          fila.setAttribute('aria-pressed', 'true');
+          fila.closest('.fila-sede')?.classList.add('sede-activa');
+
+          mapa.src = fila.dataset.incrustado ?? '';
+          mapa.hidden = false;
+          if (vacio instanceof HTMLElement) vacio.hidden = true;
+          if (pie instanceof HTMLElement) pie.hidden = false;
+          if (nombre) nombre.textContent = fila.dataset.nombre ?? '';
+          if (direccion) direccion.textContent = fila.dataset.direccion ?? '';
+          if (enlace instanceof HTMLAnchorElement) {
+            enlace.href = fila.dataset.enlace ?? '';
+          }
+
+          // En una ventana angosta el mapa queda arriba, fuera de vista.
+          if (!window.matchMedia('(width >= 64rem)').matches) {
+            mapa.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        });
+      }
+    }
+  </script>
+
+  <script>
+    /** La cinta de marcas alterna entre patrocinadores y colaboradores.
+     *
+     * Cada grupo lleva su turno en `data-espera`. Al esconderse no se saca
+     * del flujo con `hidden`: se apaga con `data-oculto`, que además le pone
+     * la cinta en pausa. Con `display: none` la animación volvería a empezar
+     * de cero cada vez y los últimos logos no se verían nunca.
+     *
+     * El relevo va en tres tiempos: primero cambia la luz —el color de la
+     * sección, que tarda más y arranca antes—, después se va el grupo que
+     * estaba y recién ahí, con la cinta tapada, se cambia el título. Cambiar
+     * las tres cosas en el mismo cuadro es lo que se veía como un parpadeo.
+     */
+    const cinta = document.querySelector('[data-cinta]');
+    if (cinta) {
+      const grupos = [...cinta.querySelectorAll('[data-grupo-nombre]')] as HTMLElement[];
+      const cabecera = cinta.querySelector('.cinta-cabecera');
+      const titulo = cinta.querySelector('[data-titulo]');
+      const rotulo = cinta.querySelector('[data-rotulo]');
+      const SALIDA = 420;
+      let actual = 0;
+      let mudando = false;
+      let reloj: ReturnType<typeof setTimeout> | undefined;
+
+      const armarTurno = (g: HTMLElement) => {
+        clearTimeout(reloj);
+        reloj = setTimeout(cambiar, Number(g.dataset.espera ?? 12000));
+      };
+
+      function cambiar() {
+        if (mudando) return;
+        mudando = true;
+        clearTimeout(reloj);
+
+        const saliente = grupos[actual];
+        actual = (actual + 1) % grupos.length;
+        const entrante = grupos[actual];
+
+        cinta.setAttribute('data-grupo', entrante.dataset.grupoNombre ?? '');
+        saliente.dataset.estado = 'saliendo';
+        if (cabecera instanceof HTMLElement) cabecera.dataset.estado = 'saliendo';
+
+        setTimeout(() => {
+          saliente.dataset.oculto = '';
+          delete saliente.dataset.estado;
+
+          const nombre = entrante.dataset.tituloGrupo ?? '';
+          if (titulo) titulo.textContent = nombre;
+          if (rotulo) rotulo.textContent = `${entrante.dataset.indice} / ${nombre}`;
+          if (cabecera instanceof HTMLElement) delete cabecera.dataset.estado;
+
+          delete entrante.dataset.oculto;
+          entrante.dataset.estado = 'entrando';
+          setTimeout(() => delete entrante.dataset.estado, 800);
+          armarTurno(entrante);
+          mudando = false;
+        }, SALIDA);
+      }
+
+      // Sin animación no hay turnos: se muestran los dos grupos, cada uno con
+      // su rótulo, y nadie cambia nada solo.
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        cinta.setAttribute('data-quieta', 'si');
+        grupos.forEach((g) => delete g.dataset.oculto);
+      } else {
+        armarTurno(grupos[actual]);
+      }
+    }
+  </script>
 </Base>

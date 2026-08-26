@@ -88,19 +88,81 @@ export const registro = {
 export type Sede = {
   nombre: string;
   direccion: string;
-  instagram: string;
-  mapa: string;
+  /** Vacío mientras no nos pasen la cuenta: la ficha oculta el enlace. */
+  instagram?: string;
+  /** Enlace corto al pin exacto. Sin él se busca por dirección. */
+  mapa?: string;
 };
+
+/** A dónde lleva «Ubicación»: al pin exacto si lo tenemos, y si no a la
+ *  búsqueda por dirección. Nunca se inventa un pin que no nos dieron. */
+export const enlaceMapa = (sede: Sede) =>
+  sede.mapa ??
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    sede.direccion,
+  )}`;
+
+/** El mapa incrustado va siempre por dirección: los enlaces cortos de Maps
+ *  no se dejan meter en un iframe. */
+export const mapaIncrustado = (sede: Sede) =>
+  `https://www.google.com/maps?q=${encodeURIComponent(
+    sede.direccion,
+  )}&output=embed`;
 
 export const sedes = {
   titulo: 'Sedes',
-  acciones: { conoce: 'Conoce más', ubicacion: 'Ubicación' },
+  acciones: {
+    conoce: 'Conoce más',
+    ubicacion: 'Ubicación',
+    verMapa: 'Ver en el mapa',
+    sinMapa: 'Elegí una sede para verla en el mapa',
+  },
+  // El orden es el de la lista que nos pasaron, no alfabético.
   lista: [
     {
-      nombre: 'Salón Liminal',
-      direccion: 'C. Independencia 795, Zona Centro, 44100 Guadalajara, Jal.',
-      instagram: 'https://www.instagram.com/salonliminal/',
-      mapa: 'https://maps.app.goo.gl/17i56g378cvg5t7j9',
+      nombre: 'Cuerpos Parlante',
+      direccion: 'C. Cruz Verde 93, Zona Centro, 44200 Guadalajara, Jal.',
+    },
+    {
+      nombre: 'Foro AM',
+      direccion: 'C. Pedro Loza 344, Zona Centro, 44200 Guadalajara, Jal.',
+    },
+    {
+      nombre: 'Temporal',
+      // La dirección anterior repetía la de Salón Liminal; ésta es la buena.
+      direccion: 'C. Donato Guerra 25, Zona Centro, 44100 Guadalajara, Jal.',
+      instagram: 'https://www.instagram.com/temporal___________/',
+      mapa: 'https://maps.app.goo.gl/Fsu7vg12MzBCtbxD8',
+    },
+    {
+      nombre: 'Estudio Arrechiga',
+      direccion:
+        'Camarena 118, Col Americana, Americana, 44160 Guadalajara, Jal.',
+      instagram: 'https://www.instagram.com/estudioarechiga/',
+      mapa: 'https://maps.app.goo.gl/C1F4Us1jy6buYTJJA',
+    },
+    {
+      nombre: 'Casa Dos Guayabos',
+      direccion: 'C. San Felipe 731, Zona Centro, 44200 Guadalajara, Jal.',
+    },
+    {
+      nombre: 'No museo',
+      direccion: 'Palestina',
+    },
+    {
+      nombre: 'Taller industria gráfica',
+      direccion:
+        'C. San Felipe 827, Capilla de Jesús, 44160 Guadalajara, Jal.',
+    },
+    {
+      nombre: 'Casa Feria',
+      direccion: 'C. Pedro Loza 359, Zona Centro, 44100 Guadalajara, Jal.',
+    },
+    {
+      nombre: 'Ala Rota',
+      direccion: 'Juan Manuel 823, Zona Centro, 44200 Guadalajara, Jal.',
+      instagram: 'https://www.instagram.com/alarota.cultura/',
+      mapa: 'https://maps.app.goo.gl/hB6KDRMnp6TxrJBD7',
     },
     {
       nombre: 'Staditche',
@@ -110,16 +172,16 @@ export const sedes = {
       mapa: 'https://maps.app.goo.gl/436QGVLkPj3ZSueU6',
     },
     {
-      nombre: 'Ala Rota',
-      direccion: 'Juan Manuel 823, Zona Centro, 44200 Guadalajara, Jal.',
-      instagram: 'https://www.instagram.com/alarota.cultura/',
-      mapa: 'https://maps.app.goo.gl/hB6KDRMnp6TxrJBD7',
+      nombre: 'Estallido Art Project',
+      direccion: 'Calle, Av. Alcalde 159, Zona Centro, 44100 Guadalajara, Jal.',
+      instagram: 'https://www.instagram.com/estallidoartproject/',
+      mapa: 'https://maps.app.goo.gl/SuKhGPMVaB7ZeRve9',
     },
     {
-      nombre: 'Temporal',
+      nombre: 'Salón Liminal',
       direccion: 'C. Independencia 795, Zona Centro, 44100 Guadalajara, Jal.',
-      instagram: 'https://www.instagram.com/temporal___________/',
-      mapa: 'https://maps.app.goo.gl/Fsu7vg12MzBCtbxD8',
+      instagram: 'https://www.instagram.com/salonliminal/',
+      mapa: 'https://maps.app.goo.gl/17i56g378cvg5t7j9',
     },
     {
       nombre: 'Ánima Galería',
@@ -129,32 +191,60 @@ export const sedes = {
       mapa: 'https://maps.app.goo.gl/D2y3qeR19Qc2G2ND8',
     },
     {
-      nombre: 'Estallido Art Project',
-      direccion: 'Calle, Av. Alcalde 159, Zona Centro, 44100 Guadalajara, Jal.',
-      instagram: 'https://www.instagram.com/estallidoartproject/',
-      mapa: 'https://maps.app.goo.gl/SuKhGPMVaB7ZeRve9',
-    },
-    {
       nombre: 'Palma Galería',
       direccion:
         'C. Manuel López Cotilla 1360, Col Americana, Americana, 44160 Guadalajara, Jal.',
       instagram: 'https://www.instagram.com/palmagaleria/',
       mapa: 'https://maps.app.goo.gl/9LFY63xj1kpyzuncA',
     },
-    {
-      nombre: 'Estudio Arrechiga',
-      direccion:
-        'Camarena 118, Col Americana, Americana, 44160 Guadalajara, Jal.',
-      instagram: 'https://www.instagram.com/estudioarechiga/',
-      mapa: 'https://maps.app.goo.gl/C1F4Us1jy6buYTJJA',
-    },
   ] satisfies Sede[],
 };
 
+export type Marca = { nombre: string; logo?: string; url?: string };
+
+/** Los logos salen del sitio viejo (Wix), reescalados a 600 px de lado.
+ *  Las marcas sin logo se pintan con el nombre en display: prefiero un hueco
+ *  honesto a inventar un archivo que no nos dieron. */
 export const patrocinadores = {
   titulo: 'Patrocinadores',
-  // El original sólo tiene placeholders de stock: sin logos reales todavía.
-  lista: [] as { nombre: string; logo: string; url?: string }[],
+  lista: [
+    { nombre: 'Minerva', logo: '/patrocinadores/minerva.png' },
+    { nombre: 'Cielito Lindo', logo: '/patrocinadores/cielito-lindo.jpg' },
+    { nombre: 'Clase 33', logo: '/patrocinadores/clase-33.jpg' },
+    { nombre: 'Mezcania' },
+    { nombre: 'RE.CREA.LAB', logo: '/patrocinadores/recrealab.png' },
+    { nombre: 'MESH' },
+    { nombre: '1800', logo: '/patrocinadores/1800.png' },
+    { nombre: 'Capicua' },
+    // Nos pidieron confirmar cómo se escribe.
+    { nombre: 'Suero' },
+    { nombre: 'DC Producciones' },
+    // Apoyos institucionales: estaban en el sitio viejo y no en la lista que
+    // nos pasaron, pero son de los que no se dejan fuera.
+    {
+      nombre: 'Universidad de Guadalajara',
+      logo: '/patrocinadores/universidad-de-guadalajara.png',
+    },
+    { nombre: 'ITESO', logo: '/patrocinadores/iteso.jpg' },
+    {
+      nombre: 'Tecnológico de Monterrey',
+      logo: '/patrocinadores/tec-de-monterrey.png',
+    },
+  ] satisfies Marca[],
+};
+
+export const colaboradores = {
+  titulo: 'Colaboradores',
+  lista: [
+    { nombre: 'Ferazzz', logo: '/patrocinadores/ferazzz.png' },
+    { nombre: 'Brumma', logo: '/patrocinadores/brumma.png' },
+    { nombre: 'GDL de Noche', logo: '/patrocinadores/gdl-de-noche.png' },
+    {
+      nombre: 'Visual Negativo',
+      logo: '/patrocinadores/visual-negativo.jpg',
+    },
+    { nombre: 'DC Producciones' },
+  ] satisfies Marca[],
 };
 
 export const privacidad = {
