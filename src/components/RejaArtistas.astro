@@ -1,0 +1,52 @@
+---
+import FichaArtista from './FichaArtista.astro';
+import { artistas } from '../data/artistas';
+
+/**
+ * La reja de artistas, o el hueco cuando todavía no hay ninguno.
+ *
+ * Vive en un componente y no suelta en cada página porque la pintan dos: la
+ * sección de la portada, recortada, y `/artistas` entera. Es la misma reja de
+ * `sedes.astro` —tres columnas, cantos de 2 px, entrada escalonada por
+ * filas—; lo único propio es el estado vacío.
+ *
+ * El vacío no es un error ni un cartel de obras: es la misma ficha de papel
+ * con sombra dura que usa el resto del sitio, diciendo lo que hay que decir.
+ * Mientras `artistas.lista` esté vacía se pinta eso; en cuanto haya un nombre
+ * se pinta la reja. Nadie tiene que venir a cambiar una plantilla.
+ *
+ * La reja no lleva cantos propios, igual que la de sedes: los filetes los
+ * ponen las fichas (`border-r-2 border-b-2`) y el de arriba lo pone lo que
+ * haya encima —el encabezado de la página, o la cabecera de la sección vía
+ * `class`—. Poniéndolo aquí salían cuatro píxeles de raya en `/artistas`,
+ * donde el `Encabezado` ya trae el suyo.
+ */
+interface Props {
+  /** Cuántas fichas como mucho. Sin él, todas. */
+  limite?: number;
+  class?: string;
+}
+
+const { limite, class: clase = '' } = Astro.props;
+const lista = limite ? artistas.lista.slice(0, limite) : artistas.lista;
+---
+
+{
+  lista.length === 0 ? (
+    <div class={`ficha ficha--ancha max-w-3xl ${clase}`} data-reveal="escala">
+      <p class="meta text-rojo">{artistas.estado}</p>
+      <p class="display mt-4 text-4xl leading-[0.95] lg:text-5xl">
+        Todavía no hay nombres
+      </p>
+      <p class="mt-5 max-w-[52ch] font-mono text-sm leading-relaxed text-tinta/70">
+        {artistas.vacio}
+      </p>
+    </div>
+  ) : (
+    <ul class={`grid sm:grid-cols-2 lg:grid-cols-3 ${clase}`}>
+      {lista.map((artista, i) => (
+        <FichaArtista artista={artista} indice={i} retraso={(i % 3) * 90} />
+      ))}
+    </ul>
+  )
+}

@@ -1,0 +1,41 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<style>
+  @font-face { font-family: Anton; src: url('../node_modules/@fontsource/anton/files/anton-latin-400-normal.woff2') format('woff2'); }
+  @font-face { font-family: Courier Prime; font-weight: 700; src: url('../node_modules/@fontsource/courier-prime/files/courier-prime-latin-700-normal.woff2') format('woff2'); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1200px; height: 630px; overflow: hidden; }
+  .carta {
+    position: relative; width: 1200px; height: 630px;
+    background: #fffd00; color: #1e1e1e; overflow: hidden;
+    border-bottom: 14px solid #ff0100;
+  }
+  /* La misma cuadricula del sitio, al mismo paso de 4rem */
+  .rejilla { position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(30,30,30,.12) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(30,30,30,.12) 1px, transparent 1px);
+    background-size: 64px 64px; }
+  .silla { position: absolute; right: -40px; top: 40px; width: 400px; opacity: .22; }
+  .cuerpo { position: relative; padding: 54px 64px; height: 100%;
+    display: flex; flex-direction: column; justify-content: space-between; }
+  .meta { font-family: 'Courier Prime', monospace; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .14em; font-size: 21px; color: #ff0100; }
+  .meta .raya { display: inline-block; width: 54px; height: 3px; background: #ff0100;
+    vertical-align: middle; margin-right: 20px; }
+  h1 { font-family: Anton, sans-serif; font-weight: 400; text-transform: uppercase;
+    line-height: .84; letter-spacing: -.02em; font-size: 132px;
+    transform: scaleX(.92); transform-origin: left center; }
+  h1 .rojo { color: #ff0100; }
+  .pie { font-family: 'Courier Prime', monospace; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .12em; font-size: 26px; color: #1e1e1e; }
+</style></head><body>
+  <div class="carta">
+    <div class="rejilla"></div>
+    <img class="silla" src="../public/logos/silla-roja.svg">
+    <div class="cuerpo">
+      <p class="meta"><span class="raya"></span>Guadalajara, Jalisco / 2026</p>
+      <h1><span class="rojo">Festival</span><br>de Arte<br><span class="rojo">Conceptual</span></h1>
+      <p class="pie">Del 24 al 27 de Septiembre, 2026</p>
+    </div>
+  </div>
+</body></html>

@@ -29,23 +29,63 @@ Los patrocinadores están vacíos a propósito: el sitio de Wix sólo tenía fot
 de stock de relleno. Cuando lleguen los logos reales se añaden a
 `patrocinadores.lista` y la cuadrícula de «Próximamente» se reemplaza sola.
 
+### Lo que está montado y esperando contenido
+
+Tres cosas del pedido del 26/08 están construidas enteras y **apagadas hasta
+que lleguen los datos**. Ninguna necesita tocar una plantilla: se pega el dato
+en su archivo y se encienden solas.
+
+| Qué | Archivo | Qué falta |
+| --- | --- | --- |
+| Artistas | `src/data/artistas.ts` | nombres, disciplina, `@` y fotos 4:5 en `public/artistas/` |
+| Archivo de ediciones | `src/data/archivo.ts` | año de cada edición y fotos en `public/archivo/<año>/` |
+| Donaciones | `festival.donaciones.paypal` en `src/data/site.ts` | el enlace de PayPal |
+
+Mientras están vacías, cada una se pinta en su estado vacío —una ficha que
+dice qué falta— salvo la donación, que **no se pinta en absoluto**: un botón
+de donar que no lleva a ninguna parte es peor que no tenerlo. En cuanto haya
+enlace aparece en tres sitios a la vez (cierre de la portada, pie y remate de
+`/registro`).
+
 ## Identidad
 
 Paleta y tipografías salen del manual (`identidad visual.ai`), no del sitio
 viejo:
 
-| Token       | Hex       | Uso                                  |
-| ----------- | --------- | ------------------------------------ |
-| `amarillo`  | `#fffd00` | fondo dominante                      |
-| `rojo`      | `#ff0100` | tinta principal, acentos             |
-| `hueso`     | `#cfd8d7` | fondo de secciones de lectura        |
-| `tinta`     | `#1e1e1e` | texto, bordes, cuenta regresiva      |
-| `pizarra`   | `#23404a` | sección de sedes                     |
-| `ladrillo`  | `#99272d` | disponible, sin usar todavía         |
+| Token       | Hex       | Uso                                        |
+| ----------- | --------- | ------------------------------------------ |
+| `amarillo`  | `#fffd00` | el campo — fondo dominante                 |
+| `papel`     | `#ffffff` | el descanso — secciones de lectura y fotos |
+| `tinta`     | `#1e1e1e` | el peso — sedes, cuenta regresiva, pie     |
+| `rojo`      | `#ff0100` | el grito — cierre, cinta, acentos          |
+| `ladrillo`  | `#99272d` | el filete del tipo «escena» del Gantt      |
+| `hueso`     | `#cfd8d7` | **retirado** — declarado, sin uso          |
+| `pizarra`   | `#23404a` | **retirado** — declarado, sin uso          |
 
 El encargo pedía **amarillo primario, rojo, blanco secundario**, así que se
 invirtió la jerarquía del sitio viejo (que era rojo sobre rojo): ahora el
 amarillo es el campo y el rojo es la tinta.
+
+**Por qué se retiraron el hueso y la pizarra.** En la revisión del 26/08 el
+cliente los señaló a los dos: «el gris no me gusta nada, prefiero que sea
+blanco» y «el azul… siento que apaga la página esos colores, y la página son
+colores vivos». Tenía razón de fondo: eran las dos únicas superficies apagadas
+del sitio y entre las dos cargaban todo lo que se lee y el plano entero. El
+gris pasó a blanco y el azul a negro, y las secciones quedan alternando claro
+y oscuro sin repetir fondo dos veces seguidas:
+
+```
+amarillo → tinta → rojo → papel → TINTA → amarillo → papel → TINTA →
+papel ⇄ amarillo → rojo → tinta
+```
+
+Los dos tokens se quedan declarados en `global.css` porque están en el manual
+de identidad; simplemente no visten ninguna superficie.
+
+Dos colores más del sistema, y no son tintas sino roles: `--anillo` (el color
+del anillo de foco) y `--canto` (el canto y la sombra dura de los botones).
+Los dos valen tinta por defecto y las secciones oscuras los vuelcan a
+amarillo, porque sobre negro un canto de tinta no existe.
 
 **Tipografías.** El manual usa Old London y Acumin Variable Concept; ninguna
 de las dos se puede servir en web sin licencia (Acumin es de Adobe Fonts,
@@ -167,13 +207,15 @@ src/
   layouts/Base.astro  head, SEO, JSON-LD, nav, pie, reparto móvil/escritorio
   components/         Nav, Footer, Marquee, Silla, Encabezado
   components/movil/   Portada (con la entrada), Pantalla
-  pages/              index, programa, sedes, registro, privacidad, 404
+  pages/              index, programa, artistas, sedes, archivo, registro,
+                      privacidad, 404
 ```
 
 ## URLs
 
 Las rutas viejas de Wix redirigen (301) para no romper enlaces que ya
-circulan en redes y en el PDF de la convocatoria:
+circulan en redes y en el PDF de la convocatoria (que cerró: ya no hay ni un
+botón que lleve a él, pero el enlace sigue vivo en `festival.convocatoriaPDF`):
 
 | Wix                      | Nueva         |
 | ------------------------ | ------------- |
@@ -189,6 +231,45 @@ Vercel, Cloudflare Pages o cualquier hosting. Las redirecciones se generan
 como páginas `<meta refresh>`; si el hosting soporta 301 de verdad
 (`_redirects` en Netlify, `vercel.json`), conviene declararlas ahí también
 para no perder señal de SEO.
+
+## Pendiente: panel de edición para subir fotos
+
+**Todavía no está montado, y va después de mover el dominio de Wix.** Esto es
+el plan, escrito para el día que toque, no una descripción de lo que hay.
+
+El problema que resuelve: El Profe necesita subir fotos de las ediciones
+anteriores y los retratos de artistas **sin pedírselo a nadie**. Hoy eso
+significa editar `src/data/archivo.ts` y `src/data/artistas.ts` a mano.
+
+### Cómo queda
+
+1. **Hosting a Netlify**, construyendo del mismo repo. En `astro.config.mjs`
+   desaparece `PAGES_BASE` y el sitio vuelve a colgar de la raíz; el workflow
+   `vista-previa.yml` de GitHub Pages se retira o se deja sólo para pruebas.
+2. **Decap CMS con Netlify Identity.** Panel en `/admin`. Los editores entran
+   con **correo y contraseña**: es lo único de esta lista que no exige cuenta
+   de GitHub, y por eso se elige Netlify y no un CMS sobre GitHub Pages.
+   Cada cambio que guardan es un commit en el repo y un build nuevo.
+3. **Cloudinary como librería de medios.** Es la pieza que evita que el repo
+   se infle: un archivo fotográfico de varias ediciones son cientos de
+   imágenes, y en git se quedan para siempre. Con Cloudinary no entran nunca
+   al repo, y encima llegan al navegador redimensionadas y en AVIF/WebP.
+4. **Dos colecciones**, con los campos que ya describen `artistas.ts` y
+   `archivo.ts`: artistas (nombre, disciplina, foto, instagram, sede) y
+   ediciones (edición, año, lema, sedes, actividades, fotos con pie).
+
+### Lo que ya está preparado
+
+- **`src/lib/imagen.ts`** — todas las fotos del sitio pasan ya por ahí.
+  Encender Cloudinary es rellenar una constante en ese archivo; ninguna
+  plantilla se entera. Sin esa capa habría que tocar cada componente.
+- **Los archivos de datos** están tipados y comentados campo por campo, que es
+  lo que se traduce directo a la configuración de las colecciones.
+
+### El orden importa
+
+Primero el dominio, después Netlify, después el panel. Montar el panel antes
+de mover el dominio significa hacerlo dos veces.
 
 ## Lo que falta (depende del cliente)
 

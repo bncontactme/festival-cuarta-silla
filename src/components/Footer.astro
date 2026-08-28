@@ -1,10 +1,30 @@
 ---
-import { festival, nav, privacidad } from '../data/site';
+import {
+  festival,
+  nav,
+  inicio,
+  accionPrincipal,
+  registroEventos,
+  privacidad,
+} from '../data/site';
 import { conBase } from '../lib/base';
 import Marquee from './Marquee.astro';
+
+/** El pie es el único sitio donde está el sitio entero: las pestañas, la
+ *  destacada y las dos que no gastan pestaña arriba —la portada y el aviso
+ *  legal—. Aquí no hay que ahorrar espacio, así que no se esconde nada.
+ *
+ *  El registro sale de `nav`, no suelto: cuando volvió a ser pestaña, tenerlo
+ *  además en esta lista lo pintaba dos veces. */
+const enlaces = [
+  inicio,
+  ...nav,
+  accionPrincipal,
+  { label: privacidad.titulo, href: '/privacidad' },
+];
 ---
 
-<footer class="border-t-2 border-amarillo bg-tinta text-hueso">
+<footer class="border-t-2 border-amarillo bg-tinta text-papel">
   <Marquee
     items={[festival.fechas, festival.ciudad, 'Cuarta Silla', 'Arte Conceptual']}
     duracion="46s"
@@ -23,7 +43,7 @@ import Marquee from './Marquee.astro';
           height="85"
           class="w-44 sm:w-56"
         />
-        <p class="meta mt-4 max-w-xs text-hueso/70">
+        <p class="meta mt-4 max-w-xs text-papel/60">
           {festival.nombre} · {festival.ciudad}
         </p>
       </div>
@@ -32,7 +52,7 @@ import Marquee from './Marquee.astro';
         <p class="meta mb-4 text-rojo">Navegación</p>
         <ul class="space-y-2">
           {
-            nav.map((item) => (
+            enlaces.map((item) => (
               <li>
                 <a href={conBase(item.href)} class="enlace text-lg">
                   {item.label}
@@ -40,26 +60,42 @@ import Marquee from './Marquee.astro';
               </li>
             ))
           }
-          <li>
-            <a href={conBase("/privacidad")} class="enlace text-lg">{privacidad.titulo}</a>
-          </li>
         </ul>
       </nav>
 
+      {/* La columna que era «Participa → Convocatoria». Cerrada la
+          convocatoria, lo que le queda por hacer a quien llega es apuntarse; y
+          debajo, cuando exista la cuenta, el botón de donar. Sin enlace de
+          PayPal no se pinta nada: en el pie hay sitio de sobra y un botón
+          dormido aquí sería ruido —en el cierre de la portada sí sale, porque
+          allí es lo único que hay debajo del logotipo—. */}
       <div>
         <p class="meta mb-4 text-rojo">Participa</p>
-        <a
-          href={festival.convocatoriaPDF}
-          target="_blank"
-          rel="noopener"
-          class="boton boton--hueso"
-        >
-          ★ Convocatoria ★
+        <a href={conBase(registroEventos.href)} class="boton boton--papel">
+          {registroEventos.label}
         </a>
+
+        {
+          festival.donaciones.paypal && (
+            <div class="mt-6">
+              <a
+                href={festival.donaciones.paypal}
+                target="_blank"
+                rel="noopener"
+                class="boton"
+              >
+                ★ Donar ★
+              </a>
+              <p class="meta mt-3 max-w-[26ch] leading-relaxed text-papel/45">
+                {festival.donaciones.nota}
+              </p>
+            </div>
+          )
+        }
       </div>
     </div>
 
-    <p class="meta mt-16 border-t-2 border-hueso/20 pt-6 text-hueso/50">
+    <p class="meta mt-16 border-t-2 border-papel/20 pt-6 text-papel/45">
       {festival.creditoFooter}
     </p>
   </div>

@@ -1,0 +1,100 @@
+---
+import Base from '../layouts/Base.astro';
+import { conBase } from '../lib/base';
+import Encabezado from '../components/Encabezado.astro';
+import RejaArtistas from '../components/RejaArtistas.astro';
+import FichaArtista from '../components/FichaArtista.astro';
+import Silla from '../components/Silla.astro';
+import Pantalla from '../components/movil/Pantalla.astro';
+import { artistas } from '../data/artistas';
+import { festival } from '../data/site';
+
+const cuantos = artistas.lista.length;
+---
+
+<Base
+  titulo={artistas.titulo}
+  descripcion={
+    cuantos
+      ? `Lxs ${cuantos} artistas del ${festival.nombre} en ${festival.ciudad}.`
+      : `Artistas del ${festival.nombre}. ${artistas.estado}.`
+  }
+>
+  {/* ── Móvil: una columna, la foto manda ──────────────────────────────── */}
+  {/* En un teléfono la reja de tres columnas son tres tarjetas de 120 px de
+      ancho: la foto deja de verse, que es lo único que se viene a ver. Aquí
+      va en una sola columna, a lo ancho de la pantalla, y se hace scroll.
+      Es la misma ficha, sin recortar nada. */}
+  <Fragment slot="movil">
+    <Pantalla
+      titulo={artistas.titulo}
+      indice="05"
+      nota={cuantos ? `${cuantos} nombres` : artistas.estado}
+      fondo="papel"
+    >
+      {
+        cuantos === 0 ? (
+          <div class="p-4">
+            <div class="ficha">
+              <p class="meta text-rojo">{artistas.estado}</p>
+              <p class="display mt-3 text-3xl leading-[0.95]">
+                Todavía no hay nombres
+              </p>
+              <p class="mt-4 font-mono text-[0.8rem] leading-relaxed text-tinta/70">
+                {artistas.vacio}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <ul class="grid">
+            {artistas.lista.map((artista, i) => (
+              <FichaArtista artista={artista} indice={i} />
+            ))}
+          </ul>
+        )
+      }
+    </Pantalla>
+  </Fragment>
+
+  <Encabezado
+    indice={
+      cuantos
+        ? `${artistas.titulo} / ${String(cuantos).padStart(2, '0')}`
+        : `${artistas.titulo} / ${festival.anio}`
+    }
+    titulo={artistas.titulo}
+    fondo="papel"
+  />
+
+  {/* Vacía, la sección se aprieta: la ficha de «todavía no hay» flotando en
+      media pantalla de blanco se lee como un error de maquetación y no como un
+      estado. Llena, la reja va a sangre y no lleva relleno ninguno. */}
+  <section class="bg-papel">
+    <div class={cuantos ? '' : 'px-4 py-14 sm:px-6 lg:px-10 lg:py-16'}>
+      {/* Sin `border-r` en el contenedor: los cantos derechos de la última
+          columna son los de las fichas, y el de abajo cierra la reja. */}
+      <RejaArtistas class={cuantos ? 'border-b-2' : ''} />
+    </div>
+  </section>
+
+  <section class="relative overflow-hidden border-t-2 border-tinta bg-amarillo">
+    <Silla
+      variante="roja"
+      deriva
+      class="absolute -bottom-10 right-4 w-40 opacity-20 lg:w-64"
+    />
+    <div class="relative px-4 py-20 sm:px-6 lg:px-10">
+      <p class="meta mb-6 text-rojo" data-reveal="lado">{festival.ciudad}</p>
+      <p
+        class="display max-w-4xl text-[9vw] leading-[0.95] text-tinta lg:text-[5.5vw]"
+        data-lineas
+        data-reveal="lineas"
+      >
+        {festival.fechas}
+      </p>
+      <a href={conBase("/programa")} class="boton mt-10" data-reveal="arriba">
+        Ver el programa
+      </a>
+    </div>
+  </section>
+</Base>

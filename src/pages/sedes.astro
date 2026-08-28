@@ -20,7 +20,7 @@ import { sedes, festival, enlaceMapa } from '../data/site';
       titulo={sedes.titulo}
       indice="03"
       nota={`${sedes.lista.length} lugares en ${festival.ciudad}`}
-      fondo="pizarra"
+      fondo="tinta"
     >
       {
         sedes.lista.map((sede, i) => (
@@ -35,7 +35,7 @@ import { sedes, festival, enlaceMapa } from '../data/site';
               </span>
             </summary>
 
-            <div class="bg-hueso px-4 py-4 text-tinta">
+            <div class="bg-papel px-4 py-4 text-tinta">
               <address class="text-sm leading-snug not-italic opacity-70">
                 {sede.direccion}
               </address>
@@ -69,10 +69,10 @@ import { sedes, festival, enlaceMapa } from '../data/site';
   <Encabezado
     indice={`${sedes.titulo} / ${String(sedes.lista.length).padStart(2, '0')}`}
     titulo={sedes.titulo}
-    fondo="pizarra"
+    fondo="tinta"
   />
 
-  <section class="bg-hueso">
+  <section class="bg-papel">
     <ul class="grid sm:grid-cols-2 lg:grid-cols-3">
       {
         sedes.lista.map((sede, i) => (

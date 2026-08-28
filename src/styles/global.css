@@ -20,6 +20,19 @@
   --color-pizarra: #23404a;
   --color-tinta: #1e1e1e;
 
+  /* Blanco de papel. No está en el manual, y por eso está aquí abajo y
+     separado: el manual da seis tintas y ninguna neutra clara que no sea el
+     hueso. El cliente pidió que el gris fuera blanco —«siento que apaga la
+     página esos colores, y la página son colores vivos»— y tiene razón: el
+     hueso y la pizarra eran las dos únicas superficies apagadas del sitio y
+     cargaban todo lo que se lee.
+     Los cuatro papeles del sitio, y lo que hace cada uno:
+       amarillo → el campo        papel → el descanso
+       tinta    → el peso         rojo  → el grito
+     `hueso` y `pizarra` se quedan declarados porque están en el manual, pero
+     ya no visten ninguna superficie. */
+  --color-papel: #ffffff;
+
   --font-display: 'Anton', 'Arial Narrow', sans-serif;
   --font-texto: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
   --font-mono: 'Courier Prime', ui-monospace, monospace;
@@ -33,6 +46,31 @@
   :root {
     --borde: 2px;
     color-scheme: light;
+
+    /* Color del anillo de foco. Antes era la pizarra fija, que sobre el negro
+       del pie y sobre el rojo del cierre no se veía —1.5:1 en el peor caso—.
+       Ahora cada superficie oscura lo vuelca a amarillo, y el anillo lo hereda
+       quien esté dentro. Peor caso nuevo: 8:1. */
+    --anillo: var(--color-tinta);
+
+    /* Canto y sombra dura de los botones. Va aquí y no dentro de `.boton`
+       porque tiene que poder heredarse: una declaración en el propio botón le
+       ganaría siempre a la que pone la sección. */
+    --canto: var(--color-tinta);
+  }
+
+  /* Las utilidades de fondo oscuras cambian el anillo de quien cuelgue de
+     ellas. Sólo tocan la variable —el fondo lo sigue pintando Tailwind—, así
+     que da igual el orden de capas. */
+  .bg-tinta,
+  .bg-rojo {
+    --anillo: var(--color-amarillo);
+  }
+
+  /* Sobre negro, el canto y la sombra dura de los botones se vuelcan a
+     amarillo: en tinta contra tinta no se ven y el botón pierde el relieve. */
+  .bg-tinta {
+    --canto: var(--color-amarillo);
   }
 
   html {
@@ -67,7 +105,7 @@
   }
 
   :focus-visible {
-    outline: 3px solid var(--color-pizarra);
+    outline: 3px solid var(--anillo);
     outline-offset: 3px;
   }
 
@@ -128,6 +166,12 @@
   }
 
   /* ── Botón ──────────────────────────────────────────────────────────── */
+  /* El canto y la sombra del botón salen de una variable, no de un color
+     fijo. Sobre el amarillo y sobre el papel son de tinta, como siempre; sobre
+     una sección negra un canto de tinta contra tinta no existe y el botón se
+     quedaba en un rectángulo plano, sin el desfase que lo hace un objeto
+     puesto encima. Ahí se vuelca a amarillo —que es lo que ya hace la ✕ del
+     modal— y el botón recupera su relieve. */
   .boton {
     --desfase: 6px;
     position: relative;
@@ -142,8 +186,8 @@
     font-size: 0.8rem;
     background-color: var(--color-rojo);
     color: var(--color-amarillo);
-    border: var(--borde) solid var(--color-tinta);
-    box-shadow: var(--desfase) var(--desfase) 0 var(--color-tinta);
+    border: var(--borde) solid var(--canto);
+    box-shadow: var(--desfase) var(--desfase) 0 var(--canto);
     transition:
       transform 0.25s var(--ease-salida),
       box-shadow 0.25s var(--ease-salida);
@@ -151,12 +195,33 @@
 
   .boton:hover {
     transform: translate(var(--desfase), var(--desfase));
-    box-shadow: 0 0 0 var(--color-tinta);
+    box-shadow: 0 0 0 var(--canto);
   }
 
-  .boton--hueso {
-    background-color: var(--color-hueso);
+  .boton--papel {
+    background-color: var(--color-papel);
     color: var(--color-tinta);
+  }
+
+  /* Un botón que todavía no lleva a ninguna parte: mantiene la forma —el
+     canto, el desfase— pero no se hunde al pasar el cursor, que es lo que lo
+     delataría como pulsable. Se usa para lo que está anunciado y no abierto;
+     hoy, el de donar mientras no haya cuenta de PayPal.
+
+     El fondo NO se toca: lo pone la variante (`--papel`, opaco). Bajarle la
+     opacidad al fondo dejaba pasar el rojo de la banda de abajo y el rótulo se
+     quedaba en 2.9:1. Se apaga sólo el texto, y contra un blanco macizo eso
+     son 5.7:1: se lee que está y se lee que no está activo. */
+  .boton--dormido {
+    color: color-mix(in srgb, var(--color-tinta) 70%, transparent);
+    box-shadow: var(--desfase) var(--desfase) 0
+      color-mix(in srgb, var(--canto) 45%, transparent);
+    cursor: not-allowed;
+  }
+  .boton--dormido:hover {
+    transform: none;
+    box-shadow: var(--desfase) var(--desfase) 0
+      color-mix(in srgb, var(--canto) 45%, transparent);
   }
 
   /* En una pantalla de 390px, dos botones con este relleno se parten en dos
@@ -528,7 +593,7 @@
   width: 4px;
 }
 .lista-sedes::-webkit-scrollbar-track {
-  background: color-mix(in srgb, var(--color-hueso) 12%, transparent);
+  background: color-mix(in srgb, var(--color-papel) 12%, transparent);
 }
 .lista-sedes::-webkit-scrollbar-thumb {
   background: var(--color-amarillo);
@@ -539,7 +604,7 @@
 @supports not selector(::-webkit-scrollbar) {
   .lista-sedes {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-amarillo) color-mix(in srgb, var(--color-hueso) 12%, transparent);
+    scrollbar-color: var(--color-amarillo) color-mix(in srgb, var(--color-papel) 12%, transparent);
   }
 }
 
@@ -552,15 +617,20 @@
 }
 
 /* — Ficha: la tarjeta de la casa ——————————————————————————————————— */
-/* Canto de 2 px, sombra dura y papel hueso: los botones del sitio y el modal
+/* Canto de 2 px, sombra dura y papel blanco: los botones del sitio y el modal
    ya se construyen así, y sobre el amarillo de una sección es lo que hace que
    un bloque se lea como un objeto puesto encima y no como un dibujo suelto
    en la página. El relleno no es decorativo: es la diferencia entre una
    tarjeta y una caja que aprieta a su contenido contra los cantos. */
+/* La sombra sale de `--canto`, igual que la de los botones: sobre una sección
+   negra una sombra de tinta no existe y la ficha se queda en un rectángulo
+   blanco pegado al fondo, sin el desfase que la hace un objeto puesto encima.
+   El canto sí se queda en tinta: la ficha es blanca y su filete es un keyline
+   por dentro, no el que la separa del fondo. */
 .ficha {
   border: 2px solid var(--color-tinta);
-  box-shadow: 6px 6px 0 var(--color-tinta);
-  background-color: var(--color-hueso);
+  box-shadow: 6px 6px 0 var(--canto);
+  background-color: var(--color-papel);
   color: var(--color-tinta);
   padding: 1.5rem;
 }
@@ -569,7 +639,7 @@
    1.5rem de aire se quedan cortos: la ficha se ve apretada y la sombra,
    tímida. Todo escala con el tamaño del objeto. */
 .ficha--ancha {
-  box-shadow: 8px 8px 0 var(--color-tinta);
+  box-shadow: 8px 8px 0 var(--canto);
   padding: 1.75rem;
 }
 
@@ -705,8 +775,20 @@
 /* Una sección con dos caras. El cambio de grupo lo dispara el JS al cerrar la
    vuelta de la cinta; acá sólo vive el color, que va en transición para que
    el vuelco se lea como un cambio de luz y no como un parpadeo. */
+/* Las dos caras son papel y tinta: día y noche del mismo papel.
+   La segunda fue amarilla y no funcionaba, por dos motivos que se suman.
+   Uno: la sección que hay justo encima —el adelanto del programa— ya es
+   amarilla, así que al volcarse la cinta las dos bandas se fundían en un solo
+   bloque de amarillo de mil píxeles partido por un filete, y el cambio de luz,
+   que es de lo que va esta sección, dejaba de leerse como un cambio.
+   Dos: el amarillo del manual es un #fffd00 a plena saturación, y detrás de
+   trece mosaicos blancos con canto de tinta vibra —los cantos se recortan
+   contra él y los logos en negativo se pierden—.
+   En tinta el vuelco se lee entero, los mosaicos blancos pasan a ser fichas
+   sobre negro (que es como se ven las sedes en su plano) y no entra ni un
+   color que no esté ya en el manual. */
 .cinta-marcas {
-  background-color: var(--color-hueso);
+  background-color: var(--color-papel);
   border-color: var(--color-tinta);
   color: var(--color-tinta);
   transition:
@@ -715,16 +797,30 @@
     color 0.8s var(--ease-salida);
 }
 .cinta-marcas[data-grupo='colaboradores'] {
-  background-color: var(--color-pizarra);
+  background-color: var(--color-tinta);
+  /* Debajo empieza el cierre rojo: un filete de tinta contra tinta no existe,
+     igual que en las sedes. */
   border-color: var(--color-amarillo);
-  color: var(--color-hueso);
+  color: var(--color-papel);
+  --anillo: var(--color-amarillo);
 }
 
+/* Sobre negro el canto de tinta del mosaico desaparece y los logos se quedan
+   en rectángulos blancos flotando. El canto se vuelca a amarillo —el mismo
+   gesto que ya hacen los botones sobre las secciones oscuras— y la cinta pasa
+   a ser una fila de fichas. */
+.cinta-marcas[data-grupo='colaboradores'] .mosaico {
+  border-color: var(--color-amarillo);
+}
+
+/* El rótulo va en rojo sobre el papel y en amarillo sobre la tinta: es el
+   mismo trato que reciben los rótulos de sección en todo el sitio. */
 .cinta-acento {
   color: var(--color-rojo);
   transition: color 0.8s var(--ease-salida);
 }
-.cinta-marcas[data-grupo='colaboradores'] .cinta-acento {
+.cinta-marcas[data-grupo='colaboradores'] .cinta-acento,
+.cinta-marcas[data-grupo='colaboradores'] .rotulo-grupo {
   color: var(--color-amarillo);
 }
 
@@ -810,7 +906,7 @@
 
 /* — Modal ——————————————————————————————————————————————————————————— */
 /* Sobre un `<dialog>` nativo: sólo se le pone piel y las dos animaciones.
-   La piel son tres bandas a sangre —roja, hueso, tinta— separadas por los
+   La piel son tres bandas a sangre —roja, papel, tinta— separadas por los
    mismos filetes de 2 px que separan las secciones del sitio. Una tarjeta con
    relleno parejo y texto gris habría sido un modal de cualquier lado. */
 .modal {
@@ -836,7 +932,7 @@
   border: 2px solid var(--color-tinta);
   /* Sombra dura, sin difuminar: la misma idea que los botones del sitio. */
   box-shadow: 12px 12px 0 var(--color-tinta);
-  background-color: var(--color-hueso);
+  background-color: var(--color-papel);
   color: var(--color-tinta);
   overflow: hidden;
 }

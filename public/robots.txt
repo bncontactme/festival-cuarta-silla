@@ -1,0 +1,8 @@
+# Festival de Arte Conceptual La Cuarta Silla
+# Todo abierto: es un sitio público de cuatro páginas y lo que queremos es que
+# lo encuentren cuando busquen el festival por su nombre.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://www.festivaldearteconceptual.com/sitemap.xml

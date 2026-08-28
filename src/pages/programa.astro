@@ -5,7 +5,14 @@ import Encabezado from '../components/Encabezado.astro';
 import Marquee from '../components/Marquee.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import Gantt from '../components/Gantt.astro';
-import { programa, festival, ganttEsEjemplo, ganttAviso } from '../data/site';
+import {
+  programa,
+  festival,
+  accionPrincipal,
+  registroEventos,
+  ganttEsEjemplo,
+  ganttAviso,
+} from '../data/site';
 ---
 
 <Base
@@ -22,7 +29,7 @@ import { programa, festival, ganttEsEjemplo, ganttAviso } from '../data/site';
       titulo={programa.titulo}
       indice="02"
       nota={programa.estado}
-      fondo="hueso"
+      fondo="papel"
     >
       {
         programa.dias.map((dia, i) => (
@@ -68,13 +75,8 @@ import { programa, festival, ganttEsEjemplo, ganttAviso } from '../data/site';
       }
 
       <div class="p-4">
-        <a
-          href={festival.convocatoriaPDF}
-          target="_blank"
-          rel="noopener"
-          class="boton"
-        >
-          ★ Convocatoria ★
+        <a href={conBase(accionPrincipal.href)} class="boton">
+          {accionPrincipal.label}
         </a>
       </div>
     </Pantalla>
@@ -185,7 +187,7 @@ import { programa, festival, ganttEsEjemplo, ganttAviso } from '../data/site';
         {/* ── Vista 2: los cuatro días ─────────────────────────────────────
             La tabla de siempre, metida en la ficha. Fuera las cabeceras
             negras pegajosas: dentro de una tarjeta el `sticky` no tiene
-            contra qué pegarse, y cuatro bloques de tinta sobre el hueso
+            contra qué pegarse, y cuatro bloques de tinta sobre el papel
             pesaban más que las doce horas que van debajo. Cada día se cierra
             con el mismo filete rojo que hace de eje en la rejilla: es lo que
             deja reconocer las dos vistas como la misma ficha. */}
@@ -234,22 +236,19 @@ import { programa, festival, ganttEsEjemplo, ganttAviso } from '../data/site';
 
       {/* Las dos puertas, dentro de la misma sección y no en una banda aparte.
           Con banda propia hacían falta dos fondos seguidos: en amarillo se
-          fundía con ésta partida por un filete, y en hueso chocaba con el
-          papel de la ficha —dos grises separados por tres dedos de amarillo,
+          fundía con ésta partida por un filete, y en papel chocaba con el
+          papel de la ficha —dos claros separados por tres dedos de amarillo,
           que se leía como un corte y no como un remate—. */}
       <div
         class="mt-14 flex flex-wrap justify-center gap-4 lg:mt-16"
         data-reveal="arriba"
       >
-        <a
-          href={festival.convocatoriaPDF}
-          target="_blank"
-          rel="noopener"
-          class="boton"
-        >
-          ★ Convocatoria ★
+        <a href={conBase(accionPrincipal.href)} class="boton">
+          ★ {accionPrincipal.label} ★
         </a>
-        <a href={conBase("/registro")} class="boton boton--hueso">Registro a eventos</a>
+        <a href={conBase(registroEventos.href)} class="boton boton--papel">
+          {registroEventos.label}
+        </a>
       </div>
     </div>
   </section>

@@ -1,0 +1,1017 @@
+---
+import { sedes, festival, enlaceMapa } from '../data/site';
+import { plano, proyecta } from '../data/mapa';
+
+/**
+ * El plano de las sedes: las catorce a la vez, cada una con su estrella.
+ *
+ * Antes aquí había un iframe de Google que enseñaba una sede cada vez —había
+ * que elegir para que apareciera algo—, pintado con la paleta de Google
+ * encima de una sección que es negra y amarilla. La pregunta de esta
+ * sección no es «¿dónde está Temporal?», es «¿dónde está todo esto?»: si las
+ * sedes caen a diez minutos andando unas de otras, eso sólo se ve con las
+ * catorce puestas en el mismo papel.
+ *
+ * El dibujo es nuestro y viaja en el HTML: `src/data/mapa.ts`, que sale de
+ * OpenStreetMap con `scripts/plano.py`. Ni una petición a un tercero.
+ *
+ * El componente trae las dos columnas —plano y lista— porque son un solo
+ * instrumento: la lista manda sobre el plano y el plano contesta a la lista.
+ * Separados hacían falta dos scripts que se buscaran por la página.
+ */
+interface Props {
+  class?: string;
+}
+const { class: clase = '' } = Astro.props;
+
+/** La estrellita, dibujada y no copiada: cinco puntas, radio 10, valle 4.1.
+ *  Sale de aquí para poder tocarle el filo sin pelearse con una ristra de
+ *  decimales pegada en el HTML. */
+const estrella = (puntas: number, radio: number, valle: number) =>
+  'M' +
+  Array.from({ length: puntas * 2 }, (_, i) => {
+    const angulo = (Math.PI / puntas) * i - Math.PI / 2;
+    const r = i % 2 ? valle : radio;
+    return `${(Math.cos(angulo) * r).toFixed(2)} ${(Math.sin(angulo) * r).toFixed(2)}`;
+  }).join(' L') +
+  'Z';
+const ESTRELLA = estrella(5, 10, 4.1);
+
+/** Cada sede con su número de orden y su punto en el dibujo. Las que no
+ *  tienen coordenada se quedan sin punto: salen en la lista, no en el papel. */
+const lista = sedes.lista.map((sede, i) => ({
+  ...sede,
+  indice: String(i + 1).padStart(2, '0'),
+  punto: sede.coord ? proyecta(sede.coord[0], sede.coord[1]) : null,
+  enlace: enlaceMapa(sede),
+}));
+const conEstrella = lista.filter((s) => s.punto);
+---
+
+<div
+  class={`grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-12 ${clase}`}
+  data-mapa-sedes
+>
+  {/* ── El plano ───────────────────────────────────────────────────────── */}
+  <div class="flex h-[55vh] flex-col border-2 border-papel/25 lg:h-[60vh]">
+    <div
+      class="mapa-caja"
+      data-caja
+      role="group"
+      aria-label={`Plano de las ${sedes.lista.length} sedes en ${festival.ciudad}. Con el foco puesto aquí, las flechas lo mueven y las teclas + y − lo acercan.`}
+    >
+      {/* La cuadrícula del sitio, quieta detrás del plano: el papel sobre el
+          que se mueve el dibujo. */}
+      <div class="cuadricula mapa-rejilla" aria-hidden="true"></div>
+
+      <div
+        class="mapa-plano"
+        data-plano
+        data-ancho={plano.ancho}
+        data-alto={plano.alto}
+        data-metros={plano.metrosPorUnidad}
+        data-limites={`${plano.limites.x0},${plano.limites.y0},${plano.limites.x1},${plano.limites.y1}`}
+      >
+        {/* `overflow: visible` en la hoja: el dibujo se sale del viewBox por
+            los cuatro costados y eso es lo que llena la caja sea cual sea su
+            proporción. Sin eso quedarían franjas vacías arriba y abajo. */}
+        <svg
+          class="mapa-dibujo"
+          viewBox={`0 0 ${plano.ancho} ${plano.alto}`}
+          width={plano.ancho}
+          height={plano.alto}
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path class="capa-verde" d={plano.verde} />
+          <path class="capa-calles" d={plano.calles} />
+          <path class="capa-peatonal" d={plano.peatonal} />
+          <path class="capa-vias" d={plano.vias} />
+          <g class="capa-rotulos">
+            {
+              plano.rotulos.map((r) => (
+                <text x={r.x} y={r.y} transform={`rotate(${r.giro} ${r.x} ${r.y})`}>
+                  {r.texto}
+                </text>
+              ))
+            }
+          </g>
+        </svg>
+
+        {/* Las estrellas van en HTML y no dentro del SVG: así el rótulo de
+            cada una es tipografía del sitio —Anton, filete de 2 px— y no un
+            `<text>` al que hay que dibujarle la caja a mano. */}
+        <div class="mapa-pines" data-pines>
+          {
+            conEstrella.map((sede, i) => (
+              <button
+                type="button"
+                class="pin"
+                style={`--x:${sede.punto!.x}px;--y:${sede.punto!.y}px;--retraso:${i * 55}ms`}
+                aria-pressed="false"
+                aria-label={`${sede.indice} — ${sede.nombre}`}
+                data-pin
+                data-nombre={sede.nombre}
+              >
+                <svg class="pin-estrella" viewBox="-16 -16 32 32" aria-hidden="true">
+                  {/* Dos tintas mal registradas, como un cartel mal impreso:
+                      la de abajo asoma por el canto de la de arriba. */}
+                  <path class="pin-sombra" d={ESTRELLA} transform="translate(1.7 1.7)" />
+                  <path class="pin-cara" d={ESTRELLA} />
+                  <circle class="pin-aro" r="14.5" />
+                </svg>
+                <span class="pin-num">{sede.indice}</span>
+                <span class="pin-nombre">{sede.nombre}</span>
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      {/* La que no está en el plano. No se le inventa un punto: se cuenta. */}
+      <div class="mapa-fuera" hidden data-fuera>
+        <p class="mapa-fuera-nombre" data-fuera-nombre></p>
+        <p class="mapa-fuera-nota" data-fuera-nota></p>
+      </div>
+
+      <div class="mapa-mandos">
+        <button type="button" data-zoom="mas" aria-label={sedes.acciones.acercar}>
+          +
+        </button>
+        <button type="button" data-zoom="menos" aria-label={sedes.acciones.alejar}>
+          −
+        </button>
+        <button type="button" class="mapa-todas" data-todas>
+          {sedes.acciones.todas}
+        </button>
+      </div>
+
+      <div class="mapa-abajo">
+        <div class="mapa-escala" aria-hidden="true">
+          <span class="mapa-escala-barra" data-escala-barra></span>
+          <span data-escala-texto></span>
+        </div>
+        <p class="mapa-credito">{sedes.acciones.credito}</p>
+      </div>
+    </div>
+
+    {/* ── Pie: qué se está viendo ─────────────────────────────────────── */}
+    <div class="mapa-pie">
+      <p class="meta mapa-pie-vacio" data-pie-vacio>
+        {sedes.acciones.sinMapa}
+      </p>
+
+      <div class="mapa-pie-ficha" hidden data-pie-ficha>
+        <div>
+          <p class="display text-xl leading-none" data-pie-nombre></p>
+          <address
+            class="mt-2 text-sm leading-snug not-italic opacity-70"
+            data-pie-direccion></address>
+        </div>
+        <a
+          class="meta shrink-0 border-2 border-tinta bg-tinta px-4 py-2.5 text-[0.6rem] font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
+          target="_blank"
+          rel="noopener"
+          data-pie-enlace
+        >
+          {sedes.acciones.ubicacion} ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {/* ── La lista ───────────────────────────────────────────────────────────
+      Scrollea por dentro, al alto del plano, y desde el primer momento: con
+      la barra pintada a un lado se ve que la caja se mueve, que era lo que
+      antes había que explicar bloqueándola.
+
+      Las filas entran escalonadas, una detrás de otra, pero las catorce a la
+      vez: quien dispara la cascada es la lista, no cada fila por su cuenta.
+      El observador de `motion.ts` mide contra la ventana y no contra esta
+      caja, así que las sedes que caen por debajo del recorte no entraban
+      nunca en cuadro y se quedaban invisibles —catorce sedes de las que se
+      veían seis—. Del disparo se encarga el script de abajo; aquí sólo va el
+      retraso de cada una.
+
+      `data-lenis-prevent` es lo que hace que la rueda mueva la lista y no la
+      página: Lenis captura el scroll de toda la ventana y sin eso esta caja
+      no se entera. `overscroll-behavior: contain`, en la hoja, es lo que
+      evita que al llegar al final el gesto siga y arrastre la portada. */}
+  <ul
+    class="lista-sedes h-[55vh] border-t-2 border-papel/25 pr-3 lg:h-[60vh]"
+    data-lista-sedes
+    data-lenis-prevent
+  >
+    {
+      lista.map((sede, i) => (
+        <li
+          class="fila-sede flex items-center gap-4 border-b border-papel/20"
+          data-reveal="arriba"
+          data-retraso={i * 45}
+        >
+          {/* La fila entera elige la sede: el objetivo es la franja, no un
+              enlace de dos palabras. */}
+          <button
+            type="button"
+            class="group flex flex-1 items-baseline gap-x-5 py-3.5 text-left"
+            aria-pressed="false"
+            data-sede
+            data-nombre={sede.nombre}
+            data-direccion={sede.direccion}
+            data-enlace={sede.enlace}
+            data-nota={sede.notaMapa}
+            data-x={sede.punto?.x}
+            data-y={sede.punto?.y}
+          >
+            <span class="meta w-8 shrink-0 text-papel/35 transition-colors group-hover:text-amarillo">
+              {sede.indice}
+            </span>
+            <span class="display truncate text-2xl leading-none transition-colors group-hover:text-amarillo">
+              {sede.nombre}
+            </span>
+            {!sede.punto && (
+              <span class="meta ml-auto shrink-0 text-[0.55rem] text-rojo">
+                ✳
+              </span>
+            )}
+          </button>
+
+          {sede.instagram && (
+            <a
+              href={sede.instagram}
+              target="_blank"
+              rel="noopener"
+              class="meta shrink-0 text-[0.6rem] text-papel/35 transition-colors duration-300 hover:text-amarillo"
+            >
+              IG ↗
+            </a>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  /* ── La caja ───────────────────────────────────────────────────────────
+     Recorta el dibujo, que es más grande que ella por los cuatro costados, y
+     es contra su tamaño contra lo que se calcula el encaje. */
+  .mapa-caja {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    background-color: var(--color-tinta);
+    touch-action: pan-y; /* el dedo sigue pudiendo scrollear la página */
+    cursor: grab;
+    user-select: none;
+  }
+  .mapa-caja[data-arrastrando] {
+    cursor: grabbing;
+  }
+  .mapa-caja:focus-visible {
+    outline: 3px solid var(--color-amarillo);
+    outline-offset: -3px;
+  }
+
+  .mapa-rejilla {
+    position: absolute;
+    inset: 0;
+    color: var(--color-papel);
+    opacity: 0.25;
+    pointer-events: none;
+  }
+
+  /* ── El plano ──────────────────────────────────────────────────────────
+     Mide exactamente lo que mide el viewBox, así que dentro de él una unidad
+     del dibujo es un píxel y las estrellas se colocan con `left`/`top` sin
+     más cuentas. Lo que lo encaja en la caja es `--z`, que pone el script:
+     el encaje (cuánto cabe) por el acercamiento (cuánto se pidió).
+
+     `--iz` es su inverso. Con él, los trazos y los rótulos se dibujan más
+     finos cuanto más se acerca uno, y acaban midiendo siempre lo mismo en
+     pantalla; sin eso, al acercarse las calles engordan hasta taparse. */
+  .mapa-plano {
+    --z: 0.7;
+    --iz: 1.43;
+    --tx: 0px;
+    --ty: 0px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 1000px;
+    height: 720px;
+    margin: -360px 0 0 -500px;
+    transform: translate(var(--tx), var(--ty)) scale(var(--z));
+    transform-origin: 50% 50%;
+    transition: transform 0.55s var(--ease-salida);
+  }
+  .mapa-plano[data-suave='no'] {
+    transition: none;
+  }
+
+  .mapa-dibujo {
+    display: block;
+    overflow: visible;
+  }
+
+  /* ── Las capas del dibujo ─────────────────────────────────────────────
+     De atrás hacia delante: manchas verdes, damero de calles, andadores y
+     avenidas. Todo en blanco a distintas intensidades —el plano es un fondo,
+     no un cuadro— y el único color vivo es el de las estrellas. */
+  .capa-verde {
+    fill: color-mix(in srgb, var(--color-papel) 12%, transparent);
+    stroke: none;
+  }
+  .capa-calles,
+  .capa-peatonal,
+  .capa-vias {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .capa-calles {
+    stroke: color-mix(in srgb, var(--color-papel) 27%, transparent);
+    stroke-width: calc(1.1px * var(--iz));
+  }
+  .capa-peatonal {
+    /* En amarillo competían con las estrellas —y en el centro hay andadores
+       de sobra—. El amarillo de esta sección es de las sedes y de nadie más. */
+    stroke: color-mix(in srgb, var(--color-papel) 26%, transparent);
+    stroke-width: calc(1.1px * var(--iz));
+    stroke-dasharray: calc(3px * var(--iz)) calc(3px * var(--iz));
+  }
+  .capa-vias {
+    stroke: color-mix(in srgb, var(--color-papel) 50%, transparent);
+    stroke-width: calc(2.4px * var(--iz));
+  }
+
+  .capa-rotulos text {
+    fill: color-mix(in srgb, var(--color-papel) 32%, transparent);
+    font-family: var(--font-mono);
+    font-size: calc(8.5px * var(--iz));
+    letter-spacing: calc(0.12em);
+    text-anchor: middle;
+    paint-order: stroke;
+    stroke: var(--color-tinta);
+    stroke-width: calc(3px * var(--iz));
+    stroke-linejoin: round;
+  }
+
+  /* ── Las estrellas ────────────────────────────────────────────────────
+     El botón mide 34 px y se centra en su punto: por debajo de eso no hay
+     dedo que acierte. `--iz` lo devuelve a su tamaño de pantalla, o sea que
+     la estrella no crece al acercarse el plano —crece la ciudad debajo—. */
+  .mapa-pines {
+    position: absolute;
+    inset: 0;
+  }
+
+  .pin {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: 34px;
+    height: 34px;
+    transform: translate(-50%, -50%) scale(var(--iz));
+    transform-origin: 50% 50%;
+    transition: transform 0.55s var(--ease-salida);
+    cursor: pointer;
+  }
+  .pin:hover,
+  .pin:focus-visible,
+  .pin[aria-pressed='true'] {
+    z-index: 2;
+  }
+
+  .pin-estrella {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+    transition: transform 0.35s var(--ease-salida);
+  }
+  .pin:hover .pin-estrella,
+  .pin:focus-visible .pin-estrella {
+    transform: scale(1.22) rotate(-8deg);
+  }
+  .pin[aria-pressed='true'] .pin-estrella {
+    transform: scale(1.45);
+  }
+
+  .pin-cara {
+    fill: var(--color-amarillo);
+    stroke: var(--color-tinta);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+  }
+  .pin-sombra {
+    fill: var(--color-tinta);
+    opacity: 0.55;
+  }
+  .pin[aria-pressed='true'] .pin-cara {
+    fill: var(--color-rojo);
+    stroke: var(--color-amarillo);
+  }
+  .pin[aria-pressed='true'] .pin-sombra {
+    fill: var(--color-amarillo);
+    opacity: 1;
+  }
+
+  /* El aro sólo sale en la elegida: es lo que la separa de las otras trece
+     estrellas amarillas cuando el plano está lleno.
+
+     `transform-box: fill-box` no es cosmético, es lo que lo mantiene clavado
+     en la estrella. El viewBox de la estrella arranca en −16 −16 para tener el
+     origen en el centro, y con la caja de referencia por defecto —`view-box`—
+     el navegador resuelve `transform-origin: 50% 50%` como «16px 16px» en
+     coordenadas de usuario, sin descontar ese desplazamiento: el eje de giro
+     caía a 22 unidades del centro y el aro no giraba sobre sí mismo, orbitaba
+     alrededor de un punto arriba y a la derecha de la estrella. Con la caja de
+     relleno el 50 % se mide sobre el propio círculo, que está centrado en el
+     origen, y el eje vuelve a caer donde tiene que caer. */
+  .pin-aro {
+    fill: none;
+    stroke: var(--color-amarillo);
+    stroke-width: 1.4;
+    stroke-dasharray: 4 5;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+  }
+  .pin[aria-pressed='true'] .pin-aro {
+    opacity: 1;
+    animation: gira-aro 9s linear infinite;
+  }
+  @keyframes gira-aro {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .pin-num {
+    position: absolute;
+    left: calc(100% - 4px);
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.08em;
+    color: color-mix(in srgb, var(--color-papel) 55%, transparent);
+    text-shadow: 0 0 3px var(--color-tinta);
+    pointer-events: none;
+  }
+  .pin:hover .pin-num,
+  .pin[aria-pressed='true'] .pin-num {
+    color: var(--color-amarillo);
+  }
+  /* La elegida crece, y a su tamaño el número le quedaba debajo. Ahora que el
+     aro gira donde debe —y no orbitando fuera de la estrella— hay que darle
+     sitio también a él: escalado 1.45 el círculo se sale seis píxeles por
+     cada costado del botón, y el número caía justo encima del trazo. */
+  .pin[aria-pressed='true'] .pin-num {
+    left: calc(100% + 9px);
+  }
+
+  /* El nombre no está siempre: catorce rótulos a la vez sobre el centro de
+     Guadalajara no se leen. Sale el de la que se señala. */
+  .pin-nombre {
+    position: absolute;
+    left: 50%;
+    top: calc(100% - 2px);
+    transform: translate(-50%, 0) scale(0.9);
+    transform-origin: top center;
+    padding: 0.3rem 0.5rem 0.25rem;
+    border: 2px solid var(--color-tinta);
+    background-color: var(--color-amarillo);
+    color: var(--color-tinta);
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.25s var(--ease-salida),
+      transform 0.25s var(--ease-salida);
+  }
+  .pin:hover .pin-nombre,
+  .pin:focus-visible .pin-nombre,
+  .pin[aria-pressed='true'] .pin-nombre {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  /* Y otro tanto por abajo: pegado al botón, el rótulo le cortaba al aro el
+     tercio de abajo. */
+  .pin[aria-pressed='true'] .pin-nombre {
+    top: calc(100% + 7px);
+    background-color: var(--color-rojo);
+    border-color: var(--color-amarillo);
+    color: var(--color-amarillo);
+  }
+
+  /* Entrada: las estrellas se clavan una detrás de otra cuando el plano
+     asoma. Antes de eso no están —ni encogidas ni transparentes: no están—,
+     que es lo que hace que se vea el gesto de clavarlas. */
+  .mapa-pines .pin-estrella {
+    scale: 0;
+  }
+  /* Y si no hay JS no hay quien las clave: entonces estaban desde siempre.
+     Sin esto, un navegador con el script apagado enseñaba el plano vacío. */
+  @media (scripting: none) {
+    .mapa-pines .pin-estrella {
+      scale: 1;
+    }
+  }
+  .mapa-pines[data-dentro] .pin-estrella {
+    scale: 1;
+    transition:
+      scale 0.5s var(--ease-salida) var(--retraso),
+      transform 0.35s var(--ease-salida);
+  }
+
+  /* ── Mandos ───────────────────────────────────────────────────────────
+     Arriba a la izquierda, que es la esquina que queda vacía cuando se ven
+     las catorce: a la derecha se sentaban justo encima de Foro AM y Casa
+     Feria, las dos de Pedro Loza.
+
+     Y en hueco, no en bloque: tres cuadrados de blanco macizo sobre el plano
+     pesaban más que las estrellas, que son de lo que va esto. Mobiliario del
+     mapa, no botones de la página. */
+  .mapa-mandos {
+    position: absolute;
+    top: 0.7rem;
+    left: 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    align-items: stretch;
+  }
+  .mapa-mandos button {
+    min-width: 2rem;
+    height: 2rem;
+    border: 2px solid color-mix(in srgb, var(--color-papel) 45%, transparent);
+    background-color: color-mix(in srgb, var(--color-tinta) 82%, transparent);
+    color: var(--color-papel);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1;
+    backdrop-filter: blur(2px);
+    transition:
+      background-color 0.25s var(--ease-salida),
+      border-color 0.25s var(--ease-salida),
+      color 0.25s var(--ease-salida);
+  }
+  .mapa-mandos button:hover {
+    background-color: var(--color-amarillo);
+    border-color: var(--color-amarillo);
+    color: var(--color-tinta);
+  }
+  .mapa-todas {
+    font-size: 0.5rem !important;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0 0.45rem;
+  }
+
+  /* ── Escala y crédito ─────────────────────────────────────────────────
+     La barra es la que dice a qué distancia queda todo: sin ella, un plano
+     sin nombres de calle podría ser de cuatro manzanas o de cuarenta. */
+  .mapa-abajo {
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.6rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    pointer-events: none;
+    font-family: var(--font-mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-papel) 55%, transparent);
+  }
+  .mapa-escala {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .mapa-escala-barra {
+    display: block;
+    height: 0.45rem;
+    border: 2px solid color-mix(in srgb, var(--color-papel) 55%, transparent);
+    border-top: 0;
+    transition: width 0.55s var(--ease-salida);
+  }
+  .mapa-credito {
+    text-align: right;
+  }
+
+  /* ── La que no está en el plano ───────────────────────────────────────── */
+  .mapa-fuera {
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 1.25rem;
+    border: 2px solid var(--color-tinta);
+    background-color: var(--color-papel);
+    color: var(--color-tinta);
+    box-shadow: 6px 6px 0 var(--color-tinta);
+    max-width: 22rem;
+    margin-inline: auto;
+  }
+  .mapa-fuera-nombre {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .mapa-fuera-nota {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    line-height: 1.35;
+    opacity: 0.75;
+  }
+
+  /* ── Pie ──────────────────────────────────────────────────────────────── */
+  .mapa-pie {
+    flex-shrink: 0;
+    border-top: 2px solid color-mix(in srgb, var(--color-papel) 25%, transparent);
+    background-color: var(--color-amarillo);
+    color: var(--color-tinta);
+    padding: 1rem 1.25rem;
+  }
+  .mapa-pie-vacio {
+    color: color-mix(in srgb, var(--color-tinta) 60%, transparent);
+  }
+  .mapa-pie-ficha {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  /* Sin esto, una dirección larga —López Cotilla 1360, con colonia y código
+     postal— empuja el botón a una línea propia y el pie crece de golpe. */
+  .mapa-pie-ficha > div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Sin animación no hay ni vuelo ni aro ni entrada: el plano se coloca de
+     golpe y las estrellas están desde el principio. */
+  @media (prefers-reduced-motion: reduce) {
+    .mapa-plano,
+    .pin,
+    .pin-estrella,
+    .pin-nombre,
+    .mapa-escala-barra {
+      transition: none;
+    }
+    .pin[aria-pressed='true'] .pin-aro {
+      animation: none;
+    }
+    .mapa-pines .pin-estrella {
+      scale: 1;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * El plano: encajarlo, moverlo y mantenerlo a una con la lista.
+   *
+   * Las cuentas son tres y se hacen todas aquí:
+   *
+   * 1. `encaje` — cuánto hay que reducir el dibujo para que quepa entero en
+   *    la caja. Sale de medir la caja, así que se recalcula al cambiar de
+   *    tamaño la ventana.
+   * 2. `zoom` — lo que pide quien mira: 1 es «todas», y una sede elegida se
+   *    ve a 2.6.
+   * 3. El arrastre, en píxeles de pantalla, topado para que nadie se salga
+   *    del papel: el dibujo tiene bordes y detrás no hay nada.
+   */
+  // En bucle y no con un `querySelector`: el script de un componente de Astro
+  // se ejecuta una vez por página, así que si algún día hay dos planos en la
+  // misma —la portada y otra sección— el segundo también tiene que andar.
+  for (const raiz of document.querySelectorAll<HTMLElement>('[data-mapa-sedes]')) {
+    const caja = raiz.querySelector<HTMLElement>('[data-caja]')!;
+    const plano = raiz.querySelector<HTMLElement>('[data-plano]')!;
+    const pines = [...raiz.querySelectorAll<HTMLElement>('[data-pin]')];
+    const filas = [...raiz.querySelectorAll<HTMLElement>('[data-sede]')];
+
+    const fuera = raiz.querySelector<HTMLElement>('[data-fuera]')!;
+    const fueraNombre = raiz.querySelector<HTMLElement>('[data-fuera-nombre]')!;
+    const fueraNota = raiz.querySelector<HTMLElement>('[data-fuera-nota]')!;
+    const pieVacio = raiz.querySelector<HTMLElement>('[data-pie-vacio]')!;
+    const pieFicha = raiz.querySelector<HTMLElement>('[data-pie-ficha]')!;
+    const pieNombre = raiz.querySelector<HTMLElement>('[data-pie-nombre]')!;
+    const pieDireccion = raiz.querySelector<HTMLElement>('[data-pie-direccion]')!;
+    const pieEnlace = raiz.querySelector<HTMLAnchorElement>('[data-pie-enlace]')!;
+    const escalaBarra = raiz.querySelector<HTMLElement>('[data-escala-barra]')!;
+    const escalaTexto = raiz.querySelector<HTMLElement>('[data-escala-texto]')!;
+
+    const ANCHO = Number(plano.dataset.ancho);
+    const ALTO = Number(plano.dataset.alto);
+    const METROS = Number(plano.dataset.metros);
+    const [LX0, LY0, LX1, LY1] = (plano.dataset.limites ?? '').split(',').map(Number);
+
+    const ZOOM_MIN = 1;
+    const ZOOM_MAX = 5;
+    const ZOOM_SEDE = 2.2;
+
+    let encaje = 1;
+    let zoom = 1;
+    let tx = 0;
+    let ty = 0;
+    let ancho = 0;
+    let alto = 0;
+
+    const entre = (v: number, min: number, max: number) =>
+      Math.min(Math.max(v, min), max);
+
+    /** El centro del dibujo que se está viendo, en unidades del plano. */
+    const centroVisible = (z: number) => ({
+      x: ANCHO / 2 - tx / z,
+      y: ALTO / 2 - ty / z,
+    });
+
+    /** Topa el arrastre contra los bordes de lo dibujado. Si de un lado cabe
+     *  todo, ese lado se centra en vez de toparse. */
+    function topar(z: number) {
+      const mediaX = ancho / 2 / z;
+      const mediaY = alto / 2 / z;
+      const c = centroVisible(z);
+      const x =
+        LX1 - LX0 <= mediaX * 2
+          ? (LX0 + LX1) / 2
+          : entre(c.x, LX0 + mediaX, LX1 - mediaX);
+      const y =
+        LY1 - LY0 <= mediaY * 2
+          ? (LY0 + LY1) / 2
+          : entre(c.y, LY0 + mediaY, LY1 - mediaY);
+      tx = (ANCHO / 2 - x) * z;
+      ty = (ALTO / 2 - y) * z;
+    }
+
+    /** La barra de escala: se elige la distancia redonda más grande que
+     *  quepa en cien píxeles, y la barra se dibuja de ese largo. */
+    const PASOS = [25, 50, 100, 200, 500, 1000];
+    function pintarEscala(z: number) {
+      let metros = PASOS[0];
+      for (const paso of PASOS) if ((paso / METROS) * z <= 100) metros = paso;
+      escalaBarra.style.width = `${(metros / METROS) * z}px`;
+      escalaTexto.textContent = `${metros} m`;
+    }
+
+    function pintar(suave = true) {
+      const z = encaje * zoom;
+      topar(z);
+      plano.dataset.suave = suave ? 'si' : 'no';
+      plano.style.setProperty('--z', String(z));
+      plano.style.setProperty('--iz', String(1 / z));
+      plano.style.setProperty('--tx', `${tx}px`);
+      plano.style.setProperty('--ty', `${ty}px`);
+      pintarEscala(z);
+    }
+
+    function medir() {
+      const r = caja.getBoundingClientRect();
+      ancho = r.width;
+      alto = r.height;
+      // El encaje es el que hace que quepa entero: el lado que peor va manda.
+      encaje = Math.min(ancho / ANCHO, alto / ALTO);
+      pintar(false);
+    }
+
+    /** Acercar o alejar dejando quieto un punto de la pantalla —el del dedo,
+     *  el del cursor, o el centro de la caja si no hay ninguno—. */
+    function acercar(nuevoZoom: number, pantallaX?: number, pantallaY?: number) {
+      const z0 = encaje * zoom;
+      const z1 = encaje * entre(nuevoZoom, ZOOM_MIN, ZOOM_MAX);
+      if (z1 === z0) return;
+      const r = caja.getBoundingClientRect();
+      const px = (pantallaX ?? r.left + r.width / 2) - r.left - ancho / 2;
+      const py = (pantallaY ?? r.top + r.height / 2) - r.top - alto / 2;
+      // El punto del dibujo que hay bajo ese píxel no se mueve de sitio.
+      tx = px - ((px - tx) / z0) * z1;
+      ty = py - ((py - ty) / z0) * z1;
+      zoom = z1 / encaje;
+      pintar();
+    }
+
+    /** Lleva una sede al centro. */
+    function volarA(x: number, y: number) {
+      zoom = ZOOM_SEDE;
+      const z = encaje * zoom;
+      tx = (ANCHO / 2 - x) * z;
+      ty = (ALTO / 2 - y) * z;
+      pintar();
+    }
+
+    // ── Elegir una sede ───────────────────────────────────────────────────
+    function elegir(nombre: string | null, opciones: { volar?: boolean } = {}) {
+      for (const fila of filas) {
+        const suya = fila.dataset.nombre === nombre;
+        fila.setAttribute('aria-pressed', String(suya));
+        fila.closest('.fila-sede')?.classList.toggle('sede-activa', suya);
+      }
+      for (const pin of pines) {
+        pin.setAttribute('aria-pressed', String(pin.dataset.nombre === nombre));
+      }
+
+      const fila = filas.find((f) => f.dataset.nombre === nombre);
+      if (!fila) {
+        pieFicha.hidden = true;
+        pieVacio.hidden = false;
+        fuera.hidden = true;
+        return;
+      }
+
+      pieVacio.hidden = true;
+      pieFicha.hidden = false;
+      pieNombre.textContent = fila.dataset.nombre ?? '';
+      pieDireccion.textContent = fila.dataset.direccion ?? '';
+      pieEnlace.href = fila.dataset.enlace ?? '';
+
+      const x = Number(fila.dataset.x);
+      const y = Number(fila.dataset.y);
+      if (Number.isFinite(x) && Number.isFinite(y)) {
+        fuera.hidden = true;
+        if (opciones.volar !== false) volarA(x, y);
+      } else {
+        // Sin punto: se cuenta por qué en vez de mover el plano a ninguna
+        // parte.
+        fueraNombre.textContent = fila.dataset.nombre ?? '';
+        fueraNota.textContent = fila.dataset.nota ?? '';
+        fuera.hidden = false;
+      }
+
+      // En una ventana angosta el plano queda arriba, fuera de vista.
+      if (!window.matchMedia('(width >= 64rem)').matches) {
+        caja.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    for (const fila of filas) {
+      fila.addEventListener('click', () => elegir(fila.dataset.nombre ?? null));
+    }
+    for (const pin of pines) {
+      pin.addEventListener('click', () => {
+        if (arrastrado) return; // veníamos de mover el plano, no de elegir
+        elegir(pin.dataset.nombre ?? null);
+        const fila = filas.find((f) => f.dataset.nombre === pin.dataset.nombre);
+        // La lista es larga y scrollea por dentro: si la elegida está fuera
+        // de su recorte, no se entera nadie de que se marcó.
+        fila?.closest('.fila-sede')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        });
+      });
+    }
+
+    raiz.querySelector('[data-todas]')?.addEventListener('click', () => {
+      zoom = 1;
+      tx = 0;
+      ty = 0;
+      pintar();
+      elegir(null);
+    });
+    raiz
+      .querySelector('[data-zoom="mas"]')
+      ?.addEventListener('click', () => acercar(zoom * 1.6));
+    raiz
+      .querySelector('[data-zoom="menos"]')
+      ?.addEventListener('click', () => acercar(zoom / 1.6));
+
+    // ── Arrastre ──────────────────────────────────────────────────────────
+    // El clic de una estrella y el arrastre salen del mismo gesto: hasta que
+    // no se mueven cuatro píxeles no hay arrastre, y en cuanto lo hay el
+    // clic que viene detrás se descarta.
+    let arrastrando = false;
+    let arrastrado = false;
+    let x0 = 0;
+    let y0 = 0;
+
+    caja.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      arrastrando = true;
+      arrastrado = false;
+      x0 = e.clientX;
+      y0 = e.clientY;
+    });
+
+    caja.addEventListener('pointermove', (e) => {
+      if (!arrastrando) return;
+      const dx = e.clientX - x0;
+      const dy = e.clientY - y0;
+      if (!arrastrado && Math.hypot(dx, dy) < 4) return;
+      if (!arrastrado) {
+        // La captura se pide aquí y no al apretar: con el puntero capturado
+        // por la caja, el clic que viene detrás se lo lleva la caja y la
+        // estrella de debajo no se entera. O sea que capturar de entrada
+        // dejaba las catorce estrellas sin poder pulsarse. Se captura cuando
+        // ya sabemos que esto es un arrastre y no un clic.
+        caja.setPointerCapture(e.pointerId);
+        caja.dataset.arrastrando = 'si';
+        arrastrado = true;
+      }
+      tx += dx;
+      ty += dy;
+      x0 = e.clientX;
+      y0 = e.clientY;
+      pintar(false);
+    });
+
+    const soltar = (e: PointerEvent) => {
+      if (!arrastrando) return;
+      arrastrando = false;
+      delete caja.dataset.arrastrando;
+      if (caja.hasPointerCapture(e.pointerId)) caja.releasePointerCapture(e.pointerId);
+      // El clic de la estrella llega justo después de esto: se le deja ver la
+      // bandera y se limpia en el siguiente turno.
+      setTimeout(() => {
+        arrastrado = false;
+      }, 0);
+    };
+    caja.addEventListener('pointerup', soltar);
+    caja.addEventListener('pointercancel', soltar);
+
+    caja.addEventListener('dblclick', (e) => {
+      acercar(zoom * 1.8, e.clientX, e.clientY);
+    });
+
+    // ── Teclado ───────────────────────────────────────────────────────────
+    // La caja se puede enfocar: con ella enfocada, las flechas mueven el
+    // plano y +/− lo acercan. Es la alternativa al ratón para quien no lo
+    // usa; elegir una sede ya se puede desde la lista, que es una lista de
+    // botones de verdad.
+    caja.tabIndex = 0;
+    caja.addEventListener('keydown', (e) => {
+      if (e.target !== caja) return;
+      const paso = 60;
+      const teclas: Record<string, () => void> = {
+        ArrowUp: () => (ty += paso),
+        ArrowDown: () => (ty -= paso),
+        ArrowLeft: () => (tx += paso),
+        ArrowRight: () => (tx -= paso),
+        '+': () => acercar(zoom * 1.6),
+        '=': () => acercar(zoom * 1.6),
+        '-': () => acercar(zoom / 1.6),
+        Home: () => {
+          zoom = 1;
+          tx = 0;
+          ty = 0;
+        },
+      };
+      const accion = teclas[e.key];
+      if (!accion) return;
+      e.preventDefault();
+      accion();
+      if (!e.key.match(/[+=-]/)) pintar();
+    });
+
+    // ── Puesta en marcha ──────────────────────────────────────────────────
+    medir();
+    new ResizeObserver(medir).observe(caja);
+
+    // Las estrellas se clavan cuando el plano asoma, no al cargar la página:
+    // si la sección está a tres pantallas, la entrada se la pierde todo el
+    // mundo.
+    const cajaPines = raiz.querySelector<HTMLElement>('[data-pines]')!;
+    const ojo = new IntersectionObserver(
+      ([entrada], observador) => {
+        if (!entrada.isIntersecting) return;
+        observador.disconnect();
+        cajaPines.dataset.dentro = 'si';
+      },
+      { rootMargin: '0px 0px -12% 0px', threshold: 0 },
+    );
+    ojo.observe(caja);
+
+    // La cascada de la lista: las filas llevan `data-reveal`, pero el
+    // observador de `motion.ts` mide contra la ventana y dentro de una caja
+    // recortada las de abajo no entran en cuadro nunca. Se destapan las
+    // catorce de una vez, cada una con su retraso.
+    const lista = raiz.querySelector<HTMLElement>('[data-lista-sedes]');
+    if (lista) {
+      const reveladas = [...lista.querySelectorAll<HTMLElement>('[data-reveal]')];
+      const ojoLista = new IntersectionObserver(
+        ([entrada], observador) => {
+          if (!entrada.isIntersecting) return;
+          observador.disconnect();
+          for (const fila of reveladas) {
+            fila.style.setProperty('--retraso', `${fila.dataset.retraso ?? 0}ms`);
+            fila.classList.add('dentro');
+          }
+        },
+        { rootMargin: '0px 0px -12% 0px', threshold: 0 },
+      );
+      ojoLista.observe(lista);
+    }
+  }
+</script>
