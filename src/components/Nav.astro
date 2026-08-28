@@ -1,5 +1,5 @@
 ---
-import { nav, festival } from '../data/site';
+import { nav, accionPrincipal, festival } from '../data/site';
 import { conBase } from '../lib/base';
 
 // `Astro.url.pathname` ya trae la base incorporada, así que el enlace se
@@ -8,6 +8,11 @@ import { conBase } from '../lib/base';
 const limpia = (p: string) => p.replace(/\/$/, '') || '/';
 const ruta = limpia(Astro.url.pathname);
 const activo = (href: string) => (ruta === limpia(conBase(href)) ? 'page' : undefined);
+
+// El nombre partido en dos renglones, «Festival de arte / conceptual», que es
+// el corte del manual. Se parte aquí y no por ancho de caja: dejárselo al
+// contenedor lo rompería por un sitio distinto en cada tamaño de pantalla.
+const [nombreArriba, nombreAbajo] = ['Festival de arte', 'conceptual'];
 ---
 
 <header
@@ -33,21 +38,18 @@ const activo = (href: string) => (ruta === limpia(conBase(href)) ? 'page' : unde
         height="420"
         class="h-8 w-auto transition-transform duration-500 ease-[var(--ease-salida)] group-hover:-rotate-6 sm:h-10"
       />
-      <span class="leading-none">
-        <span class="meta block text-[0.5rem] text-rojo sm:text-[0.55rem]"
-          >Festival de arte</span
-        >
-        <!-- El wordmark va en vector, con las formas reales de Old London del
-             manual, en vez de recomponerlo con la gótica sustituta. El
-             lockup completo (`logotipo-*.svg`) no cabe aquí: a la altura de
-             la barra su texto secundario quedaría en ~3 px. -->
-        <img
-          src={conBase("/logos/wordmark-roja.svg")}
-          alt=""
-          width="533"
-          height="85"
-          class="mt-0.5 block h-5 w-auto sm:h-6"
-        />
+      <!-- El cliente pidió la barra así: la silla y «Festival de arte
+           conceptual», sin el wordmark gótico —«que no diga festival de arte
+           (CUARTA SILLA)», 26/08—.
+
+           Dos líneas de mono miden ~22 px contra los 32/40 de la silla, así
+           que la barra no cambia de alto. Y el wordmark gótico no se pierde:
+           sigue en el cierre de la portada, en el pie y calado en el respaldo
+           de la silla. -->
+      <span
+        class="meta block text-[0.5rem] leading-[1.55] text-rojo sm:text-[0.6rem]"
+      >
+        {nombreArriba}<br />{nombreAbajo}
       </span>
     </a>
 
@@ -65,12 +67,11 @@ const activo = (href: string) => (ruta === limpia(conBase(href)) ? 'page' : unde
         ))
       }
       <a
-        href={festival.convocatoriaPDF}
-        target="_blank"
-        rel="noopener"
-        class="meta flex items-center gap-2 border-l-2 border-tinta bg-rojo px-6 font-bold text-amarillo transition-colors duration-300 hover:bg-tinta"
+        href={conBase(accionPrincipal.href)}
+        aria-current={activo(accionPrincipal.href)}
+        class="meta flex items-center gap-2 border-l-2 border-tinta bg-rojo px-6 font-bold text-amarillo transition-colors duration-300 hover:bg-tinta aria-[current=page]:bg-tinta"
       >
-        ★ Convocatoria ★
+        ★ {accionPrincipal.label} ★
       </a>
     </nav>
 
@@ -117,12 +118,11 @@ const activo = (href: string) => (ruta === limpia(conBase(href)) ? 'page' : unde
       ))
     }
     <a
-      href={festival.convocatoriaPDF}
-      target="_blank"
-      rel="noopener"
+      href={conBase(accionPrincipal.href)}
+      aria-current={activo(accionPrincipal.href)}
       class="meta mt-8 inline-flex items-center justify-center gap-2 border-2 border-amarillo px-6 py-4 font-bold text-amarillo"
     >
-      ★ Convocatoria (PDF) ★
+      ★ {accionPrincipal.label} ★
     </a>
   </nav>
 </div>

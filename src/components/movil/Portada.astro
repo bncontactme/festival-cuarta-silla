@@ -19,6 +19,8 @@ import {
   programa,
   sedes,
 } from '../../data/site';
+import { artistas } from '../../data/artistas';
+import { archivo } from '../../data/archivo';
 
 const puertas = [
   { n: '01', label: 'Manifiesto', href: '#manifiesto', nota: 'Qué es esto' },
@@ -31,11 +33,24 @@ const puertas = [
   },
   {
     n: '04',
-    label: 'Convocatoria',
-    href: festival.convocatoriaPDF,
-    nota: 'PDF',
-    externa: true,
+    label: artistas.titulo,
+    href: '/artistas',
+    nota: artistas.lista.length
+      ? `${artistas.lista.length} nombres`
+      : artistas.estado,
   },
+];
+
+/** Los atajos del pie de la portada. No son puertas: son la letra chica del
+ *  índice. Se quedan fuera de las cuatro grandes a propósito —una quinta
+ *  puerta le come 70 px a la escena de la silla, y en un iPhone SE la silla,
+ *  que mide 217 px, se recortaría contra el `overflow: hidden` del marco—.
+ *  «Apoya» sólo aparece cuando exista la cuenta de PayPal. */
+const atajos = [
+  { label: archivo.titulo, href: '/archivo' },
+  ...(festival.donaciones.paypal
+    ? [{ label: 'Apoya', href: festival.donaciones.paypal, externa: true }]
+    : []),
 ];
 ---
 
@@ -48,18 +63,11 @@ const puertas = [
     </div>
 
     <header class="movil-barra portada-barra">
+      {/* Mismo cambio que la barra de escritorio: la silla vive en la escena
+          de abajo, así que aquí queda el nombre a dos renglones y nada más. */}
       <span class="px-4">
-        <span class="leading-none">
-          <span class="meta block text-[0.45rem] text-rojo">
-            Festival de arte
-          </span>
-          <img
-            src={conBase("/logos/wordmark-roja.svg")}
-            alt="Cuarta Silla"
-            width="533"
-            height="85"
-            class="mt-0.5 block h-4 w-auto"
-          />
+        <span class="meta block text-[0.5rem] leading-[1.55] text-rojo">
+          Festival de arte<br />conceptual
         </span>
       </span>
       <a
@@ -79,7 +87,7 @@ const puertas = [
           {festival.nombre} — {festival.fechas} — {festival.ciudad}
         </span>
         <span
-          class="display display-centro block text-[16cqw] leading-[0.88] text-rojo"
+          class="display display-centro block leading-[0.88] text-rojo"
           aria-hidden="true"
         >
           Festival<br />de Arte<br />Conceptual
@@ -125,6 +133,20 @@ const puertas = [
       }
     </nav>
 
+    <nav class="portada-atajos" aria-label="Más">
+      {
+        atajos.map((a) => (
+          <a
+            href={conBase(a.href)}
+            target={a.externa ? '_blank' : undefined}
+            rel={a.externa ? 'noopener' : undefined}
+          >
+            {a.label} <span aria-hidden="true">{a.externa ? '↗' : '→'}</span>
+          </a>
+        ))
+      }
+    </nav>
+
     {/* El pie del sitio grande no se pinta aquí, y con él se iba el único
         enlace al aviso de privacidad. Una línea basta. */}
     <p class="portada-legal">
@@ -139,10 +161,10 @@ const puertas = [
       del teléfono funciona solo. */}
   <section
     id="manifiesto"
-    class="movil-modal bg-hueso"
+    class="movil-modal bg-papel"
     aria-label={manifiesto.titulo}
   >
-    <div class="movil-barra bg-hueso">
+    <div class="movil-barra bg-papel">
       <a href="#portada" class="meta px-4 font-bold text-rojo">
         <span aria-hidden="true">←</span>&nbsp; Volver
       </a>

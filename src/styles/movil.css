@@ -73,8 +73,8 @@
     min-height: 3.25rem;
   }
 
-  /* Sólo los hijos directos: dentro de la barra hay un wordmark de dos líneas
-     apiladas, y convertirlo en fila las encabalga. */
+  /* Sólo los hijos directos: dentro de la barra el nombre va a dos renglones
+     apilados, y convertirlo en fila los encabalga. */
   .movil-barra > a,
   .movil-barra > span {
     display: flex;
@@ -123,21 +123,35 @@
   }
 
   /* ── El bloque de la silla ──────────────────────────────────────────── */
+  /* `grid-template-rows: minmax(0, 1fr)` y no la fila implícita: una fila
+     automática crece hasta el hijo más alto, y el hijo más alto es la silla
+     —316×420, así que a 208 px de ancho pide 276 de alto—. En un teléfono bajo
+     la escena se queda en 151 px de contenido, la fila crecía a 276 y, al
+     centrar todo dentro de esa fila desbordada, el rótulo se iba hacia abajo y
+     «CONCEPTUAL» acababa debajo de la franja roja.
+     Con la fila acotada a `1fr` el hueco manda, y cada hijo se ajusta a él. */
   .portada-escena {
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
     display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     place-items: center;
     padding: 1rem;
   }
 
   /* La silla ocupa el centro y, cuando llega el color, se retira al fondo:
-     empieza siendo el sujeto y acaba siendo el suelo. */
+     empieza siendo el sujeto y acaba siendo el suelo.
+     En topes y no en medidas fijas: manda el ancho mientras haya alto de sobra
+     y manda el alto cuando no. `width`/`height` en `auto` son lo que conserva
+     la proporción entre los dos topes. */
   .portada-silla {
     grid-area: 1 / 1;
-    width: min(58vw, 15rem);
+    width: auto;
     height: auto;
+    max-width: min(58vw, 15rem);
+    max-height: 100%;
     opacity: 0.16;
   }
 
@@ -146,6 +160,30 @@
     position: relative;
     width: 100%;
     text-align: center;
+  }
+
+  /* El cuerpo del rótulo, con techo por ALTO además de por ancho.
+   *
+   * Medido en `cqw` a secas —el ancho del marco— el titular no se entera de
+   * cuánto alto le queda, y en un teléfono bajo la escena se encoge pero la
+   * tipografía no: en 360×640 «CONCEPTUAL» se metía media línea debajo de la
+   * franja roja. Es el mismo problema que ya tenía el titular de escritorio y
+   * se resuelve igual, con un `min()` que mide lo que sobra de pantalla.
+   *
+   * De dónde sale el 30.6rem: lo fijo de la portada mide 457 px —barra 52,
+   * franja de datos 56, cuatro puertas 236, tira de atajos 33, línea legal 28,
+   * más filetes— y la escena se queda con el resto menos su relleno de 2rem.
+   * Eso son 28.6rem + 2rem.
+   *
+   * Y el 3.22 en vez de 2.64 (tres líneas a 0.88 de interlínea): Anton pinta
+   * las mayúsculas por fuera de su caja de línea, así que la caja sólo puede
+   * ocupar un 82 % del hueco. Medir la caja y no la tinta es justo lo que
+   * hacía que los números cuadraran y la pantalla no.
+   *
+   * Comprobado en 360×640, 375×667, 390×844 y 430×932: sólo actúa en los dos
+   * primeros, en el resto sigue mandando el 16cqw de siempre. */
+  .portada-rotulo .display {
+    font-size: min(16cqw, calc((100dvh - 30.6rem) / 3.22));
   }
 
   /* ── Franja de datos ────────────────────────────────────────────────────
@@ -187,6 +225,50 @@
 
   .puerta-flecha {
     margin-left: auto;
+  }
+
+  /* ── Atajos ─────────────────────────────────────────────────────────────
+     Un renglón de 34 px entre las puertas y la línea legal, con lo que no
+     merece una puerta entera: el archivo y —cuando exista la cuenta— el enlace
+     de donar. Es la letra chica del índice, no una quinta puerta: una quinta
+     puerta le quita 70 px a la escena de la silla y en las pantallas cortas la
+     silla se recorta contra el `overflow: hidden` del marco.
+
+     `grid-auto-columns: 1fr` reparte a partes iguales sean uno o dos, así que
+     el renglón se lee igual de bien con el enlace de donar apagado. */
+  .portada-atajos {
+    flex: none;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    border-top: var(--borde) solid var(--color-tinta);
+    background-color: var(--color-amarillo);
+  }
+
+  .portada-atajos > a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.75rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.55rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-tinta);
+    transition: background-color 0.25s var(--ease-salida);
+  }
+
+  /* El filete que los separa va sólo entre medias: con `border-left` en todos,
+     el primero llevaría una raya contra el canto del marco. */
+  .portada-atajos > a + a {
+    border-left: var(--borde) solid var(--color-tinta);
+  }
+
+  .portada-atajos > a:active {
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
   }
 
   .portada-legal {
@@ -238,6 +320,7 @@
 
     /* Y las puertas, al final */
     [data-intro='si'] .portada-puertas,
+    [data-intro='si'] .portada-atajos,
     [data-intro='si'] .portada-legal {
       animation: asomar 0.5s var(--ease-salida) 1.45s both;
     }
@@ -253,6 +336,7 @@
        entrada lo recoge el <html>, así que no se pierde. */
     [data-intro='si'] .portada-barra,
     [data-intro='si'] .portada-puertas,
+    [data-intro='si'] .portada-atajos,
     [data-intro='si'] .portada-legal {
       pointer-events: none;
     }
@@ -389,7 +473,7 @@
 
   .plegable[open] > summary {
     background-color: var(--color-tinta);
-    color: var(--color-hueso);
+    color: var(--color-papel);
   }
 
   .plegable[open] .plegable-signo {

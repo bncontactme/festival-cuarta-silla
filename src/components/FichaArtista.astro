@@ -1,0 +1,104 @@
+---
+import Silla from './Silla.astro';
+import { imagen, juegoDeImagenes } from '../lib/imagen';
+import { artistas, type Artista } from '../data/artistas';
+
+/**
+ * La ficha de un artista. Es **la misma tarjeta de la reja de sedes**
+ * —`src/pages/sedes.astro`— con una foto encima: canto de 2 px, número de
+ * orden, nombre en display, y la tira de acción abajo. No se estrena nada.
+ *
+ * Dónde sí se aparta de la de sedes, y por qué: allí la cortina roja sube por
+ * la tarjeta entera, porque la tarjeta entera es texto. Aquí taparía la foto,
+ * que es lo único que se viene a ver, así que la cortina sube **sólo por el
+ * bloque del pie**. La foto se queda quieta y el rótulo se invierte, que es
+ * como se comporta una ficha de catálogo.
+ *
+ * Sin foto la caja no se encoge ni se salta: se pinta en amarillo con la silla
+ * calada y el mismo 4:5. Un hueco honesto antes que una reja desalineada.
+ */
+interface Props {
+  artista: Artista;
+  indice: number;
+  retraso?: number;
+}
+
+const { artista, indice, retraso = 0 } = Astro.props;
+const numero = String(indice + 1).padStart(2, '0');
+---
+
+<li
+  class="group relative flex flex-col overflow-hidden border-r-2 border-b-2 border-tinta"
+  data-reveal="escala"
+  data-retraso={retraso}
+>
+  <div
+    class="relative aspect-[4/5] overflow-hidden border-b-2 border-tinta bg-amarillo"
+  >
+    {
+      artista.foto ? (
+        <img
+          src={imagen(artista.foto, 800)}
+          srcset={juegoDeImagenes(artista.foto) || undefined}
+          sizes="(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"
+          alt={artista.nombre}
+          width="1000"
+          height="1250"
+          loading="lazy"
+          decoding="async"
+          class="h-full w-full object-cover transition-transform duration-700 ease-[var(--ease-salida)] group-hover:scale-[1.04]"
+        />
+      ) : (
+        <Silla
+          variante="roja"
+          class="absolute inset-0 m-auto w-1/2 opacity-15"
+        />
+      )
+    }
+
+    {/* El número va sobre la foto y no debajo del nombre: es el que ordena la
+        reja, y ahí arriba se lee de un golpe recorriéndola con la vista. */}
+    <span class="meta absolute top-0 left-0 bg-tinta px-2.5 py-1.5 text-[0.55rem] text-amarillo">
+      {numero}
+    </span>
+  </div>
+
+  <div class="relative flex-1 overflow-hidden">
+    {/* La cortina, igual que en sedes: sube desde abajo al pasar el cursor. */}
+    <span
+      class="absolute inset-0 origin-bottom scale-y-0 bg-rojo transition-transform duration-500 ease-[var(--ease-cortina)] group-hover:scale-y-100"
+      aria-hidden="true"
+    />
+
+    <div
+      class="relative p-5 transition-colors duration-500 group-hover:text-amarillo lg:p-6"
+    >
+      <h3 class="display text-3xl leading-[0.95] lg:text-4xl">
+        {artista.nombre}
+      </h3>
+      {
+        artista.disciplina && (
+          <p class="meta mt-3 text-[0.6rem] opacity-60">{artista.disciplina}</p>
+        )
+      }
+      {
+        artista.sede && (
+          <p class="meta mt-1.5 text-[0.6rem] opacity-45">{artista.sede}</p>
+        )
+      }
+    </div>
+  </div>
+
+  {
+    artista.instagram && (
+      <a
+        href={artista.instagram}
+        target="_blank"
+        rel="noopener"
+        class="meta relative border-t-2 border-tinta bg-amarillo px-4 py-3.5 text-center font-bold transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
+      >
+        {artistas.acciones.instagram} ↗
+      </a>
+    )
+  }
+</li>

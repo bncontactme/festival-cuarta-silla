@@ -6,15 +6,15 @@ import Silla from '../components/Silla.astro';
 import Mosaico from '../components/Mosaico.astro';
 import Portada from '../components/movil/Portada.astro';
 import Gantt from '../components/Gantt.astro';
+import Mapa from '../components/Mapa.astro';
 import {
   festival,
+  accionPrincipal,
   manifiesto,
   sedes,
   patrocinadores,
   colaboradores,
   programa,
-  enlaceMapa,
-  mapaIncrustado,
 } from '../data/site';
 
 const cuenta = [
@@ -135,26 +135,24 @@ const cuenta = [
           </p>
         </div>
 
+        {/* Era «★ Convocatoria ★» + «Programa». Cerrada la convocatoria, el
+            botón rojo —el que manda— lleva a la misma acción destacada que el
+            bloque rojo de la barra, para que el sitio pida siempre lo mismo. */}
         <div class="flex flex-wrap items-center gap-4" data-reveal="arriba" data-retraso="120">
-          <a
-            href={festival.convocatoriaPDF}
-            target="_blank"
-            rel="noopener"
-            class="boton"
-          >
-            ★ Convocatoria ★
+          <a href={conBase(accionPrincipal.href)} class="boton">
+            ★ {accionPrincipal.label} ★
           </a>
-          <a href={conBase("/programa")} class="boton boton--hueso">Programa</a>
+          <a href={conBase("/programa")} class="boton boton--papel">Programa</a>
         </div>
       </div>
     </div>
 
     <!-- Cuenta regresiva -->
     <div
-      class="relative border-t-2 border-tinta bg-tinta text-hueso"
+      class="relative border-t-2 border-tinta bg-tinta text-papel"
       data-cuenta={festival.inicioISO}
     >
-      <dl class="grid grid-cols-4 divide-x-2 divide-hueso/25">
+      <dl class="grid grid-cols-4 divide-x-2 divide-papel/25">
         {
           cuenta.map(({ campo, label }) => (
             <div class="px-3 py-5 text-center sm:py-7">
@@ -164,7 +162,7 @@ const cuenta = [
               >
                 --
               </dd>
-              <dt class="meta mt-3 text-hueso/60">{label}</dt>
+              <dt class="meta mt-3 text-papel/55">{label}</dt>
             </div>
           ))
         }
@@ -200,15 +198,17 @@ const cuenta = [
     id="manifiesto"
     {/* Borde amarillo: abajo sigue la sección de sedes, que también es
         oscura, y un filete tinta contra tinta no se ve. */}
-    class="relative overflow-hidden border-b-2 border-amarillo bg-hueso"
+    class="relative overflow-hidden border-b-2 border-amarillo bg-papel"
   >
     {/* La silla, muy apagada y recortada por el canto de la banda: entre la
-        pregunta y el botón queda un hueco ancho que en hueso liso se ve
-        plano. No sube el alto de la sección ni compite con nada. */}
+        pregunta y el botón queda un hueco ancho que en blanco liso se ve
+        plano. No sube el alto de la sección ni compite con nada.
+        Al 7 % sobre el hueso se veía; sobre blanco puro desaparecía, así que
+        sube a 10 %: la marca de agua tiene que insinuarse, no borrarse. */}
     <Silla
       variante="roja"
       deriva
-      class="pointer-events-none absolute -top-10 right-[26%] w-52 opacity-[0.07] lg:w-64"
+      class="pointer-events-none absolute -top-10 right-[26%] w-52 opacity-[0.10] lg:w-64"
     />
 
     {/* Alineadas por abajo: el botón se apoya en la última línea de la
@@ -266,7 +266,7 @@ const cuenta = [
   </section>
 
   {/* El modal es una mini-página, no una tarjeta: tres bandas a sangre
-      —cabecera roja, cuerpo hueso, remate tinta— con los mismos filetes de
+      —cabecera roja, cuerpo papel, remate tinta— con los mismos filetes de
       2 px que separan las secciones del sitio. */}
   <dialog
     class="modal"
@@ -316,10 +316,10 @@ const cuenta = [
   </dialog>
 
   <!-- ══ SEDES ══════════════════════════════════════════════════════════ -->
-  <section class="border-b-2 border-amarillo bg-pizarra text-hueso">
+  <section class="border-b-2 border-amarillo bg-tinta text-papel">
     <div class="px-4 pt-12 pb-20 sm:px-6 lg:px-10 lg:pt-16 lg:pb-28">
       <div
-        class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-hueso/25 pb-8"
+        class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-papel/25 pb-8"
       >
         <div>
           <p
@@ -330,7 +330,7 @@ const cuenta = [
             02 / {sedes.titulo}
           </p>
           <h2
-            class="display text-[13vw] leading-[0.82] text-hueso lg:text-[8vw]"
+            class="display text-[13vw] leading-[0.82] text-papel lg:text-[8vw]"
             data-lineas
             data-reveal="lineas"
           >
@@ -340,137 +340,9 @@ const cuenta = [
         <a href={conBase("/sedes")} class="boton" data-reveal="arriba">Ver las {sedes.lista.length}</a>
       </div>
 
-      {/* Mapa a la izquierda, lista a la derecha. El iframe no se carga
-          hasta que alguien elige una sede: catorce mapas de Google al entrar
-          serían catorce peticiones a un tercero que nadie pidió. */}
-      <div class="mt-10">
-      <div class="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-12">
-        <!-- ── Mapa ───────────────────────────────────────────────────── -->
-        <div
-          class="relative flex h-[55vh] flex-col border-2 border-hueso/25 lg:h-[60vh]"
-        >
-          {/* Columna flexible: al aparecer el pie, el mapa cede alto en vez
-              de estirar el marco. */}
-          <div class="relative flex-1 overflow-hidden bg-pizarra">
-            <!-- Lo que se ve antes de elegir -->
-            <div
-              class="absolute inset-0 grid place-items-center px-8 text-center"
-              data-mapa-vacio
-            >
-              <div
-                class="cuadricula absolute inset-0 opacity-25"
-                aria-hidden="true"
-              >
-              </div>
-              <Silla
-                variante="roja"
-                class="absolute -bottom-10 -left-10 w-48 opacity-20 lg:w-60"
-              />
-              <p class="meta relative max-w-xs leading-relaxed text-hueso/60">
-                {sedes.acciones.sinMapa}
-              </p>
-            </div>
-
-            <iframe
-              class="absolute inset-0 h-full w-full border-0"
-              title={`Mapa de las sedes del ${festival.nombre}`}
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              allowfullscreen
-              hidden
-              data-mapa></iframe>
-          </div>
-
-          <!-- Pie: qué se está viendo -->
-          <div
-            class="flex shrink-0 flex-wrap items-center justify-between gap-4 border-t-2 border-hueso/25 bg-amarillo px-5 py-4 text-tinta"
-            hidden
-            data-mapa-pie
-          >
-            <div>
-              <p class="display text-xl leading-none" data-mapa-nombre></p>
-              <address
-                class="mt-2 text-sm leading-snug not-italic opacity-70"
-                data-mapa-direccion></address>
-            </div>
-            <a
-              class="meta border-2 border-tinta bg-tinta px-4 py-2.5 text-[0.6rem] font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
-              target="_blank"
-              rel="noopener"
-              data-mapa-enlace
-            >
-              {sedes.acciones.ubicacion} ↗
-            </a>
-          </div>
-        </div>
-
-        {/* ── Lista ────────────────────────────────────────────────────
-            Scrollea por dentro, al alto del mapa, y desde el primer momento:
-            con la barra pintada a un lado se ve que la caja se mueve, que era
-            lo que antes había que explicar bloqueándola.
-
-            Las filas entran escalonadas, una detrás de otra, pero las
-            catorce a la vez: quien dispara la cascada es la lista, no cada
-            fila por su cuenta. El observador de `motion.ts` mide contra la
-            ventana y no contra esta caja, así que las sedes que caen por
-            debajo del recorte no entraban nunca en cuadro y se quedaban
-            invisibles hasta que alguien scrolleaba dentro —catorce sedes de
-            las que se veían seis—. El script del final de la página se
-            encarga; aquí sólo va el retraso de cada una.
-
-            `data-lenis-prevent` es lo que hace que la rueda mueva la lista y
-            no la página: Lenis captura el scroll de toda la ventana y sin eso
-            esta caja no se entera. `overscroll-behavior: contain`, en la
-            hoja, es lo que evita que al llegar al final el gesto siga y
-            arrastre la portada. */}
-        <ul
-          class="lista-sedes h-[55vh] border-t-2 border-hueso/25 pr-3 lg:h-[60vh]"
-          data-lista-sedes
-          data-lenis-prevent
-        >
-          {
-            sedes.lista.map((sede, i) => (
-              <li
-                class="fila-sede flex items-center gap-4 border-b border-hueso/20"
-                data-reveal="arriba"
-                data-retraso={i * 45}
-              >
-                {/* La fila entera elige la sede: el objetivo es la franja,
-                    no un enlace de dos palabras. */}
-                <button
-                  type="button"
-                  class="group flex flex-1 items-baseline gap-x-5 py-3.5 text-left"
-                  aria-pressed="false"
-                  data-sede
-                  data-nombre={sede.nombre}
-                  data-direccion={sede.direccion}
-                  data-incrustado={mapaIncrustado(sede)}
-                  data-enlace={enlaceMapa(sede)}
-                >
-                  <span class="meta w-8 shrink-0 text-hueso/40 transition-colors group-hover:text-amarillo">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span class="display truncate text-2xl leading-none transition-colors group-hover:text-amarillo">
-                    {sede.nombre}
-                  </span>
-                </button>
-
-                {sede.instagram && (
-                  <a
-                    href={sede.instagram}
-                    target="_blank"
-                    rel="noopener"
-                    class="meta shrink-0 text-[0.6rem] text-hueso/40 transition-colors duration-300 hover:text-amarillo"
-                  >
-                    IG ↗
-                  </a>
-                )}
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-      </div>
+      {/* Plano a la izquierda, lista a la derecha: son un solo
+          instrumento, así que viven en un solo componente. */}
+      <Mapa class="mt-10" />
     </div>
   </section>
 
@@ -493,8 +365,16 @@ const cuenta = [
             <span class="inline-block h-[2px] w-12 bg-rojo"></span>
             03 / {programa.titulo}
           </p>
+          {/* Un punto por debajo de SEDES, que va a 8vw. No es un capricho
+              de escala: son dos secciones seguidas, las dos con la misma
+              receta —rótulo, titular, botón, filete— y la de arriba manda.
+              Puestas al mismo cuerpo, la bajada de la portada era una fila de
+              carteles del mismo tamaño gritando por turnos, y ésta encima
+              grita sobre amarillo a plena saturación, que es el fondo que más
+              cansa de los cuatro. Bajarla es lo que la vuelve lo que es: el
+              adelanto del programa, no el programa. */}
           <h2
-            class="display text-[13vw] leading-[0.82] text-tinta lg:text-[8vw]"
+            class="display text-[11vw] leading-[0.82] text-tinta lg:text-[6.4vw]"
             data-lineas
             data-reveal="lineas"
           >
@@ -511,8 +391,15 @@ const cuenta = [
           que hablaban de lo mismo sin mirarse —el día salía escrito dos
           veces, una en la cabecera del mini y otra en la lista— y ninguno de
           los dos se podía tocar. */}
+      {/* `items-stretch` y no `items-start`: la tarjeta de la izquierda mide
+          lo que mide el día que se esté viendo, y la lista de la derecha medía
+          siempre lo mismo —cuatro filas de sesenta píxeles—. La diferencia
+          quedaba en un socavón de amarillo debajo de la lista, que era lo que
+          hacía que la sección pareciera una caja a medio llenar. Estiradas a
+          la par, las cuatro filas se reparten el alto que haya y las dos
+          columnas cierran a la misma línea. */}
       <div
-        class="mt-10 grid gap-10 lg:mt-12 lg:grid-cols-[1.35fr_1fr] lg:items-start lg:gap-14"
+        class="mt-10 grid gap-10 lg:mt-12 lg:grid-cols-[1.35fr_1fr] lg:items-stretch lg:gap-14"
       >
         {/* El mini: la silueta del día, sin texto en las barras. No es para
             leer qué hay —eso está a la derecha y en el programa—, es para ver
@@ -527,15 +414,18 @@ const cuenta = [
             además, el canto de arriba de la lista arranca exactamente en el
             canto de arriba de la tarjeta. */}
         <div data-reveal="arriba">
-          <ul class="border-y-2 border-tinta" data-dias-portada>
+          <ul
+            class="flex h-full flex-col border-y-2 border-tinta"
+            data-dias-portada
+          >
             {
               programa.dias.map((d, i) => (
-                <li class="border-b border-tinta/15 last:border-b-0">
+                <li class="flex flex-1 border-b border-tinta/15 last:border-b-0">
                   {/* La fila entera cambia el día de la rejilla: el objetivo
                       es la franja, no dos palabras. */}
                   <button
                     type="button"
-                    class="dia-portada flex w-full items-baseline gap-x-4 py-4 text-left"
+                    class="dia-portada flex w-full items-center gap-x-4 py-4 text-left"
                     data-dia={i}
                     aria-pressed={i === 0 ? 'true' : 'false'}
                   >
@@ -567,7 +457,7 @@ const cuenta = [
 
   {/* ══ PATROCINADORES → COLABORADORES ═══════════════════════════════════
       Una sola sección con dos caras. Al terminar el turno de un grupo cambia
-      la luz —fondo hueso ↔ pizarra, acento rojo ↔ amarillo—, el título y el
+      la luz —fondo papel ↔ amarillo—, el título y el
       número; el relevo va en tres tiempos para que no se lea como un
       parpadeo (ver el guion al pie).
 
@@ -666,59 +556,47 @@ const cuenta = [
       <p class="meta mt-6 text-amarillo/80" data-reveal="arriba">
         {festival.fechas} · {festival.ciudad}
       </p>
-      <div class="mt-12 flex flex-wrap justify-center gap-4" data-reveal="arriba" data-retraso="120">
-        <a
-          href={festival.convocatoriaPDF}
-          target="_blank"
-          rel="noopener"
-          class="boton boton--hueso"
-        >
-          ★ Convocatoria ★
-        </a>
-        <a href={conBase("/registro")} class="boton boton--hueso">Registro a eventos</a>
+      {/* El remate lleva un solo botón, y es el de donar. Lo demás —programa,
+          sedes, artistas, archivo— ya está en la barra de arriba y en el pie;
+          repetirlo aquí abajo convertía el cierre en otro menú. Con una sola
+          puerta, la banda pide una cosa y se entiende cuál.
+
+          Mientras no exista la cuenta de PayPal el botón sale desactivado y
+          diciéndolo, en vez de desaparecer: el cierre se quedaría sin nada
+          debajo del logotipo. En cuanto `festival.donaciones.paypal` tenga el
+          enlace, se convierte solo en el botón de verdad. */}
+      <div class="mt-12 flex justify-center" data-reveal="arriba" data-retraso="120">
+        {
+          festival.donaciones.paypal ? (
+            <a
+              href={festival.donaciones.paypal}
+              target="_blank"
+              rel="noopener"
+              class="boton boton--papel"
+            >
+              ★ Donar ★
+            </a>
+          ) : (
+            <span class="boton boton--papel boton--dormido">
+              ★ Donar — próximamente ★
+            </span>
+          )
+        }
       </div>
+      {
+        festival.donaciones.nota && (
+          <p
+            class="meta mx-auto mt-6 max-w-[38ch] leading-relaxed text-amarillo/80"
+            data-reveal="arriba"
+            data-retraso="180"
+          >
+            {festival.donaciones.nota}
+          </p>
+        )
+      }
     </div>
   </section>
 
-
-  <script>
-    /** El mapa se llena al elegir una sede — antes no existe. */
-    const mapa = document.querySelector('[data-mapa]');
-    const vacio = document.querySelector('[data-mapa-vacio]');
-    const pie = document.querySelector('[data-mapa-pie]');
-    const nombre = document.querySelector('[data-mapa-nombre]');
-    const direccion = document.querySelector('[data-mapa-direccion]');
-    const enlace = document.querySelector('[data-mapa-enlace]');
-    const filas = document.querySelectorAll('[data-sede]');
-
-    if (mapa instanceof HTMLIFrameElement && filas.length) {
-      for (const fila of filas) {
-        fila.addEventListener('click', () => {
-          for (const otra of filas) {
-            otra.setAttribute('aria-pressed', 'false');
-            otra.closest('.fila-sede')?.classList.remove('sede-activa');
-          }
-          fila.setAttribute('aria-pressed', 'true');
-          fila.closest('.fila-sede')?.classList.add('sede-activa');
-
-          mapa.src = fila.dataset.incrustado ?? '';
-          mapa.hidden = false;
-          if (vacio instanceof HTMLElement) vacio.hidden = true;
-          if (pie instanceof HTMLElement) pie.hidden = false;
-          if (nombre) nombre.textContent = fila.dataset.nombre ?? '';
-          if (direccion) direccion.textContent = fila.dataset.direccion ?? '';
-          if (enlace instanceof HTMLAnchorElement) {
-            enlace.href = fila.dataset.enlace ?? '';
-          }
-
-          // En una ventana angosta el mapa queda arriba, fuera de vista.
-          if (!window.matchMedia('(width >= 64rem)').matches) {
-            mapa.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        });
-      }
-    }
-  </script>
 
   <script>
     /** La cinta de marcas alterna entre patrocinadores y colaboradores.
@@ -821,40 +699,6 @@ const cuenta = [
         );
         ojo.observe(cinta);
       }
-    }
-  </script>
-
-  <script>
-    /** La cascada de la lista de sedes la dispara la lista, no cada fila.
-     *
-     * Las filas llevan `data-reveal`, pero el observador de `motion.ts` mide
-     * contra la ventana: dentro de una caja recortada, las que quedan por
-     * debajo del corte no entran en cuadro nunca y se quedan invisibles. Aquí
-     * se observa la caja entera y, en cuanto asoma, se destapan las catorce de
-     * una vez —cada una con su retraso, que es lo que las escalona—.
-     *
-     * El `--retraso` se pone aquí y no se espera al de `motion.ts`: los dos
-     * scripts leen el mismo `data-retraso` y da igual cuál llegue antes.
-     */
-    const lista = document.querySelector('[data-lista-sedes]');
-    if (lista) {
-      const filas = [
-        ...lista.querySelectorAll<HTMLElement>('[data-reveal]'),
-      ];
-      const ojo = new IntersectionObserver(
-        ([entrada], observador) => {
-          if (!entrada.isIntersecting) return;
-          // Una vez y se olvida: la cascada no se repite al volver a pasar.
-          observador.disconnect();
-          for (const fila of filas) {
-            fila.style.setProperty('--retraso', `${fila.dataset.retraso ?? 0}ms`);
-            fila.classList.add('dentro');
-          }
-        },
-        // El mismo margen que usan los reveals del resto del sitio.
-        { rootMargin: '0px 0px -12% 0px', threshold: 0 },
-      );
-      ojo.observe(lista);
     }
   </script>
 

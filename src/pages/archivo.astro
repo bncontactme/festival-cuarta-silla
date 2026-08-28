@@ -1,0 +1,213 @@
+---
+import Base from '../layouts/Base.astro';
+import { conBase } from '../lib/base';
+import { imagen, juegoDeImagenes } from '../lib/imagen';
+import Encabezado from '../components/Encabezado.astro';
+import Silla from '../components/Silla.astro';
+import Pantalla from '../components/movil/Pantalla.astro';
+import { archivo } from '../data/archivo';
+import { festival } from '../data/site';
+
+const ediciones = archivo.lista;
+---
+
+<Base
+  titulo={archivo.titulo}
+  descripcion={`Registro histórico del ${festival.nombre}: las ediciones anteriores en ${festival.ciudad}.`}
+>
+  {/* ── Móvil: el índice, y las fotos debajo de cada año ────────────────── */}
+  <Fragment slot="movil">
+    <Pantalla
+      titulo={archivo.titulo}
+      indice="06"
+      nota={
+        ediciones.length
+          ? `${ediciones.length} ediciones`
+          : archivo.estado
+      }
+      fondo="tinta"
+    >
+      {
+        ediciones.length === 0 ? (
+          <div class="p-4">
+            <div class="ficha">
+              <p class="meta text-rojo">{archivo.estado}</p>
+              <p class="display mt-3 text-3xl leading-[0.95]">
+                Todavía no hay fotos
+              </p>
+              <p class="mt-4 font-mono text-[0.8rem] leading-relaxed text-tinta/70">
+                {archivo.vacio}
+              </p>
+            </div>
+          </div>
+        ) : (
+          ediciones.map((e) => (
+            <section class="border-b-2 border-papel/20 px-4 py-6">
+              <p class="meta text-[0.6rem] text-amarillo">{e.anio}</p>
+              <h2 class="display mt-2 text-3xl leading-none">{e.edicion}</h2>
+              {e.lema && (
+                <p class="mt-2 font-mono text-[0.8rem] opacity-60">{e.lema}</p>
+              )}
+              <div class="mt-4 grid grid-cols-2 gap-2">
+                {e.fotos.map((f) => (
+                  <img
+                    src={imagen(f.src, 480)}
+                    srcset={juegoDeImagenes(f.src, [320, 480]) || undefined}
+                    sizes="50vw"
+                    alt={f.pie ?? `${e.edicion}, ${e.anio}`}
+                    width="1200"
+                    height="900"
+                    loading="lazy"
+                    decoding="async"
+                    class="aspect-[4/3] w-full border-2 border-papel/25 object-cover"
+                  />
+                ))}
+              </div>
+            </section>
+          ))
+        )
+      }
+    </Pantalla>
+  </Fragment>
+
+  <Encabezado
+    indice={
+      ediciones.length
+        ? `${archivo.titulo} / ${String(ediciones.length).padStart(2, '0')}`
+        : `${archivo.titulo} / ${archivo.estado}`
+    }
+    titulo={archivo.titulo}
+    fondo="tinta"
+  />
+
+  {
+    ediciones.length === 0 ? (
+      <section class="bg-tinta text-papel">
+        {/* Mismo criterio que artistas: sin ediciones cargadas la banda se
+            aprieta. Con `py-32` la ficha quedaba sola en el medio de una
+            pantalla entera de negro. */}
+        <div class="px-4 py-14 sm:px-6 lg:px-10 lg:py-16">
+          <div class="ficha ficha--ancha max-w-2xl" data-reveal="escala">
+            <p class="meta text-rojo">{archivo.estado}</p>
+            <p class="display mt-4 text-4xl leading-[0.95] lg:text-5xl">
+              Todavía no hay fotos
+            </p>
+            <p class="mt-5 max-w-[52ch] font-mono text-sm leading-relaxed text-tinta/70">
+              {archivo.vacio}
+            </p>
+          </div>
+        </div>
+      </section>
+    ) : (
+      /* Una banda por edición, y dentro una hoja de contactos. El año manda:
+         va en display al tamaño de un titular de sección, porque en un
+         archivo lo primero que se busca es el año y no el nombre. */
+      ediciones.map((e, n) => (
+        <section
+          class={`border-b-2 border-tinta ${n % 2 ? 'bg-papel' : 'bg-amarillo'}`}
+        >
+          <div class="px-4 pt-12 pb-16 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
+            <div class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8">
+              <div>
+                <p class="meta mb-5 flex items-center gap-4 text-rojo" data-reveal="lado">
+                  <span class="inline-block h-[2px] w-12 bg-rojo" />
+                  {String(n + 1).padStart(2, '0')} / {e.edicion}
+                </p>
+                <h2
+                  class="display text-[16vw] leading-[0.82] text-tinta lg:text-[9vw]"
+                  data-lineas
+                  data-reveal="lineas"
+                >
+                  {e.anio}
+                </h2>
+                {e.lema && (
+                  <p
+                    class="mt-5 max-w-[48ch] font-mono text-sm leading-relaxed text-tinta/70"
+                    data-reveal="arriba"
+                  >
+                    {e.lema}
+                  </p>
+                )}
+              </div>
+
+              {/* Los números de la edición, en columna y alineados a la
+                  derecha: son datos de ficha, no titulares. */}
+              <dl class="meta grid gap-2 text-right text-tinta/55" data-reveal="arriba">
+                {e.sedes && (
+                  <div>
+                    <dt class="sr-only">{archivo.acciones.sedes}</dt>
+                    <dd>
+                      {e.sedes} {archivo.acciones.sedes}
+                    </dd>
+                  </div>
+                )}
+                {e.actividades && (
+                  <div>
+                    <dt class="sr-only">{archivo.acciones.actividades}</dt>
+                    <dd>
+                      {e.actividades} {archivo.acciones.actividades}
+                    </dd>
+                  </div>
+                )}
+                <div>
+                  <dt class="sr-only">Fotos</dt>
+                  <dd>{e.fotos.length} fotos</dd>
+                </div>
+              </dl>
+            </div>
+
+            <ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {e.fotos.map((f, i) => (
+                <li data-reveal="escala" data-retraso={(i % 3) * 90}>
+                  <figure>
+                    <img
+                      src={imagen(f.src, 800)}
+                      srcset={juegoDeImagenes(f.src) || undefined}
+                      sizes="(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"
+                      alt={f.pie ?? `${e.edicion}, ${e.anio}`}
+                      width="1200"
+                      height="900"
+                      loading="lazy"
+                      decoding="async"
+                      class="aspect-[4/3] w-full border-2 border-tinta object-cover"
+                    />
+                    {f.pie && (
+                      <figcaption class="meta mt-2.5 leading-relaxed text-tinta/55">
+                        {f.pie}
+                      </figcaption>
+                    )}
+                  </figure>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ))
+    )
+  }
+
+  <section class="relative overflow-hidden bg-rojo text-amarillo">
+    <Silla
+      variante="amarilla"
+      deriva
+      class="absolute -right-10 -bottom-12 w-48 opacity-20 lg:w-72"
+    />
+    <div class="relative px-4 py-20 sm:px-6 lg:px-10">
+      <p class="meta mb-6" data-reveal="lado">{festival.edicion}</p>
+      <p
+        class="display max-w-4xl text-[9vw] leading-[0.95] lg:text-[5.5vw]"
+        data-lineas
+        data-reveal="lineas"
+      >
+        {festival.fechas}
+      </p>
+      <a
+        href={conBase("/programa")}
+        class="boton boton--papel mt-10"
+        data-reveal="arriba"
+      >
+        Ver el programa
+      </a>
+    </div>
+  </section>
+</Base>

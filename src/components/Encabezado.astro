@@ -4,7 +4,7 @@ interface Props {
   indice: string;
   titulo: string;
   bajada?: string;
-  fondo?: 'amarillo' | 'rojo' | 'hueso' | 'pizarra';
+  fondo?: 'amarillo' | 'rojo' | 'papel' | 'tinta';
 }
 
 const { indice, titulo, bajada, fondo = 'amarillo' } = Astro.props;
@@ -12,8 +12,8 @@ const { indice, titulo, bajada, fondo = 'amarillo' } = Astro.props;
 const paleta = {
   amarillo: 'bg-amarillo text-tinta',
   rojo: 'bg-rojo text-amarillo',
-  hueso: 'bg-hueso text-tinta',
-  pizarra: 'bg-pizarra text-hueso',
+  papel: 'bg-papel text-tinta',
+  tinta: 'bg-tinta text-papel',
 }[fondo];
 ---
 

@@ -6,7 +6,11 @@ import type { Marca } from '../data/site';
  *
  * Las marcas de las que todavía no tenemos archivo se pintan con el nombre en
  * display, en la misma caja y del mismo tamaño: un hueco honesto antes que un
- * logo inventado. */
+ * logo inventado.
+ *
+ * Lleva la clase `mosaico` además de las utilidades: la cinta de marcas le
+ * vuelca el canto a amarillo cuando la cara de la sección es oscura, y para eso
+ * hace falta poder nombrarlo desde fuera. */
 interface Props {
   marca: Marca;
   class?: string;
@@ -16,7 +20,7 @@ const { marca, class: clase = '' } = Astro.props;
 ---
 
 <div
-  class={`flex aspect-[3/2] w-52 shrink-0 items-center justify-center border-2 border-tinta bg-white p-4 ${clase}`}
+  class={`mosaico flex aspect-[3/2] w-52 shrink-0 items-center justify-center border-2 border-tinta bg-papel p-4 ${clase}`}
 >
   {
     marca.logo ? (

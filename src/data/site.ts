@@ -14,18 +14,63 @@ export const festival = {
   anio: '2026',
   // Fecha de arranque para la cuenta regresiva (24 sep 2026, 08:00 hora de GDL / UTC-6)
   inicioISO: '2026-09-24T08:00:00-06:00',
+  /**
+   * La convocatoria CERRÓ. Ya no hay ni un botón que lleve aquí —«ya ese botón
+   * muere», 26/08— y por eso no se borra el dato: el PDF sigue circulando en
+   * redes y en buscadores, y el día que haya que volver a enlazarlo está.
+   */
   convocatoriaPDF:
     'https://www.festivaldearteconceptual.com/_files/ugd/985416_d240424c19c14ea4ad0fbeeff5a22e4a.pdf',
+  /**
+   * Donaciones. Vacío mientras no exista la cuenta: **todo lo que pinta un
+   * botón de donar cuelga de que `paypal` tenga algo**, así que hoy no se
+   * dibuja nada. Pegar aquí el enlace enciende de una vez el cierre de la
+   * portada, la columna «Participa» del pie y el remate de /registro.
+   *
+   * `nota` es la línea que va debajo del botón —a qué se destina el dinero—.
+   * Vacía a propósito: eso lo escriben ellos, no yo. Sin ella el botón sale
+   * solo, que es como está ahora.
+   */
+  donaciones: {
+    paypal: '',
+    nota: '',
+  },
   creditoFooter:
     '© 2026 Creado por Festival De Arte Conceptual La Cuarta Silla',
 };
 
+/** La portada no gasta pestaña: se va por el logo, que es donde todo el mundo
+ *  la busca. Sigue entera en el pie. */
+export const inicio = { label: 'Inicio', href: '/' };
+
+/** El registro tiene nombre propio porque lo pintan tres sitios: su pestaña de
+ *  la barra, la columna «Participa» del pie y el remate de `/programa`.
+ *
+ *  Ojo con lo que promete: aquí uno se registra **por actividad**, no al
+ *  festival entero — cada `ActividadGantt` trae su propio `registro` y la ficha
+ *  de la rejilla abre ese formulario. Esta página es la puerta general. */
+export const registroEventos = {
+  label: 'Registro a eventos',
+  href: '/registro',
+};
+
+/** Las pestañas de la barra. El bloque rojo del final no sale de aquí: es la
+ *  acción destacada y la pinta `Nav.astro` aparte.
+ *
+ *  Cuatro y la destacada, cada una contestando algo distinto: cuándo, dónde,
+ *  qué hubo, cómo entro, quién. Artistas y archivo son pestañas y no secciones
+ *  de la portada: cada uno tiene su página. */
 export const nav = [
-  { label: 'Inicio', href: '/' },
   { label: 'Programa', href: '/programa' },
-  { label: 'Registro a eventos', href: '/registro' },
   { label: 'Sedes', href: '/sedes' },
+  { label: 'Archivo', href: '/archivo' },
+  registroEventos,
 ];
+
+/** La acción destacada de la barra: el bloque rojo del extremo derecho.
+ *  Era la convocatoria, y cerrada ésa pasó un rato por el registro. Ahora es
+ *  artistas, que es lo que hay que enseñar. */
+export const accionPrincipal = { label: 'Artistas', href: '/artistas' };
 
 /** Manifiesto — home. Texto íntegro del original. */
 export const manifiesto = {
@@ -92,6 +137,21 @@ export type Sede = {
   instagram?: string;
   /** Enlace corto al pin exacto. Sin él se busca por dirección. */
   mapa?: string;
+  /**
+   * `[latitud, longitud]`, para clavar la estrella en el plano de la portada.
+   *
+   * De dónde sale cada una: las que tienen `mapa` son el pin que nos pasaron,
+   * leído del enlace corto de Google; las demás salen del número de puerta en
+   * OpenStreetMap —el exacto si existe, y si no interpolando entre el anterior
+   * y el siguiente de la misma calle—. Se comprobó el método contra las que sí
+   * tienen pin: cae dentro de la manzana.
+   *
+   * Sin coordenada no hay estrella. Es lo que toca cuando una sede no está en
+   * Guadalajara: antes que inventarle un punto, el mapa lo dice.
+   */
+  coord?: [number, number];
+  /** Qué contar cuando no hay estrella que enseñar. */
+  notaMapa?: string;
 };
 
 /** A dónde lleva «Ubicación»: al pin exacto si lo tenemos, y si no a la
@@ -102,13 +162,6 @@ export const enlaceMapa = (sede: Sede) =>
     sede.direccion,
   )}`;
 
-/** El mapa incrustado va siempre por dirección: los enlaces cortos de Maps
- *  no se dejan meter en un iframe. */
-export const mapaIncrustado = (sede: Sede) =>
-  `https://www.google.com/maps?q=${encodeURIComponent(
-    sede.direccion,
-  )}&output=embed`;
-
 export const sedes = {
   titulo: 'Sedes',
   acciones: {
@@ -116,21 +169,29 @@ export const sedes = {
     ubicacion: 'Ubicación',
     verMapa: 'Ver en el mapa',
     sinMapa: 'Elegí una sede para verla en el mapa',
+    // Rótulos del plano de la portada.
+    todas: 'Todas',
+    acercar: 'Acercar',
+    alejar: 'Alejar',
+    credito: 'Cartografía © OpenStreetMap',
   },
   // El orden es el de la lista que nos pasaron, no alfabético.
   lista: [
     {
       nombre: 'Cuerpos Parlante',
       direccion: 'C. Cruz Verde 93, Zona Centro, 44200 Guadalajara, Jal.',
+      coord: [20.678024, -103.357493],
     },
     {
       nombre: 'Foro AM',
       direccion: 'C. Pedro Loza 344, Zona Centro, 44200 Guadalajara, Jal.',
+      coord: [20.681676, -103.348404],
     },
     {
       nombre: 'Temporal',
       // La dirección anterior repetía la de Salón Liminal; ésta es la buena.
       direccion: 'C. Donato Guerra 25, Zona Centro, 44100 Guadalajara, Jal.',
+      coord: [20.675938, -103.350449],
       instagram: 'https://www.instagram.com/temporal___________/',
       mapa: 'https://maps.app.goo.gl/Fsu7vg12MzBCtbxD8',
     },
@@ -138,29 +199,48 @@ export const sedes = {
       nombre: 'Estudio Arrechiga',
       direccion:
         'Camarena 118, Col Americana, Americana, 44160 Guadalajara, Jal.',
+      coord: [20.674647, -103.35767],
       instagram: 'https://www.instagram.com/estudioarechiga/',
       mapa: 'https://maps.app.goo.gl/C1F4Us1jy6buYTJJA',
     },
     {
       nombre: 'Casa Dos Guayabos',
       direccion: 'C. San Felipe 731, Zona Centro, 44200 Guadalajara, Jal.',
+      coord: [20.679379, -103.354601],
     },
     {
-      nombre: 'No museo',
-      direccion: 'Palestina',
+      /**
+       * El andador es el tramo peatonal de Escorza que corre al este de la
+       * Rectoría General de la UdeG, de Morelos a López Cotilla: el que el
+       * ayuntamiento decretó Constancio Hernández Alvirde en 2015 y el que la
+       * gente renombró Andador Palestina Libre. Va primero el nombre que se
+       * usa y entre paréntesis el del papel, que es el orden en que sirven:
+       * uno es para llegar andando y el otro para escribirlo en un sobre.
+       *
+       * La coordenada es el punto medio de ese tramo en OpenStreetMap
+       * (`highway=pedestrian`, «Calle Escorza» + «Andador Escorza»), a media
+       * cuadra de la Rectoría (20.67523, -103.35900) y del MUSA.
+       */
+      nombre: 'No Museo',
+      direccion:
+        'Andador Palestina Libre (Constancio Hernández Alvirde), Col. Americana, 44160 Guadalajara, Jal.',
+      coord: [20.6741, -103.35857],
     },
     {
-      nombre: 'Taller industria gráfica',
+      nombre: 'Taller Industria Gráfica',
       direccion:
         'C. San Felipe 827, Capilla de Jesús, 44160 Guadalajara, Jal.',
+      coord: [20.67934, -103.356823],
     },
     {
       nombre: 'Casa Feria',
       direccion: 'C. Pedro Loza 359, Zona Centro, 44100 Guadalajara, Jal.',
+      coord: [20.681953, -103.348427],
     },
     {
       nombre: 'Ala Rota',
       direccion: 'Juan Manuel 823, Zona Centro, 44200 Guadalajara, Jal.',
+      coord: [20.678578, -103.354777],
       instagram: 'https://www.instagram.com/alarota.cultura/',
       mapa: 'https://maps.app.goo.gl/hB6KDRMnp6TxrJBD7',
     },
@@ -168,18 +248,21 @@ export const sedes = {
       nombre: 'Staditche',
       direccion:
         'C. Manuel López Cotilla 858, Col Americana, Americana, 44160 Guadalajara, Jal.',
+      coord: [20.674168, -103.357894],
       instagram: 'https://www.instagram.com/staditche/',
       mapa: 'https://maps.app.goo.gl/436QGVLkPj3ZSueU6',
     },
     {
       nombre: 'Estallido Art Project',
       direccion: 'Calle, Av. Alcalde 159, Zona Centro, 44100 Guadalajara, Jal.',
+      coord: [20.678963, -103.347828],
       instagram: 'https://www.instagram.com/estallidoartproject/',
       mapa: 'https://maps.app.goo.gl/SuKhGPMVaB7ZeRve9',
     },
     {
       nombre: 'Salón Liminal',
       direccion: 'C. Independencia 795, Zona Centro, 44100 Guadalajara, Jal.',
+      coord: [20.678033, -103.354007],
       instagram: 'https://www.instagram.com/salonliminal/',
       mapa: 'https://maps.app.goo.gl/17i56g378cvg5t7j9',
     },
@@ -187,6 +270,7 @@ export const sedes = {
       nombre: 'Ánima Galería',
       direccion:
         'C. Miguel Blanco 1405, Col Americana, Americana, 44160 Guadalajara, Jal.',
+      coord: [20.672186, -103.357879],
       instagram: 'https://www.instagram.com/animagaleria/',
       mapa: 'https://maps.app.goo.gl/D2y3qeR19Qc2G2ND8',
     },
@@ -194,6 +278,7 @@ export const sedes = {
       nombre: 'Palma Galería',
       direccion:
         'C. Manuel López Cotilla 1360, Col Americana, Americana, 44160 Guadalajara, Jal.',
+      coord: [20.673916, -103.366453],
       instagram: 'https://www.instagram.com/palmagaleria/',
       mapa: 'https://maps.app.goo.gl/9LFY63xj1kpyzuncA',
     },
@@ -254,10 +339,6 @@ export const privacidad = {
     'Todo lo antes expuesto en esta pagina es responsabilidad del Festival de Arte Conceptual La Cuarta Silla',
 };
 
-export const cta = {
-  convocatoria: 'Convocatoria',
-};
-
 /** ── Rejilla del programa (Gantt) ─────────────────────────────────────────
  *
  * ⚠️  ESTOS EVENTOS SON DE EJEMPLO Y HAY QUE REEMPLAZARLOS ENTEROS. ⚠️
@@ -292,10 +373,18 @@ export type ActividadGantt = {
 export const sedeDe = (nombre: string) =>
   sedes.lista.find((s) => s.nombre === nombre);
 
+/** Los cuatro tipos, cada uno con su tinta. El color no pinta la barra entera
+ *  —eso era un carnaval—: es el filete de 5 px del canto izquierdo y el
+ *  cuadradito de la leyenda.
+ *
+ *  «Muestra» va en papel y no en una quinta tinta: sobre la barra negra un
+ *  filete blanco se distingue del rojo, del amarillo y del ladrillo tan bien
+ *  como cualquier color, y en la leyenda queda un cuadrado en hueco dentro de
+ *  su canto de 2 px. Tres tintas y el papel, que es como se imprime un cartel. */
 export const coloresGantt = {
   taller: { fondo: 'var(--color-rojo)', texto: 'var(--color-amarillo)' },
   charla: { fondo: 'var(--color-amarillo)', texto: 'var(--color-tinta)' },
-  muestra: { fondo: 'var(--color-pizarra)', texto: 'var(--color-hueso)' },
+  muestra: { fondo: 'var(--color-papel)', texto: 'var(--color-tinta)' },
   escena: { fondo: 'var(--color-ladrillo)', texto: 'var(--color-amarillo)' },
 } as const;
 
@@ -312,7 +401,7 @@ export const actividades: ActividadGantt[] = [
   { titulo: 'Cuerpo y espacio', dia: 0, inicio: '19:00', fin: '21:00', sede: 'Cuerpos Parlante', tipo: 'escena', artista: 'Mariana Ruvalcaba', registro: 'https://tally.so/r/ejemplo2' },
 
   // Viernes
-  { titulo: 'Taller de risografía', dia: 1, inicio: '10:00', fin: '13:00', sede: 'Taller Industria Grafica', tipo: 'taller', artista: 'Taller Industria Gráfica', registro: 'https://tally.so/r/ejemplo3' },
+  { titulo: 'Taller de risografía', dia: 1, inicio: '10:00', fin: '13:00', sede: 'Taller Industria Gráfica', tipo: 'taller', artista: 'Taller Industria Gráfica', registro: 'https://tally.so/r/ejemplo3' },
   { titulo: 'Conceptualismo hoy', dia: 1, inicio: '12:00', fin: '13:30', sede: 'Temporal', tipo: 'charla', artista: 'Panel invitado', registro: 'https://tally.so/r/ejemplo4' },
   { titulo: 'Muestra: archivo abierto', dia: 1, inicio: '11:00', fin: '20:00', sede: 'No Museo', tipo: 'muestra', artista: 'Colectivo Archivo Vivo' },
   { titulo: 'Lectura de portafolios', dia: 1, inicio: '15:00', fin: '18:00', sede: 'Estudio Arrechiga', tipo: 'taller', artista: 'Andrea Sandoval', registro: 'https://tally.so/r/ejemplo5' },
@@ -322,7 +411,7 @@ export const actividades: ActividadGantt[] = [
   // Sábado
   { titulo: 'Recorrido por el centro', dia: 2, inicio: '11:00', fin: '14:00', sede: 'No Museo', tipo: 'muestra', artista: 'Guía del festival', registro: 'https://tally.so/r/ejemplo7' },
   { titulo: 'Escritura sobre obra', dia: 2, inicio: '10:30', fin: '12:30', sede: 'Estudio Arrechiga', tipo: 'taller', artista: 'Ximena Prado', registro: 'https://tally.so/r/ejemplo8' },
-  { titulo: 'Grabado expandido', dia: 2, inicio: '13:00', fin: '16:00', sede: 'Taller Industria Grafica', tipo: 'taller', artista: 'Rubén Ortega', registro: 'https://tally.so/r/ejemplo9' },
+  { titulo: 'Grabado expandido', dia: 2, inicio: '13:00', fin: '16:00', sede: 'Taller Industria Gráfica', tipo: 'taller', artista: 'Rubén Ortega', registro: 'https://tally.so/r/ejemplo9' },
   { titulo: 'Charla: qué pone en discusión', dia: 2, inicio: '16:30', fin: '18:00', sede: 'Temporal', tipo: 'charla', artista: 'Panel invitado', registro: 'https://tally.so/r/ejemplo10' },
   { titulo: 'Proyección al aire libre', dia: 2, inicio: '20:30', fin: '22:30', sede: 'Casa Dos Guayabos', tipo: 'escena', artista: 'Cine Errante' },
 
@@ -332,3 +421,51 @@ export const actividades: ActividadGantt[] = [
   { titulo: 'Conversatorio de cierre', dia: 3, inicio: '16:00', fin: '17:30', sede: 'Foro AM', tipo: 'charla', artista: 'Comité organizador', registro: 'https://tally.so/r/ejemplo12' },
   { titulo: 'Clausura', dia: 3, inicio: '19:00', fin: '22:00', sede: 'Casa Feria', tipo: 'escena', artista: 'Todas las sedes' },
 ];
+
+/** ── Red de seguridad ─────────────────────────────────────────────────────
+ *
+ * `sedeDe()` empareja por nombre EXACTO, así que una tilde de más o de menos en
+ * el campo `sede` de una actividad no rompe nada a la vista: simplemente la
+ * ficha de esa actividad sale sin dirección y sin enlace al mapa, y nadie se
+ * entera hasta que un visitante la abre. Ya pasó una vez, con «Taller Industria
+ * Grafica» contra «Taller Industria Gráfica».
+ *
+ * Astro evalúa este módulo al construir, así que esto revienta el build en vez
+ * de dejar pasar el fallo. Importa sobre todo de aquí en adelante: cuando
+ * llegue la programación de verdad van a ser decenas de renglones escritos a
+ * mano contra catorce nombres con tildes, acentos y mayúsculas.
+ *
+ * Se lista todo lo que no empareja de una vez —no sólo lo primero— y se sugiere
+ * el nombre bueno cuando se parece, que es lo que ahorra el viaje de ida y
+ * vuelta al arreglarlo.
+ */
+{
+  const nombres = sedes.lista.map((s) => s.nombre);
+  /** Sin tildes, sin mayúsculas y sin dobles espacios: así se detecta el
+   *  «quisiste decir…» sin depender de cómo se tecleó. */
+  const pelar = (s: string) =>
+    s
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  const sueltas = actividades
+    .filter((a) => !nombres.includes(a.sede))
+    .map((a) => {
+      const parecida = nombres.find((n) => pelar(n) === pelar(a.sede));
+      return `  · «${a.sede}» (en «${a.titulo}»)${
+        parecida ? ` — ¿querías decir «${parecida}»?` : ''
+      }`;
+    });
+
+  if (sueltas.length) {
+    throw new Error(
+      `site.ts: hay ${sueltas.length} actividad(es) que nombran una sede que no está en ` +
+        `sedes.lista. La ficha de la rejilla se queda sin dirección ni mapa.\n` +
+        sueltas.join('\n') +
+        `\n\nSedes válidas:\n${nombres.map((n) => `  · ${n}`).join('\n')}`,
+    );
+  }
+}

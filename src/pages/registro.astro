@@ -5,6 +5,7 @@ import Encabezado from '../components/Encabezado.astro';
 import Silla from '../components/Silla.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import { registro, festival } from '../data/site';
+import { artistas } from '../data/artistas';
 ---
 
 <Base
@@ -23,7 +24,7 @@ import { registro, festival } from '../data/site';
         <article
           class="border-2 border-tinta bg-amarillo text-tinta shadow-[6px_6px_0_var(--color-tinta)]"
         >
-          <header class="border-b-2 border-tinta bg-tinta px-4 py-4 text-hueso">
+          <header class="border-b-2 border-tinta bg-tinta px-4 py-4 text-papel">
             <p class="meta text-[0.55rem] text-amarillo">{registro.ciudad}</p>
             <h2 class="display mt-2 text-4xl leading-none">
               {registro.estado}
@@ -58,13 +59,8 @@ import { registro, festival } from '../data/site';
           {registro.estado} — el registro abrirá junto con el programa.
         </p>
 
-        <a
-          href={festival.convocatoriaPDF}
-          target="_blank"
-          rel="noopener"
-          class="boton boton--hueso mt-5"
-        >
-          ★ Convocatoria ★
+        <a href={conBase("/artistas")} class="boton boton--papel mt-5">
+          {artistas.titulo}
         </a>
       </div>
     </Pantalla>
@@ -76,20 +72,22 @@ import { registro, festival } from '../data/site';
     fondo="rojo"
   />
 
-  <section class="relative overflow-hidden border-b-2 border-tinta bg-hueso">
+  <section class="relative overflow-hidden border-b-2 border-tinta bg-papel">
     <Silla
       variante="roja"
       deriva
       class="absolute -right-8 -bottom-12 w-48 opacity-15 lg:w-80"
     />
 
-    <div class="relative px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
+    {/* Apretado por abajo: la nota es lo último que hay y con `py-28` quedaba
+        un palmo de vacío entre ella y la banda de cierre. */}
+    <div class="relative px-4 pt-16 pb-14 sm:px-6 lg:px-10 lg:pt-20 lg:pb-16">
       <!-- Tarjeta de evento en estado "por definir" -->
       <article
         class="max-w-2xl border-2 border-tinta bg-amarillo shadow-[10px_10px_0_var(--color-tinta)]"
         data-reveal="escala"
       >
-        <header class="border-b-2 border-tinta bg-tinta px-6 py-5 text-hueso">
+        <header class="border-b-2 border-tinta bg-tinta px-6 py-5 text-papel">
           <p class="meta text-amarillo">{registro.ciudad}</p>
           <h2 class="display mt-3 text-5xl leading-none lg:text-6xl">
             {registro.estado}
@@ -118,10 +116,13 @@ import { registro, festival } from '../data/site';
         </div>
 
         <footer class="flex flex-wrap gap-3 border-t-2 border-tinta px-6 py-5">
-          <button type="button" class="boton" disabled>
+          {/* El mismo botón dormido que el de donar en la portada: un
+              tratamiento para «esto existe y todavía no está abierto», no uno
+              por página. */}
+          <button type="button" class="boton boton--papel boton--dormido" disabled>
             {registro.acciones.registro}
           </button>
-          <a href={conBase("/programa")} class="boton boton--hueso">
+          <a href={conBase("/programa")} class="boton boton--papel">
             {registro.acciones.leerMas}
           </a>
         </footer>
@@ -133,7 +134,7 @@ import { registro, festival } from '../data/site';
     </div>
   </section>
 
-  <section class="bg-pizarra text-hueso">
+  <section class="bg-tinta text-papel">
     <div class="px-4 py-20 sm:px-6 lg:px-10">
       <p
         class="display max-w-4xl text-[9vw] leading-[0.95] lg:text-[5.5vw]"
@@ -142,27 +143,21 @@ import { registro, festival } from '../data/site';
       >
         {festival.fechas}
       </p>
-      <a
-        href={festival.convocatoriaPDF}
-        target="_blank"
-        rel="noopener"
-        class="boton mt-10"
-        data-reveal="arriba"
-      >
-        ★ Convocatoria ★
-      </a>
+      <div class="mt-10 flex flex-wrap gap-4" data-reveal="arriba">
+        <a href={conBase("/programa")} class="boton">Ver el programa</a>
+        {
+          festival.donaciones.paypal && (
+            <a
+              href={festival.donaciones.paypal}
+              target="_blank"
+              rel="noopener"
+              class="boton boton--papel"
+            >
+              ★ Donar ★
+            </a>
+          )
+        }
+      </div>
     </div>
   </section>
 </Base>
-
-<style>
-  .boton:disabled {
-    cursor: not-allowed;
-    background-color: var(--color-tinta);
-    color: color-mix(in srgb, var(--color-hueso) 45%, transparent);
-    box-shadow: 6px 6px 0 color-mix(in srgb, var(--color-tinta) 30%, transparent);
-  }
-  .boton:disabled:hover {
-    transform: none;
-  }
-</style>
