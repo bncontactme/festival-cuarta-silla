@@ -373,10 +373,11 @@ const cuenta = [
       blanca dentro del campo rojo — la misma gramática que el retrato montado
       sobre rojo en el feed. */}
   <section class="relative overflow-hidden border-b-2 border-tinta bg-rojo">
-    {/* En la esquina de arriba a la derecha, detrás del botón —que es opaco
-        y se le monta encima—. Queda por encima de la lista de días, que
-        arranca más abajo, así que no se come ningún nombre. */}
-    <Estrella tinta="amarilla" alto="esquina" lado="derecha" />
+    {/* Izquierda y abajo, detrás de la ficha blanca del mini-programa: es
+        opaca, se le monta encima y deja asomar la estrella por el hueco. Así
+        queda lejos del botón —arriba a la derecha— y de la lista de días, que
+        es texto y no la taparía. */}
+    <Estrella tinta="amarilla" alto="abajo" lado="izquierda" />
     <div class="relative px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
       <div
         class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8"
