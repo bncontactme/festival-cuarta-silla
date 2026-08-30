@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
 import { imagen, juegoDeImagenes } from '../lib/imagen';
 import Encabezado from '../components/Encabezado.astro';
-import Silla from '../components/Silla.astro';
+import Estrella from '../components/Estrella.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import { archivo } from '../data/archivo';
 import { festival } from '../data/site';
@@ -25,13 +25,16 @@ const ediciones = archivo.lista;
           ? `${ediciones.length} ediciones`
           : archivo.estado
       }
-      fondo="tinta"
+      fondo="amarillo"
     >
       {
         ediciones.length === 0 ? (
           <div class="p-4">
             <div class="ficha">
-              <p class="meta text-rojo">{archivo.estado}</p>
+              <p class="meta flex items-center gap-3 text-tinta">
+                <span class="inline-block h-[2px] w-8 bg-rojo" />
+                {archivo.estado}
+              </p>
               <p class="display mt-3 text-3xl leading-[0.95]">
                 Todavía no hay fotos
               </p>
@@ -42,8 +45,8 @@ const ediciones = archivo.lista;
           </div>
         ) : (
           ediciones.map((e) => (
-            <section class="border-b-2 border-papel/20 px-4 py-6">
-              <p class="meta text-[0.6rem] text-amarillo">{e.anio}</p>
+            <section class="border-b-2 border-tinta/20 px-4 py-6">
+              <p class="meta text-[0.6rem] text-tinta/55">{e.anio}</p>
               <h2 class="display mt-2 text-3xl leading-none">{e.edicion}</h2>
               {e.lema && (
                 <p class="mt-2 font-mono text-[0.8rem] opacity-60">{e.lema}</p>
@@ -59,7 +62,7 @@ const ediciones = archivo.lista;
                     height="900"
                     loading="lazy"
                     decoding="async"
-                    class="aspect-[4/3] w-full border-2 border-papel/25 object-cover"
+                    class="aspect-[4/3] w-full border-2 border-tinta object-cover"
                   />
                 ))}
               </div>
@@ -77,18 +80,23 @@ const ediciones = archivo.lista;
         : `${archivo.titulo} / ${archivo.estado}`
     }
     titulo={archivo.titulo}
-    fondo="tinta"
+    fondo="amarillo"
   />
 
   {
     ediciones.length === 0 ? (
-      <section class="bg-tinta text-papel">
+      <section class="bg-amarillo">
         {/* Mismo criterio que artistas: sin ediciones cargadas la banda se
             aprieta. Con `py-32` la ficha quedaba sola en el medio de una
-            pantalla entera de negro. */}
+            pantalla entera de negro — que además era negro, y el negro dejó
+            de ser campo en todo el sitio. Sobre amarillo la ficha se lee como
+            una nota clavada en el tablero y no como una ausencia. */}
         <div class="px-4 py-14 sm:px-6 lg:px-10 lg:py-16">
           <div class="ficha ficha--ancha max-w-2xl" data-reveal="escala">
-            <p class="meta text-rojo">{archivo.estado}</p>
+            <p class="meta flex items-center gap-4 text-tinta">
+              <span class="inline-block h-[2px] w-10 bg-rojo" />
+              {archivo.estado}
+            </p>
             <p class="display mt-4 text-4xl leading-[0.95] lg:text-5xl">
               Todavía no hay fotos
             </p>
@@ -101,20 +109,39 @@ const ediciones = archivo.lista;
     ) : (
       /* Una banda por edición, y dentro una hoja de contactos. El año manda:
          va en display al tamaño de un titular de sección, porque en un
-         archivo lo primero que se busca es el año y no el nombre. */
-      ediciones.map((e, n) => (
+         archivo lo primero que se busca es el año y no el nombre.
+
+         Las ediciones alternan campo —roja, amarilla, roja— igual que dos
+         posts seguidos de la cuenta. Es la traducción más directa de la
+         referencia que hay en el sitio: un archivo es, estructuralmente, un
+         feed. Y el año va siempre en la tinta contraria a la de su campo, que
+         es el único sitio donde las dos tintas se tocan a plena fuerza — algo
+         que sólo se puede hacer a tamaño cartel, y 9vw lo es de sobra. */
+      ediciones.map((e, n) => {
+        const rojo = n % 2 === 0;
+        return (
         <section
-          class={`border-b-2 border-tinta ${n % 2 ? 'bg-papel' : 'bg-amarillo'}`}
+          class={`border-b-2 border-tinta ${rojo ? 'relative overflow-hidden bg-rojo' : 'bg-amarillo'}`}
         >
-          <div class="px-4 pt-12 pb-16 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
-            <div class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8">
+          {rojo && <Estrella tinta="amarilla" alto="abajo" />}
+          <div class="relative px-4 pt-12 pb-16 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
+            <div class="relative flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8">
               <div>
-                <p class="meta mb-5 flex items-center gap-4 text-rojo" data-reveal="lado">
-                  <span class="inline-block h-[2px] w-12 bg-rojo" />
-                  {String(n + 1).padStart(2, '0')} / {e.edicion}
-                </p>
+                {rojo ? (
+                  <p
+                    class="meta mb-5 inline-block bg-amarillo px-3 py-1.5 text-tinta"
+                    data-reveal="lado"
+                  >
+                    {String(n + 1).padStart(2, '0')} / {e.edicion}
+                  </p>
+                ) : (
+                  <p class="meta mb-5 flex items-center gap-4 text-tinta" data-reveal="lado">
+                    <span class="inline-block h-[2px] w-12 bg-rojo" />
+                    {String(n + 1).padStart(2, '0')} / {e.edicion}
+                  </p>
+                )}
                 <h2
-                  class="display text-[16vw] leading-[0.82] text-tinta lg:text-[9vw]"
+                  class={`display text-[16vw] leading-[0.82] lg:text-[9vw] ${rojo ? 'text-amarillo' : 'text-rojo'}`}
                   data-lineas
                   data-reveal="lineas"
                 >
@@ -122,7 +149,7 @@ const ediciones = archivo.lista;
                 </h2>
                 {e.lema && (
                   <p
-                    class="mt-5 max-w-[48ch] font-mono text-sm leading-relaxed text-tinta/70"
+                    class={`mt-5 max-w-[48ch] font-mono text-sm leading-relaxed ${rojo ? 'text-papel' : 'text-tinta/70'}`}
                     data-reveal="arriba"
                   >
                     {e.lema}
@@ -132,7 +159,10 @@ const ediciones = archivo.lista;
 
               {/* Los números de la edición, en columna y alineados a la
                   derecha: son datos de ficha, no titulares. */}
-              <dl class="meta grid gap-2 text-right text-tinta/55" data-reveal="arriba">
+              <dl
+                class={`meta grid gap-2 text-right ${rojo ? 'text-papel' : 'text-tinta/55'}`}
+                data-reveal="arriba"
+              >
                 {e.sedes && (
                   <div>
                     <dt class="sr-only">{archivo.acciones.sedes}</dt>
@@ -156,7 +186,7 @@ const ediciones = archivo.lista;
               </dl>
             </div>
 
-            <ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ul class="relative mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {e.fotos.map((f, i) => (
                 <li data-reveal="escala" data-retraso={(i % 3) * 90}>
                   <figure>
@@ -172,7 +202,9 @@ const ediciones = archivo.lista;
                       class="aspect-[4/3] w-full border-2 border-tinta object-cover"
                     />
                     {f.pie && (
-                      <figcaption class="meta mt-2.5 leading-relaxed text-tinta/55">
+                      <figcaption
+                        class={`meta mt-2.5 leading-relaxed ${rojo ? 'text-papel' : 'text-tinta/55'}`}
+                      >
                         {f.pie}
                       </figcaption>
                     )}
@@ -182,18 +214,22 @@ const ediciones = archivo.lista;
             </ul>
           </div>
         </section>
-      ))
+        );
+      })
     )
   }
 
   <section class="relative overflow-hidden bg-rojo text-amarillo">
-    <Silla
-      variante="amarilla"
-      deriva
-      class="absolute -right-10 -bottom-12 w-48 opacity-20 lg:w-72"
-    />
+    <Estrella tinta="amarilla" alto="abajo" />
     <div class="relative px-4 py-20 sm:px-6 lg:px-10">
-      <p class="meta mb-6" data-reveal="lado">{festival.edicion}</p>
+      {/* El rótulo se lleva su propio campo amarillo: a 11,5px sobre rojo no
+          hay ningún color de la paleta que llegue a 4,5:1. */}
+      <p
+        class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta"
+        data-reveal="lado"
+      >
+        {festival.edicion}
+      </p>
       <p
         class="display max-w-4xl text-[9vw] leading-[0.95] lg:text-[5.5vw]"
         data-lineas

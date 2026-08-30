@@ -23,6 +23,12 @@ const paleta = {
   tinta: 'bg-tinta text-papel',
   rojo: 'bg-rojo text-amarillo',
 }[fondo];
+
+/* Sobre rojo, lo chico va en papel y no en la tinta del campo: el amarillo
+   sobre rojo da 3,67:1 y bajarle la opacidad, como hacía la nota, lo dejaba
+   por debajo de 3. El titular sí se queda en amarillo — es tamaño cartel. */
+const menudo = fondo === 'rojo' ? 'text-papel opacity-80' : 'opacity-55';
+const indicePiel = fondo === 'rojo' ? 'text-papel opacity-75' : 'opacity-45';
 ---
 
 <div class={`movil-marco ${paleta}`}>
@@ -30,13 +36,13 @@ const paleta = {
     <a href={conBase("/")} class="meta px-4 font-bold">
       <span aria-hidden="true">←</span>&nbsp; Portada
     </a>
-    <span class="meta border-l-2 border-current px-4 opacity-45">{indice}</span>
+    <span class={`meta border-l-2 border-current px-4 ${indicePiel}`}>{indice}</span>
   </header>
 
   <div class="movil-cuerpo">
     <div class="border-b-2 border-current px-4 py-5">
       <h1 class="display text-[12cqw] leading-[0.92]">{titulo}</h1>
-      {nota && <p class="meta mt-2 text-[0.6rem] opacity-55">{nota}</p>}
+      {nota && <p class={`meta mt-2 text-[0.6rem] ${menudo}`}>{nota}</p>}
     </div>
 
     <slot />

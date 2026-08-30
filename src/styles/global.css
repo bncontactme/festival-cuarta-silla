@@ -185,7 +185,10 @@
     letter-spacing: 0.12em;
     font-size: 0.8rem;
     background-color: var(--color-rojo);
-    color: var(--color-amarillo);
+    /* Papel y no amarillo: amarillo sobre rojo son 3,67:1 y esta etiqueta mide
+       12,8px. Sobre rojo la letra chica va blanca — es lo que ya hace la cuenta
+       de Instagram en el texto de sus posts rojos. */
+    color: var(--color-papel);
     border: var(--borde) solid var(--canto);
     box-shadow: var(--desfase) var(--desfase) 0 var(--canto);
     transition:
@@ -200,6 +203,13 @@
 
   .boton--papel {
     background-color: var(--color-papel);
+    color: var(--color-tinta);
+  }
+
+  /* Sobre una sección roja un botón rojo es un rectángulo invisible con canto.
+     Ahí manda el amarillo, que es la otra tinta del par. */
+  .boton--amarillo {
+    background-color: var(--color-amarillo);
     color: var(--color-tinta);
   }
 
@@ -258,6 +268,58 @@
   .enlace[aria-current='page']::after {
     transform: scaleX(1);
     transform-origin: left;
+  }
+}
+
+/* ── Estrella ─────────────────────────────────────────────────────────────
+   Ver `Estrella.astro` para el porqué. Aquí sólo la piel: se ancla al canto
+   derecho, se sale de la caja y la sección la recorta. Va detrás del contenido,
+   así que lo opaco se le monta encima. */
+.estrella {
+  --medida: 26rem;
+  position: absolute;
+  z-index: 0;
+  width: var(--medida);
+  height: var(--medida);
+  pointer-events: none;
+}
+.estrella--derecha {
+  right: calc(var(--medida) * -0.4);
+}
+.estrella--izquierda {
+  left: calc(var(--medida) * -0.4);
+}
+.estrella path {
+  fill: currentColor;
+}
+.estrella--amarilla {
+  color: var(--color-amarillo);
+}
+.estrella--roja {
+  color: var(--color-rojo);
+}
+.estrella--centro {
+  top: 50%;
+  translate: 0 -50%;
+}
+.estrella--arriba {
+  top: calc(var(--medida) * -0.3);
+}
+.estrella--abajo {
+  bottom: calc(var(--medida) * -0.34);
+}
+
+/* En un teléfono la sección es mucho más angosta y la estrella se come el
+   titular. Se encoge y se va casi entera fuera de cuadro. */
+@media (width < 48rem) {
+  .estrella {
+    --medida: 13rem;
+  }
+  .estrella--derecha {
+    right: calc(var(--medida) * -0.46);
+  }
+  .estrella--izquierda {
+    left: calc(var(--medida) * -0.46);
   }
 }
 
@@ -593,10 +655,10 @@
   width: 4px;
 }
 .lista-sedes::-webkit-scrollbar-track {
-  background: color-mix(in srgb, var(--color-papel) 12%, transparent);
+  background: color-mix(in srgb, var(--color-tinta) 12%, transparent);
 }
 .lista-sedes::-webkit-scrollbar-thumb {
-  background: var(--color-amarillo);
+  background: var(--color-rojo);
 }
 
 /* Firefox no tiene esos pseudos; allí manda la propiedad estándar, que además
@@ -604,16 +666,20 @@
 @supports not selector(::-webkit-scrollbar) {
   .lista-sedes {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-amarillo) color-mix(in srgb, var(--color-papel) 12%, transparent);
+    scrollbar-color: var(--color-rojo) color-mix(in srgb, var(--color-tinta) 12%, transparent);
   }
 }
 
-/* La elegida queda en amarillo entera —número, nombre y el enlace de
-   Instagram—, así que el estado vive en el `li` y no en el botón. */
+/* La elegida queda de un color entera —número, nombre y el enlace de
+   Instagram—, así que el estado vive en el `li` y no en el botón.
+   Era amarillo, de cuando la lista colgaba de una sección negra; ahora el
+   campo es amarillo y ese amarillo desaparecía. En rojo, además, la lista
+   habla el mismo idioma que la estrella activa del plano, que también es
+   roja: lo elegido es rojo en los dos sitios. */
 .fila-sede.sede-activa,
 .fila-sede.sede-activa .meta,
 .fila-sede.sede-activa a {
-  color: var(--color-amarillo);
+  color: var(--color-rojo);
 }
 
 /* — Ficha: la tarjeta de la casa ——————————————————————————————————— */
@@ -751,15 +817,27 @@
 
 /* — Días de la portada ————————————————————————————————————————————— */
 /* La lista de los cuatro días del adelanto del programa es el mando de la
-   rejilla que tiene al lado. El día elegido se pinta en rojo entero —número
-   y nombre—, así que el estado se lee en la fila y no en el botón; es el
-   mismo trato que reciben las sedes, que se ponen en amarillo enteras.
-   Nada de fondo ni de relleno: en una sección amarilla, con un titular de
-   cartel encima, cualquier caja más sería otro bloque compitiendo. */
+   rejilla que tiene al lado. El día elegido se pinta entero —número y
+   nombre—, así que el estado se lee en la fila y no en el botón; es el mismo
+   trato que reciben las sedes, que se ponen en amarillo enteras.
+   Nada de fondo ni de relleno: con un titular encima, cualquier caja más
+   sería otro bloque compitiendo.
+
+   De qué color se pinta depende del campo, y por eso sale de una variable: en
+   una sección amarilla el día elegido va en rojo, pero esa misma sección
+   ahora es roja en la portada y un rojo sobre rojo no existe. Ahí se vuelca a
+   papel, que sobre rojo da 4,0:1 — suficiente para los 24px del nombre del
+   día, que es texto grande. */
+.dia-portada {
+  --dia-activo: var(--color-rojo);
+}
+.bg-rojo .dia-portada {
+  --dia-activo: var(--color-papel);
+}
 .dia-portada:hover .dia-nombre,
 .dia-portada[aria-pressed='true'] .dia-nombre,
 .dia-portada[aria-pressed='true'] .dia-num {
-  color: var(--color-rojo);
+  color: var(--dia-activo);
 }
 
 /* «Hoy» sólo aparece si el festival está en marcha: lo pone el script de la
@@ -772,56 +850,30 @@
 }
 
 /* — Cinta de marcas ———————————————————————————————————————————————— */
-/* Una sección con dos caras. El cambio de grupo lo dispara el JS al cerrar la
-   vuelta de la cinta; acá sólo vive el color, que va en transición para que
-   el vuelco se lea como un cambio de luz y no como un parpadeo. */
-/* Las dos caras son papel y tinta: día y noche del mismo papel.
-   La segunda fue amarilla y no funcionaba, por dos motivos que se suman.
-   Uno: la sección que hay justo encima —el adelanto del programa— ya es
-   amarilla, así que al volcarse la cinta las dos bandas se fundían en un solo
-   bloque de amarillo de mil píxeles partido por un filete, y el cambio de luz,
-   que es de lo que va esta sección, dejaba de leerse como un cambio.
-   Dos: el amarillo del manual es un #fffd00 a plena saturación, y detrás de
-   trece mosaicos blancos con canto de tinta vibra —los cantos se recortan
-   contra él y los logos en negativo se pierden—.
-   En tinta el vuelco se lee entero, los mosaicos blancos pasan a ser fichas
-   sobre negro (que es como se ven las sedes en su plano) y no entra ni un
-   color que no esté ya en el manual. */
+/* Una sección con dos caras que se turnan. El campo NO cambia: se queda
+   amarillo en los dos turnos.
+
+   Antes volcaba de papel a tinta para avisar del relevo. Eso se cae con el
+   sistema de dos tintas por dos motivos. Uno: el negro deja de ser campo en
+   todo el sitio, y ésta era la última sección que lo usaba de fondo. Dos: si
+   en vez de tinta volcara a rojo —que sería lo coherente— quedaría roja justo
+   encima del cierre, que también es rojo, y dos campos rojos seguidos rompen
+   la alternancia que ordena la portada entera.
+
+   Así que el relevo lo cuentan el título y el rótulo, que es lo que de verdad
+   cambia, y no mil píxeles de fondo. Los mosaicos se quedan blancos: son la
+   ventana donde los logos tienen que verse de verdad. */
 .cinta-marcas {
-  background-color: var(--color-papel);
+  background-color: var(--color-amarillo);
   border-color: var(--color-tinta);
   color: var(--color-tinta);
-  transition:
-    background-color 0.8s var(--ease-salida),
-    border-color 0.8s var(--ease-salida),
-    color 0.8s var(--ease-salida);
-}
-.cinta-marcas[data-grupo='colaboradores'] {
-  background-color: var(--color-tinta);
-  /* Debajo empieza el cierre rojo: un filete de tinta contra tinta no existe,
-     igual que en las sedes. */
-  border-color: var(--color-amarillo);
-  color: var(--color-papel);
-  --anillo: var(--color-amarillo);
 }
 
-/* Sobre negro el canto de tinta del mosaico desaparece y los logos se quedan
-   en rectángulos blancos flotando. El canto se vuelca a amarillo —el mismo
-   gesto que ya hacen los botones sobre las secciones oscuras— y la cinta pasa
-   a ser una fila de fichas. */
-.cinta-marcas[data-grupo='colaboradores'] .mosaico {
-  border-color: var(--color-amarillo);
-}
-
-/* El rótulo va en rojo sobre el papel y en amarillo sobre la tinta: es el
-   mismo trato que reciben los rótulos de sección en todo el sitio. */
+/* El rótulo va en tinta, no en rojo: mide 11,5px y rojo sobre amarillo son
+   3,67:1. El rojo se queda en el filete que lleva al lado, que no es texto y
+   puede ir a cualquier tamaño. */
 .cinta-acento {
-  color: var(--color-rojo);
-  transition: color 0.8s var(--ease-salida);
-}
-.cinta-marcas[data-grupo='colaboradores'] .cinta-acento,
-.cinta-marcas[data-grupo='colaboradores'] .rotulo-grupo {
-  color: var(--color-amarillo);
+  color: var(--color-tinta);
 }
 
 /* Los dos grupos comparten celda. El que no toca se apaga pero no se saca
@@ -882,7 +934,7 @@
    hablar por los dos. */
 .rotulo-grupo {
   display: none;
-  color: var(--color-rojo);
+  color: var(--color-tinta);
 }
 .cinta-marcas[data-quieta] .rotulo-grupo {
   display: block;

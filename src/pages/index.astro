@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
 import Marquee from '../components/Marquee.astro';
 import Silla from '../components/Silla.astro';
+import Estrella from '../components/Estrella.astro';
 import Mosaico from '../components/Mosaico.astro';
 import Portada from '../components/movil/Portada.astro';
 import Gantt from '../components/Gantt.astro';
@@ -45,8 +46,15 @@ const cuenta = [
          esto necesita recibir el cursor —quien las mueve es el puntero desde
          la ventana, no el hover—, así que pueden ir debajo del texto sin
          perder el movimiento. -->
+    {/* Las sillas van en TRAMA DE TINTA, no de rojo. Al 25% de rojo sobre
+        amarillo el resultado es naranja —un tono que no está en el manual—,
+        porque bajarle la opacidad a una tinta sobre la otra no da un gris de
+        esa tinta: da un color nuevo. Un porcentaje de tinta sobre el campo sí
+        es legítimo: es una trama de plancha, y se queda dentro del sistema.
+        `brightness(0)` vuelve negro el SVG rojo sin tener que generar otro
+        archivo. */}
     <div
-      class="flotador absolute top-0 right-0 h-[64%] w-1/2 opacity-25"
+      class="flotador absolute top-0 right-0 h-[64%] w-1/2 opacity-[0.09] [filter:brightness(0)]"
       data-area
       aria-hidden="true"
     >
@@ -60,7 +68,7 @@ const cuenta = [
       </div>
     </div>
     <div
-      class="flotador absolute -bottom-16 -left-12 w-32 opacity-20 sm:w-52 lg:w-64"
+      class="flotador absolute -bottom-16 -left-12 w-32 opacity-[0.09] [filter:brightness(0)] sm:w-52 lg:w-64"
       aria-hidden="true"
     >
       <div class="sigue">
@@ -72,7 +80,7 @@ const cuenta = [
 
     <div class="relative px-4 pt-3 pb-8 sm:px-6 sm:pt-4 lg:px-10 lg:pt-5">
       <p
-        class="meta flex flex-wrap items-center gap-x-4 gap-y-2 text-rojo"
+        class="meta flex flex-wrap items-center gap-x-4 gap-y-2 text-tinta"
         data-reveal="lado"
       >
         <span class="inline-block h-[2px] w-10 bg-rojo"></span>
@@ -92,7 +100,7 @@ const cuenta = [
         </span>
 
         <span
-          class="display block text-[min(15vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo"
+          class="display block text-[min(12vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -100,7 +108,7 @@ const cuenta = [
           Festival
         </span>
         <span
-          class="display block text-[min(15vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-tinta"
+          class="display block text-[min(12vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-tinta"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -109,7 +117,7 @@ const cuenta = [
           de Arte
         </span>
         <span
-          class="display block text-[min(15vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo"
+          class="display block text-[min(12vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -124,7 +132,10 @@ const cuenta = [
         class="mt-12 grid gap-8 border-t-2 border-tinta pt-8 lg:grid-cols-[1fr_auto] lg:items-end"
       >
         <div data-reveal="arriba">
-          <p class="meta mb-3 text-rojo">Cuándo</p>
+          {/* En tinta, no en rojo: 11,5px de rojo sobre amarillo son 3,67:1.
+              El rojo se queda en los filetes y en los campos, que no son
+              texto y pueden ir a cualquier tamaño. */}
+          <p class="meta mb-3 text-tinta">Cuándo</p>
           <p
             class="font-mono text-xl leading-tight font-bold sm:text-2xl lg:text-3xl"
           >
@@ -198,18 +209,15 @@ const cuenta = [
     id="manifiesto"
     {/* Borde amarillo: abajo sigue la sección de sedes, que también es
         oscura, y un filete tinta contra tinta no se ve. */}
-    class="relative overflow-hidden border-b-2 border-amarillo bg-papel"
+    class="relative overflow-hidden border-b-2 border-tinta bg-rojo"
   >
-    {/* La silla, muy apagada y recortada por el canto de la banda: entre la
-        pregunta y el botón queda un hueco ancho que en blanco liso se ve
-        plano. No sube el alto de la sección ni compite con nada.
-        Al 7 % sobre el hueso se veía; sobre blanco puro desaparecía, así que
-        sube a 10 %: la marca de agua tiene que insinuarse, no borrarse. */}
-    <Silla
-      variante="roja"
-      deriva
-      class="pointer-events-none absolute -top-10 right-[26%] w-52 opacity-[0.10] lg:w-64"
-    />
+    {/* La estrella sustituye a la silla en marca de agua. La silla iba al 10%
+        de rojo sobre blanco, que es un rosa: sobre papel una trama de una
+        tinta sigue siendo esa tinta, así que era legítima — pero ahora el
+        campo es rojo y una trama de rojo sobre rojo no existe. La estrella
+        entra en la tinta contraria, a plena fuerza, que es como entra en el
+        feed: en ocho de sus doce posts. */}
+    <Estrella tinta="amarilla" alto="centro" />
 
     {/* Alineadas por abajo: el botón se apoya en la última línea de la
         pregunta, no flota a media altura. En columna estrecha se apila y el
@@ -219,10 +227,9 @@ const cuenta = [
     >
       <div>
         <p
-          class="meta mb-5 flex items-center gap-4 text-rojo"
+          class="meta mb-5 inline-block bg-amarillo px-3 py-1.5 text-tinta"
           data-reveal="lado"
         >
-          <span class="inline-block h-[2px] w-12 bg-rojo"></span>
           01 / Manifiesto
         </p>
 
@@ -232,7 +239,7 @@ const cuenta = [
             de la banda y la sección baja de alto, que es de lo que se
             trata. */}
         <h2
-          class="display max-w-[20ch] text-[9vw] leading-[0.95] text-tinta lg:text-[4.4vw]"
+          class="display max-w-[20ch] text-[9vw] leading-[0.95] text-amarillo lg:text-[4.4vw]"
           data-lineas
           data-reveal="lineas"
         >
@@ -245,7 +252,7 @@ const cuenta = [
             pie de foto y en la misma banda, sin fondo propio ni segundo
             bloque a sangre. */}
         <p
-          class="mt-6 max-w-[54ch] font-mono text-sm leading-relaxed text-tinta/70 lg:text-[0.95rem]"
+          class="mt-6 max-w-[54ch] font-mono text-sm leading-relaxed text-papel lg:text-[0.95rem]"
           data-reveal="arriba"
           data-retraso="80"
         >
@@ -255,7 +262,7 @@ const cuenta = [
 
       <button
         type="button"
-        class="boton shrink-0"
+        class="boton boton--amarillo shrink-0"
         data-abre="manifiesto"
         data-reveal="arriba"
         data-retraso="120"
@@ -316,21 +323,30 @@ const cuenta = [
   </dialog>
 
   <!-- ══ SEDES ══════════════════════════════════════════════════════════ -->
-  <section class="border-b-2 border-amarillo bg-tinta text-papel">
+  {/* El campo pasa a amarillo y el plano se queda negro — pero como TARJETA
+      puesta encima, no como sección. Es la diferencia que ordena todo el
+      sistema: el negro es tinta y objeto, nunca superficie del alto de una
+      pantalla. Antes esta sección eran 928px de negro corrido, el bloque más
+      grande de la portada. */}
+  <section class="border-b-2 border-tinta bg-amarillo">
     <div class="px-4 pt-12 pb-20 sm:px-6 lg:px-10 lg:pt-16 lg:pb-28">
       <div
-        class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-papel/25 pb-8"
+        class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8"
       >
         <div>
           <p
-            class="meta mb-6 flex items-center gap-4 text-amarillo"
+            class="meta mb-6 flex items-center gap-4 text-tinta"
             data-reveal="lado"
           >
-            <span class="inline-block h-[2px] w-12 bg-amarillo"></span>
+            <span class="inline-block h-[2px] w-12 bg-rojo"></span>
             02 / {sedes.titulo}
           </p>
+          {/* De 8vw a 4,5vw. Los titulares del feed miden un 8–10% del alto
+              del lienzo; a 8vw éste medía casi un cuarto de la sección. La
+              jerarquía entre secciones ya no la lleva el cuerpo — la lleva el
+              cambio de campo. */}
           <h2
-            class="display text-[13vw] leading-[0.82] text-papel lg:text-[8vw]"
+            class="display text-[9vw] leading-[0.9] text-tinta lg:text-[4.5vw]"
             data-lineas
             data-reveal="lineas"
           >
@@ -352,36 +368,42 @@ const cuenta = [
       después del hero, para una sección de adelanto— y el botón colgaba al
       pie de la columna derecha. Entre las dos cosas esto era un cartel
       enorme con dos cajitas flotando en un charco de amarillo. */}
-  <section class="border-b-2 border-tinta bg-amarillo">
-    <div class="px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
+  {/* Rojo: alterna con el amarillo de sedes, que es lo que impide que la
+      portada se lea como un solo bloque. La ficha del mini-programa se queda
+      blanca dentro del campo rojo — la misma gramática que el retrato montado
+      sobre rojo en el feed. */}
+  <section class="relative overflow-hidden border-b-2 border-tinta bg-rojo">
+    {/* Por la izquierda y abajo: ese lado lo ocupa la ficha blanca del
+        mini-programa, que es opaca y la tapa sola. Entrando por la derecha se
+        metía detrás de la lista de días —que es texto amarillo sobre rojo, sin
+        fondo— y se comía los nombres. */}
+    <Estrella tinta="amarilla" alto="abajo" lado="izquierda" />
+    <div class="relative px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
       <div
         class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8"
       >
         <div>
           <p
-            class="meta mb-6 flex items-center gap-4 text-rojo"
+            class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta"
             data-reveal="lado"
           >
-            <span class="inline-block h-[2px] w-12 bg-rojo"></span>
             03 / {programa.titulo}
           </p>
-          {/* Un punto por debajo de SEDES, que va a 8vw. No es un capricho
-              de escala: son dos secciones seguidas, las dos con la misma
-              receta —rótulo, titular, botón, filete— y la de arriba manda.
-              Puestas al mismo cuerpo, la bajada de la portada era una fila de
-              carteles del mismo tamaño gritando por turnos, y ésta encima
-              grita sobre amarillo a plena saturación, que es el fondo que más
-              cansa de los cuatro. Bajarla es lo que la vuelve lo que es: el
-              adelanto del programa, no el programa. */}
+          {/* Al mismo cuerpo que SEDES, y las dos mucho más chicas que antes.
+              Antes ésta iba un punto por debajo para que no compitieran: eran
+              dos carteles del mismo tamaño gritando por turnos sobre el mismo
+              campo amarillo. Ahora lo que las separa es el campo —una
+              amarilla, la otra roja—, así que el cuerpo puede igualarse y
+              bajar. La jerarquía la lleva el color, no el tamaño. */}
           <h2
-            class="display text-[11vw] leading-[0.82] text-tinta lg:text-[6.4vw]"
+            class="display text-[9vw] leading-[0.9] text-amarillo lg:text-[4.5vw]"
             data-lineas
             data-reveal="lineas"
           >
             {programa.titulo}
           </h2>
         </div>
-        <a href={conBase("/programa")} class="boton" data-reveal="arriba">
+        <a href={conBase("/programa")} class="boton boton--amarillo" data-reveal="arriba">
           Ver el programa
         </a>
       </div>
@@ -415,12 +437,12 @@ const cuenta = [
             canto de arriba de la tarjeta. */}
         <div data-reveal="arriba">
           <ul
-            class="flex h-full flex-col border-y-2 border-tinta"
+            class="flex h-full flex-col border-y-2 border-amarillo"
             data-dias-portada
           >
             {
               programa.dias.map((d, i) => (
-                <li class="flex flex-1 border-b border-tinta/15 last:border-b-0">
+                <li class="flex flex-1 border-b border-amarillo/30 last:border-b-0">
                   {/* La fila entera cambia el día de la rejilla: el objetivo
                       es la franja, no dos palabras. */}
                   <button
@@ -429,20 +451,20 @@ const cuenta = [
                     data-dia={i}
                     aria-pressed={i === 0 ? 'true' : 'false'}
                   >
-                    <span class="meta dia-num w-7 shrink-0 text-tinta/35 transition-colors duration-200">
+                    <span class="meta dia-num w-7 shrink-0 text-papel/75 transition-colors duration-200">
                       {String(i + 1).padStart(2, '0')}
                     </span>
-                    <span class="display dia-nombre flex-1 text-2xl leading-none transition-colors duration-200">
+                    <span class="display dia-nombre flex-1 text-2xl leading-none text-amarillo transition-colors duration-200">
                       {d.dia}
                     </span>
                     {/* Filete de 1 px y sin relleno vertical: con el de 2 px
                         del resto del sitio la etiqueta medía más que el
                         nombre del día y la fila crecía tres píxeles respecto
                         a las otras tres. */}
-                    <span class="meta dia-hoy shrink-0 border border-rojo px-1.5 text-[0.55rem] leading-[1.7] text-rojo">
+                    <span class="meta dia-hoy shrink-0 border border-amarillo px-1.5 text-[0.55rem] leading-[1.7] text-amarillo">
                       Hoy
                     </span>
-                    <span class="meta shrink-0 text-tinta/40">
+                    <span class="meta shrink-0 text-papel/75">
                       {d.fecha.replace(' de septiembre', ' sep')}
                     </span>
                   </button>
@@ -486,12 +508,15 @@ const cuenta = [
           data-grupo="patrocinadores"
         >
           <div class="cinta-cabecera px-4 pt-12 pb-10 sm:px-6 lg:px-10 lg:pt-16">
+            {/* El filete va en rojo fijo y no en `bg-current`: el rótulo pasó
+                a tinta —11,5px en rojo sobre amarillo son 3,67:1— y el rojo se
+                queda donde no es texto y puede ir a cualquier tamaño. */}
             <p class="meta cinta-acento mb-8 flex items-center gap-4">
-              <span class="inline-block h-[2px] w-12 bg-current" />
+              <span class="inline-block h-[2px] w-12 bg-rojo" />
               <span data-rotulo>04 / {patrocinadores.titulo}</span>
             </p>
             <h2
-              class="display text-[11vw] leading-[0.82] lg:text-[6vw]"
+              class="display text-[9vw] leading-[0.9] lg:text-[4.5vw]"
               data-titulo
             >
               {patrocinadores.titulo}
@@ -542,6 +567,7 @@ const cuenta = [
 
   <!-- ══ CIERRE ═════════════════════════════════════════════════════════ -->
   <section class="relative overflow-hidden bg-rojo text-amarillo">
+    <Estrella tinta="amarilla" alto="abajo" />
     <div
       class="relative px-4 py-24 text-center sm:px-6 lg:px-10 lg:py-32"
     >
@@ -553,7 +579,9 @@ const cuenta = [
         class="mx-auto w-[78vw] lg:w-[54vw]"
         data-reveal="escala"
       />
-      <p class="meta mt-6 text-amarillo/80" data-reveal="arriba">
+      {/* Iba en amarillo al 80% sobre rojo: 2,9:1, de las peores del sitio.
+          Sobre rojo la letra chica va blanca. */}
+      <p class="meta mt-6 text-papel" data-reveal="arriba">
         {festival.fechas} · {festival.ciudad}
       </p>
       {/* El remate lleva un solo botón, y es el de donar. Lo demás —programa,
@@ -586,7 +614,7 @@ const cuenta = [
       {
         festival.donaciones.nota && (
           <p
-            class="meta mx-auto mt-6 max-w-[38ch] leading-relaxed text-amarillo/80"
+            class="meta mx-auto mt-6 max-w-[38ch] leading-relaxed text-papel"
             data-reveal="arriba"
             data-retraso="180"
           >

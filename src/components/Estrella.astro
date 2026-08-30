@@ -1,0 +1,50 @@
+---
+/** La estrella del feed.
+ *
+ * En la cuenta aparece en ocho de doce posts: grande, sangrando por un canto,
+ * siempre en la tinta contraria a la del campo. Es la que carga la energía de
+ * la pieza, y por eso el titular puede quedarse quieto — que es justo lo que
+ * al sitio le faltaba para poder bajar la tipografía.
+ *
+ * Por defecto entra por la derecha. Todo el sitio alinea a la izquierda, así
+ * que ese costado es donde vive la letra: una estrella ahí se le mete debajo
+ * al titular. `lado="izquierda"` existe sólo para las secciones cuyo contenido
+ * de ese lado es OPACO —una ficha blanca, el plano— y por lo tanto la tapa
+ * sola; ahí la estrella asoma por el hueco que queda alrededor, que es como
+ * asoma en el feed.
+ *
+ * Va por detrás del contenido, así que lo opaco se le monta encima. No lleva
+ * z-index negativo: la sección no crea contexto de apilado y un negativo la
+ * mandaría por debajo del propio fondo de la sección, no del contenido.
+ */
+interface Props {
+  /** La tinta contraria a la del campo: amarilla sobre rojo, roja sobre amarillo. */
+  tinta?: 'amarilla' | 'roja';
+  /** Dónde se ancla verticalmente. */
+  alto?: 'centro' | 'arriba' | 'abajo';
+  /** Por qué canto entra. Izquierda sólo si ese lado es opaco. */
+  lado?: 'derecha' | 'izquierda';
+  /** Tamaño del lado, en cualquier unidad CSS. */
+  medida?: string;
+  class?: string;
+}
+
+const {
+  tinta = 'amarilla',
+  alto = 'centro',
+  lado = 'derecha',
+  medida,
+  class: clase = '',
+} = Astro.props;
+---
+
+<svg
+  class={`estrella estrella--${tinta} estrella--${alto} estrella--${lado} ${clase}`}
+  style={medida ? `--medida: ${medida}` : undefined}
+  viewBox="0 0 100 100"
+  aria-hidden="true"
+>
+  <path
+    d="M50 1 L61.8 35.2 L98 35.4 L68.8 56.8 L79.9 91.2 L50 70.2 L20.1 91.2 L31.2 56.8 L2 35.4 L38.2 35.2 Z"
+  ></path>
+</svg>
