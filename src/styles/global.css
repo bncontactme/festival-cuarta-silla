@@ -906,15 +906,6 @@
   border-color: var(--color-amarillo);
 }
 
-/* Los logos van a blanco y negro. Entre las trece marcas hay un azul, un
-   marino y un verde flúor: a todo color la tira era lo único del sitio que no
-   estaba en la paleta, y con dos tintas alrededor vibraba. En gris el blanco
-   del mosaico vuelve a ser lo que dice el sistema —la ventana donde se ve el
-   logo— y no una mancha de color. */
-.mosaico-logo {
-  filter: grayscale(1) contrast(1.08);
-}
-
 /* El rótulo va en tinta, no en rojo: mide 11,5px y rojo sobre amarillo son
    3,67:1. El rojo se queda en el filete que lleva al lado, que no es texto y
    puede ir a cualquier tamaño. Sobre el negro los dos se vuelcan a amarillo. */
