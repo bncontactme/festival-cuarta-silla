@@ -373,11 +373,10 @@ const cuenta = [
       blanca dentro del campo rojo — la misma gramática que el retrato montado
       sobre rojo en el feed. */}
   <section class="relative overflow-hidden border-b-2 border-tinta bg-rojo">
-    {/* Por la izquierda y abajo: ese lado lo ocupa la ficha blanca del
-        mini-programa, que es opaca y la tapa sola. Entrando por la derecha se
-        metía detrás de la lista de días —que es texto amarillo sobre rojo, sin
-        fondo— y se comía los nombres. */}
-    <Estrella tinta="amarilla" alto="abajo" lado="izquierda" />
+    {/* En la esquina de arriba a la derecha, detrás del botón —que es opaco
+        y se le monta encima—. Queda por encima de la lista de días, que
+        arranca más abajo, así que no se come ningún nombre. */}
+    <Estrella tinta="amarilla" alto="esquina" lado="derecha" />
     <div class="relative px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
       <div
         class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8"
@@ -512,7 +511,7 @@ const cuenta = [
                 a tinta —11,5px en rojo sobre amarillo son 3,67:1— y el rojo se
                 queda donde no es texto y puede ir a cualquier tamaño. */}
             <p class="meta cinta-acento mb-8 flex items-center gap-4">
-              <span class="inline-block h-[2px] w-12 bg-rojo" />
+              <span class="cinta-filete inline-block h-[2px] w-12" />
               <span data-rotulo>04 / {patrocinadores.titulo}</span>
             </p>
             <h2
@@ -566,17 +565,19 @@ const cuenta = [
   }
 
   <!-- ══ CIERRE ═════════════════════════════════════════════════════════ -->
+  {/* Sin estrella: el wordmark gótico ES la marca gráfica de esta banda y no
+      necesita competencia. Es el único cierre del sitio que ya trae su propio
+      dibujo. */}
   <section class="relative overflow-hidden bg-rojo text-amarillo">
-    <Estrella tinta="amarilla" alto="abajo" />
     <div
-      class="relative px-4 py-24 text-center sm:px-6 lg:px-10 lg:py-32"
+      class="relative px-4 py-16 text-center sm:px-6 lg:px-10 lg:py-20"
     >
       <img
         src={conBase("/logos/wordmark-amarilla.svg")}
         alt="Cuarta Silla"
         width="533"
         height="85"
-        class="mx-auto w-[78vw] lg:w-[54vw]"
+        class="mx-auto w-[68vw] lg:w-[44vw]"
         data-reveal="escala"
       />
       {/* Iba en amarillo al 80% sobre rojo: 2,9:1, de las peores del sitio.
@@ -593,7 +594,7 @@ const cuenta = [
           diciéndolo, en vez de desaparecer: el cierre se quedaría sin nada
           debajo del logotipo. En cuanto `festival.donaciones.paypal` tenga el
           enlace, se convierte solo en el botón de verdad. */}
-      <div class="mt-12 flex justify-center" data-reveal="arriba" data-retraso="120">
+      <div class="mt-9 flex justify-center" data-reveal="arriba" data-retraso="120">
         {
           festival.donaciones.paypal ? (
             <a

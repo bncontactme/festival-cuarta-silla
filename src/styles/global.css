@@ -308,6 +308,18 @@
 .estrella--abajo {
   bottom: calc(var(--medida) * -0.34);
 }
+/* Esquina: se recorta poco por los dos cantos, así que se sigue leyendo como
+   una estrella y no como una cuña. `arriba` corta el 30% y deja sólo las
+   puntas de abajo. */
+.estrella--esquina {
+  top: calc(var(--medida) * -0.16);
+}
+.estrella--esquina.estrella--derecha {
+  right: calc(var(--medida) * -0.2);
+}
+.estrella--esquina.estrella--izquierda {
+  left: calc(var(--medida) * -0.2);
+}
 
 /* En un teléfono la sección es mucho más angosta y la estrella se come el
    titular. Se encoge y se va casi entera fuera de cuadro. */
@@ -867,13 +879,59 @@
   background-color: var(--color-amarillo);
   border-color: var(--color-tinta);
   color: var(--color-tinta);
+  transition:
+    background-color 0.8s var(--ease-salida),
+    border-color 0.8s var(--ease-salida),
+    color 0.8s var(--ease-salida);
+}
+
+/* Al pasar a colaboradores cambia la luz. Es el único sitio del sitio donde
+   el negro vuelve a ser campo, y por dos razones que lo justifican: no es una
+   superficie fija sino un TURNO —la sección se pasa la mitad del tiempo en
+   amarillo—, y es lo que hace legible el relevo entre los dos grupos sin
+   tener que leer el rótulo. Volcar a rojo no servía: debajo empieza el cierre,
+   que también es rojo, y dos campos rojos seguidos borran la alternancia. */
+.cinta-marcas[data-grupo='colaboradores'] {
+  background-color: var(--color-tinta);
+  border-color: var(--color-amarillo);
+  color: var(--color-papel);
+  --anillo: var(--color-amarillo);
+}
+
+/* Sobre negro el canto de tinta del mosaico desaparece y los logos se quedan
+   en rectángulos blancos flotando. Se vuelca a amarillo —el mismo gesto que
+   hacen los botones sobre secciones oscuras— y la cinta pasa a ser una fila
+   de fichas. */
+.cinta-marcas[data-grupo='colaboradores'] .mosaico {
+  border-color: var(--color-amarillo);
+}
+
+/* Los logos van a blanco y negro. Entre las trece marcas hay un azul, un
+   marino y un verde flúor: a todo color la tira era lo único del sitio que no
+   estaba en la paleta, y con dos tintas alrededor vibraba. En gris el blanco
+   del mosaico vuelve a ser lo que dice el sistema —la ventana donde se ve el
+   logo— y no una mancha de color. */
+.mosaico-logo {
+  filter: grayscale(1) contrast(1.08);
 }
 
 /* El rótulo va en tinta, no en rojo: mide 11,5px y rojo sobre amarillo son
    3,67:1. El rojo se queda en el filete que lleva al lado, que no es texto y
-   puede ir a cualquier tamaño. */
+   puede ir a cualquier tamaño. Sobre el negro los dos se vuelcan a amarillo. */
 .cinta-acento {
   color: var(--color-tinta);
+  transition: color 0.8s var(--ease-salida);
+}
+.cinta-filete {
+  background-color: var(--color-rojo);
+  transition: background-color 0.8s var(--ease-salida);
+}
+.cinta-marcas[data-grupo='colaboradores'] .cinta-acento,
+.cinta-marcas[data-grupo='colaboradores'] .rotulo-grupo {
+  color: var(--color-amarillo);
+}
+.cinta-marcas[data-grupo='colaboradores'] .cinta-filete {
+  background-color: var(--color-amarillo);
 }
 
 /* Los dos grupos comparten celda. El que no toca se apaga pero no se saca
