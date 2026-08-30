@@ -904,6 +904,23 @@
    de fichas. */
 .cinta-marcas[data-grupo='colaboradores'] .mosaico {
   border-color: var(--color-amarillo);
+  box-shadow: 5px 5px 0 var(--color-amarillo);
+}
+
+/* Los mosaicos, de estampas: un pelín girados y con sombra dura, como fichas
+   recién puestas sobre la mesa. La cinta sigue en una sola línea, pero deja
+   de ser una fila de rectángulos idénticos: cada logo asoma con su propio
+   golpe. El giro va por turnos —nth-child por copia, así las dos vueltas del
+   bucle calcan el mismo patrón— y a ±1º no llega a verse torcido, sólo vivo. */
+.cinta-marcas .mosaico {
+  box-shadow: 5px 5px 0 var(--color-tinta);
+  rotate: -1.2deg;
+}
+.cinta-marcas .mosaico:nth-child(2n) {
+  rotate: 1.1deg;
+}
+.cinta-marcas .mosaico:nth-child(3n) {
+  rotate: 2deg;
 }
 
 /* El rótulo va en tinta, no en rojo: mide 11,5px y rojo sobre amarillo son
