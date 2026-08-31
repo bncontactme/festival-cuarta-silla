@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
 import Encabezado from '../components/Encabezado.astro';
 import Silla from '../components/Silla.astro';
+import Estrella from '../components/Estrella.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import { registro, festival } from '../data/site';
 import { artistas } from '../data/artistas';
@@ -72,7 +73,7 @@ import { artistas } from '../data/artistas';
     fondo="rojo"
   />
 
-  <section class="relative overflow-hidden border-b-2 border-tinta bg-papel">
+  <section class="relative overflow-hidden border-b-2 border-tinta bg-amarillo">
     <Silla
       variante="roja"
       deriva
@@ -84,7 +85,7 @@ import { artistas } from '../data/artistas';
     <div class="relative px-4 pt-16 pb-14 sm:px-6 lg:px-10 lg:pt-20 lg:pb-16">
       <!-- Tarjeta de evento en estado "por definir" -->
       <article
-        class="max-w-2xl border-2 border-tinta bg-amarillo shadow-[10px_10px_0_var(--color-tinta)]"
+        class="max-w-2xl border-2 border-tinta bg-papel shadow-[10px_10px_0_var(--color-tinta)]"
         data-reveal="escala"
       >
         <header class="border-b-2 border-tinta bg-tinta px-6 py-5 text-papel">
@@ -134,8 +135,12 @@ import { artistas } from '../data/artistas';
     </div>
   </section>
 
-  <section class="bg-tinta text-papel">
-    <div class="px-4 py-20 sm:px-6 lg:px-10">
+  {/* La misma secuencia de Sedes: rojo → amarillo → rojo. El papel queda
+      contenido en la tarjeta, donde sí funciona como superficie de lectura,
+      y deja de ocupar una banda completa. */}
+  <section class="relative overflow-hidden border-t-2 border-tinta bg-rojo text-amarillo">
+    <Estrella tinta="amarilla" alto="abajo" />
+    <div class="relative px-4 py-20 sm:px-6 lg:px-10">
       <p
         class="display max-w-4xl text-[9vw] leading-[0.95] lg:text-[5.5vw]"
         data-lineas
@@ -144,7 +149,7 @@ import { artistas } from '../data/artistas';
         {festival.fechas}
       </p>
       <div class="mt-10 flex flex-wrap gap-4" data-reveal="arriba">
-        <a href={conBase("/programa")} class="boton">Ver el programa</a>
+        <a href={conBase("/programa")} class="boton boton--amarillo">Ver el programa</a>
         {
           festival.donaciones.paypal && (
             <a

@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
 import Marquee from '../components/Marquee.astro';
 import Silla from '../components/Silla.astro';
+import Estrella from '../components/Estrella.astro';
 import Mosaico from '../components/Mosaico.astro';
 import Portada from '../components/movil/Portada.astro';
 import Gantt from '../components/Gantt.astro';
@@ -22,6 +23,21 @@ const cuenta = [
   { campo: 'horas', label: 'Horas' },
   { campo: 'minutos', label: 'Min' },
   { campo: 'segundos', label: 'Seg' },
+] as const;
+
+/* Collage de Sedes. Las posiciones están compuestas a mano: no hay azar ni
+   espejo (el respaldo lleva texto y voltearlo lo dejaría al revés). */
+const sillasSedes = [
+  { x: -7, y: 48, ancho: 18, giro: -10, opa: 0.11 },
+  { x: 10, y: -6, ancho: 15, giro: 7, opa: 0.09 },
+  { x: 27, y: 55, ancho: 14, giro: -4, opa: 0.075 },
+  { x: 40, y: 12, ancho: 13, giro: 9, opa: 0.08 },
+  { x: 54, y: -14, ancho: 18, giro: -7, opa: 0.095 },
+  { x: 70, y: 49, ancho: 16, giro: 6, opa: 0.08 },
+  { x: 85, y: 8, ancho: 14, giro: -5, opa: 0.085 },
+  { x: 96, y: 52, ancho: 18, giro: 10, opa: 0.1 },
+  { x: 19, y: 28, ancho: 9, giro: -11, opa: 0.055 },
+  { x: 62, y: 31, ancho: 10, giro: 4, opa: 0.055 },
 ] as const;
 ---
 
@@ -45,8 +61,10 @@ const cuenta = [
          esto necesita recibir el cursor —quien las mueve es el puntero desde
          la ventana, no el hover—, así que pueden ir debajo del texto sin
          perder el movimiento. -->
+    {/* Las sillas van en rojo, la tinta del festival, como marca de agua con
+        color: sin `brightness(0)` —que las dejaba negras y apagadas—. */}
     <div
-      class="flotador absolute top-0 right-0 h-[64%] w-1/2 opacity-25"
+      class="flotador absolute top-0 right-0 h-[64%] w-1/2 opacity-[0.22]"
       data-area
       aria-hidden="true"
     >
@@ -60,7 +78,7 @@ const cuenta = [
       </div>
     </div>
     <div
-      class="flotador absolute -bottom-16 -left-12 w-32 opacity-20 sm:w-52 lg:w-64"
+      class="flotador absolute -bottom-16 -left-12 w-32 opacity-[0.22] sm:w-52 lg:w-64"
       aria-hidden="true"
     >
       <div class="sigue">
@@ -72,7 +90,7 @@ const cuenta = [
 
     <div class="relative px-4 pt-3 pb-8 sm:px-6 sm:pt-4 lg:px-10 lg:pt-5">
       <p
-        class="meta flex flex-wrap items-center gap-x-4 gap-y-2 text-rojo"
+        class="meta flex flex-wrap items-center gap-x-4 gap-y-2 text-tinta"
         data-reveal="lado"
       >
         <span class="inline-block h-[2px] w-10 bg-rojo"></span>
@@ -81,7 +99,7 @@ const cuenta = [
         {festival.anio}
       </p>
 
-      {/* `15vw` mide el titular por el ancho de la ventana y se olvida del
+      {/* `12.55vw` mide el titular por el ancho de la ventana y se olvida del
           alto: en una pantalla ancha y baja las tres líneas no caben y
           «CONCEPTUAL» entra cortada por el canto. El `min()` le pone techo
           —lo que quede de alto entre la barra y el pie de la pantalla— y sólo
@@ -92,7 +110,7 @@ const cuenta = [
         </span>
 
         <span
-          class="display block text-[min(15vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo"
+          class="display block text-[min(12.55vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo xl:text-[min(12.9vw,calc((100svh-8.5rem)/2.98))]"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -100,7 +118,7 @@ const cuenta = [
           Festival
         </span>
         <span
-          class="display block text-[min(15vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-tinta"
+          class="display block text-[min(12.55vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-tinta xl:text-[min(12.9vw,calc((100svh-8.5rem)/2.98))]"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -109,7 +127,7 @@ const cuenta = [
           de Arte
         </span>
         <span
-          class="display block text-[min(15vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo"
+          class="display block text-[min(12.55vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo xl:text-[min(12.9vw,calc((100svh-8.5rem)/2.98))]"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -121,10 +139,13 @@ const cuenta = [
 
       <!-- Franja de datos: fecha + wordmark + CTA -->
       <div
-        class="mt-12 grid gap-8 border-t-2 border-tinta pt-8 lg:grid-cols-[1fr_auto] lg:items-end"
+        class="mt-14 grid gap-8 border-t-2 border-tinta pt-8 lg:grid-cols-[1fr_auto] lg:items-end"
       >
         <div data-reveal="arriba">
-          <p class="meta mb-3 text-rojo">Cuándo</p>
+          {/* En tinta, no en rojo: 11,5px de rojo sobre amarillo son 3,67:1.
+              El rojo se queda en los filetes y en los campos, que no son
+              texto y pueden ir a cualquier tamaño. */}
+          <p class="meta mb-3 text-tinta">Cuándo</p>
           <p
             class="font-mono text-xl leading-tight font-bold sm:text-2xl lg:text-3xl"
           >
@@ -198,18 +219,15 @@ const cuenta = [
     id="manifiesto"
     {/* Borde amarillo: abajo sigue la sección de sedes, que también es
         oscura, y un filete tinta contra tinta no se ve. */}
-    class="relative overflow-hidden border-b-2 border-amarillo bg-papel"
+    class="relative overflow-hidden border-b-2 border-tinta bg-rojo"
   >
-    {/* La silla, muy apagada y recortada por el canto de la banda: entre la
-        pregunta y el botón queda un hueco ancho que en blanco liso se ve
-        plano. No sube el alto de la sección ni compite con nada.
-        Al 7 % sobre el hueso se veía; sobre blanco puro desaparecía, así que
-        sube a 10 %: la marca de agua tiene que insinuarse, no borrarse. */}
-    <Silla
-      variante="roja"
-      deriva
-      class="pointer-events-none absolute -top-10 right-[26%] w-52 opacity-[0.10] lg:w-64"
-    />
+    {/* La estrella sustituye a la silla en marca de agua. La silla iba al 10%
+        de rojo sobre blanco, que es un rosa: sobre papel una trama de una
+        tinta sigue siendo esa tinta, así que era legítima — pero ahora el
+        campo es rojo y una trama de rojo sobre rojo no existe. La estrella
+        entra en la tinta contraria, a plena fuerza, que es como entra en el
+        feed: en ocho de sus doce posts. */}
+    <Estrella tinta="amarilla" alto="centro" />
 
     {/* Alineadas por abajo: el botón se apoya en la última línea de la
         pregunta, no flota a media altura. En columna estrecha se apila y el
@@ -219,10 +237,9 @@ const cuenta = [
     >
       <div>
         <p
-          class="meta mb-5 flex items-center gap-4 text-rojo"
+          class="meta mb-5 inline-block bg-amarillo px-3 py-1.5 text-tinta"
           data-reveal="lado"
         >
-          <span class="inline-block h-[2px] w-12 bg-rojo"></span>
           01 / Manifiesto
         </p>
 
@@ -232,7 +249,7 @@ const cuenta = [
             de la banda y la sección baja de alto, que es de lo que se
             trata. */}
         <h2
-          class="display max-w-[20ch] text-[9vw] leading-[0.95] text-tinta lg:text-[4.4vw]"
+          class="display max-w-[20ch] text-[9vw] leading-[0.95] text-amarillo lg:text-[4.4vw]"
           data-lineas
           data-reveal="lineas"
         >
@@ -245,7 +262,7 @@ const cuenta = [
             pie de foto y en la misma banda, sin fondo propio ni segundo
             bloque a sangre. */}
         <p
-          class="mt-6 max-w-[54ch] font-mono text-sm leading-relaxed text-tinta/70 lg:text-[0.95rem]"
+          class="mt-6 max-w-[54ch] font-mono text-sm leading-relaxed text-papel lg:text-[0.95rem]"
           data-reveal="arriba"
           data-retraso="80"
         >
@@ -255,7 +272,7 @@ const cuenta = [
 
       <button
         type="button"
-        class="boton shrink-0"
+        class="boton boton--amarillo shrink-0"
         data-abre="manifiesto"
         data-reveal="arriba"
         data-retraso="120"
@@ -316,21 +333,43 @@ const cuenta = [
   </dialog>
 
   <!-- ══ SEDES ══════════════════════════════════════════════════════════ -->
-  <section class="border-b-2 border-amarillo bg-tinta text-papel">
-    <div class="px-4 pt-12 pb-20 sm:px-6 lg:px-10 lg:pt-16 lg:pb-28">
+  {/* El campo pasa a amarillo y el plano se queda negro — pero como TARJETA
+      puesta encima, no como sección. Es la diferencia que ordena todo el
+      sistema: el negro es tinta y objeto, nunca superficie del alto de una
+      pantalla. Antes esta sección eran 928px de negro corrido, el bloque más
+      grande de la portada. */}
+  <section class="relative overflow-hidden border-b-2 border-tinta bg-amarillo">
+    {/* Un collage editorial, no un patrón: pocas sillas grandes, recortadas
+        por los cantos y colocadas a mano para enmarcar el contenido. */}
+    <div class="sedes-sillas absolute inset-0" aria-hidden="true">
+      {
+        sillasSedes.map((silla) => (
+          <Silla
+            variante="roja"
+            class="silla-sede"
+            style={`--x:${silla.x}%;--y:${silla.y}%;--ancho:${silla.ancho}vw;--giro:${silla.giro}deg;--opa:${silla.opa};`}
+          />
+        ))
+      }
+    </div>
+    <div class="relative px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-16">
       <div
-        class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-papel/25 pb-8"
+        class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8"
       >
         <div>
           <p
-            class="meta mb-6 flex items-center gap-4 text-amarillo"
+            class="meta mb-6 flex items-center gap-4 text-tinta"
             data-reveal="lado"
           >
-            <span class="inline-block h-[2px] w-12 bg-amarillo"></span>
+            <span class="inline-block h-[2px] w-12 bg-rojo"></span>
             02 / {sedes.titulo}
           </p>
+          {/* De 8vw a 4,5vw. Los titulares del feed miden un 8–10% del alto
+              del lienzo; a 8vw éste medía casi un cuarto de la sección. La
+              jerarquía entre secciones ya no la lleva el cuerpo — la lleva el
+              cambio de campo. */}
           <h2
-            class="display text-[13vw] leading-[0.82] text-papel lg:text-[8vw]"
+            class="display text-[9vw] leading-[0.9] text-tinta lg:text-[4.5vw]"
             data-lineas
             data-reveal="lineas"
           >
@@ -342,7 +381,7 @@ const cuenta = [
 
       {/* Plano a la izquierda, lista a la derecha: son un solo
           instrumento, así que viven en un solo componente. */}
-      <Mapa class="mt-10" />
+      <Mapa class="mt-8" />
     </div>
   </section>
 
@@ -352,36 +391,42 @@ const cuenta = [
       después del hero, para una sección de adelanto— y el botón colgaba al
       pie de la columna derecha. Entre las dos cosas esto era un cartel
       enorme con dos cajitas flotando en un charco de amarillo. */}
-  <section class="border-b-2 border-tinta bg-amarillo">
-    <div class="px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
+  {/* Rojo: alterna con el amarillo de sedes, que es lo que impide que la
+      portada se lea como un solo bloque. La ficha del mini-programa se queda
+      blanca dentro del campo rojo — la misma gramática que el retrato montado
+      sobre rojo en el feed. */}
+  <section class="relative overflow-hidden border-b-2 border-tinta bg-rojo">
+    {/* Izquierda y abajo, detrás de la ficha blanca del mini-programa: es
+        opaca, se le monta encima y deja asomar la estrella por el hueco. Así
+        queda lejos del botón —arriba a la derecha— y de la lista de días, que
+        es texto y no la taparía. */}
+    <Estrella tinta="amarilla" alto="abajo" lado="izquierda" />
+    <div class="relative px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
       <div
         class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8"
       >
         <div>
           <p
-            class="meta mb-6 flex items-center gap-4 text-rojo"
+            class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta"
             data-reveal="lado"
           >
-            <span class="inline-block h-[2px] w-12 bg-rojo"></span>
             03 / {programa.titulo}
           </p>
-          {/* Un punto por debajo de SEDES, que va a 8vw. No es un capricho
-              de escala: son dos secciones seguidas, las dos con la misma
-              receta —rótulo, titular, botón, filete— y la de arriba manda.
-              Puestas al mismo cuerpo, la bajada de la portada era una fila de
-              carteles del mismo tamaño gritando por turnos, y ésta encima
-              grita sobre amarillo a plena saturación, que es el fondo que más
-              cansa de los cuatro. Bajarla es lo que la vuelve lo que es: el
-              adelanto del programa, no el programa. */}
+          {/* Al mismo cuerpo que SEDES, y las dos mucho más chicas que antes.
+              Antes ésta iba un punto por debajo para que no compitieran: eran
+              dos carteles del mismo tamaño gritando por turnos sobre el mismo
+              campo amarillo. Ahora lo que las separa es el campo —una
+              amarilla, la otra roja—, así que el cuerpo puede igualarse y
+              bajar. La jerarquía la lleva el color, no el tamaño. */}
           <h2
-            class="display text-[11vw] leading-[0.82] text-tinta lg:text-[6.4vw]"
+            class="display text-[9vw] leading-[0.9] text-amarillo lg:text-[4.5vw]"
             data-lineas
             data-reveal="lineas"
           >
             {programa.titulo}
           </h2>
         </div>
-        <a href={conBase("/programa")} class="boton" data-reveal="arriba">
+        <a href={conBase("/programa")} class="boton boton--amarillo" data-reveal="arriba">
           Ver el programa
         </a>
       </div>
@@ -415,12 +460,12 @@ const cuenta = [
             canto de arriba de la tarjeta. */}
         <div data-reveal="arriba">
           <ul
-            class="flex h-full flex-col border-y-2 border-tinta"
+            class="flex h-full flex-col border-y-2 border-amarillo"
             data-dias-portada
           >
             {
               programa.dias.map((d, i) => (
-                <li class="flex flex-1 border-b border-tinta/15 last:border-b-0">
+                <li class="flex flex-1 border-b border-amarillo/30 last:border-b-0">
                   {/* La fila entera cambia el día de la rejilla: el objetivo
                       es la franja, no dos palabras. */}
                   <button
@@ -429,20 +474,20 @@ const cuenta = [
                     data-dia={i}
                     aria-pressed={i === 0 ? 'true' : 'false'}
                   >
-                    <span class="meta dia-num w-7 shrink-0 text-tinta/35 transition-colors duration-200">
+                    <span class="meta dia-num w-7 shrink-0 text-papel/75 transition-colors duration-200">
                       {String(i + 1).padStart(2, '0')}
                     </span>
-                    <span class="display dia-nombre flex-1 text-2xl leading-none transition-colors duration-200">
+                    <span class="display dia-nombre flex-1 text-2xl leading-none text-amarillo transition-colors duration-200">
                       {d.dia}
                     </span>
                     {/* Filete de 1 px y sin relleno vertical: con el de 2 px
                         del resto del sitio la etiqueta medía más que el
                         nombre del día y la fila crecía tres píxeles respecto
                         a las otras tres. */}
-                    <span class="meta dia-hoy shrink-0 border border-rojo px-1.5 text-[0.55rem] leading-[1.7] text-rojo">
+                    <span class="meta dia-hoy shrink-0 border border-amarillo px-1.5 text-[0.55rem] leading-[1.7] text-amarillo">
                       Hoy
                     </span>
-                    <span class="meta shrink-0 text-tinta/40">
+                    <span class="meta shrink-0 text-papel/75">
                       {d.fecha.replace(' de septiembre', ' sep')}
                     </span>
                   </button>
@@ -455,57 +500,53 @@ const cuenta = [
     </div>
   </section>
 
-  {/* ══ PATROCINADORES → COLABORADORES ═══════════════════════════════════
-      Una sola sección con dos caras. Al terminar el turno de un grupo cambia
-      la luz —fondo papel ↔ amarillo—, el título y el
-      número; el relevo va en tres tiempos para que no se lea como un
-      parpadeo (ver el guion al pie).
-
-      El turno no dura lo que dura la vuelta de la cinta. Trece logos en una
-      fila son casi un minuto de recorrido, y esperar eso para ver un cambio
-      de color es demasiado. Así que el turno es corto y fijo, y la cinta,
-      cuando le toca esconderse, se queda **en pausa donde iba**: al volver
-      sigue desde ahí y no desde el principio. Por eso no se pierde ninguna
-      marca aunque el turno se corte a media pasada — sólo que se ven en dos o
-      tres vueltas en vez de una. */}
+  <!-- ══ PATROCINADORES → COLABORADORES ═══════════════════════════════════
+       La cinta original, con el mismo collage de sillas que usa Sedes detrás
+       de las fichas. -->
   {
     (() => {
-      const PASO = 224; // ancho del mosaico más su separación
-      const VELOCIDAD = 55; // px/s: ritmo de mirar un logo, no de un ticker
-
+      const PASO = 240;
+      const VELOCIDAD = 52;
       const grupos = [
-        { clave: 'patrocinadores', indice: '04', datos: patrocinadores, turno: 20000 },
+        { clave: 'patrocinadores', indice: '04', datos: patrocinadores, turno: 18000 },
         { clave: 'colaboradores', indice: '05', datos: colaboradores, turno: 10000 },
       ];
 
       return (
         <section
-          class="cinta-marcas overflow-hidden border-b-2"
+          class="cinta-marcas relative overflow-hidden border-b-2 border-tinta"
           data-cinta
           data-dormida
           data-grupo="patrocinadores"
         >
-          <div class="cinta-cabecera px-4 pt-12 pb-10 sm:px-6 lg:px-10 lg:pt-16">
-            <p class="meta cinta-acento mb-8 flex items-center gap-4">
-              <span class="inline-block h-[2px] w-12 bg-current" />
+          <div class="cinta-sillas absolute inset-0" aria-hidden="true">
+            {
+              sillasSedes.map((silla) => (
+                <Silla
+                  variante="roja"
+                  class="silla-sede"
+                  style={`--x:${silla.x}%;--y:${silla.y}%;--ancho:${silla.ancho}vw;--giro:${silla.giro}deg;--opa:${silla.opa};`}
+                />
+              ))
+            }
+          </div>
+
+          <div class="cinta-cabecera relative px-4 pt-12 pb-9 sm:px-6 lg:px-10 lg:pt-16">
+            <p class="meta cinta-acento mb-7 flex items-center gap-4">
+              <span class="cinta-filete inline-block h-[2px] w-12" />
               <span data-rotulo>04 / {patrocinadores.titulo}</span>
             </p>
             <h2
-              class="display text-[11vw] leading-[0.82] lg:text-[6vw]"
+              class="display text-[9vw] leading-[0.9] lg:text-[4.5vw]"
               data-titulo
             >
               {patrocinadores.titulo}
             </h2>
           </div>
 
-          {/* Los dos grupos comparten celda: el que no toca se apaga sin
-              salirse del flujo, así la sección no da un salto de alto. */}
-          <div class="cinta-pista pb-20">
+          <div class="cinta-pista relative pb-16 lg:pb-20">
             {grupos.map(({ clave, indice, datos, turno }, n) => {
-              // La unidad tiene que pasar el ancho de una pantalla ancha: si
-              // no, la cinta deja un hueco a media vuelta. Con cinco logos eso
-              // significa repetir la tanda.
-              const repes = Math.max(1, Math.ceil(1500 / PASO / datos.lista.length));
+              const repes = Math.max(1, Math.ceil(1600 / PASO / datos.lista.length));
               const unidad = Array.from({ length: repes }, () => datos.lista).flat();
               const duracion = ((unidad.length * PASO) / VELOCIDAD).toFixed(1);
               return (
@@ -516,11 +557,12 @@ const cuenta = [
                   data-indice={indice}
                   data-titulo-grupo={datos.titulo}
                   data-espera={turno}
+                  aria-hidden={n === 0 ? 'false' : 'true'}
                 >
                   <p class="meta rotulo-grupo px-4 pb-4 sm:px-6 lg:px-10">
                     {indice} / {datos.titulo}
                   </p>
-                  <div class="overflow-hidden" role="marquee">
+                  <div class="cinta-ventana overflow-hidden" role="marquee">
                     <div class="marquee" style={`--duracion: ${duracion}s`}>
                       {[0, 1].map((copia) => (
                         <div class="flex shrink-0" aria-hidden={copia === 1}>
@@ -541,19 +583,24 @@ const cuenta = [
   }
 
   <!-- ══ CIERRE ═════════════════════════════════════════════════════════ -->
+  {/* Sin estrella: el wordmark gótico ES la marca gráfica de esta banda y no
+      necesita competencia. Es el único cierre del sitio que ya trae su propio
+      dibujo. */}
   <section class="relative overflow-hidden bg-rojo text-amarillo">
     <div
-      class="relative px-4 py-24 text-center sm:px-6 lg:px-10 lg:py-32"
+      class="relative px-4 py-16 text-center sm:px-6 lg:px-10 lg:py-20"
     >
       <img
         src={conBase("/logos/wordmark-amarilla.svg")}
         alt="Cuarta Silla"
         width="533"
         height="85"
-        class="mx-auto w-[78vw] lg:w-[54vw]"
+        class="mx-auto w-[68vw] lg:w-[44vw]"
         data-reveal="escala"
       />
-      <p class="meta mt-6 text-amarillo/80" data-reveal="arriba">
+      {/* Iba en amarillo al 80% sobre rojo: 2,9:1, de las peores del sitio.
+          Sobre rojo la letra chica va blanca. */}
+      <p class="meta mt-6 text-papel" data-reveal="arriba">
         {festival.fechas} · {festival.ciudad}
       </p>
       {/* El remate lleva un solo botón, y es el de donar. Lo demás —programa,
@@ -565,7 +612,7 @@ const cuenta = [
           diciéndolo, en vez de desaparecer: el cierre se quedaría sin nada
           debajo del logotipo. En cuanto `festival.donaciones.paypal` tenga el
           enlace, se convierte solo en el botón de verdad. */}
-      <div class="mt-12 flex justify-center" data-reveal="arriba" data-retraso="120">
+      <div class="mt-9 flex justify-center" data-reveal="arriba" data-retraso="120">
         {
           festival.donaciones.paypal ? (
             <a
@@ -586,7 +633,7 @@ const cuenta = [
       {
         festival.donaciones.nota && (
           <p
-            class="meta mx-auto mt-6 max-w-[38ch] leading-relaxed text-amarillo/80"
+            class="meta mx-auto mt-6 max-w-[38ch] leading-relaxed text-papel"
             data-reveal="arriba"
             data-retraso="180"
           >
@@ -597,24 +644,7 @@ const cuenta = [
     </div>
   </section>
 
-
   <script>
-    /** La cinta de marcas alterna entre patrocinadores y colaboradores.
-     *
-     * No arranca hasta que la sección asoma, y al salir de cuadro vuelve a
-     * dormirse en patrocinadores: quien baja hasta acá la encuentra siempre
-     * empezada por el principio, no a mitad de un turno que corrió solo
-     * mientras nadie miraba.
-     *
-     * La cinta que se apaga queda **en pausa donde iba**, no se saca del
-     * flujo: con `display: none` la animación volvería a empezar de cero cada
-     * vez y las últimas marcas no se verían nunca.
-     *
-     * El relevo va en tres tiempos: primero cambia la luz —el color de la
-     * sección, que tarda más y arranca antes—, después se va el grupo que
-     * estaba y recién ahí, con la cinta tapada, se cambia el título. Cambiar
-     * las tres cosas en el mismo cuadro es lo que se veía como un parpadeo.
-     */
     const cinta = document.querySelector('[data-cinta]');
     if (cinta) {
       const grupos = [...cinta.querySelectorAll('[data-grupo-nombre]')] as HTMLElement[];
@@ -626,9 +656,9 @@ const cuenta = [
       let mudando = false;
       let reloj: ReturnType<typeof setTimeout> | undefined;
 
-      const armarTurno = (g: HTMLElement) => {
+      const armarTurno = (grupo: HTMLElement) => {
         clearTimeout(reloj);
-        reloj = setTimeout(cambiar, Number(g.dataset.espera ?? 12000));
+        reloj = setTimeout(cambiar, Number(grupo.dataset.espera ?? 12000));
       };
 
       function cambiar() {
@@ -646,6 +676,7 @@ const cuenta = [
 
         setTimeout(() => {
           saliente.dataset.oculto = '';
+          saliente.setAttribute('aria-hidden', 'true');
           delete saliente.dataset.estado;
 
           const nombre = entrante.dataset.tituloGrupo ?? '';
@@ -654,6 +685,7 @@ const cuenta = [
           if (cabecera instanceof HTMLElement) delete cabecera.dataset.estado;
 
           delete entrante.dataset.oculto;
+          entrante.setAttribute('aria-hidden', 'false');
           entrante.dataset.estado = 'entrando';
           setTimeout(() => delete entrante.dataset.estado, 800);
           armarTurno(entrante);
@@ -661,15 +693,15 @@ const cuenta = [
         }, SALIDA);
       }
 
-      /** Vuelta a foja cero: primer grupo, sin turnos corriendo. */
       const dormir = () => {
         clearTimeout(reloj);
         mudando = false;
         actual = 0;
-        grupos.forEach((g, i) => {
-          delete g.dataset.estado;
-          if (i === 0) delete g.dataset.oculto;
-          else g.dataset.oculto = '';
+        grupos.forEach((grupo, i) => {
+          delete grupo.dataset.estado;
+          grupo.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
+          if (i === 0) delete grupo.dataset.oculto;
+          else grupo.dataset.oculto = '';
         });
         cinta.setAttribute('data-grupo', grupos[0].dataset.grupoNombre ?? '');
         const nombre = grupos[0].dataset.tituloGrupo ?? '';
@@ -678,12 +710,13 @@ const cuenta = [
         cinta.setAttribute('data-dormida', '');
       };
 
-      // Sin animación no hay turnos: se muestran los dos grupos, cada uno con
-      // su rótulo, y nadie cambia nada solo.
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         cinta.setAttribute('data-quieta', 'si');
         cinta.removeAttribute('data-dormida');
-        grupos.forEach((g) => delete g.dataset.oculto);
+        grupos.forEach((grupo) => {
+          delete grupo.dataset.oculto;
+          grupo.setAttribute('aria-hidden', 'false');
+        });
       } else {
         const ojo = new IntersectionObserver(
           ([entrada]) => {
@@ -694,12 +727,10 @@ const cuenta = [
               dormir();
             }
           },
-          // Umbral 0: arranca en cuanto el borde de arriba entra en cuadro.
           { threshold: 0 },
         );
         ojo.observe(cinta);
       }
     }
   </script>
-
 </Base>

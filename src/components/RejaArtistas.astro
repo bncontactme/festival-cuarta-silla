@@ -34,7 +34,10 @@ const lista = limite ? artistas.lista.slice(0, limite) : artistas.lista;
 {
   lista.length === 0 ? (
     <div class={`ficha ficha--ancha max-w-3xl ${clase}`} data-reveal="escala">
-      <p class="meta text-rojo">{artistas.estado}</p>
+      <p class="meta flex items-center gap-3 text-tinta">
+        <span class="inline-block h-[2px] w-8 bg-rojo" />
+        {artistas.estado}
+      </p>
       <p class="display mt-4 text-4xl leading-[0.95] lg:text-5xl">
         Todavía no hay nombres
       </p>

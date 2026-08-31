@@ -10,15 +10,11 @@ import {
 import { conBase } from '../lib/base';
 import Marquee from './Marquee.astro';
 
-/** El pie es el único sitio donde está el sitio entero: las pestañas, la
- *  destacada y las dos que no gastan pestaña arriba —la portada y el aviso
- *  legal—. Aquí no hay que ahorrar espacio, así que no se esconde nada.
- *
- *  El registro sale de `nav`, no suelto: cuando volvió a ser pestaña, tenerlo
- *  además en esta lista lo pintaba dos veces. */
+/** El pie conserva el sitio entero, pero en una sola línea flexible. Registro
+ *  sale de la lista porque ya vive como botón de acción. */
 const enlaces = [
   inicio,
-  ...nav,
+  ...nav.filter((item) => item.href !== registroEventos.href),
   accionPrincipal,
   { label: privacidad.titulo, href: '/privacidad' },
 ];
@@ -33,51 +29,29 @@ const enlaces = [
     class="meta border-b-2 border-amarillo py-3 text-amarillo"
   />
 
-  <div class="px-4 py-14 sm:px-6 lg:px-10">
-    <div class="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr]">
-      <div>
+  <div class="px-4 py-8 sm:px-6 lg:px-10 lg:py-9">
+    <div class="flex flex-wrap items-center justify-between gap-6">
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
         <img
           src={conBase("/logos/wordmark-amarilla.svg")}
           alt="Cuarta Silla"
           width="533"
           height="85"
-          class="w-44 sm:w-56"
+          class="w-40 sm:w-48"
         />
-        <p class="meta mt-4 max-w-xs text-papel/60">
+        <p class="meta max-w-xs text-papel/60">
           {festival.nombre} · {festival.ciudad}
         </p>
       </div>
 
-      <nav aria-label="Pie de página">
-        <p class="meta mb-4 text-rojo">Navegación</p>
-        <ul class="space-y-2">
-          {
-            enlaces.map((item) => (
-              <li>
-                <a href={conBase(item.href)} class="enlace text-lg">
-                  {item.label}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </nav>
-
-      {/* La columna que era «Participa → Convocatoria». Cerrada la
-          convocatoria, lo que le queda por hacer a quien llega es apuntarse; y
-          debajo, cuando exista la cuenta, el botón de donar. Sin enlace de
-          PayPal no se pinta nada: en el pie hay sitio de sobra y un botón
-          dormido aquí sería ruido —en el cierre de la portada sí sale, porque
-          allí es lo único que hay debajo del logotipo—. */}
-      <div>
-        <p class="meta mb-4 text-rojo">Participa</p>
+      <div class="flex flex-wrap items-center gap-4">
         <a href={conBase(registroEventos.href)} class="boton boton--papel">
           {registroEventos.label}
         </a>
 
         {
           festival.donaciones.paypal && (
-            <div class="mt-6">
+            <div>
               <a
                 href={festival.donaciones.paypal}
                 target="_blank"
@@ -86,16 +60,28 @@ const enlaces = [
               >
                 ★ Donar ★
               </a>
-              <p class="meta mt-3 max-w-[26ch] leading-relaxed text-papel/45">
-                {festival.donaciones.nota}
-              </p>
             </div>
           )
         }
       </div>
     </div>
 
-    <p class="meta mt-16 border-t-2 border-papel/20 pt-6 text-papel/45">
+    <nav class="mt-7 border-t border-papel/20 pt-5" aria-label="Pie de página">
+      <p class="sr-only">Navegación</p>
+      <ul class="flex flex-wrap gap-x-6 gap-y-2">
+        {
+          enlaces.map((item) => (
+            <li>
+              <a href={conBase(item.href)} class="enlace text-sm">
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <p class="meta mt-5 border-t border-papel/15 pt-4 text-papel/45">
       {festival.creditoFooter}
     </p>
   </div>

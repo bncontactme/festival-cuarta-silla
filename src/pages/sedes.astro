@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Encabezado from '../components/Encabezado.astro';
-import Silla from '../components/Silla.astro';
+import Estrella from '../components/Estrella.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import { sedes, festival, enlaceMapa } from '../data/site';
 ---
@@ -20,13 +20,13 @@ import { sedes, festival, enlaceMapa } from '../data/site';
       titulo={sedes.titulo}
       indice="03"
       nota={`${sedes.lista.length} lugares en ${festival.ciudad}`}
-      fondo="tinta"
+      fondo="rojo"
     >
       {
         sedes.lista.map((sede, i) => (
           <details class="plegable border-current">
             <summary>
-              <span class="meta text-[0.6rem] text-amarillo">
+              <span class="meta bg-amarillo px-1.5 py-0.5 text-[0.6rem] text-tinta">
                 {String(i + 1).padStart(2, '0')}
               </span>
               <span class="display text-2xl leading-none">{sede.nombre}</span>
@@ -45,7 +45,7 @@ import { sedes, festival, enlaceMapa } from '../data/site';
                     href={sede.instagram}
                     target="_blank"
                     rel="noopener"
-                    class="meta flex-1 bg-amarillo px-3 py-3 text-center text-[0.55rem] font-bold"
+                    class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
                   >
                     {sedes.acciones.conoce} ↗
                   </a>
@@ -54,7 +54,7 @@ import { sedes, festival, enlaceMapa } from '../data/site';
                   href={enlaceMapa(sede)}
                   target="_blank"
                   rel="noopener"
-                  class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
+                  class="meta flex-1 bg-rojo px-3 py-3 text-center text-[0.55rem] font-bold text-papel"
                 >
                   {sedes.acciones.ubicacion} ↗
                 </a>
@@ -69,10 +69,15 @@ import { sedes, festival, enlaceMapa } from '../data/site';
   <Encabezado
     indice={`${sedes.titulo} / ${String(sedes.lista.length).padStart(2, '0')}`}
     titulo={sedes.titulo}
-    fondo="tinta"
+    fondo="rojo"
   />
 
-  <section class="bg-papel">
+  {/* El campo pasa a amarillo. Tinta sobre amarillo son 15,3:1 — se leen
+      mejor que como estaban, en tinta sobre blanco justo debajo de un
+      encabezado negro. El blanco sale de aquí porque en este sistema es la
+      ventana donde algo tiene que verse de verdad (fotos, logos), y una
+      dirección no es ninguna de las dos cosas. */}
+  <section class="bg-amarillo">
     <ul class="grid sm:grid-cols-2 lg:grid-cols-3">
       {
         sedes.lista.map((sede, i) => (
@@ -81,14 +86,18 @@ import { sedes, festival, enlaceMapa } from '../data/site';
             data-reveal="escala"
             data-retraso={(i % 3) * 90}
           >
-            {/* Cortina roja que sube al pasar el cursor */}
+            {/* Cortina que sube al pasar el cursor. Es de tinta y no roja: la
+                dirección mide 16px y sobre rojo se queda en 4,0:1 en el mejor
+                caso, mientras que sobre tinta llega a 15,3:1. El rojo no se
+                pierde — vive en la barra de ubicación, que es donde el rojo
+                tiene su oficio en esta página: la acción. */}
             <span
-              class="absolute inset-0 -z-0 origin-bottom scale-y-0 bg-rojo transition-transform duration-500 ease-[var(--ease-cortina)] group-hover:scale-y-100"
+              class="absolute inset-0 -z-0 origin-bottom scale-y-0 bg-tinta transition-transform duration-500 ease-[var(--ease-cortina)] group-hover:scale-y-100"
               aria-hidden="true"
             />
 
             <div class="relative p-6 transition-colors duration-500 group-hover:text-amarillo lg:p-8">
-              <p class="meta text-rojo transition-colors duration-500 group-hover:text-amarillo">
+              <p class="meta text-tinta/55 transition-colors duration-500 group-hover:text-amarillo">
                 {String(i + 1).padStart(2, '0')}
               </p>
 
@@ -101,13 +110,20 @@ import { sedes, festival, enlaceMapa } from '../data/site';
               </address>
             </div>
 
+            {/* Antes esta barra era amarilla o negra según la sede tuviera
+                Instagram o no, y de la rejilla salía un damero que nadie
+                diseñó. Ahora cada acción tiene una forma fija: conocer es de
+                tinta y ubicar es de rojo, con Instagram o sin él. Catorce
+                marcas rojas repartidas por la rejilla son el grito de esta
+                página — el mismo papel que en la portada hace una banda a
+                sangre, aquí repartido en la unidad que se repite. */}
             <div class="relative flex divide-x-2 divide-tinta border-t-2 border-tinta">
               {sede.instagram && (
                 <a
                   href={sede.instagram}
                   target="_blank"
                   rel="noopener"
-                  class="meta flex-1 bg-amarillo px-4 py-4 text-center font-bold transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
+                  class="meta flex-1 bg-tinta px-4 py-4 text-center font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
                 >
                   {sedes.acciones.conoce} ↗
                 </a>
@@ -116,7 +132,7 @@ import { sedes, festival, enlaceMapa } from '../data/site';
                 href={enlaceMapa(sede)}
                 target="_blank"
                 rel="noopener"
-                class="meta flex-1 bg-tinta px-4 py-4 text-center font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
+                class="meta flex-1 bg-rojo px-4 py-4 text-center font-bold text-papel transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
               >
                 {sedes.acciones.ubicacion} ↗
               </a>
@@ -127,16 +143,18 @@ import { sedes, festival, enlaceMapa } from '../data/site';
     </ul>
   </section>
 
-  <section class="relative overflow-hidden border-t-2 border-tinta bg-amarillo">
-    <Silla
-      variante="roja"
-      deriva
-      class="absolute -bottom-10 right-4 w-40 opacity-20 lg:w-64"
-    />
+  {/* Rojo, amarillo, rojo: la página abre y cierra en la misma tinta y el
+      cuerpo va en la otra. La silla en marca de agua se cae — al 20% de rojo
+      sobre amarillo salía naranja, un tono que no está en el manual. La
+      estrella hace ese trabajo sin inventar ningún color. */}
+  <section class="relative overflow-hidden border-t-2 border-tinta bg-rojo">
+    <Estrella tinta="amarilla" alto="abajo" />
     <div class="relative px-4 py-20 sm:px-6 lg:px-10">
-      <p class="meta mb-6 text-rojo" data-reveal="lado">{festival.ciudad}</p>
+      <p class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta" data-reveal="lado">
+        {festival.ciudad}
+      </p>
       <p
-        class="display max-w-4xl text-[9vw] leading-[0.95] text-tinta lg:text-[5.5vw]"
+        class="display max-w-4xl text-[9vw] leading-[0.95] text-amarillo lg:text-[5.5vw]"
         data-lineas
         data-reveal="lineas"
       >

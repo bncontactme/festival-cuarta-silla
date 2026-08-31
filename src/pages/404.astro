@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
-import Silla from '../components/Silla.astro';
+import Estrella from '../components/Estrella.astro';
 import { nav } from '../data/site';
 ---
 
@@ -9,17 +9,22 @@ import { nav } from '../data/site';
   <section
     class="relative flex min-h-[70vh] items-center overflow-hidden bg-rojo text-amarillo"
   >
-    <Silla
-      variante="amarilla"
-      class="absolute -right-12 bottom-0 w-56 rotate-6 opacity-20 lg:w-96"
-    />
+    {/* La silla iba al 20% de amarillo sobre rojo, que da naranja: una trama
+        de una tinta sobre la OTRA inventa un color que no está en el manual.
+        La estrella entra a plena fuerza y se queda dentro del sistema. */}
+    <Estrella tinta="amarilla" alto="abajo" />
 
     <div class="relative px-4 py-24 sm:px-6 lg:px-10">
-      <p class="meta mb-6">Error 404</p>
+      <p class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta">
+        Error 404
+      </p>
       <h1 class="display text-[22vw] leading-[0.95] lg:text-[13vw]">
         Silla<br />vacía
       </h1>
-      <p class="mt-8 max-w-md text-lg">
+      {/* En papel y a cuerpo grande: amarillo sobre rojo da 3,67:1 y esto es
+          texto corrido. A 20px en negrita cuenta como texto grande y el blanco
+          sobre rojo (4,0:1) ya alcanza. */}
+      <p class="mt-8 max-w-md text-xl font-bold text-papel">
         Esta página no existe. Estas sí:
       </p>
       <ul class="mt-8 flex flex-wrap gap-3">
