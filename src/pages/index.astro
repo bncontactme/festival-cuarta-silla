@@ -24,6 +24,21 @@ const cuenta = [
   { campo: 'minutos', label: 'Min' },
   { campo: 'segundos', label: 'Seg' },
 ] as const;
+
+/* Collage de Sedes. Las posiciones están compuestas a mano: no hay azar ni
+   espejo (el respaldo lleva texto y voltearlo lo dejaría al revés). */
+const sillasSedes = [
+  { x: -7, y: 48, ancho: 18, giro: -10, opa: 0.11 },
+  { x: 10, y: -6, ancho: 15, giro: 7, opa: 0.09 },
+  { x: 27, y: 55, ancho: 14, giro: -4, opa: 0.075 },
+  { x: 40, y: 12, ancho: 13, giro: 9, opa: 0.08 },
+  { x: 54, y: -14, ancho: 18, giro: -7, opa: 0.095 },
+  { x: 70, y: 49, ancho: 16, giro: 6, opa: 0.08 },
+  { x: 85, y: 8, ancho: 14, giro: -5, opa: 0.085 },
+  { x: 96, y: 52, ancho: 18, giro: 10, opa: 0.1 },
+  { x: 19, y: 28, ancho: 9, giro: -11, opa: 0.055 },
+  { x: 62, y: 31, ancho: 10, giro: 4, opa: 0.055 },
+] as const;
 ---
 
 <Base titulo="Inicio">
@@ -84,7 +99,7 @@ const cuenta = [
         {festival.anio}
       </p>
 
-      {/* `15vw` mide el titular por el ancho de la ventana y se olvida del
+      {/* `12.55vw` mide el titular por el ancho de la ventana y se olvida del
           alto: en una pantalla ancha y baja las tres líneas no caben y
           «CONCEPTUAL» entra cortada por el canto. El `min()` le pone techo
           —lo que quede de alto entre la barra y el pie de la pantalla— y sólo
@@ -95,7 +110,7 @@ const cuenta = [
         </span>
 
         <span
-          class="display block text-[min(12vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo"
+          class="display block text-[min(12.55vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo xl:text-[min(12.9vw,calc((100svh-8.5rem)/2.98))]"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -103,7 +118,7 @@ const cuenta = [
           Festival
         </span>
         <span
-          class="display block text-[min(12vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-tinta"
+          class="display block text-[min(12.55vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-tinta xl:text-[min(12.9vw,calc((100svh-8.5rem)/2.98))]"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -112,7 +127,7 @@ const cuenta = [
           de Arte
         </span>
         <span
-          class="display block text-[min(12vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo"
+          class="display block text-[min(12.55vw,calc((100svh-8.5rem)/3.08))] leading-[0.86] text-rojo xl:text-[min(12.9vw,calc((100svh-8.5rem)/2.98))]"
           aria-hidden="true"
           data-lineas
           data-reveal="lineas"
@@ -124,7 +139,7 @@ const cuenta = [
 
       <!-- Franja de datos: fecha + wordmark + CTA -->
       <div
-        class="mt-12 grid gap-8 border-t-2 border-tinta pt-8 lg:grid-cols-[1fr_auto] lg:items-end"
+        class="mt-14 grid gap-8 border-t-2 border-tinta pt-8 lg:grid-cols-[1fr_auto] lg:items-end"
       >
         <div data-reveal="arriba">
           {/* En tinta, no en rojo: 11,5px de rojo sobre amarillo son 3,67:1.
@@ -324,22 +339,18 @@ const cuenta = [
       pantalla. Antes esta sección eran 928px de negro corrido, el bloque más
       grande de la portada. */}
   <section class="relative overflow-hidden border-b-2 border-tinta bg-amarillo">
-    {/* La sección que le da nombre al festival lleva el motivo suelto detrás:
-        tres sillas rojas a media tinta, recortadas por el borde para no
-        competir con el plano. */}
-    <div aria-hidden="true">
-      <Silla
-        variante="roja"
-        class="absolute -left-10 top-24 w-52 -rotate-12 opacity-[0.16]"
-      />
-      <Silla
-        variante="roja"
-        class="absolute top-[-2rem] right-[-1rem] w-64 rotate-6 opacity-[0.16]"
-      />
-      <Silla
-        variante="roja"
-        class="absolute -bottom-10 left-1/3 w-56 rotate-12 opacity-[0.14]"
-      />
+    {/* Un collage editorial, no un patrón: pocas sillas grandes, recortadas
+        por los cantos y colocadas a mano para enmarcar el contenido. */}
+    <div class="sedes-sillas absolute inset-0" aria-hidden="true">
+      {
+        sillasSedes.map((silla) => (
+          <Silla
+            variante="roja"
+            class="silla-sede"
+            style={`--x:${silla.x}%;--y:${silla.y}%;--ancho:${silla.ancho}vw;--giro:${silla.giro}deg;--opa:${silla.opa};`}
+          />
+        ))
+      }
     </div>
     <div class="relative px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-16">
       <div
@@ -390,27 +401,6 @@ const cuenta = [
         queda lejos del botón —arriba a la derecha— y de la lista de días, que
         es texto y no la taparía. */}
     <Estrella tinta="amarilla" alto="abajo" lado="izquierda" />
-    {/* El programa también lleva el motivo: sillas amarillas —la tinta
-        contraria al campo rojo—, con color y repartidas por los cantos para
-        enmarcar sin tapar el titular ni la lista de días. */}
-    <div aria-hidden="true">
-      <Silla
-        variante="amarilla"
-        class="absolute top-4 -left-4 w-44 -rotate-6 opacity-[0.18]"
-      />
-      <Silla
-        variante="amarilla"
-        class="absolute top-10 right-8 w-40 rotate-6 opacity-[0.16]"
-      />
-      <Silla
-        variante="amarilla"
-        class="absolute top-1/2 -right-6 w-40 rotate-12 opacity-[0.15]"
-      />
-      <Silla
-        variante="amarilla"
-        class="absolute -bottom-8 right-12 w-56 -rotate-12 opacity-[0.18]"
-      />
-    </div>
     <div class="relative px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
       <div
         class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8"
@@ -510,41 +500,39 @@ const cuenta = [
     </div>
   </section>
 
-  {/* ══ PATROCINADORES → COLABORADORES ═══════════════════════════════════
-      Una sola sección con dos caras. Al terminar el turno de un grupo cambia
-      la luz —fondo papel ↔ amarillo—, el título y el
-      número; el relevo va en tres tiempos para que no se lea como un
-      parpadeo (ver el guion al pie).
-
-      El turno no dura lo que dura la vuelta de la cinta. Trece logos en una
-      fila son casi un minuto de recorrido, y esperar eso para ver un cambio
-      de color es demasiado. Así que el turno es corto y fijo, y la cinta,
-      cuando le toca esconderse, se queda **en pausa donde iba**: al volver
-      sigue desde ahí y no desde el principio. Por eso no se pierde ninguna
-      marca aunque el turno se corte a media pasada — sólo que se ven en dos o
-      tres vueltas en vez de una. */}
+  <!-- ══ PATROCINADORES → COLABORADORES ═══════════════════════════════════
+       La cinta original, con el mismo collage de sillas que usa Sedes detrás
+       de las fichas. -->
   {
     (() => {
-      const PASO = 224; // ancho del mosaico más su separación
-      const VELOCIDAD = 55; // px/s: ritmo de mirar un logo, no de un ticker
-
+      const PASO = 240;
+      const VELOCIDAD = 52;
       const grupos = [
-        { clave: 'patrocinadores', indice: '04', datos: patrocinadores, turno: 20000 },
+        { clave: 'patrocinadores', indice: '04', datos: patrocinadores, turno: 18000 },
         { clave: 'colaboradores', indice: '05', datos: colaboradores, turno: 10000 },
       ];
 
       return (
         <section
-          class="cinta-marcas overflow-hidden border-b-2"
+          class="cinta-marcas relative overflow-hidden border-b-2 border-tinta"
           data-cinta
           data-dormida
           data-grupo="patrocinadores"
         >
-          <div class="cinta-cabecera px-4 pt-12 pb-10 sm:px-6 lg:px-10 lg:pt-16">
-            {/* El filete va en rojo fijo y no en `bg-current`: el rótulo pasó
-                a tinta —11,5px en rojo sobre amarillo son 3,67:1— y el rojo se
-                queda donde no es texto y puede ir a cualquier tamaño. */}
-            <p class="meta cinta-acento mb-8 flex items-center gap-4">
+          <div class="cinta-sillas absolute inset-0" aria-hidden="true">
+            {
+              sillasSedes.map((silla) => (
+                <Silla
+                  variante="roja"
+                  class="silla-sede"
+                  style={`--x:${silla.x}%;--y:${silla.y}%;--ancho:${silla.ancho}vw;--giro:${silla.giro}deg;--opa:${silla.opa};`}
+                />
+              ))
+            }
+          </div>
+
+          <div class="cinta-cabecera relative px-4 pt-12 pb-9 sm:px-6 lg:px-10 lg:pt-16">
+            <p class="meta cinta-acento mb-7 flex items-center gap-4">
               <span class="cinta-filete inline-block h-[2px] w-12" />
               <span data-rotulo>04 / {patrocinadores.titulo}</span>
             </p>
@@ -556,14 +544,9 @@ const cuenta = [
             </h2>
           </div>
 
-          {/* Los dos grupos comparten celda: el que no toca se apaga sin
-              salirse del flujo, así la sección no da un salto de alto. */}
-          <div class="cinta-pista pb-20">
+          <div class="cinta-pista relative pb-16 lg:pb-20">
             {grupos.map(({ clave, indice, datos, turno }, n) => {
-              // La unidad tiene que pasar el ancho de una pantalla ancha: si
-              // no, la cinta deja un hueco a media vuelta. Con cinco logos eso
-              // significa repetir la tanda.
-              const repes = Math.max(1, Math.ceil(1500 / PASO / datos.lista.length));
+              const repes = Math.max(1, Math.ceil(1600 / PASO / datos.lista.length));
               const unidad = Array.from({ length: repes }, () => datos.lista).flat();
               const duracion = ((unidad.length * PASO) / VELOCIDAD).toFixed(1);
               return (
@@ -574,11 +557,12 @@ const cuenta = [
                   data-indice={indice}
                   data-titulo-grupo={datos.titulo}
                   data-espera={turno}
+                  aria-hidden={n === 0 ? 'false' : 'true'}
                 >
                   <p class="meta rotulo-grupo px-4 pb-4 sm:px-6 lg:px-10">
                     {indice} / {datos.titulo}
                   </p>
-                  <div class="overflow-hidden" role="marquee">
+                  <div class="cinta-ventana overflow-hidden" role="marquee">
                     <div class="marquee" style={`--duracion: ${duracion}s`}>
                       {[0, 1].map((copia) => (
                         <div class="flex shrink-0" aria-hidden={copia === 1}>
@@ -660,24 +644,7 @@ const cuenta = [
     </div>
   </section>
 
-
   <script>
-    /** La cinta de marcas alterna entre patrocinadores y colaboradores.
-     *
-     * No arranca hasta que la sección asoma, y al salir de cuadro vuelve a
-     * dormirse en patrocinadores: quien baja hasta acá la encuentra siempre
-     * empezada por el principio, no a mitad de un turno que corrió solo
-     * mientras nadie miraba.
-     *
-     * La cinta que se apaga queda **en pausa donde iba**, no se saca del
-     * flujo: con `display: none` la animación volvería a empezar de cero cada
-     * vez y las últimas marcas no se verían nunca.
-     *
-     * El relevo va en tres tiempos: primero cambia la luz —el color de la
-     * sección, que tarda más y arranca antes—, después se va el grupo que
-     * estaba y recién ahí, con la cinta tapada, se cambia el título. Cambiar
-     * las tres cosas en el mismo cuadro es lo que se veía como un parpadeo.
-     */
     const cinta = document.querySelector('[data-cinta]');
     if (cinta) {
       const grupos = [...cinta.querySelectorAll('[data-grupo-nombre]')] as HTMLElement[];
@@ -689,9 +656,9 @@ const cuenta = [
       let mudando = false;
       let reloj: ReturnType<typeof setTimeout> | undefined;
 
-      const armarTurno = (g: HTMLElement) => {
+      const armarTurno = (grupo: HTMLElement) => {
         clearTimeout(reloj);
-        reloj = setTimeout(cambiar, Number(g.dataset.espera ?? 12000));
+        reloj = setTimeout(cambiar, Number(grupo.dataset.espera ?? 12000));
       };
 
       function cambiar() {
@@ -709,6 +676,7 @@ const cuenta = [
 
         setTimeout(() => {
           saliente.dataset.oculto = '';
+          saliente.setAttribute('aria-hidden', 'true');
           delete saliente.dataset.estado;
 
           const nombre = entrante.dataset.tituloGrupo ?? '';
@@ -717,6 +685,7 @@ const cuenta = [
           if (cabecera instanceof HTMLElement) delete cabecera.dataset.estado;
 
           delete entrante.dataset.oculto;
+          entrante.setAttribute('aria-hidden', 'false');
           entrante.dataset.estado = 'entrando';
           setTimeout(() => delete entrante.dataset.estado, 800);
           armarTurno(entrante);
@@ -724,15 +693,15 @@ const cuenta = [
         }, SALIDA);
       }
 
-      /** Vuelta a foja cero: primer grupo, sin turnos corriendo. */
       const dormir = () => {
         clearTimeout(reloj);
         mudando = false;
         actual = 0;
-        grupos.forEach((g, i) => {
-          delete g.dataset.estado;
-          if (i === 0) delete g.dataset.oculto;
-          else g.dataset.oculto = '';
+        grupos.forEach((grupo, i) => {
+          delete grupo.dataset.estado;
+          grupo.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
+          if (i === 0) delete grupo.dataset.oculto;
+          else grupo.dataset.oculto = '';
         });
         cinta.setAttribute('data-grupo', grupos[0].dataset.grupoNombre ?? '');
         const nombre = grupos[0].dataset.tituloGrupo ?? '';
@@ -741,12 +710,13 @@ const cuenta = [
         cinta.setAttribute('data-dormida', '');
       };
 
-      // Sin animación no hay turnos: se muestran los dos grupos, cada uno con
-      // su rótulo, y nadie cambia nada solo.
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         cinta.setAttribute('data-quieta', 'si');
         cinta.removeAttribute('data-dormida');
-        grupos.forEach((g) => delete g.dataset.oculto);
+        grupos.forEach((grupo) => {
+          delete grupo.dataset.oculto;
+          grupo.setAttribute('aria-hidden', 'false');
+        });
       } else {
         const ojo = new IntersectionObserver(
           ([entrada]) => {
@@ -757,12 +727,10 @@ const cuenta = [
               dormir();
             }
           },
-          // Umbral 0: arranca en cuanto el borde de arriba entra en cuadro.
           { threshold: 0 },
         );
         ojo.observe(cinta);
       }
     }
   </script>
-
 </Base>
