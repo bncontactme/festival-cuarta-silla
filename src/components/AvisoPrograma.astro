@@ -3,9 +3,10 @@ import { festival, programa } from '../data/site';
 
 interface Props {
   movil?: boolean;
+  compacto?: boolean;
 }
 
-const { movil = false } = Astro.props;
+const { movil = false, compacto = false } = Astro.props;
 const estado = programa.estado.replace(/[()]/g, '');
 ---
 
@@ -15,6 +16,7 @@ const estado = programa.estado.replace(/[()]/g, '');
     movil
       ? 'aviso-programa--movil border-2 border-tinta bg-papel text-tinta shadow-[6px_6px_0_var(--color-tinta)]'
       : 'ficha ficha--ancha',
+    compacto && 'aviso-programa--compacto',
   ]}
   data-reveal={movil ? undefined : 'escala'}
 >
@@ -97,5 +99,13 @@ const estado = programa.estado.replace(/[()]/g, '');
 
   .aviso-programa--movil .aviso-programa-titulo {
     font-size: min(15.5cqw, 4.9rem);
+  }
+
+  .aviso-programa--compacto .aviso-programa-cuerpo {
+    min-height: clamp(16rem, 28vw, 24rem);
+  }
+
+  .aviso-programa--compacto .aviso-programa-titulo {
+    font-size: clamp(3.75rem, 10.8vw, 9rem);
   }
 </style>
