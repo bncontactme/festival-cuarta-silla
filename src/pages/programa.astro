@@ -29,20 +29,20 @@ import {
       titulo={programa.titulo}
       indice="02"
       nota={programa.estado}
-      fondo="papel"
+      fondo="amarillo"
     >
       {
         programa.dias.map((dia, i) => (
           <details class="plegable">
             <summary>
-              <span class="meta text-[0.6rem] text-rojo">
+              <span class="plegable-indice meta text-[0.6rem] text-rojo">
                 {String(i + 1).padStart(2, '0')}
               </span>
               <span>
                 <span class="display block text-3xl leading-none">
                   {dia.dia}
                 </span>
-                <span class="meta mt-1 block text-[0.5rem] opacity-50">
+                <span class="plegable-nota meta mt-1 block text-[0.5rem] opacity-50">
                   {dia.fecha}
                 </span>
               </span>

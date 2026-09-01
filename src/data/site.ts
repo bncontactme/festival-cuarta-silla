@@ -54,6 +54,13 @@ export const registroEventos = {
   href: '/registro',
 };
 
+/** Convocatoria externa para sumarse al festival como voluntarix. Vive en el
+ *  CTA de la portada de escritorio y en los accesos secundarios de móvil. */
+export const convocatoriaVoluntarixs = {
+  label: 'Convocatoria voluntarixs',
+  href: 'https://docs.google.com/forms/d/e/1FAIpQLSc1mk-gt7o50qyvpBsFJqBphMQeWPKlJj9Ok7HYvex9FAn9dQ/viewform',
+};
+
 /** Las pestañas de la barra. El bloque rojo del final no sale de aquí: es la
  *  acción destacada y la pinta `Nav.astro` aparte.
  *
@@ -181,11 +188,13 @@ export const sedes = {
       nombre: 'Cuerpos Parlante',
       direccion: 'C. Cruz Verde 93, Zona Centro, 44200 Guadalajara, Jal.',
       coord: [20.678024, -103.357493],
+      instagram: 'https://www.instagram.com/cuerpos_parlantes/',
     },
     {
       nombre: 'Foro AM',
       direccion: 'C. Pedro Loza 344, Zona Centro, 44200 Guadalajara, Jal.',
       coord: [20.681676, -103.348404],
+      instagram: 'https://www.instagram.com/foro.a.m/',
     },
     {
       nombre: 'Temporal',
@@ -207,6 +216,7 @@ export const sedes = {
       nombre: 'Casa Dos Guayabos',
       direccion: 'C. San Felipe 731, Zona Centro, 44200 Guadalajara, Jal.',
       coord: [20.679379, -103.354601],
+      instagram: 'https://www.instagram.com/casa_dos_guayabos/',
     },
     {
       /**
@@ -225,17 +235,20 @@ export const sedes = {
       direccion:
         'Andador Palestina Libre (Constancio Hernández Alvirde), Col. Americana, 44160 Guadalajara, Jal.',
       coord: [20.6741, -103.35857],
+      instagram: 'https://www.instagram.com/esto_no_es_un_museo/',
     },
     {
       nombre: 'Taller Industria Gráfica',
       direccion:
         'C. San Felipe 827, Capilla de Jesús, 44160 Guadalajara, Jal.',
       coord: [20.67934, -103.356823],
+      instagram: 'https://www.instagram.com/tallerindustriagrafica/',
     },
     {
       nombre: 'Casa Feria',
       direccion: 'C. Pedro Loza 359, Zona Centro, 44100 Guadalajara, Jal.',
       coord: [20.681953, -103.348427],
+      instagram: 'https://www.instagram.com/casa.feria/',
     },
     {
       nombre: 'Ala Rota',

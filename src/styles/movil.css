@@ -89,6 +89,14 @@
     overscroll-behavior-y: contain;
   }
 
+  /* La portada interior y su contenido pueden tener campos distintos. Ésta
+     es la misma secuencia rojo → amarillo de Sedes y Registro en escritorio;
+     el color del marco evita que aparezca blanco al final de una pantalla
+     corta. */
+  .movil-contenido {
+    min-height: 100%;
+  }
+
   /* ═════════════════════════════════════════════════════════════════════
      PORTADA
      ═════════════════════════════════════════════════════════════════════ */
@@ -210,17 +218,57 @@
     gap: 0.9rem;
     padding: 0.7rem 1rem;
     border-bottom: var(--borde) solid var(--color-tinta);
-    background-color: var(--color-amarillo);
     transition: background-color 0.25s var(--ease-salida);
+  }
+
+  .puerta--amarillo {
+    background-color: var(--color-amarillo);
+    color: var(--color-tinta);
+  }
+
+  .puerta--rojo {
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
+  }
+
+  .puerta-numero {
+    flex: 0 0 1.75rem;
+    text-align: center;
+  }
+
+  .puerta--amarillo .puerta-numero {
+    color: var(--color-tinta);
+    border-bottom: 2px solid var(--color-rojo);
+  }
+
+  .puerta--amarillo .puerta-nota {
+    color: color-mix(in srgb, var(--color-tinta) 45%, transparent);
+  }
+
+  .puerta--rojo .puerta-numero {
+    align-self: flex-start;
+    background-color: var(--color-amarillo);
+    color: var(--color-tinta);
+    padding: 0.15rem 0.35rem;
+  }
+
+  .puerta--rojo .puerta-nota {
+    color: var(--color-papel);
+    opacity: 0.8;
   }
 
   .puerta:last-child {
     border-bottom: 0;
   }
 
-  .puerta:active {
+  .puerta--amarillo:active {
     background-color: var(--color-rojo);
     color: var(--color-amarillo);
+  }
+
+  .puerta--rojo:active {
+    background-color: var(--color-amarillo);
+    color: var(--color-tinta);
   }
 
   .puerta-flecha {
@@ -228,14 +276,14 @@
   }
 
   /* ── Atajos ─────────────────────────────────────────────────────────────
-     Un renglón de 34 px entre las puertas y la línea legal, con lo que no
-     merece una puerta entera: el archivo y —cuando exista la cuenta— el enlace
-     de donar. Es la letra chica del índice, no una quinta puerta: una quinta
-     puerta le quita 70 px a la escena de la silla y en las pantallas cortas la
-     silla se recorta contra el `overflow: hidden` del marco.
+     Un renglón compacto entre las puertas y la línea legal, con lo que no
+     merece una puerta entera: el archivo, la convocatoria de voluntarixs y
+     —cuando exista la cuenta— el enlace de donar. Es la letra chica del
+     índice, no una quinta puerta: una quinta puerta le quita 70 px a la escena
+     de la silla y en las pantallas cortas se recorta contra el marco.
 
-     `grid-auto-columns: 1fr` reparte a partes iguales sean uno o dos, así que
-     el renglón se lee igual de bien con el enlace de donar apagado. */
+     `grid-auto-columns: 1fr` reparte todos los accesos a partes iguales, así
+     que el renglón se lee igual de bien con el enlace de donar apagado. */
   .portada-atajos {
     flex: none;
     display: grid;
@@ -472,8 +520,16 @@
   }
 
   .plegable[open] > summary {
-    background-color: var(--color-tinta);
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
+  }
+
+  /* La letra chica sobre rojo necesita papel; el titular y el signo sí
+     conservan el amarillo porque trabajan a cuerpo grande. */
+  .plegable[open] > summary .plegable-indice,
+  .plegable[open] > summary .plegable-nota {
     color: var(--color-papel);
+    opacity: 0.85;
   }
 
   .plegable[open] .plegable-signo {
