@@ -49,7 +49,16 @@ jobs:
 
       # Baja el contenido del panel y construye. Si el Worker no contesta, usa
       # la copia comiteada y sigue: ver scripts/instantanea.mjs.
+      #
+      # Las dos variables salen de la configuración del repositorio y casi
+      # siempre están vacías, que es como se construye producción. Sólo se
+      # rellenan mientras el dominio todavía no apunta aquí y Pages sirve el
+      # sitio desde `/festival-cuarta-silla/`: sin ellas se vería sin estilos.
+      # Ver el comentario de `astro.config.mjs`.
       - run: npm run build
+        env:
+          PAGES_SITE: ${{ vars.PAGES_SITE }}
+          PAGES_BASE: ${{ vars.PAGES_BASE }}
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

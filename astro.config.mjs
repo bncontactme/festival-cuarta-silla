@@ -2,10 +2,19 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
-// El sitio de producción vive en la raíz de su dominio. Las vistas previas
-// de GitHub Pages cuelgan de un subdirectorio, así que ahí se inyectan
-// `PAGES_SITE` y `PAGES_BASE` desde el workflow en vez de tocar esto.
-const site = process.env.PAGES_SITE ?? 'https://www.festivaldearteconceptual.com';
+// El sitio de producción vive en la raíz de su dominio. Mientras el dominio no
+// apunte aquí, GitHub Pages sirve el repo desde `/festival-cuarta-silla/` y un
+// sitio construido para la raíz se ve sin estilos: las rutas de los assets
+// salen de `/` y ahí no hay nada.
+//
+// Por eso estas dos se inyectan desde el workflow, y su valor son variables del
+// repositorio (`vars.PAGES_SITE` / `vars.PAGES_BASE`) en vez de estar escritas
+// en el YAML: el día que el dominio resuelva, se borran las variables y el
+// mismo workflow vuelve a construir para la raíz sin tocar una línea de código.
+//
+// `||` y no `??`: una variable de repositorio que no existe llega como cadena
+// vacía, no como `undefined`, y `??` la dejaría pasar.
+const site = process.env.PAGES_SITE || 'https://www.festivaldearteconceptual.com';
 const base = process.env.PAGES_BASE || undefined;
 
 export default defineConfig({
