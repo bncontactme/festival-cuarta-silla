@@ -20,31 +20,30 @@ const estado = programa.estado.replace(/[()]/g, '');
   ]}
   data-reveal={movil ? undefined : 'escala'}
 >
-  <header
-    class:list={[
-      'meta flex flex-wrap items-center justify-between gap-3 border-b-2 border-tinta bg-tinta text-papel',
-      movil ? 'px-4 py-3 text-[0.5rem]' : 'px-6 py-4 lg:px-8',
-    ]}
-  >
-    <span class="text-amarillo">Programa / {festival.anio}</span>
-    <span>{movil ? '24—27 / 09' : festival.fechas.replace('Del ', '')}</span>
-  </header>
-
-  <div class:list={['aviso-programa-cuerpo', !movil && 'cuadricula']}>
-    <p class:list={['meta text-rojo', movil && 'text-[0.52rem]']}>
-      {festival.ciudad}
-    </p>
-
-    <h2 class="aviso-programa-titulo display">{estado}</h2>
-
+  <div class="aviso-programa-cuerpo">
     <div
       class:list={[
-        'meta flex flex-wrap items-center justify-between gap-3 border-t-2 border-tinta pt-4',
+        'meta flex flex-wrap items-center justify-between gap-3 border-b-2 border-tinta pb-3',
         movil && 'text-[0.48rem]',
       ]}
     >
-      <span>{movil ? festival.fechas : festival.nombre}</span>
-      <span class="text-rojo" aria-hidden="true">★ ★ ★</span>
+      <span class="text-rojo">Programa / {festival.anio}</span>
+      <span>{movil ? '24—27 / 09' : festival.fechas.replace('Del ', '')}</span>
+    </div>
+
+    <div class="aviso-programa-centro">
+      <span class="meta text-rojo" aria-hidden="true">★</span>
+      <h2 class="aviso-programa-titulo display display-centro">{estado}</h2>
+    </div>
+
+    <div
+      class:list={[
+        'meta flex flex-wrap items-center justify-between gap-3 border-t-2 border-tinta pt-3',
+        movil && 'text-[0.48rem]',
+      ]}
+    >
+      <span>{festival.nombre}</span>
+      <span>{festival.ciudad}</span>
     </div>
   </div>
 </article>
@@ -56,56 +55,40 @@ const estado = programa.estado.replace(/[()]/g, '');
   }
 
   .aviso-programa-cuerpo {
-    position: relative;
-    isolation: isolate;
     display: flex;
-    min-height: clamp(22rem, 43vw, 38rem);
+    min-height: clamp(15rem, 25vw, 20rem);
     flex-direction: column;
     justify-content: space-between;
-    padding: clamp(1.5rem, 3vw, 3rem);
+    padding: clamp(1.25rem, 2vw, 2rem);
   }
 
-  .aviso-programa-cuerpo::before {
-    position: absolute;
-    z-index: -1;
-    top: -22%;
-    right: 16%;
-    bottom: -22%;
-    width: clamp(4.5rem, 12vw, 10rem);
-    content: '';
-    background: var(--color-rojo);
-    transform: rotate(12deg);
+  .aviso-programa-centro {
+    display: grid;
+    justify-items: center;
+    gap: 0.65rem;
+    text-align: center;
   }
 
   .aviso-programa-titulo {
-    position: relative;
-    width: max-content;
     max-width: 100%;
-    font-size: clamp(3.75rem, 12.4vw, 11rem);
-    line-height: 0.82;
-    letter-spacing: -0.045em;
-    white-space: nowrap;
+    font-size: clamp(2.75rem, 7vw, 6.5rem);
+    line-height: 0.9;
   }
 
   .aviso-programa--movil .aviso-programa-cuerpo {
-    min-height: min(74cqw, 22rem);
+    min-height: min(50cqw, 15rem);
     padding: 1rem;
   }
 
-  .aviso-programa--movil .aviso-programa-cuerpo::before {
-    right: 13%;
-    width: 4.5rem;
-  }
-
   .aviso-programa--movil .aviso-programa-titulo {
-    font-size: min(15.5cqw, 4.9rem);
+    font-size: min(11.5cqw, 3.5rem);
   }
 
   .aviso-programa--compacto .aviso-programa-cuerpo {
-    min-height: clamp(16rem, 28vw, 24rem);
+    min-height: clamp(13rem, 18vw, 16rem);
   }
 
   .aviso-programa--compacto .aviso-programa-titulo {
-    font-size: clamp(3.75rem, 10.8vw, 9rem);
+    font-size: clamp(2.75rem, 5vw, 4.75rem);
   }
 </style>
