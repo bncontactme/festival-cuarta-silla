@@ -163,7 +163,14 @@ function interruptorEjemplo() {
       estadoBarras();
     },
   });
-  return el('div', { class: 'aviso ' + (marcado ? 'ojo' : 'bien') },
+  // Desmarcado y sin una sola actividad es la combinación que no quiere nadie:
+  // el sitio publica el conmutador de vistas sobre una rejilla vacía. Pasa al
+  // vaciar el programa para meter el de verdad, que es un momento normal — por
+  // eso se avisa fuerte en vez de prohibirlo.
+  const vacio = !estado.programa.actividades.length;
+  const peligro = !marcado && vacio;
+
+  return el('div', { class: 'aviso ' + (peligro ? 'error' : marcado ? 'ojo' : 'bien') },
     el('label', { for: 'es-ejemplo', style: 'display:flex;align-items:flex-start;cursor:pointer' },
       casilla,
       el('span', {},
@@ -171,7 +178,9 @@ function interruptorEjemplo() {
         ' ',
         marcado
           ? 'Mientras esté marcado, el sitio no enseña el programa: ni aquí ni en la portada. En su lugar sale el cartel de «Próximamente». Desmárcalo cuando la rejilla ya sea la buena — eso la publica.'
-          : 'El programa está publicado: el sitio lo enseña entero. Vuelve a marcarlo si todavía es un andamio y prefieres esconderlo.',
+          : peligro
+            ? 'Está desmarcado y no hay ni una actividad: si guardas así, el sitio publica el programa VACÍO — la rejilla sin nada dentro. Vuelve a marcarlo mientras cargas el programa de verdad; con él marcado sale el cartel de «Próximamente».'
+            : 'El programa está publicado: el sitio lo enseña entero. Vuelve a marcarlo si todavía es un andamio y prefieres esconderlo.',
       ),
     ),
   );
@@ -188,11 +197,22 @@ function estadoBarras() {
   $('#estado-version').textContent =
     `versión ${meta.version} · guardado ${cuando(meta.actualizado)}` +
     (meta.ultimoDeploy ? ` · publicado ${cuando(meta.ultimoDeploy)}` : '');
-  // Refresca el punto rojo de las pestañas sin repintar el formulario, que
-  // borraría lo que se está escribiendo.
+  // Refresca el punto rojo y la cuenta de las pestañas sin repintar el
+  // formulario, que borraría lo que se está escribiendo.
+  //
+  // La cuenta hay que tocarla aquí y no en `pintarPestanas()`: añadir o borrar
+  // una fila no repinta la barra, así que si no, la pestaña seguía diciendo 19
+  // con la tabla ya vacía. Dos números distintos para lo mismo en la misma
+  // pantalla es peor que no poner ninguno: parece que se perdió algo.
   [...$('#pestanas').children].forEach((nodo, i) => {
     const cols = new Set(PESTANAS[i].tablas.map((t) => TABLAS[t].coleccion));
     nodo.classList.toggle('sucia', [...cols].some(sucia));
+    const cuenta = nodo.querySelector('.cuenta');
+    if (cuenta) {
+      cuenta.textContent = String(
+        PESTANAS[i].tablas.reduce((n, t) => n + TABLAS[t].leer(estado).length, 0),
+      );
+    }
   });
 }
 
@@ -258,6 +278,17 @@ async function guardar() {
 }
 
 async function publicar() {
+  // Publicar sube lo que hay GUARDADO, no lo que hay en pantalla. Decir
+  // «el contenido está guardado» con cambios sin guardar encima es mentir, y
+  // es justo el momento en que alguien cierra la pestaña tranquilo.
+  if (haySucias()) {
+    avisar(
+      'Publicar sube lo último GUARDADO, y tienes cambios sin guardar: no entrarían. Guarda primero.',
+      'ojo', 'Ojo antes de publicar',
+    );
+    return;
+  }
+
   const boton = $<HTMLButtonElement>('#publicar-boton');
   boton.disabled = true;
   try {
