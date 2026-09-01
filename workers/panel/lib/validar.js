@@ -252,7 +252,16 @@ class Verificador {
     // Sin la clave, se asume que SÍ es ejemplo. Errar hacia decir «esto todavía
     // no es la programación» es barato; lo caro es pasar por buena una rejilla
     // de mentira.
-    return { actividades, esEjemplo: bruto === datos ? true : datos.esEjemplo !== false };
+    const esEjemplo = bruto === datos ? true : datos.esEjemplo !== false;
+
+    // Publicado y sin una sola actividad: el sitio saca la rejilla vacía. Se
+    // avisa y no se bloquea —vaciar el programa para rehacerlo es un paso
+    // normal— pero que quede dicho, porque desde el panel no se ve.
+    if (!esEjemplo && !actividades.length) {
+      this.aviso('programa', 'queda publicado y sin ninguna actividad: el sitio va a enseñar la rejilla vacía. Si estás rehaciéndolo, marca «esto todavía es la rejilla de ejemplo».');
+    }
+
+    return { actividades, esEjemplo };
   }
 
   artistas(datos) {
