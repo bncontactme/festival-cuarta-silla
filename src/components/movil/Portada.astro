@@ -18,18 +18,20 @@ import {
   privacidad,
   programa,
   sedes,
+  convocatoriaVoluntarixs,
 } from '../../data/site';
 import { artistas } from '../../data/artistas';
 import { archivo } from '../../data/archivo';
 
 const puertas = [
-  { n: '01', label: 'Manifiesto', href: '#manifiesto', nota: 'Qué es esto' },
-  { n: '02', label: programa.titulo, href: '/programa', nota: programa.estado },
+  { n: '01', label: 'Manifiesto', href: '#manifiesto', nota: 'Qué es esto', fondo: 'rojo' },
+  { n: '02', label: programa.titulo, href: '/programa', nota: programa.estado, fondo: 'amarillo' },
   {
     n: '03',
     label: sedes.titulo,
     href: '/sedes',
     nota: `${sedes.lista.length} lugares`,
+    fondo: 'rojo',
   },
   {
     n: '04',
@@ -38,16 +40,19 @@ const puertas = [
     nota: artistas.lista.length
       ? `${artistas.lista.length} nombres`
       : artistas.estado,
+    fondo: 'amarillo',
   },
-];
+] as const;
 
 /** Los atajos del pie de la portada. No son puertas: son la letra chica del
  *  índice. Se quedan fuera de las cuatro grandes a propósito —una quinta
  *  puerta le come 70 px a la escena de la silla, y en un iPhone SE la silla,
  *  que mide 217 px, se recortaría contra el `overflow: hidden` del marco—.
+ *  La convocatoria de voluntarixs comparte esta franja con el archivo;
  *  «Apoya» sólo aparece cuando exista la cuenta de PayPal. */
 const atajos = [
   { label: archivo.titulo, href: '/archivo' },
+  { ...convocatoriaVoluntarixs, externa: true },
   ...(festival.donaciones.paypal
     ? [{ label: 'Apoya', href: festival.donaciones.paypal, externa: true }]
     : []),
@@ -112,16 +117,16 @@ const atajos = [
         puertas.map((p) => (
           <a
             href={conBase(p.href)}
-            class="puerta"
+            class={`puerta puerta--${p.fondo}`}
             target={p.externa ? '_blank' : undefined}
             rel={p.externa ? 'noopener' : undefined}
           >
-            <span class="meta text-[0.6rem] text-rojo">{p.n}</span>
+            <span class="puerta-numero meta text-[0.6rem]">{p.n}</span>
             <span>
-              <span class="display block text-3xl leading-none text-tinta">
+              <span class="puerta-titulo display block text-3xl leading-none">
                 {p.label}
               </span>
-              <span class="meta mt-1 block text-[0.5rem] text-tinta/45">
+              <span class="puerta-nota meta mt-1 block text-[0.5rem]">
                 {p.nota}
               </span>
             </span>
@@ -161,31 +166,31 @@ const atajos = [
       del teléfono funciona solo. */}
   <section
     id="manifiesto"
-    class="movil-modal bg-papel"
+    class="movil-modal bg-rojo text-amarillo"
     aria-label={manifiesto.titulo}
   >
-    <div class="movil-barra bg-papel">
-      <a href="#portada" class="meta px-4 font-bold text-rojo">
+    <div class="movil-barra bg-rojo">
+      <a href="#portada" class="meta border-r-2 border-tinta bg-amarillo px-4 font-bold text-tinta">
         <span aria-hidden="true">←</span>&nbsp; Volver
       </a>
-      <span class="meta border-l-2 border-tinta px-4 text-tinta/45">01</span>
+      <span class="meta px-4 text-papel/80">01</span>
     </div>
 
     <div class="movil-cuerpo px-4 py-6">
-      <h2 class="display text-[9cqw] leading-[1] text-tinta">
+      <h2 class="display text-[9cqw] leading-[1] text-amarillo">
         {manifiesto.titulo}
       </h2>
 
       <div class="mt-6 space-y-4">
         {
           manifiesto.parrafos.map((p) => (
-            <p class="text-[0.95rem] leading-relaxed text-tinta/85">{p}</p>
+            <p class="text-[0.95rem] leading-relaxed text-papel">{p}</p>
           ))
         }
       </div>
 
       <blockquote
-        class="mt-8 border-l-4 border-rojo pl-4 font-mono text-base leading-snug font-bold text-rojo"
+        class="mt-8 border-l-4 border-amarillo pl-4 font-mono text-base leading-snug font-bold text-papel"
       >
         {manifiesto.cierre}
       </blockquote>

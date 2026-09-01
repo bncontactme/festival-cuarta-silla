@@ -6,8 +6,7 @@
  * **La lista está vacía a propósito**, igual que la de artistas: ésta es la
  * cuarta edición, así que hubo tres antes, pero de ninguna tenemos ni el año
  * confirmado ni una sola foto. Inventarlos sería peor que el hueco. En cuanto
- * se pegue la primera edición aquí, la banda de la portada pasa de la línea de
- * «en construcción» al índice, y `/archivo` se llena sola.
+ * se pegue la primera edición aquí, `/archivo` se llena sola.
  *
  * Qué hace falta por edición:
  *   1. `edicion`     — cómo se llamó: «Primera Silla», «Segunda Silla»…
@@ -41,7 +40,7 @@ export type Edicion = {
 
 export const archivo = {
   titulo: 'Archivo',
-  estado: 'En construcción',
+  estado: 'Archivo histórico',
   /** Lo que se lee en el hueco mientras no haya ediciones cargadas. */
   vacio:
     'Estamos juntando las fotos de las tres ediciones anteriores. Si tienes material de alguna, escríbenos.',
