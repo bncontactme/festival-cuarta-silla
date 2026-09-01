@@ -141,11 +141,12 @@ function pintarLienzo() {
 }
 
 /**
- * «Esto todavía es la rejilla de ejemplo».
+ * «Esto todavía es la rejilla de ejemplo». Es el botón de publicar.
  *
  * Vive aquí y no en una fila porque no es de una actividad: es de la rejilla
- * entera. Mientras esté marcado, el sitio lo dice al pie del programa; al
- * desmarcarlo, ese aviso desaparece del sitio.
+ * entera. Mientras esté marcado, el sitio **no enseña el programa** — ni en
+ * /programa ni en la portada: sale el cartel de «Próximamente». Al desmarcarlo
+ * se publica entero.
  *
  * Es lo único del panel que no es contenido sino una declaración, y por eso se
  * pregunta en vez de deducirse: quien está mirando la rejilla es el único que
@@ -169,8 +170,8 @@ function interruptorEjemplo() {
         el('strong', {}, 'Esto todavía es la rejilla de ejemplo.'),
         ' ',
         marcado
-          ? 'Mientras esté marcado, el sitio avisa al pie del programa de que lo que se ve no es la programación de verdad. Desmárcalo cuando ya sea.'
-          : 'El sitio está enseñando esto como la programación buena. Vuelve a marcarlo si todavía es un andamio.',
+          ? 'Mientras esté marcado, el sitio no enseña el programa: ni aquí ni en la portada. En su lugar sale el cartel de «Próximamente». Desmárcalo cuando la rejilla ya sea la buena — eso la publica.'
+          : 'El programa está publicado: el sitio lo enseña entero. Vuelve a marcarlo si todavía es un andamio y prefieres esconderlo.',
       ),
     ),
   );

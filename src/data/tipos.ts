@@ -119,7 +119,8 @@ export type Contenido = {
     actividades: ActividadGantt[];
     /** Si la rejilla todavía es el andamio de ejemplo. Lo apaga el festival
      *  desde el panel cuando mete su programación de verdad; mientras esté en
-     *  `true`, el sitio lo anuncia a la vista al pie de la rejilla.
+     *  `true`, el sitio no enseña el programa y pone el cartel de espera en su
+     *  lugar. Desmarcarlo es, en la práctica, publicar.
      *
      *  No se deduce de si el panel se ha usado: sembrarlo con los eventos de
      *  ejemplo ya cuenta como usarlo. Es una decisión, y la toma quien sabe si

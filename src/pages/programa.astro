@@ -5,13 +5,13 @@ import Encabezado from '../components/Encabezado.astro';
 import Marquee from '../components/Marquee.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import Gantt from '../components/Gantt.astro';
+import AvisoPrograma from '../components/AvisoPrograma.astro';
 import {
   programa,
   festival,
   accionPrincipal,
   registroEventos,
-  ganttEsEjemplo,
-  ganttAviso,
+  programaPublicado,
 } from '../data/site';
 ---
 
@@ -32,46 +32,52 @@ import {
       fondo="amarillo"
     >
       {
-        programa.dias.map((dia, i) => (
-          <details class="plegable">
-            <summary>
-              <span class="plegable-indice meta text-[0.6rem] text-rojo">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <span>
-                <span class="display block text-3xl leading-none">
-                  {dia.dia}
+        programaPublicado ? (
+          programa.dias.map((dia, i) => (
+            <details class="plegable">
+              <summary>
+                <span class="plegable-indice meta text-[0.6rem] text-rojo">
+                  {String(i + 1).padStart(2, '0')}
                 </span>
-                <span class="plegable-nota meta mt-1 block text-[0.5rem] opacity-50">
-                  {dia.fecha}
+                <span>
+                  <span class="display block text-3xl leading-none">
+                    {dia.dia}
+                  </span>
+                  <span class="plegable-nota meta mt-1 block text-[0.5rem] opacity-50">
+                    {dia.fecha}
+                  </span>
                 </span>
-              </span>
-              <span class="plegable-signo" aria-hidden="true">
-                +
-              </span>
-            </summary>
+                <span class="plegable-signo" aria-hidden="true">
+                  +
+                </span>
+              </summary>
 
-            <ul class="divide-y divide-tinta/15 bg-amarillo">
-              {dia.slots.map((slot) => (
-                <li class="flex items-baseline gap-3 px-4 py-2.5">
-                  <span class="font-mono text-sm font-bold text-rojo tabular-nums">
-                    {slot.hora}
-                  </span>
-                  <span aria-hidden="true" class="text-tinta/25">
-                    //
-                  </span>
-                  {slot.actividad ? (
-                    <span class="text-sm leading-snug">{slot.actividad}</span>
-                  ) : (
-                    <span class="meta text-[0.5rem] text-tinta/35">
-                      Por anunciar
+              <ul class="divide-y divide-tinta/15 bg-amarillo">
+                {dia.slots.map((slot) => (
+                  <li class="flex items-baseline gap-3 px-4 py-2.5">
+                    <span class="font-mono text-sm font-bold text-rojo tabular-nums">
+                      {slot.hora}
                     </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </details>
-        ))
+                    <span aria-hidden="true" class="text-tinta/25">
+                      //
+                    </span>
+                    {slot.actividad ? (
+                      <span class="text-sm leading-snug">{slot.actividad}</span>
+                    ) : (
+                      <span class="meta text-[0.5rem] text-tinta/35">
+                        Por anunciar
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ))
+        ) : (
+          <div class="p-4 pb-1">
+            <AvisoPrograma movil />
+          </div>
+        )
       }
 
       <div class="p-4">
@@ -113,126 +119,124 @@ import {
           este selector y él las obedece desde fuera, que es lo mismo que hace
           la lista de días de la portada. En la vista de días se esconden — no
           hay ningún día que elegir— y el script se encarga. */}
-      <div class="ficha ficha--ancha" data-reveal="arriba">
-        <div
-          class="mb-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-b-2 border-tinta pb-6"
-        >
+      {
+        programaPublicado ? (
+        <div class="ficha ficha--ancha" data-reveal="arriba">
           <div
-            class="conmutador"
-            role="tablist"
-            aria-label="Cómo ver el programa"
-            data-vistas
+            class="mb-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-b-2 border-tinta pb-6"
           >
-            <span class="conmutador-burbuja" aria-hidden="true"></span>
-            <button
-              type="button"
-              role="tab"
-              class="conmutador-opcion"
-              data-vista="rejilla"
-              aria-selected="true"
-              aria-controls="vista-rejilla"
+            <div
+              class="conmutador"
+              role="tablist"
+              aria-label="Cómo ver el programa"
+              data-vistas
             >
-              Por horas
-            </button>
-            <button
-              type="button"
-              role="tab"
-              class="conmutador-opcion"
-              data-vista="dias"
-              aria-selected="false"
-              aria-controls="vista-dias"
-            >
-              Por días
-            </button>
+              <span class="conmutador-burbuja" aria-hidden="true"></span>
+              <button
+                type="button"
+                role="tab"
+                class="conmutador-opcion"
+                data-vista="rejilla"
+                aria-selected="true"
+                aria-controls="vista-rejilla"
+              >
+                Por horas
+              </button>
+              <button
+                type="button"
+                role="tab"
+                class="conmutador-opcion"
+                data-vista="dias"
+                aria-selected="false"
+                aria-controls="vista-dias"
+              >
+                Por días
+              </button>
+            </div>
+
+            <div class="conmutador conmutador--dias" data-dias-programa>
+              <span class="conmutador-burbuja" aria-hidden="true"></span>
+              {
+                programa.dias.map((d, i) => (
+                  <button
+                    type="button"
+                    class="conmutador-opcion"
+                    data-dia={i}
+                    aria-pressed={i === 0 ? 'true' : 'false'}
+                  >
+                    <span class="conmutador-opcion-dia">{d.dia}</span>
+                    <span class="conmutador-opcion-nota">
+                      {d.fecha.replace(' de septiembre', ' sep')}
+                    </span>
+                  </button>
+                ))
+              }
+            </div>
           </div>
 
-          <div class="conmutador conmutador--dias" data-dias-programa>
-            <span class="conmutador-burbuja" aria-hidden="true"></span>
-            {
-              programa.dias.map((d, i) => (
-                <button
-                  type="button"
-                  class="conmutador-opcion"
-                  data-dia={i}
-                  aria-pressed={i === 0 ? 'true' : 'false'}
-                >
-                  <span class="conmutador-opcion-dia">{d.dia}</span>
-                  <span class="conmutador-opcion-nota">
-                    {d.fecha.replace(' de septiembre', ' sep')}
-                  </span>
-                </button>
-              ))
-            }
+          {/* ── Vista 1: la rejilla ──────────────────────────────────────── */}
+          <div
+            class="panel-vista"
+            id="vista-rejilla"
+            role="tabpanel"
+            data-panel-vista="rejilla"
+          >
+            <Gantt selector="[data-dias-programa]" />
           </div>
-        </div>
 
-        {/* ── Vista 1: la rejilla ──────────────────────────────────────── */}
-        <div
-          class="panel-vista"
-          id="vista-rejilla"
-          role="tabpanel"
-          data-panel-vista="rejilla"
-        >
-          <Gantt selector="[data-dias-programa]">
-            {
-              ganttEsEjemplo && (
-                <p slot="pie" class="meta text-[0.6rem] text-rojo">
-                  ⚠ {ganttAviso}
-                </p>
-              )
-            }
-          </Gantt>
-        </div>
+          {/* ── Vista 2: los cuatro días ─────────────────────────────────────
+              La tabla de siempre, metida en la ficha. Fuera las cabeceras
+              negras pegajosas: dentro de una tarjeta el `sticky` no tiene
+              contra qué pegarse, y cuatro bloques de tinta sobre el papel
+              pesaban más que las doce horas que van debajo. Cada día se cierra
+              con el mismo filete rojo que hace de eje en la rejilla: es lo que
+              deja reconocer las dos vistas como la misma ficha. */}
+          <div
+            class="panel-vista"
+            id="vista-dias"
+            role="tabpanel"
+            data-panel-vista="dias"
+            hidden
+          >
+            <div class="grid gap-8 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-tinta/15">
+              {
+                programa.dias.map((dia, i) => (
+                  <article class="lg:px-5 lg:first:pl-0 lg:last:pr-0">
+                    <header class="border-b-2 border-rojo pb-4">
+                      <p class="meta text-rojo">{String(i + 1).padStart(2, '0')}</p>
+                      <h2 class="display mt-2 text-4xl leading-none">{dia.dia}</h2>
+                      <p class="meta mt-2 text-tinta/45">{dia.fecha}</p>
+                    </header>
 
-        {/* ── Vista 2: los cuatro días ─────────────────────────────────────
-            La tabla de siempre, metida en la ficha. Fuera las cabeceras
-            negras pegajosas: dentro de una tarjeta el `sticky` no tiene
-            contra qué pegarse, y cuatro bloques de tinta sobre el papel
-            pesaban más que las doce horas que van debajo. Cada día se cierra
-            con el mismo filete rojo que hace de eje en la rejilla: es lo que
-            deja reconocer las dos vistas como la misma ficha. */}
-        <div
-          class="panel-vista"
-          id="vista-dias"
-          role="tabpanel"
-          data-panel-vista="dias"
-          hidden
-        >
-          <div class="grid gap-8 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-tinta/15">
-            {
-              programa.dias.map((dia, i) => (
-                <article class="lg:px-5 lg:first:pl-0 lg:last:pr-0">
-                  <header class="border-b-2 border-rojo pb-4">
-                    <p class="meta text-rojo">{String(i + 1).padStart(2, '0')}</p>
-                    <h2 class="display mt-2 text-4xl leading-none">{dia.dia}</h2>
-                    <p class="meta mt-2 text-tinta/45">{dia.fecha}</p>
-                  </header>
-
-                  <ul class="divide-y divide-tinta/12">
-                    {dia.slots.map((slot) => (
-                      <li class="flex items-baseline gap-3 py-3">
-                        <span class="font-mono text-sm font-bold text-rojo tabular-nums">
-                          {slot.hora}
-                        </span>
-                        <span aria-hidden="true" class="text-tinta/25">
-                          //
-                        </span>
-                        {slot.actividad ? (
-                          <span class="text-sm leading-snug">{slot.actividad}</span>
-                        ) : (
-                          <span class="meta text-[0.55rem] text-tinta/35">
-                            Por anunciar
+                    <ul class="divide-y divide-tinta/12">
+                      {dia.slots.map((slot) => (
+                        <li class="flex items-baseline gap-3 py-3">
+                          <span class="font-mono text-sm font-bold text-rojo tabular-nums">
+                            {slot.hora}
                           </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              ))
-            }
+                          <span aria-hidden="true" class="text-tinta/25">
+                            //
+                          </span>
+                          {slot.actividad ? (
+                            <span class="text-sm leading-snug">{slot.actividad}</span>
+                          ) : (
+                            <span class="meta text-[0.55rem] text-tinta/35">
+                              Por anunciar
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </article>
+                ))
+              }
+            </div>
           </div>
         </div>
-      </div>
+        ) : (
+          <AvisoPrograma />
+        )
+      }
 
       {/* Las dos puertas, dentro de la misma sección y no en una banda aparte.
           Con banda propia hacían falta dos fondos seguidos: en amarillo se
