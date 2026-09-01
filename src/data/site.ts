@@ -79,7 +79,7 @@ export const convocatoriaVoluntarixs = {
 export const nav = [
   { label: 'Programa', href: '/programa' },
   { label: 'Sedes', href: '/sedes' },
-  { label: 'Archivo', href: '/archivo' },
+  { label: 'Galería', href: '/galeria' },
   registroEventos,
 ];
 

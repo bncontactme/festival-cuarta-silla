@@ -34,6 +34,8 @@ export default defineConfig({
       '/agenda': '/programa',
       '/lugar': '/sedes',
       '/event-list': '/registro',
+      // La sección se llamaba «Archivo» hasta que pasó a «Galería».
+      '/archivo': '/galeria',
       '/política-de-privacidad': '/privacidad',
       '/pol%C3%ADtica-de-privacidad': '/privacidad',
     }).map(([de, a]) => [de, base ? base + a : a]),

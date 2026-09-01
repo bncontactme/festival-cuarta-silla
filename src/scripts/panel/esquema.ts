@@ -175,7 +175,7 @@ export const TABLAS: Record<string, Tabla> = {
     escribir: (e, l) => { e.artistas = l; },
   },
   archivo: {
-    clave: 'archivo', titulo: 'Archivo', coleccion: 'archivo', esquema: archivo,
+    clave: 'archivo', titulo: 'Galería', coleccion: 'archivo', esquema: archivo,
     nota: 'De la edición más reciente a la más vieja, que es como se lee un archivo.',
     leer: (e) => e.archivo,
     escribir: (e, l) => { e.archivo = l; },
@@ -196,6 +196,6 @@ export const PESTANAS: { clave: string; titulo: string; tablas: string[] }[] = [
   { clave: 'programa', titulo: 'Programa', tablas: ['actividades'] },
   { clave: 'sedes', titulo: 'Sedes', tablas: ['sedes'] },
   { clave: 'artistas', titulo: 'Artistas', tablas: ['artistas'] },
-  { clave: 'archivo', titulo: 'Archivo', tablas: ['archivo'] },
+  { clave: 'archivo', titulo: 'Galería', tablas: ['archivo'] },
   { clave: 'marcas', titulo: 'Marcas', tablas: ['patrocinadores', 'colaboradores'] },
 ];
