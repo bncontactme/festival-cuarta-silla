@@ -13,16 +13,28 @@ interface Props {
   indice: string;
   nota?: string;
   fondo?: 'amarillo' | 'papel' | 'tinta' | 'rojo';
+  /** Campo de la zona de contenido. Permite repetir en móvil la secuencia
+   *  del escritorio: portada roja y cuerpo amarillo. */
+  fondoCuerpo?: 'amarillo' | 'papel' | 'tinta' | 'rojo';
 }
 
-const { titulo, indice, nota, fondo = 'amarillo' } = Astro.props;
+const {
+  titulo,
+  indice,
+  nota,
+  fondo = 'amarillo',
+  fondoCuerpo = fondo,
+} = Astro.props;
 
-const paleta = {
+const paletas = {
   amarillo: 'bg-amarillo text-tinta',
   papel: 'bg-papel text-tinta',
   tinta: 'bg-tinta text-papel',
   rojo: 'bg-rojo text-amarillo',
-}[fondo];
+};
+
+const paletaCabecera = paletas[fondo];
+const paletaCuerpo = paletas[fondoCuerpo];
 
 /* Sobre rojo, lo chico va en papel y no en la tinta del campo: el amarillo
    sobre rojo da 3,67:1 y bajarle la opacidad, como hacía la nota, lo dejaba
@@ -31,8 +43,8 @@ const menudo = fondo === 'rojo' ? 'text-papel opacity-80' : 'opacity-55';
 const indicePiel = fondo === 'rojo' ? 'text-papel opacity-75' : 'opacity-45';
 ---
 
-<div class={`movil-marco ${paleta}`}>
-  <header class="movil-barra">
+<div class={`movil-marco ${paletaCuerpo}`}>
+  <header class={`movil-barra ${paletaCabecera}`}>
     <a href={conBase("/")} class="meta px-4 font-bold">
       <span aria-hidden="true">←</span>&nbsp; Portada
     </a>
@@ -40,11 +52,13 @@ const indicePiel = fondo === 'rojo' ? 'text-papel opacity-75' : 'opacity-45';
   </header>
 
   <div class="movil-cuerpo">
-    <div class="border-b-2 border-current px-4 py-5">
+    <div class={`border-b-2 border-current px-4 py-5 ${paletaCabecera}`}>
       <h1 class="display text-[12cqw] leading-[0.92]">{titulo}</h1>
       {nota && <p class={`meta mt-2 text-[0.6rem] ${menudo}`}>{nota}</p>}
     </div>
 
-    <slot />
+    <div class={`movil-contenido ${paletaCuerpo}`}>
+      <slot />
+    </div>
   </div>
 </div>

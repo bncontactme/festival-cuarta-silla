@@ -10,7 +10,7 @@ import Gantt from '../components/Gantt.astro';
 import Mapa from '../components/Mapa.astro';
 import {
   festival,
-  accionPrincipal,
+  convocatoriaVoluntarixs,
   manifiesto,
   sedes,
   patrocinadores,
@@ -156,12 +156,16 @@ const sillasSedes = [
           </p>
         </div>
 
-        {/* Era «★ Convocatoria ★» + «Programa». Cerrada la convocatoria, el
-            botón rojo —el que manda— lleva a la misma acción destacada que el
-            bloque rojo de la barra, para que el sitio pida siempre lo mismo. */}
+        {/* La convocatoria de voluntarixs es la acción principal de este
+            bloque. Artistas conserva su puerta propia en la navegación. */}
         <div class="flex flex-wrap items-center gap-4" data-reveal="arriba" data-retraso="120">
-          <a href={conBase(accionPrincipal.href)} class="boton">
-            ★ {accionPrincipal.label} ★
+          <a
+            href={convocatoriaVoluntarixs.href}
+            target="_blank"
+            rel="noopener"
+            class="boton whitespace-nowrap px-4"
+          >
+            {convocatoriaVoluntarixs.label}
           </a>
           <a href={conBase("/programa")} class="boton boton--papel">Programa</a>
         </div>

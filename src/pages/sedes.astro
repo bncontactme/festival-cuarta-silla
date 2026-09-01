@@ -21,10 +21,11 @@ import { sedes, festival, enlaceMapa } from '../data/site';
       indice="03"
       nota={`${sedes.lista.length} lugares en ${festival.ciudad}`}
       fondo="rojo"
+      fondoCuerpo="amarillo"
     >
       {
         sedes.lista.map((sede, i) => (
-          <details class="plegable border-current">
+          <details class="plegable">
             <summary>
               <span class="meta bg-amarillo px-1.5 py-0.5 text-[0.6rem] text-tinta">
                 {String(i + 1).padStart(2, '0')}
@@ -35,7 +36,7 @@ import { sedes, festival, enlaceMapa } from '../data/site';
               </span>
             </summary>
 
-            <div class="bg-papel px-4 py-4 text-tinta">
+            <div class="bg-amarillo px-4 py-4 text-tinta">
               <address class="text-sm leading-snug not-italic opacity-70">
                 {sede.direccion}
               </address>
@@ -67,7 +68,7 @@ import { sedes, festival, enlaceMapa } from '../data/site';
   </Fragment>
 
   <Encabezado
-    indice={`${sedes.titulo} / ${String(sedes.lista.length).padStart(2, '0')}`}
+    indice={`${sedes.titulo} / Guadalajara`}
     titulo={sedes.titulo}
     fondo="rojo"
   />

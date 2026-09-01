@@ -12,19 +12,14 @@ interface Props {
 const { indice, titulo, bajada, fondo = 'amarillo' } = Astro.props;
 
 /* Cada campo trae su pareja completa: el fondo, cómo se pinta el rótulo y de
-   qué tinta es la estrella —siempre la contraria a la del campo—.
-   El rótulo mide 11,5px, así que no puede ir en cualquier color:
-     · sobre amarillo y papel va en tinta, con el filete rojo al lado (15,3:1);
-     · sobre tinta va en amarillo (15,3:1);
-     · sobre rojo NO hay ningún color que llegue a 4,5:1 a ese cuerpo —amarillo
-       da 3,67 y papel 4,00—, así que el rótulo se lleva su propio campo
-       amarillo encima y vuelve a 15,3:1. Es la excepción del sistema y es la
-       misma que ya aplica el manual: el rojo no lleva letra chica. */
+   qué tinta es la estrella —siempre la contraria a la del campo—. En las
+   páginas internas el rótulo nunca lleva chapa: conserva el mismo filete que
+   los encabezados claros y deja las cajas amarillas sólo para Inicio. */
 const campo = {
-  amarillo: { piel: 'bg-amarillo text-tinta', rotulo: 'text-tinta', filete: 'bg-rojo', chapa: false, tinta: 'roja' },
-  rojo:     { piel: 'bg-rojo text-amarillo',  rotulo: '',           filete: '',        chapa: true,  tinta: 'amarilla' },
-  papel:    { piel: 'bg-papel text-tinta',    rotulo: 'text-tinta', filete: 'bg-rojo', chapa: false, tinta: 'roja' },
-  tinta:    { piel: 'bg-tinta text-papel',    rotulo: 'text-amarillo', filete: 'bg-amarillo', chapa: false, tinta: 'amarilla' },
+  amarillo: { piel: 'bg-amarillo text-tinta', rotulo: 'text-tinta', filete: 'bg-rojo', tinta: 'roja' },
+  rojo:     { piel: 'bg-rojo text-amarillo',  rotulo: 'text-tinta font-bold', filete: 'bg-tinta', tinta: 'amarilla' },
+  papel:    { piel: 'bg-papel text-tinta',    rotulo: 'text-tinta', filete: 'bg-rojo', tinta: 'roja' },
+  tinta:    { piel: 'bg-tinta text-papel',    rotulo: 'text-amarillo', filete: 'bg-amarillo', tinta: 'amarilla' },
 }[fondo];
 ---
 
@@ -41,21 +36,10 @@ const campo = {
       lo correcto: las mayúsculas no llenan su caja, y repartir exacto las
       deja ópticamente caídas. */}
   <div class="relative px-4 pt-8 pb-6 sm:px-6 lg:px-10 lg:pt-10">
-    {
-      campo.chapa ? (
-        <p
-          class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta"
-          data-reveal="lado"
-        >
-          {indice}
-        </p>
-      ) : (
-        <p class={`meta mb-6 flex items-center gap-4 ${campo.rotulo}`} data-reveal="lado">
-          <span class={`inline-block h-[2px] w-12 ${campo.filete}`} />
-          {indice}
-        </p>
-      )
-    }
+    <p class={`meta mb-6 flex items-center gap-4 ${campo.rotulo}`} data-reveal="lado">
+      <span class={`inline-block h-[2px] w-12 ${campo.filete}`} />
+      {indice}
+    </p>
 
     {/* Los encabezados de página se quedan a tamaño cartel a propósito: son
         portadas, y en el feed las portadas también gritan. Lo que baja de

@@ -20,10 +20,11 @@ import { artistas } from '../data/artistas';
       indice="04"
       nota={registro.estado}
       fondo="rojo"
+      fondoCuerpo="amarillo"
     >
       <div class="p-4">
         <article
-          class="border-2 border-tinta bg-amarillo text-tinta shadow-[6px_6px_0_var(--color-tinta)]"
+          class="border-2 border-tinta bg-papel text-tinta shadow-[6px_6px_0_var(--color-tinta)]"
         >
           <header class="border-b-2 border-tinta bg-tinta px-4 py-4 text-papel">
             <p class="meta text-[0.55rem] text-amarillo">{registro.ciudad}</p>
@@ -56,7 +57,7 @@ import { artistas } from '../data/artistas';
           </p>
         </article>
 
-        <p class="meta mt-5 text-[0.55rem] leading-relaxed text-amarillo/70">
+        <p class="meta mt-5 text-[0.55rem] leading-relaxed text-tinta/50">
           {registro.estado} — el registro abrirá junto con el programa.
         </p>
 
