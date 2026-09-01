@@ -272,8 +272,9 @@ correcto que un cambio ahí sea un commit.
 
 - Contenido real del programa, artistas y archivo. Ya no depende de mí: entra
   por `/admin` en cuanto se dé de alta el Worker (ver [PANEL.md](PANEL.md)).
-  La rejilla que se ve hoy es de ejemplo y el sitio lo dice; el aviso se apaga
-  desde el propio panel.
+  Mientras el programa no sea el bueno, el sitio enseña un cartel de
+  «Próximamente» en vez de la rejilla; publicarlo es desmarcar una casilla en
+  el panel.
 - Logos de las marcas que están sin él (Mezcania, MESH, Capicua, Suero,
   DC Producciones). Se suben desde el panel.
 - Registro a eventos: hoy es una ficha en estado «Próximamente» con el botón

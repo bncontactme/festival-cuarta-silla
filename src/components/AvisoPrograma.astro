@@ -1,0 +1,94 @@
+---
+import { festival, programa } from '../data/site';
+
+interface Props {
+  movil?: boolean;
+  compacto?: boolean;
+}
+
+const { movil = false, compacto = false } = Astro.props;
+const estado = programa.estado.replace(/[()]/g, '');
+---
+
+<article
+  class:list={[
+    'aviso-programa',
+    movil
+      ? 'aviso-programa--movil border-2 border-tinta bg-papel text-tinta shadow-[6px_6px_0_var(--color-tinta)]'
+      : 'ficha ficha--ancha',
+    compacto && 'aviso-programa--compacto',
+  ]}
+  data-reveal={movil ? undefined : 'escala'}
+>
+  <div class="aviso-programa-cuerpo">
+    <div
+      class:list={[
+        'meta flex flex-wrap items-center justify-between gap-3 border-b-2 border-tinta pb-3',
+        movil && 'text-[0.48rem]',
+      ]}
+    >
+      <span class="text-rojo">Programa / {festival.anio}</span>
+      <span>{movil ? '24—27 / 09' : festival.fechas.replace('Del ', '')}</span>
+    </div>
+
+    <div class="aviso-programa-centro">
+      <span class="meta text-rojo" aria-hidden="true">★</span>
+      <h2 class="aviso-programa-titulo display display-centro">{estado}</h2>
+    </div>
+
+    <div
+      class:list={[
+        'meta flex flex-wrap items-center justify-between gap-3 border-t-2 border-tinta pt-3',
+        movil && 'text-[0.48rem]',
+      ]}
+    >
+      <span>{festival.nombre}</span>
+      <span>{festival.ciudad}</span>
+    </div>
+  </div>
+</article>
+
+<style>
+  .aviso-programa {
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .aviso-programa-cuerpo {
+    display: flex;
+    min-height: clamp(15rem, 25vw, 20rem);
+    flex-direction: column;
+    justify-content: space-between;
+    padding: clamp(1.25rem, 2vw, 2rem);
+  }
+
+  .aviso-programa-centro {
+    display: grid;
+    justify-items: center;
+    gap: 0.65rem;
+    text-align: center;
+  }
+
+  .aviso-programa-titulo {
+    max-width: 100%;
+    font-size: clamp(2.75rem, 7vw, 6.5rem);
+    line-height: 0.9;
+  }
+
+  .aviso-programa--movil .aviso-programa-cuerpo {
+    min-height: min(50cqw, 15rem);
+    padding: 1rem;
+  }
+
+  .aviso-programa--movil .aviso-programa-titulo {
+    font-size: min(11.5cqw, 3.5rem);
+  }
+
+  .aviso-programa--compacto .aviso-programa-cuerpo {
+    min-height: clamp(13rem, 18vw, 16rem);
+  }
+
+  .aviso-programa--compacto .aviso-programa-titulo {
+    font-size: clamp(2.75rem, 5vw, 4.75rem);
+  }
+</style>

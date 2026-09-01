@@ -7,6 +7,7 @@ import Estrella from '../components/Estrella.astro';
 import Mosaico from '../components/Mosaico.astro';
 import Portada from '../components/movil/Portada.astro';
 import Gantt from '../components/Gantt.astro';
+import AvisoPrograma from '../components/AvisoPrograma.astro';
 import Mapa from '../components/Mapa.astro';
 import {
   festival,
@@ -16,6 +17,7 @@ import {
   patrocinadores,
   colaboradores,
   programa,
+  programaPublicado,
 } from '../data/site';
 
 const cuenta = [
@@ -447,60 +449,68 @@ const sillasSedes = [
           hacía que la sección pareciera una caja a medio llenar. Estiradas a
           la par, las cuatro filas se reparten el alto que haya y las dos
           columnas cierran a la misma línea. */}
-      <div
-        class="mt-10 grid gap-10 lg:mt-12 lg:grid-cols-[1.35fr_1fr] lg:items-stretch lg:gap-14"
-      >
-        {/* El mini: la silueta del día, sin texto en las barras. No es para
-            leer qué hay —eso está a la derecha y en el programa—, es para ver
-            de un golpe cómo se reparte la jornada entre las sedes. */}
-        <div data-reveal="arriba" data-retraso="120">
-          <Gantt agrupar="sede" resumen mini selector="[data-dias-portada]" />
-        </div>
+      {
+        programaPublicado ? (
+        <div
+          class="mt-10 grid gap-10 lg:mt-12 lg:grid-cols-[1.35fr_1fr] lg:items-stretch lg:gap-14"
+        >
+          {/* El mini: la silueta del día, sin texto en las barras. No es para
+              leer qué hay —eso está a la derecha y en el programa—, es para ver
+              de un golpe cómo se reparte la jornada entre las sedes. */}
+          <div data-reveal="arriba" data-retraso="120">
+            <Gantt agrupar="sede" resumen mini selector="[data-dias-portada]" />
+          </div>
 
-        {/* Sin rótulo de columna: la tarjeta de la izquierda ya lleva el suyo
-            dentro y aquí sobra: cuatro días con su fecha, bajo un titular que
-            dice «Programa», no necesitan que nadie los presente. Sin él,
-            además, el canto de arriba de la lista arranca exactamente en el
-            canto de arriba de la tarjeta. */}
-        <div data-reveal="arriba">
-          <ul
-            class="flex h-full flex-col border-y-2 border-amarillo"
-            data-dias-portada
-          >
-            {
-              programa.dias.map((d, i) => (
-                <li class="flex flex-1 border-b border-amarillo/30 last:border-b-0">
-                  {/* La fila entera cambia el día de la rejilla: el objetivo
-                      es la franja, no dos palabras. */}
-                  <button
-                    type="button"
-                    class="dia-portada flex w-full items-center gap-x-4 py-4 text-left"
-                    data-dia={i}
-                    aria-pressed={i === 0 ? 'true' : 'false'}
-                  >
-                    <span class="meta dia-num w-7 shrink-0 text-papel/75 transition-colors duration-200">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    <span class="display dia-nombre flex-1 text-2xl leading-none text-amarillo transition-colors duration-200">
-                      {d.dia}
-                    </span>
-                    {/* Filete de 1 px y sin relleno vertical: con el de 2 px
-                        del resto del sitio la etiqueta medía más que el
-                        nombre del día y la fila crecía tres píxeles respecto
-                        a las otras tres. */}
-                    <span class="meta dia-hoy shrink-0 border border-amarillo px-1.5 text-[0.55rem] leading-[1.7] text-amarillo">
-                      Hoy
-                    </span>
-                    <span class="meta shrink-0 text-papel/75">
-                      {d.fecha.replace(' de septiembre', ' sep')}
-                    </span>
-                  </button>
-                </li>
-              ))
-            }
-          </ul>
+          {/* Sin rótulo de columna: la tarjeta de la izquierda ya lleva el suyo
+              dentro y aquí sobra: cuatro días con su fecha, bajo un titular que
+              dice «Programa», no necesitan que nadie los presente. Sin él,
+              además, el canto de arriba de la lista arranca exactamente en el
+              canto de arriba de la tarjeta. */}
+          <div data-reveal="arriba">
+            <ul
+              class="flex h-full flex-col border-y-2 border-amarillo"
+              data-dias-portada
+            >
+              {
+                programa.dias.map((d, i) => (
+                  <li class="flex flex-1 border-b border-amarillo/30 last:border-b-0">
+                    {/* La fila entera cambia el día de la rejilla: el objetivo
+                        es la franja, no dos palabras. */}
+                    <button
+                      type="button"
+                      class="dia-portada flex w-full items-center gap-x-4 py-4 text-left"
+                      data-dia={i}
+                      aria-pressed={i === 0 ? 'true' : 'false'}
+                    >
+                      <span class="meta dia-num w-7 shrink-0 text-papel/75 transition-colors duration-200">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span class="display dia-nombre flex-1 text-2xl leading-none text-amarillo transition-colors duration-200">
+                        {d.dia}
+                      </span>
+                      {/* Filete de 1 px y sin relleno vertical: con el de 2 px
+                          del resto del sitio la etiqueta medía más que el
+                          nombre del día y la fila crecía tres píxeles respecto
+                          a las otras tres. */}
+                      <span class="meta dia-hoy shrink-0 border border-amarillo px-1.5 text-[0.55rem] leading-[1.7] text-amarillo">
+                        Hoy
+                      </span>
+                      <span class="meta shrink-0 text-papel/75">
+                        {d.fecha.replace(' de septiembre', ' sep')}
+                      </span>
+                    </button>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
         </div>
-      </div>
+        ) : (
+          <div class="mt-10 lg:mt-12">
+            <AvisoPrograma compacto />
+          </div>
+        )
+      }
     </div>
   </section>
 

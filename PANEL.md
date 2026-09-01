@@ -282,11 +282,13 @@ es lo que una hoja de cálculo no te dice. Lo que se encima sale con un canto
 rojo y contado en la leyenda.
 
 Ahí vive también el interruptor **«esto todavía es la rejilla de ejemplo»**, que
-es lo que enciende y apaga el aviso al pie del programa en el sitio. Es una
-declaración y no un dato, y por eso se pregunta en vez de deducirse: sembrar el
-panel con los eventos de mentira también es «usar el panel», así que atarlo a
-eso lo habría apagado el primer día con el andamio todavía puesto. Quien mira la
-rejilla es el único que sabe si eso ya es el programa.
+es, de hecho, el botón de publicar el programa: mientras está marcado, el sitio
+no lo enseña —ni en `/programa` ni en la portada— y sale el cartel de
+«Próximamente»; al desmarcarlo, se publica entero. Es una declaración y no un
+dato, y por eso se pregunta en vez de deducirse: sembrar el panel con los
+eventos de mentira también es «usar el panel», así que atarlo a eso lo habría
+publicado el primer día con el andamio todavía puesto. Quien mira la rejilla es
+el único que sabe si eso ya es el programa.
 
 **Barra de estado permanente**: versión, cuándo se guardó por última vez, si
 hay un rebuild en curso y un enlace a ver el sitio.

@@ -210,10 +210,10 @@ export const privacidad = {
  * Las barras del programa. **Se editan en `/admin`** y llegan de
  * `contenido.ts`; el tipo vive en `tipos.ts`.
  *
- * Mientras nadie haya tocado el panel, lo que se pinta es la rejilla de
- * ejemplo que sembró el repo: sirve para ver y probar la vista de barras antes
- * de tener el programa real, y la página lo anuncia como tal a la vista
- * (`ganttEsEjemplo`). El primer guardado en el panel apaga ese aviso solo.
+ * Mientras el festival no dé el programa por bueno (`ganttEsEjemplo`), esta
+ * rejilla no sale a la calle: `/programa` y la portada enseñan el cartel de
+ * «Próximamente» en su lugar. La de ejemplo que sembró el repo sigue aquí para
+ * ver y probar la vista de barras, pero se queda de puertas adentro.
  *
  * Va aparte de `programa` y no dentro: `programa.dias` son los cuatro días
  * con sus horarios tal y como vinieron de Wix, y de ahí cuelgan la tabla de
@@ -248,9 +248,16 @@ export const coloresGantt = {
  *  todavía puesta. Sin la clave se asume que sí es ejemplo: decir de más que
  *  esto no es el programa es barato, pasar por bueno lo que no lo es no. */
 export const ganttEsEjemplo = contenido.programa.esEjemplo !== false;
-/** Versión de un renglón, que es la que va al pie de la rejilla. La larga
- *  ocupaba una banda entera arriba de todo, antes de que se viera nada. */
-export const ganttAviso = 'Rejilla de ejemplo — todavía no es la programación';
+
+/** La misma decisión, dicha por su nombre: si el programa ya se enseña o si
+ *  todavía sale el cartel de «Próximamente».
+ *
+ *  Es una sola llave y a propósito. Antes hubo dos ideas: enseñar la rejilla
+ *  de ejemplo con un aviso al pie, o esconderla entera hasta el anuncio. Se
+ *  eligió esconderla —un andamio publicado se lee como programa por mucho que
+ *  lo desmienta la letra chica— y quedó una única señal, la del panel, para
+ *  que quien publique sea el festival y no un commit. */
+export const programaPublicado = !ganttEsEjemplo;
 
 export const actividades: ActividadGantt[] = contenido.programa.actividades;
 
