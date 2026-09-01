@@ -1,0 +1,108 @@
+---
+/**
+ * El panel de administración.
+ *
+ * No usa `Base.astro` a propósito: nada de Lenis, ni cortinas, ni barra de
+ * navegación, ni el sitio móvil. Es una herramienta, no una página del
+ * festival, y comparte con él la paleta y las tipografías y nada más.
+ *
+ * Es una página pública del sitio y eso se asume. Lo que la protege es la
+ * contraseña y el bloqueo por intentos del Worker, no que esté escondida
+ * —`noindex` y el `Disallow` de `robots.txt` sólo evitan que salga en Google—.
+ * Ver PANEL.md, sección «Seguridad».
+ *
+ * Aquí no hay ni un dato secreto: el HTML se construye vacío y todo el
+ * contenido lo baja el navegador del Worker después de entrar.
+ */
+import '../../styles/panel.css';
+import { conBase } from '../../lib/base';
+import { festival, programa } from '../../data/site';
+
+/** Los cuatro días con su fecha. Son texto del sitio, no contenido del panel,
+ *  así que viajan de aquí al script en vez de estar escritos dos veces. */
+const config = {
+  dias: programa.dias.map((d) => `${d.dia} ${d.fecha}`),
+  sitio: conBase('/'),
+};
+---
+
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Panel — {festival.nombreCorto}</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#1e1e1e" />
+    <link rel="icon" href={conBase('/logos/silla-roja.svg')} type="image/svg+xml" />
+    <script type="application/json" id="panel-config" set:html={JSON.stringify(config)} />
+  </head>
+
+  <body>
+    {/* ── Entrar ────────────────────────────────────────────────────────── */}
+    <div class="entrada" id="entrada">
+      <form id="entrada-forma">
+        <p class="rotulo">Festival de Arte Conceptual</p>
+        <h1>Panel</h1>
+        <p>
+          Desde aquí se cargan el programa, las sedes, lxs artistas, el archivo
+          y las marcas. Lo que se guarda aquí es lo que sale en el sitio.
+        </p>
+
+        <label>
+          <span class="rotulo">Contraseña</span>
+          <input
+            type="password"
+            id="entrada-clave"
+            autocomplete="current-password"
+            required
+            aria-describedby="entrada-queja"
+          />
+        </label>
+        <p id="entrada-queja" class="mono" style="color:var(--rojo);font-size:.75rem;margin-top:.4rem" role="alert"></p>
+
+        <div style="display:flex;gap:.6rem;align-items:center;margin-top:1.1rem">
+          <button type="submit" class="boton fuerte" id="entrar-boton">Entrar</button>
+          <a class="boton" href={conBase('/')}>Ver el sitio</a>
+        </div>
+
+        <p style="margin-top:1.2rem;font-size:.72rem;opacity:.55;line-height:1.4">
+          Cinco intentos fallidos y esta conexión se queda fuera quince minutos.
+          La sesión se cierra al cerrar la pestaña.
+        </p>
+      </form>
+    </div>
+
+    {/* ── Panel ─────────────────────────────────────────────────────────── */}
+    <div class="armazon" id="armazon" hidden>
+      <header class="barra">
+        <span class="marca">La Cuarta Silla · <span>Panel</span></span>
+        <span class="estado" id="estado-version">…</span>
+        <span class="empuje"></span>
+        <button type="button" class="boton" id="historial-boton">Historial</button>
+        <button type="button" class="boton" id="recargar-boton" title="Volver a bajar lo que hay guardado">Recargar</button>
+        <button type="button" class="boton" id="publicar-boton" title="Reconstruir el sitio ahora">Publicar ahora</button>
+        <a class="boton" href={conBase('/')} target="_blank" rel="noopener">Ver el sitio ↗</a>
+        <button type="button" class="boton" id="salir-boton">Salir</button>
+      </header>
+
+      <nav class="pestanas" id="pestanas" role="tablist"></nav>
+
+      <main class="lienzo">
+        <div id="avisos"></div>
+        <div id="lienzo"></div>
+      </main>
+
+      <footer class="pie">
+        <span class="rotulo" id="estado-cambios">…</span>
+        <span class="empuje" style="margin-left:auto"></span>
+        <span class="rotulo" style="opacity:.45">Ctrl + S guarda</span>
+        <button type="button" class="boton fuerte" id="guardar-boton" disabled>Guardar</button>
+      </footer>
+    </div>
+
+    <script>
+      import '../../scripts/panel/panel';
+    </script>
+  </body>
+</html>

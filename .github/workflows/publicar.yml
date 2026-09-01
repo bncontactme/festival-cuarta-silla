@@ -1,0 +1,67 @@
+# Publica el sitio en GitHub Pages, servido en el dominio propio.
+#
+# Por qué GitHub Pages y no Cloudflare Pages, que era el plan: el dominio se
+# registró en Wix el 26/07/2026 y las reglas de ICANN lo dejan intransferible
+# hasta el 24/09 —el día que arranca el festival—. Wix tampoco deja cambiar los
+# nameservers, así que el DNS se queda ahí de momento; y Cloudflare Pages no
+# puede servir el dominio raíz si el DNS no vive en Cloudflare. GitHub Pages sí,
+# con registros A. Cuando el dominio salga de Wix esto se puede revisar: el
+# `public/_redirects` ya está escrito esperando ese día.
+#
+# El sitio se construye desde `main` y sin `PAGES_BASE`: cuelga de la raíz del
+# dominio, no de un subdirectorio. `public/CNAME` es lo que le dice a GitHub qué
+# dominio servir, y con él la redirección del dominio pelado a `www` la hace
+# GitHub solo.
+#
+# Se dispara de tres formas: al empujar a `main`, a mano desde la pestaña de
+# Actions, y por `repository_dispatch` — que es como el Worker del panel publica
+# cuando alguien guarda algo en /admin.
+name: Publicar
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  repository_dispatch:
+    types: [publicar]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Baja el contenido del panel y construye. Si el Worker no contesta, usa
+      # la copia comiteada y sigue: ver scripts/instantanea.mjs.
+      - run: npm run build
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v4

@@ -201,14 +201,22 @@ teléfono y se sirven igual en todas partes.
 ```
 src/
   data/site.ts        todo el texto, compartido por los dos sitios
+  data/tipos.ts       las formas del contenido que carga el panel
+  data/contenido.ts   lee la instantánea; dice si viene del panel o del repo
+  data/contenido.json la instantánea, comiteada: respaldo e histórico en git
   styles/global.css   tokens, componentes, las tres capas de movimiento
   styles/movil.css    el sitio móvil entero (una sola media query)
+  styles/panel.css    el panel; CSS propio, no el del sitio
   scripts/motion.ts   Lenis + reveals + partidor + cuenta + menú + entrada
+  scripts/panel/      el panel: api, esquema, campos, tabla, previa
   layouts/Base.astro  head, SEO, JSON-LD, nav, pie, reparto móvil/escritorio
   components/         Nav, Footer, Marquee, Silla, Encabezado
   components/movil/   Portada (con la entrada), Pantalla
   pages/              index, programa, artistas, sedes, archivo, registro,
                       privacidad, 404
+  pages/admin/        el panel de edición (noindex, fuera del sitemap)
+scripts/instantanea.mjs   baja el contenido del panel antes de cada build
+workers/panel/            el Worker: KV, validación, Cloudinary, historial
 ```
 
 ## URLs
@@ -226,55 +234,48 @@ botón que lleve a él, pero el enlace sigue vivo en `festival.convocatoriaPDF`)
 
 ## Publicación
 
-`npm run build` deja HTML estático en `dist/`. Sirve tal cual en Netlify,
-Vercel, Cloudflare Pages o cualquier hosting. Las redirecciones se generan
-como páginas `<meta refresh>`; si el hosting soporta 301 de verdad
-(`_redirects` en Netlify, `vercel.json`), conviene declararlas ahí también
-para no perder señal de SEO.
+`npm run build` baja el contenido del panel (`scripts/instantanea.mjs`) y deja
+HTML estático en `dist/`. Si el panel no contesta, usa la copia comiteada y
+sigue: el sitio no se cae por culpa del panel.
 
-## Pendiente: panel de edición para subir fotos
+El sitio se publica en **GitHub Pages** desde `main`
+([`.github/workflows/publicar.yml`](.github/workflows/publicar.yml)), servido en
+`www.festivaldearteconceptual.com` — `public/CNAME` es lo que se lo dice a
+GitHub, y con eso GitHub redirige solo el dominio pelado a `www`.
 
-**Todavía no está montado, y va después de mover el dominio de Wix.** Esto es
-el plan, escrito para el día que toque, no una descripción de lo que hay.
+Por qué GitHub Pages y no Cloudflare Pages, que era el plan: el dominio se
+registró en Wix el 26/07/2026 e ICANN no deja transferirlo hasta el 24/09, que
+es cuando arranca el festival; Wix tampoco deja cambiar los nameservers, así que
+el DNS se queda ahí. Y Cloudflare Pages no sirve el dominio raíz si el DNS no
+vive en Cloudflare. GitHub Pages sí, con registros A. El precio es que las
+redirecciones viejas siguen siendo `<meta refresh>` en vez de 301 de verdad;
+[`public/_redirects`](public/_redirects) ya está escrito para el día que el
+dominio salga de Wix y el sitio se mude.
 
-El problema que resuelve: El Profe necesita subir fotos de las ediciones
-anteriores y los retratos de artistas **sin pedírselo a nadie**. Hoy eso
-significa editar `src/data/archivo.ts` y `src/data/artistas.ts` a mano.
+## Panel de edición
 
-### Cómo queda
+El programa, las sedes, lxs artistas, el archivo y los patrocinadores **los
+carga el festival desde `/admin`**, no se escriben aquí. El contenido vive en un
+Worker de Cloudflare con KV, las fotos en Cloudinary, y el sitio se lo baja en
+cada build a `src/data/contenido.json` —que se queda comiteado, y por eso el
+sitio construye igual aunque el panel esté caído—.
 
-1. **Hosting a Netlify**, construyendo del mismo repo. En `astro.config.mjs`
-   desaparece `PAGES_BASE` y el sitio vuelve a colgar de la raíz; el workflow
-   `vista-previa.yml` de GitHub Pages se retira o se deja sólo para pruebas.
-2. **Decap CMS con Netlify Identity.** Panel en `/admin`. Los editores entran
-   con **correo y contraseña**: es lo único de esta lista que no exige cuenta
-   de GitHub, y por eso se elige Netlify y no un CMS sobre GitHub Pages.
-   Cada cambio que guardan es un commit en el repo y un build nuevo.
-3. **Cloudinary como librería de medios.** Es la pieza que evita que el repo
-   se infle: un archivo fotográfico de varias ediciones son cientos de
-   imágenes, y en git se quedan para siempre. Con Cloudinary no entran nunca
-   al repo, y encima llegan al navegador redimensionadas y en AVIF/WebP.
-4. **Dos colecciones**, con los campos que ya describen `artistas.ts` y
-   `archivo.ts`: artistas (nombre, disciplina, foto, instagram, sede) y
-   ediciones (edición, año, lema, sedes, actividades, fotos con pie).
+El plan completo, con el porqué de cada pieza y lo que falta por dar de alta,
+está en **[PANEL.md](PANEL.md)**. Los comandos, en
+**[workers/panel/README.md](workers/panel/README.md)**.
 
-### Lo que ya está preparado
-
-- **`src/lib/imagen.ts`** — todas las fotos del sitio pasan ya por ahí.
-  Encender Cloudinary es rellenar una constante en ese archivo; ninguna
-  plantilla se entera. Sin esa capa habría que tocar cada componente.
-- **Los archivos de datos** están tipados y comentados campo por campo, que es
-  lo que se traduce directo a la configuración de las colecciones.
-
-### El orden importa
-
-Primero el dominio, después Netlify, después el panel. Montar el panel antes
-de mover el dominio significa hacerlo dos veces.
+Lo que NO pasa por el panel es el texto del sitio: el manifiesto, los rótulos,
+los estados vacíos, el aviso de privacidad. Eso sigue en `src/data/site.ts` y es
+correcto que un cambio ahí sea un commit.
 
 ## Lo que falta (depende del cliente)
 
-- Contenido real del programa: los 48 horarios existen y están vacíos.
-- Logos de patrocinadores.
+- Contenido real del programa, artistas y archivo. Ya no depende de mí: entra
+  por `/admin` en cuanto se dé de alta el Worker (ver [PANEL.md](PANEL.md)).
+  La rejilla que se ve hoy es de ejemplo y el sitio lo dice; el aviso se apaga
+  desde el propio panel.
+- Logos de las marcas que están sin él (Mezcania, MESH, Capicua, Suero,
+  DC Producciones). Se suben desde el panel.
 - Registro a eventos: hoy es una ficha en estado «Próximamente» con el botón
   desactivado. Cuando se decida el sistema (formulario propio, Eventbrite,
   etc.) se conecta ahí.

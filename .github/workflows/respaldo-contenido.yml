@@ -1,0 +1,60 @@
+# Guarda en el repo lo que hay en el panel.
+#
+# El sitio ya se construye con el contenido en vivo —`npm run build` llama a
+# `scripts/instantanea.mjs` antes de Astro—, así que esto no publica nada: lo
+# único que hace es dejar `src/data/contenido.json` comiteado y al día.
+#
+# Para qué sirve entonces:
+#   · Si el Worker se cae, el build usa esta copia y el sitio no se entera.
+#   · El histórico de git pasa a ser el histórico del contenido, gratis y en
+#     texto plano: se puede ver en un diff quién cambió qué hora de qué taller.
+#   · Es la copia que sobrevive incluso a que se borre la cuenta de Cloudflare.
+#
+# Es la tercera de tres (KV, esto, y el respaldo semanal a Cloudinary del propio
+# Worker). Contenido que no se puede volver a juntar —las fotos de las tres
+# ediciones anteriores no las tiene nadie más— merece tres copias.
+name: Respaldo del contenido
+
+on:
+  schedule:
+    # 09:00 UTC ≈ 03:00 en Guadalajara. A esa hora nadie está editando.
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+  # El Worker puede llamarlo cuando se guarda algo, si algún día se le pone un
+  # token: curl -X POST … -d '{"event_type":"contenido"}'
+  repository_dispatch:
+    types: [contenido]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: respaldo-contenido
+  cancel-in-progress: true
+
+jobs:
+  respaldar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Bajar el contenido del panel
+        run: node scripts/instantanea.mjs
+
+      - name: Comitear si cambió
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/data/contenido.json
+          if git diff --cached --quiet; then
+            echo "Sin cambios en el contenido."
+          else
+            VERSION=$(node -e "console.log(require('./src/data/contenido.json').version)")
+            git commit -m "contenido: instantánea del panel (versión $VERSION)"
+            git pull --rebase origin ${GITHUB_REF_NAME}
+            git push
+          fi

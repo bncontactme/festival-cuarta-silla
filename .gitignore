@@ -3,3 +3,8 @@ node_modules/
 .astro/
 .DS_Store
 *.log
+
+# Secrets del Worker para probar en local (`wrangler dev`). Los de verdad viven
+# en Cloudflare, puestos con `wrangler secret put`.
+workers/panel/.dev.vars
+workers/panel/.wrangler/

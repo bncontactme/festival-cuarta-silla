@@ -4,8 +4,20 @@
     {
       "name": "cuartasilla",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 4321
+    },
+    {
+      "name": "cuartasilla-panel",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev:panel"
+      ],
+      "port": 4399
     }
   ]
 }

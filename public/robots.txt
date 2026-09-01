@@ -5,4 +5,8 @@
 User-agent: *
 Allow: /
 
+# El panel de edición. No es un secreto —lo que lo protege es la contraseña—
+# pero no tiene por qué salir en Google.
+Disallow: /admin
+
 Sitemap: https://www.festivaldearteconceptual.com/sitemap.xml

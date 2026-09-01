@@ -1,0 +1,5 @@
+ADMIN_HASH=pon-aqui-el-sha256-de-tu-contraseña-de-pruebas
+CLOUDINARY_CLOUD_NAME=demo
+CLOUDINARY_API_KEY=000
+CLOUDINARY_API_SECRET=000
+CLOUDINARY_UPLOAD_PRESET=cuartasilla_signed

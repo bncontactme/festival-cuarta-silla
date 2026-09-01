@@ -1,0 +1,35 @@
+name = "cuartasilla-panel"
+main = "index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+# El contenido del sitio: una clave por colección. Ver lib/contenido.js para el
+# mapa de claves.
+#
+# Crear el namespace y pegar el id aquí:
+#   npx wrangler kv namespace create CONTENIDO
+[[kv_namespaces]]
+binding = "CONTENIDO"
+id = "PEGAR_AQUI_EL_ID_DE_KV"    # en `wrangler dev` no se usa: KV corre en local
+
+# Respaldo semanal a Cloudinary (lunes 9:00 UTC ≈ 3:00 en GDL).
+[triggers]
+crons = ["0 9 * * 1"]
+
+# ── Secrets (no van en este archivo; se ponen con `wrangler secret put`) ──────
+#   ADMIN_HASH                 SHA-256 de la contraseña de admin
+#   CLOUDINARY_CLOUD_NAME      el mismo de GDN
+#   CLOUDINARY_API_KEY         el mismo de GDN
+#   CLOUDINARY_API_SECRET      el mismo de GDN
+#   CLOUDINARY_UPLOAD_PRESET   preset FIRMADO (p. ej. cuartasilla_signed)
+#
+#   Y para que «Publicar» tenga a dónde disparar el build. Hoy el sitio vive en
+#   GitHub Pages (ver .github/workflows/publicar.yml), así que son estos dos:
+#   GITHUB_TOKEN               token con permiso de escritura en el repo
+#   GITHUB_REPO                bncontactme/festival-cuarta-silla
+#
+#   DEPLOY_HOOK                el otro camino: URL del build hook de Cloudflare
+#                              Pages, para el día que el sitio se mude ahí. Si
+#                              están los de GitHub, ganan ellos. Sin ninguno de
+#                              los tres, «Publicar» contesta que no hay a dónde
+#                              disparar y lo dice en vez de fingir
