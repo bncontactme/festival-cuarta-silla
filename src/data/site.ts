@@ -2,7 +2,16 @@
  * Todo el texto del sitio, en un solo lugar.
  * Migrado literalmente desde el sitio Wix original (festivaldearteconceptual.com).
  * No inventar copy aquí: si algo falta, es porque el original lo tiene vacío.
+ *
+ * Lo que SÍ sale de aquí son las listas que carga el festival desde `/admin`:
+ * sedes, programa y marcas llegan de `contenido.ts`. El texto se queda; el
+ * contenido se va. Ver PANEL.md para por qué se parte justo por ahí.
  */
+
+import { contenido, delPanel } from './contenido';
+import type { Sede, Marca, ActividadGantt } from './tipos';
+
+export type { Sede, Marca, ActividadGantt };
 
 export const festival = {
   nombre: 'Festival de Arte Conceptual',
@@ -137,29 +146,7 @@ export const registro = {
   acciones: { leerMas: 'Leer más', registro: 'Registro' },
 };
 
-export type Sede = {
-  nombre: string;
-  direccion: string;
-  /** Vacío mientras no nos pasen la cuenta: la ficha oculta el enlace. */
-  instagram?: string;
-  /** Enlace corto al pin exacto. Sin él se busca por dirección. */
-  mapa?: string;
-  /**
-   * `[latitud, longitud]`, para clavar la estrella en el plano de la portada.
-   *
-   * De dónde sale cada una: las que tienen `mapa` son el pin que nos pasaron,
-   * leído del enlace corto de Google; las demás salen del número de puerta en
-   * OpenStreetMap —el exacto si existe, y si no interpolando entre el anterior
-   * y el siguiente de la misma calle—. Se comprobó el método contra las que sí
-   * tienen pin: cae dentro de la manzana.
-   *
-   * Sin coordenada no hay estrella. Es lo que toca cuando una sede no está en
-   * Guadalajara: antes que inventarle un punto, el mapa lo dice.
-   */
-  coord?: [number, number];
-  /** Qué contar cuando no hay estrella que enseñar. */
-  notaMapa?: string;
-};
+/* `Sede` vive ahora en `tipos.ts` y se re-exporta arriba. */
 
 /** A dónde lleva «Ubicación»: al pin exacto si lo tenemos, y si no a la
  *  búsqueda por dirección. Nunca se inventa un pin que no nos dieron. */
@@ -182,167 +169,33 @@ export const sedes = {
     alejar: 'Alejar',
     credito: 'Cartografía © OpenStreetMap',
   },
-  // El orden es el de la lista que nos pasaron, no alfabético.
-  lista: [
-    {
-      nombre: 'Cuerpos Parlante',
-      direccion: 'C. Cruz Verde 93, Zona Centro, 44200 Guadalajara, Jal.',
-      coord: [20.678024, -103.357493],
-      instagram: 'https://www.instagram.com/cuerpos_parlantes/',
-    },
-    {
-      nombre: 'Foro AM',
-      direccion: 'C. Pedro Loza 344, Zona Centro, 44200 Guadalajara, Jal.',
-      coord: [20.681676, -103.348404],
-      instagram: 'https://www.instagram.com/foro.a.m/',
-    },
-    {
-      nombre: 'Temporal',
-      // La dirección anterior repetía la de Salón Liminal; ésta es la buena.
-      direccion: 'C. Donato Guerra 25, Zona Centro, 44100 Guadalajara, Jal.',
-      coord: [20.675938, -103.350449],
-      instagram: 'https://www.instagram.com/temporal___________/',
-      mapa: 'https://maps.app.goo.gl/Fsu7vg12MzBCtbxD8',
-    },
-    {
-      nombre: 'Estudio Arrechiga',
-      direccion:
-        'Camarena 118, Col Americana, Americana, 44160 Guadalajara, Jal.',
-      coord: [20.674647, -103.35767],
-      instagram: 'https://www.instagram.com/estudioarechiga/',
-      mapa: 'https://maps.app.goo.gl/C1F4Us1jy6buYTJJA',
-    },
-    {
-      nombre: 'Casa Dos Guayabos',
-      direccion: 'C. San Felipe 731, Zona Centro, 44200 Guadalajara, Jal.',
-      coord: [20.679379, -103.354601],
-      instagram: 'https://www.instagram.com/casa_dos_guayabos/',
-    },
-    {
-      /**
-       * El andador es el tramo peatonal de Escorza que corre al este de la
-       * Rectoría General de la UdeG, de Morelos a López Cotilla: el que el
-       * ayuntamiento decretó Constancio Hernández Alvirde en 2015 y el que la
-       * gente renombró Andador Palestina Libre. Va primero el nombre que se
-       * usa y entre paréntesis el del papel, que es el orden en que sirven:
-       * uno es para llegar andando y el otro para escribirlo en un sobre.
-       *
-       * La coordenada es el punto medio de ese tramo en OpenStreetMap
-       * (`highway=pedestrian`, «Calle Escorza» + «Andador Escorza»), a media
-       * cuadra de la Rectoría (20.67523, -103.35900) y del MUSA.
-       */
-      nombre: 'No Museo',
-      direccion:
-        'Andador Palestina Libre (Constancio Hernández Alvirde), Col. Americana, 44160 Guadalajara, Jal.',
-      coord: [20.6741, -103.35857],
-      instagram: 'https://www.instagram.com/esto_no_es_un_museo/',
-    },
-    {
-      nombre: 'Taller Industria Gráfica',
-      direccion:
-        'C. San Felipe 827, Capilla de Jesús, 44160 Guadalajara, Jal.',
-      coord: [20.67934, -103.356823],
-      instagram: 'https://www.instagram.com/tallerindustriagrafica/',
-    },
-    {
-      nombre: 'Casa Feria',
-      direccion: 'C. Pedro Loza 359, Zona Centro, 44100 Guadalajara, Jal.',
-      coord: [20.681953, -103.348427],
-      instagram: 'https://www.instagram.com/casa.feria/',
-    },
-    {
-      nombre: 'Ala Rota',
-      direccion: 'Juan Manuel 823, Zona Centro, 44200 Guadalajara, Jal.',
-      coord: [20.678578, -103.354777],
-      instagram: 'https://www.instagram.com/alarota.cultura/',
-      mapa: 'https://maps.app.goo.gl/hB6KDRMnp6TxrJBD7',
-    },
-    {
-      nombre: 'Staditche',
-      direccion:
-        'C. Manuel López Cotilla 858, Col Americana, Americana, 44160 Guadalajara, Jal.',
-      coord: [20.674168, -103.357894],
-      instagram: 'https://www.instagram.com/staditche/',
-      mapa: 'https://maps.app.goo.gl/436QGVLkPj3ZSueU6',
-    },
-    {
-      nombre: 'Estallido Art Project',
-      direccion: 'Calle, Av. Alcalde 159, Zona Centro, 44100 Guadalajara, Jal.',
-      coord: [20.678963, -103.347828],
-      instagram: 'https://www.instagram.com/estallidoartproject/',
-      mapa: 'https://maps.app.goo.gl/SuKhGPMVaB7ZeRve9',
-    },
-    {
-      nombre: 'Salón Liminal',
-      direccion: 'C. Independencia 795, Zona Centro, 44100 Guadalajara, Jal.',
-      coord: [20.678033, -103.354007],
-      instagram: 'https://www.instagram.com/salonliminal/',
-      mapa: 'https://maps.app.goo.gl/17i56g378cvg5t7j9',
-    },
-    {
-      nombre: 'Ánima Galería',
-      direccion:
-        'C. Miguel Blanco 1405, Col Americana, Americana, 44160 Guadalajara, Jal.',
-      coord: [20.672186, -103.357879],
-      instagram: 'https://www.instagram.com/animagaleria/',
-      mapa: 'https://maps.app.goo.gl/D2y3qeR19Qc2G2ND8',
-    },
-    {
-      nombre: 'Palma Galería',
-      direccion:
-        'C. Manuel López Cotilla 1360, Col Americana, Americana, 44160 Guadalajara, Jal.',
-      coord: [20.673916, -103.366453],
-      instagram: 'https://www.instagram.com/palmagaleria/',
-      mapa: 'https://maps.app.goo.gl/9LFY63xj1kpyzuncA',
-    },
-  ] satisfies Sede[],
+  /**
+   * Las catorce sedes. **Se editan en `/admin`**, no aquí.
+   *
+   * El orden es el que se pinta y no es alfabético: es el de la lista que nos
+   * pasaron, y el panel deja arrastrar para cambiarlo.
+   */
+  lista: contenido.sedes,
 };
 
-export type Marca = { nombre: string; logo?: string; url?: string };
+/* `Marca` vive ahora en `tipos.ts` y se re-exporta arriba. */
 
-/** Los logos salen del sitio viejo (Wix), reescalados a 600 px de lado.
+/** Quién pone. **Se edita en `/admin`.**
+ *
+ *  Los logos que ya estaban salen del sitio viejo (Wix), reescalados a 600 px
+ *  de lado y servidos desde `public/`; los que suba el festival van a
+ *  Cloudinary. `imagen()` trata igual a los dos.
+ *
  *  Las marcas sin logo se pintan con el nombre en display: prefiero un hueco
  *  honesto a inventar un archivo que no nos dieron. */
 export const patrocinadores = {
   titulo: 'Patrocinadores',
-  lista: [
-    { nombre: 'Minerva', logo: '/patrocinadores/minerva.png' },
-    { nombre: 'Cielito Lindo', logo: '/patrocinadores/cielito-lindo.jpg' },
-    { nombre: 'Clase 33', logo: '/patrocinadores/clase-33.jpg' },
-    { nombre: 'Mezcania' },
-    { nombre: 'RE.CREA.LAB', logo: '/patrocinadores/recrealab.png' },
-    { nombre: 'MESH' },
-    { nombre: '1800', logo: '/patrocinadores/1800.png' },
-    { nombre: 'Capicua' },
-    // Nos pidieron confirmar cómo se escribe.
-    { nombre: 'Suero' },
-    { nombre: 'DC Producciones' },
-    // Apoyos institucionales: estaban en el sitio viejo y no en la lista que
-    // nos pasaron, pero son de los que no se dejan fuera.
-    {
-      nombre: 'Universidad de Guadalajara',
-      logo: '/patrocinadores/universidad-de-guadalajara.png',
-    },
-    { nombre: 'ITESO', logo: '/patrocinadores/iteso.jpg' },
-    {
-      nombre: 'Tecnológico de Monterrey',
-      logo: '/patrocinadores/tec-de-monterrey.png',
-    },
-  ] satisfies Marca[],
+  lista: contenido.marcas.patrocinadores,
 };
 
 export const colaboradores = {
   titulo: 'Colaboradores',
-  lista: [
-    { nombre: 'Ferazzz', logo: '/patrocinadores/ferazzz.png' },
-    { nombre: 'Brumma', logo: '/patrocinadores/brumma.png' },
-    { nombre: 'GDL de Noche', logo: '/patrocinadores/gdl-de-noche.png' },
-    {
-      nombre: 'Visual Negativo',
-      logo: '/patrocinadores/visual-negativo.jpg',
-    },
-    { nombre: 'DC Producciones' },
-  ] satisfies Marca[],
+  lista: contenido.marcas.colaboradores,
 };
 
 export const privacidad = {
@@ -354,32 +207,18 @@ export const privacidad = {
 
 /** ── Rejilla del programa (Gantt) ─────────────────────────────────────────
  *
- * ⚠️  ESTOS EVENTOS SON DE EJEMPLO Y HAY QUE REEMPLAZARLOS ENTEROS. ⚠️
+ * Las barras del programa. **Se editan en `/admin`** y llegan de
+ * `contenido.ts`; el tipo vive en `tipos.ts`.
  *
- * Están sólo para poder ver y probar la vista de barras antes de tener el
- * programa real. La regla de arriba —no inventar copy— sigue en pie: esto es
- * un andamio, no contenido, y la página lo anuncia como tal a la vista.
+ * Mientras nadie haya tocado el panel, lo que se pinta es la rejilla de
+ * ejemplo que sembró el repo: sirve para ver y probar la vista de barras antes
+ * de tener el programa real, y la página lo anuncia como tal a la vista
+ * (`ganttEsEjemplo`). El primer guardado en el panel apaga ese aviso solo.
  *
  * Va aparte de `programa` y no dentro: `programa.dias` son los cuatro días
  * con sus horarios tal y como vinieron de Wix, y de ahí cuelgan la tabla de
  * la portada y la lista del móvil. Esto no los toca.
  */
-export type ActividadGantt = {
-  titulo: string;
-  /** Índice del día dentro de `programa.dias`: 0 = jueves … 3 = domingo. */
-  dia: number;
-  /** 24 h, 'HH:MM'. El fin es lo que le da largo a la barra. */
-  inicio: string;
-  fin: string;
-  /** Tiene que coincidir con un `nombre` de `sedes.lista`. */
-  sede: string;
-  /** Colorea la barra: uno de `coloresGantt`. */
-  tipo: 'taller' | 'charla' | 'muestra' | 'escena';
-  /** Quién la da. Sale en la ficha, debajo del título. */
-  artista?: string;
-  /** Formulario de Tally de esta actividad. Sin él, la ficha sale sin botón. */
-  registro?: string;
-};
 
 /** La sede completa de una actividad: nombre, dirección y enlace al mapa
  *  salen de `sedes.lista`, que ya los tiene. No se repiten aquí. */
@@ -401,39 +240,19 @@ export const coloresGantt = {
   escena: { fondo: 'var(--color-ladrillo)', texto: 'var(--color-amarillo)' },
 } as const;
 
-export const ganttEsEjemplo = true;
+/** Si lo de abajo todavía es el andamio o ya es la programación.
+ *
+ *  Lo decide el festival con un interruptor en `/admin`, no se deduce de nada:
+ *  sembrar el panel con los eventos de ejemplo también es «usar el panel», así
+ *  que atarlo a eso lo habría apagado el primer día, con la rejilla de mentira
+ *  todavía puesta. Sin la clave se asume que sí es ejemplo: decir de más que
+ *  esto no es el programa es barato, pasar por bueno lo que no lo es no. */
+export const ganttEsEjemplo = contenido.programa.esEjemplo !== false;
 /** Versión de un renglón, que es la que va al pie de la rejilla. La larga
  *  ocupaba una banda entera arriba de todo, antes de que se viera nada. */
 export const ganttAviso = 'Rejilla de ejemplo — todavía no es la programación';
 
-export const actividades: ActividadGantt[] = [
-  // Jueves
-  { titulo: 'Montaje y acreditaciones', dia: 0, inicio: '10:00', fin: '13:00', sede: 'Foro AM', tipo: 'muestra', artista: 'Equipo del festival' },
-  { titulo: 'Inauguración', dia: 0, inicio: '18:00', fin: '20:00', sede: 'Foro AM', tipo: 'escena', artista: 'Comité organizador', registro: 'https://tally.so/r/ejemplo1' },
-  { titulo: 'Muestra: archivo abierto', dia: 0, inicio: '12:00', fin: '20:00', sede: 'No Museo', tipo: 'muestra', artista: 'Colectivo Archivo Vivo' },
-  { titulo: 'Cuerpo y espacio', dia: 0, inicio: '19:00', fin: '21:00', sede: 'Cuerpos Parlante', tipo: 'escena', artista: 'Mariana Ruvalcaba', registro: 'https://tally.so/r/ejemplo2' },
-
-  // Viernes
-  { titulo: 'Taller de risografía', dia: 1, inicio: '10:00', fin: '13:00', sede: 'Taller Industria Gráfica', tipo: 'taller', artista: 'Taller Industria Gráfica', registro: 'https://tally.so/r/ejemplo3' },
-  { titulo: 'Conceptualismo hoy', dia: 1, inicio: '12:00', fin: '13:30', sede: 'Temporal', tipo: 'charla', artista: 'Panel invitado', registro: 'https://tally.so/r/ejemplo4' },
-  { titulo: 'Muestra: archivo abierto', dia: 1, inicio: '11:00', fin: '20:00', sede: 'No Museo', tipo: 'muestra', artista: 'Colectivo Archivo Vivo' },
-  { titulo: 'Lectura de portafolios', dia: 1, inicio: '15:00', fin: '18:00', sede: 'Estudio Arrechiga', tipo: 'taller', artista: 'Andrea Sandoval', registro: 'https://tally.so/r/ejemplo5' },
-  { titulo: 'Mesa: arte y ciudad', dia: 1, inicio: '17:00', fin: '18:30', sede: 'Foro AM', tipo: 'charla', artista: 'Panel invitado', registro: 'https://tally.so/r/ejemplo6' },
-  { titulo: 'Performance nocturno', dia: 1, inicio: '20:30', fin: '22:00', sede: 'Cuerpos Parlante', tipo: 'escena', artista: 'Kali Zurita' },
-
-  // Sábado
-  { titulo: 'Recorrido por el centro', dia: 2, inicio: '11:00', fin: '14:00', sede: 'No Museo', tipo: 'muestra', artista: 'Guía del festival', registro: 'https://tally.so/r/ejemplo7' },
-  { titulo: 'Escritura sobre obra', dia: 2, inicio: '10:30', fin: '12:30', sede: 'Estudio Arrechiga', tipo: 'taller', artista: 'Ximena Prado', registro: 'https://tally.so/r/ejemplo8' },
-  { titulo: 'Grabado expandido', dia: 2, inicio: '13:00', fin: '16:00', sede: 'Taller Industria Gráfica', tipo: 'taller', artista: 'Rubén Ortega', registro: 'https://tally.so/r/ejemplo9' },
-  { titulo: 'Charla: qué pone en discusión', dia: 2, inicio: '16:30', fin: '18:00', sede: 'Temporal', tipo: 'charla', artista: 'Panel invitado', registro: 'https://tally.so/r/ejemplo10' },
-  { titulo: 'Proyección al aire libre', dia: 2, inicio: '20:30', fin: '22:30', sede: 'Casa Dos Guayabos', tipo: 'escena', artista: 'Cine Errante' },
-
-  // Domingo
-  { titulo: 'Muestra: archivo abierto', dia: 3, inicio: '11:00', fin: '17:00', sede: 'No Museo', tipo: 'muestra', artista: 'Colectivo Archivo Vivo' },
-  { titulo: 'Taller para público infantil', dia: 3, inicio: '11:30', fin: '13:00', sede: 'Casa Feria', tipo: 'taller', artista: 'Casa Feria', registro: 'https://tally.so/r/ejemplo11' },
-  { titulo: 'Conversatorio de cierre', dia: 3, inicio: '16:00', fin: '17:30', sede: 'Foro AM', tipo: 'charla', artista: 'Comité organizador', registro: 'https://tally.so/r/ejemplo12' },
-  { titulo: 'Clausura', dia: 3, inicio: '19:00', fin: '22:00', sede: 'Casa Feria', tipo: 'escena', artista: 'Todas las sedes' },
-];
+export const actividades: ActividadGantt[] = contenido.programa.actividades;
 
 /** ── Red de seguridad ─────────────────────────────────────────────────────
  *
@@ -443,14 +262,25 @@ export const actividades: ActividadGantt[] = [
  * entera hasta que un visitante la abre. Ya pasó una vez, con «Taller Industria
  * Grafica» contra «Taller Industria Gráfica».
  *
- * Astro evalúa este módulo al construir, así que esto revienta el build en vez
- * de dejar pasar el fallo. Importa sobre todo de aquí en adelante: cuando
- * llegue la programación de verdad van a ser decenas de renglones escritos a
- * mano contra catorce nombres con tildes, acentos y mayúsculas.
- *
  * Se lista todo lo que no empareja de una vez —no sólo lo primero— y se sugiere
  * el nombre bueno cuando se parece, que es lo que ahorra el viaje de ida y
  * vuelta al arreglarlo.
+ *
+ * **Revienta el build o sólo avisa, según de dónde venga el dato**, y esa
+ * diferencia es deliberada:
+ *
+ *   · Si el contenido es la semilla del repo, lo escribí yo y un error mío
+ *     tiene que doler antes de desplegar. `throw`.
+ *   · Si vino del panel, lo escribió el festival. Aquí un `throw` significaría
+ *     que una tilde de más deja el sitio SIN PODER PUBLICARSE, y de noche,
+ *     durante el festival, sin nadie que lea la consola de un build. Se avisa y
+ *     se sigue: esa ficha sale sin dirección —que es feo— en vez de tumbar el
+ *     despliegue —que es peor—.
+ *
+ * La puerta de verdad está antes: `workers/panel/lib/validar.js` rechaza esto
+ * mismo al guardar, con el «¿querías decir…?» puesto, y el festival lo ve en la
+ * pantalla mientras todavía se acuerda de lo que escribió. Esto de aquí es la
+ * red por debajo, no el filtro.
  */
 {
   const nombres = sedes.lista.map((s) => s.nombre);
@@ -474,11 +304,16 @@ export const actividades: ActividadGantt[] = [
     });
 
   if (sueltas.length) {
-    throw new Error(
-      `site.ts: hay ${sueltas.length} actividad(es) que nombran una sede que no está en ` +
-        `sedes.lista. La ficha de la rejilla se queda sin dirección ni mapa.\n` +
-        sueltas.join('\n') +
-        `\n\nSedes válidas:\n${nombres.map((n) => `  · ${n}`).join('\n')}`,
-    );
+    const parte =
+      `hay ${sueltas.length} actividad(es) que nombran una sede que no está en ` +
+      `sedes.lista. La ficha de la rejilla se queda sin dirección ni mapa.\n` +
+      sueltas.join('\n') +
+      `\n\nSedes válidas:\n${nombres.map((n) => `  · ${n}`).join('\n')}`;
+
+    if (delPanel) {
+      console.warn(`\n⚠️  Contenido del panel: ${parte}\n`);
+    } else {
+      throw new Error(`site.ts: ${parte}`);
+    }
   }
 }

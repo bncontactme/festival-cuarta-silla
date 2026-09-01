@@ -4,9 +4,12 @@
   "description": "",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/instantanea.mjs && astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "contenido": "node scripts/instantanea.mjs",
+    "dev:panel": "PUBLIC_PANEL_URL=http://localhost:8787 astro dev --port 4399",
+    "panel": "cd workers/panel && wrangler dev --port 8787"
   },
   "keywords": [],
   "author": "",

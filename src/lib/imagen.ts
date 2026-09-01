@@ -1,59 +1,66 @@
 import { conBase } from './base';
 
 /**
- * Por dónde pasan las fotos de artistas y del archivo.
+ * Por dónde pasan todas las fotos del sitio: los retratos de artistas, el
+ * archivo y los logos de las marcas.
  *
- * Hoy no hace casi nada: devuelve la ruta local tal cual, con la base del sitio
- * puesta. Existe por lo que viene después.
+ * Hay dos clases de foto conviviendo, y esta capa existe para que las
+ * plantillas no tengan que saber cuál es cuál:
  *
- * **El plan es Cloudinary** —lo mismo que usa la página de Guadalajara de
- * Noche—, cuando se mueva el dominio de Wix y se monte el panel de edición. Un
- * archivo fotográfico de varias ediciones son cientos de imágenes: metidas en
- * git se quedan ahí para siempre y clonar el repo se vuelve lento; en una
- * librería externa no entran nunca al repo y encima llegan al navegador ya
- * redimensionadas al ancho que hace falta.
+ *   · **Las del repo** — `/patrocinadores/minerva.png`. Son las que venían del
+ *     sitio de Wix. Se sirven tal cual, con la base del sitio puesta. No se
+ *     pueden redimensionar al vuelo: son archivos estáticos.
  *
- * Ese día, todo el cambio ocurre en este archivo: se rellena `CLOUDINARY` y las
- * plantillas ni se enteran. Sin esta capa habría que ir a tocar `FichaArtista`,
- * `/archivo`, la pantalla móvil del archivo y lo que haya para entonces.
+ *   · **Las del panel** — la URL entera que devuelve Cloudinary al subir desde
+ *     `/admin`. Éstas SÍ se redimensionan, y es la mitad del motivo de usar
+ *     Cloudinary: una página de archivo con cien fotos no puede servir cien
+ *     originales de cámara.
  *
- * Cómo se usará: `imagen('/archivo/2024/inauguracion.jpg', 800)` →
- * `https://res.cloudinary.com/<cuenta>/image/upload/f_auto,q_auto,w_800/…`.
- * `f_auto` sirve AVIF o WebP según el navegador y `q_auto` ajusta la compresión
- * a lo que la imagen aguanta.
+ * Por qué Cloudinary y no meter las fotos al repo: un archivo fotográfico de
+ * cuatro ediciones son cientos de imágenes, y en git se quedan para siempre —
+ * clonar el repo se vuelve lento y no hay forma de sacarlas—. Ahí no entran
+ * nunca al repo y encima llegan en AVIF o WebP según lo que aguante el
+ * navegador.
  */
 
-/** Vacío = sigue todo en local. Al llegar el día, aquí va el nombre de la
- *  cuenta de Cloudinary y esto se enciende solo. */
-const CLOUDINARY = '';
+/** Una URL de entrega de Cloudinary, con el hueco donde van las transformaciones:
+ *  `https://res.cloudinary.com/<cuenta>/image/upload/` ← aquí ← `v123/carpeta/x.jpg` */
+const ENTREGA = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/;
+
+/** `f_auto` sirve AVIF o WebP según el navegador y `q_auto` ajusta la
+ *  compresión a lo que la imagen aguanta sin que se note. */
+const transformaciones = (ancho?: number) =>
+  ['f_auto', 'q_auto', ancho ? `w_${ancho}` : ''].filter(Boolean).join(',');
 
 /**
- * @param ruta  Ruta absoluta dentro de `public/`, p. ej. `/archivo/2024/x.jpg`.
- * @param ancho Ancho pedido en píxeles. Sin librería externa se ignora: no se
+ * @param ruta  Ruta dentro de `public/` (`/archivo/2024/x.jpg`) o la URL entera
+ *              que dio Cloudinary.
+ * @param ancho Ancho pedido en píxeles. Se ignora en las fotos del repo: no se
  *              puede redimensionar un archivo estático al vuelo.
  */
 export const imagen = (ruta: string, ancho?: number): string => {
-  // Lo que ya es una URL entera se deja en paz: una foto que alguien pegó
-  // desde otro sitio no se toca.
+  const cloudinary = ENTREGA.exec(ruta);
+  if (cloudinary) {
+    const [, base, resto] = cloudinary;
+    // Si ya trae transformaciones puestas a mano, se respetan: alguien las
+    // escribió por algo (un recorte, una marca de agua) y no toca pisarlas.
+    if (/^[a-z]{1,3}_[^/]+\//.test(resto)) return ruta;
+    return base + transformaciones(ancho) + '/' + resto;
+  }
+
+  // Cualquier otra URL entera se deja en paz: una foto que alguien pegó desde
+  // otro sitio no se toca.
   if (/^https?:\/\//.test(ruta)) return ruta;
 
-  if (!CLOUDINARY) return conBase(ruta);
-
-  const trans = ['f_auto', 'q_auto', ancho ? `w_${ancho}` : '']
-    .filter(Boolean)
-    .join(',');
-  return `https://res.cloudinary.com/${CLOUDINARY}/image/upload/${trans}${ruta}`;
+  return conBase(ruta);
 };
 
 /**
- * El `srcset` para una foto, con los anchos que de verdad se usan en el sitio.
- * Sin librería externa devuelve cadena vacía y el `<img>` se queda con su `src`
- * de siempre — que es exactamente lo que hace hoy.
+ * El `srcset` de una foto, con los anchos que de verdad se usan en el sitio.
+ *
+ * Sólo tiene sentido en las de Cloudinary: para una foto del repo devuelve
+ * cadena vacía y el `<img>` se queda con su `src` de siempre, que es lo
+ * correcto —tres copias del mismo archivo estático no son tres tamaños—.
  */
-export const juegoDeImagenes = (
-  ruta: string,
-  anchos = [480, 800, 1200],
-): string =>
-  CLOUDINARY && !/^https?:\/\//.test(ruta)
-    ? anchos.map((w) => `${imagen(ruta, w)} ${w}w`).join(', ')
-    : '';
+export const juegoDeImagenes = (ruta: string, anchos = [480, 800, 1200]): string =>
+  ENTREGA.test(ruta) ? anchos.map((w) => `${imagen(ruta, w)} ${w}w`).join(', ') : '';

@@ -1,5 +1,5 @@
 ---
-import { conBase } from '../lib/base';
+import { imagen, juegoDeImagenes } from '../lib/imagen';
 import type { Marca } from '../data/site';
 
 /** Un logo de la cinta de marcas.
@@ -10,7 +10,12 @@ import type { Marca } from '../data/site';
  *
  * Lleva la clase `mosaico` además de las utilidades: la cinta de marcas le
  * vuelca el canto a amarillo cuando la cara de la sección es oscura, y para eso
- * hace falta poder nombrarlo desde fuera. */
+ * hace falta poder nombrarlo desde fuera.
+ *
+ * El logo pasa por `imagen()` y no por `conBase()` porque desde que hay panel
+ * puede ser una URL de Cloudinary. La caja son 208 px de ancho: se pide el
+ * doble para las pantallas densas y ahí se para. Un logo que sube alguien desde
+ * el teléfono son cuatro megas, y en la cinta hay dieciocho. */
 interface Props {
   marca: Marca;
   class?: string;
@@ -26,7 +31,9 @@ const { marca, class: clase = '' } = Astro.props;
     {
       marca.logo ? (
       <img
-        src={conBase(marca.logo)}
+        src={imagen(marca.logo, 416)}
+        srcset={juegoDeImagenes(marca.logo, [208, 416]) || undefined}
+        sizes="208px"
         alt={marca.nombre}
         loading="lazy"
         decoding="async"

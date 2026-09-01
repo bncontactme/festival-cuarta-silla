@@ -1,0 +1,15 @@
+# Redirecciones 301 de verdad, para cuando el sitio viva en Cloudflare Pages.
+#
+# Astro ya genera estas mismas rutas como páginas con `<meta refresh>` (ver
+# `astro.config.mjs`), porque la vista previa de GitHub Pages no sabe leer este
+# archivo. En Pages este archivo gana: las reglas se evalúan antes que los
+# assets estáticos, así que un buscador ve un 301 y no una página que rebota.
+#
+# Las dos formas de la ruta con tilde están a propósito: circula escrita de las
+# dos maneras según de dónde se copie el enlace.
+
+/agenda                     /programa    301
+/lugar                      /sedes       301
+/event-list                 /registro    301
+/política-de-privacidad     /privacidad  301
+/pol%C3%ADtica-de-privacidad /privacidad 301
