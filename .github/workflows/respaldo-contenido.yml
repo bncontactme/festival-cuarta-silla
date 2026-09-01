@@ -13,6 +13,19 @@
 # Es la tercera de tres (KV, esto, y el respaldo semanal a Cloudinary del propio
 # Worker). Contenido que no se puede volver a juntar —las fotos de las tres
 # ediciones anteriores no las tiene nadie más— merece tres copias.
+#
+# **Este trabajo NO publica, y eso es deliberado.** Comitea a `main`, y un push
+# a `main` dispara `publicar.yml`: sin cuidado, el respaldo de las tres de la
+# mañana sacaba a la calle lo que hubiera en el panel en ese momento —a medio
+# escribir, o con la casilla de «rejilla de ejemplo» desmarcada sin querer—.
+# Ya pasó, con una actividad de prueba.
+#
+# Por eso el commit lleva `[skip ci]`, la marca con la que Actions se salta un
+# push. El respaldo se guarda igual; lo único que deja de hacer es desplegar.
+#
+# Quien publica es el panel: guardar en /admin dispara el build por
+# `repository_dispatch`. Publicar es la decisión de alguien, nunca el efecto
+# secundario de un reloj.
 name: Respaldo del contenido
 
 on:
@@ -54,7 +67,8 @@ jobs:
             echo "Sin cambios en el contenido."
           else
             VERSION=$(node -e "console.log(require('./src/data/contenido.json').version)")
-            git commit -m "contenido: instantánea del panel (versión $VERSION)"
+            # `[skip ci]` para no desplegar: ver la cabecera de este archivo.
+            git commit -m "contenido: instantánea del panel (versión $VERSION) [skip ci]"
             git pull --rebase origin ${GITHUB_REF_NAME}
             git push
           fi
