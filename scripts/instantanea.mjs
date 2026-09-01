@@ -47,6 +47,32 @@ async function bajar() {
   return datos;
 }
 
+/**
+ * Un panel recién desplegado contesta 200 con todo a cero.
+ *
+ * `version: 0` no quiere decir «el festival lo dejó vacío»: quiere decir que en
+ * KV no se ha escrito NUNCA — el contador sube en cada guardado, así que la
+ * única forma de estar en cero es no haber guardado jamás. Y entre el momento
+ * en que el Worker existe y el momento en que se siembra hay un rato en el que
+ * cualquier build publicaría un sitio sin sedes, sin marcas y sin programa.
+ *
+ * Así que el cero no pisa nada. En cuanto se siembre, la versión es 1 o más y
+ * el panel manda para siempre — incluido el día que legítimamente se quiera
+ * dejar una lista vacía, porque entonces la versión ya no será cero.
+ *
+ * No es una regla sobre «está vacío»: vacío es un estado legítimo en artistas y
+ * en archivo, y el sitio los pinta bien. Es una regla sobre «nunca se ha
+ * escrito», que es otra cosa.
+ */
+function reciennacido(datos, copia) {
+  if ((datos.version ?? 0) > 0) return false;
+  if (!copia) return false;
+  const cuenta = (d) =>
+    d.sedes.length + d.programa.actividades.length + d.artistas.length +
+    d.archivo.length + d.marcas.patrocinadores.length + d.marcas.colaboradores.length;
+  return cuenta(datos) < cuenta(copia);
+}
+
 async function copia() {
   try {
     return JSON.parse(await readFile(DESTINO, 'utf8'));
@@ -72,6 +98,13 @@ try {
   log('⚠️ ', `el panel no contestó (${e.message}).`);
   log('  ', `se construye con la copia del repo, versión ${guardado.version ?? '?'}` +
             (guardado.actualizado ? ` del ${guardado.actualizado}` : '') + '.');
+  process.exit(0);
+}
+
+if (reciennacido(datos, guardado)) {
+  log('⚠️ ', 'el panel contesta, pero está sin sembrar (versión 0 y más vacío que el repo).');
+  log('  ', 'no se pisa la copia buena. Siémbralo y esto deja de salir:');
+  log('  ', "CLAVE='…' node workers/panel/semilla.mjs");
   process.exit(0);
 }
 

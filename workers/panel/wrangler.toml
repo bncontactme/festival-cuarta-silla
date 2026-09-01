@@ -10,7 +10,7 @@ workers_dev = true
 #   npx wrangler kv namespace create CONTENIDO
 [[kv_namespaces]]
 binding = "CONTENIDO"
-id = "PEGAR_AQUI_EL_ID_DE_KV"    # en `wrangler dev` no se usa: KV corre en local
+id = "d6e661c30a68474ca66820048769ddaa"   # en `wrangler dev` no se usa: KV corre en local
 
 # Respaldo semanal a Cloudinary (lunes 9:00 UTC ≈ 3:00 en GDL).
 [triggers]
