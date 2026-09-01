@@ -32,7 +32,7 @@ de septiembre: la semana del festival va a haber cambios de última hora, y no
 puedo ser el cuello de botella de un cambio de hora de un taller.
 
 Lo que se necesita: que entren a una dirección, escriban una contraseña y
-carguen sedes, patrocinadores, programa, artistas y archivo. Y que el sitio se
+carguen sedes, patrocinadores, programa, artistas y galería. Y que el sitio se
 llene solo conforme se llena eso.
 
 ---
@@ -92,7 +92,7 @@ convierta en un editor de sitio web mal hecho.
 | **Sedes** | `site.ts › sedes.lista` | nombre, dirección, coordenada, instagram, pin de Google |
 | **Programa** | `site.ts › actividades` | las barras del Gantt: título, día, inicio, fin, sede, tipo, artista, formulario de registro |
 | **Artistas** | `artistas.ts › lista` | nombre, disciplina, foto, instagram, sede |
-| **Archivo** | `archivo.ts › lista` | ediciones anteriores y sus fotos con pie |
+| **Galería** | `archivo.ts › lista` | ediciones anteriores y sus fotos con pie |
 | **Marcas** | `site.ts › patrocinadores` + `colaboradores` | nombre, logo, enlace |
 
 **NO se mueve** — esto es el sitio, no contenido:
@@ -101,6 +101,13 @@ convierta en un editor de sitio web mal hecho.
   privacidad, las etiquetas de la cuenta regresiva.
 - La barra de navegación, las redirecciones, el sitemap.
 - Los colores del Gantt, la tipografía, el movimiento.
+
+**«Galería» fuera, `archivo` dentro.** La sección se rotula Galería porque lo
+que la gente viene a ver son fotos, pero lo que se guarda es un archivo:
+ediciones fechadas, con pie, de la más reciente a la más vieja. El módulo, la
+colección del panel, la clave de KV y la carpeta de Cloudinary siguen diciendo
+`archivo` — renombrar el almacén por un rótulo es una migración de datos a
+cambio de nada.
 
 Un panel que deja editar el manifiesto acaba con el manifiesto roto. Si hay
 que cambiar copy, es un commit — y es correcto que lo sea.

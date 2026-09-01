@@ -48,10 +48,10 @@ const puertas = [
  *  índice. Se quedan fuera de las cuatro grandes a propósito —una quinta
  *  puerta le come 70 px a la escena de la silla, y en un iPhone SE la silla,
  *  que mide 217 px, se recortaría contra el `overflow: hidden` del marco—.
- *  La convocatoria de voluntarixs comparte esta franja con el archivo;
+ *  La convocatoria de voluntarixs comparte esta franja con la galería;
  *  «Apoya» sólo aparece cuando exista la cuenta de PayPal. */
 const atajos = [
-  { label: archivo.titulo, href: '/archivo' },
+  { label: archivo.titulo, href: '/galeria' },
   { ...convocatoriaVoluntarixs, externa: true },
   ...(festival.donaciones.paypal
     ? [{ label: 'Apoya', href: festival.donaciones.paypal, externa: true }]
