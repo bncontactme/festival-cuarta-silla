@@ -53,7 +53,14 @@ const conEstrella = lista.filter((s) => s.punto);
   data-mapa-sedes
 >
   {/* ── El plano ───────────────────────────────────────────────────────── */}
-  <div class="flex h-[55vh] flex-col border-2 border-papel/25 lg:h-[60vh]">
+  {/* El plano se queda negro, pero ahora es una TARJETA sobre el campo
+      amarillo, no una sección. Por eso el canto pasa de un papel translúcido
+      —que era el filete interno de una banda oscura— a tinta maciza con
+      sombra dura: es el mismo trato que reciben la ficha y los botones del
+      sitio, y es lo que lo hace un objeto puesto encima. */}
+  <div
+    class="flex h-[48vh] flex-col border-2 border-tinta shadow-[8px_8px_0_var(--color-tinta)] lg:h-[52vh]"
+  >
     <div
       class="mapa-caja"
       data-caja
@@ -198,14 +205,14 @@ const conEstrella = lista.filter((s) => s.punto);
       no se entera. `overscroll-behavior: contain`, en la hoja, es lo que
       evita que al llegar al final el gesto siga y arrastre la portada. */}
   <ul
-    class="lista-sedes h-[55vh] border-t-2 border-papel/25 pr-3 lg:h-[60vh]"
+    class="lista-sedes h-[48vh] border-t-2 border-tinta bg-amarillo pr-3 lg:h-[52vh]"
     data-lista-sedes
     data-lenis-prevent
   >
     {
       lista.map((sede, i) => (
         <li
-          class="fila-sede flex items-center gap-4 border-b border-papel/20"
+          class="fila-sede flex items-center gap-4 border-b border-tinta/20"
           data-reveal="arriba"
           data-retraso={i * 45}
         >
@@ -223,10 +230,10 @@ const conEstrella = lista.filter((s) => s.punto);
             data-x={sede.punto?.x}
             data-y={sede.punto?.y}
           >
-            <span class="meta w-8 shrink-0 text-papel/35 transition-colors group-hover:text-amarillo">
+            <span class="meta w-8 shrink-0 text-tinta/45 transition-colors group-hover:text-rojo">
               {sede.indice}
             </span>
-            <span class="display truncate text-2xl leading-none transition-colors group-hover:text-amarillo">
+            <span class="display truncate text-2xl leading-none text-tinta transition-colors group-hover:text-rojo">
               {sede.nombre}
             </span>
             {!sede.punto && (
@@ -241,7 +248,7 @@ const conEstrella = lista.filter((s) => s.punto);
               href={sede.instagram}
               target="_blank"
               rel="noopener"
-              class="meta shrink-0 text-[0.6rem] text-papel/35 transition-colors duration-300 hover:text-amarillo"
+              class="meta shrink-0 text-[0.6rem] text-tinta/45 transition-colors duration-300 hover:text-rojo"
             >
               IG ↗
             </a>

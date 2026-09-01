@@ -8,6 +8,7 @@ import { conBase } from '../lib/base';
 interface Props {
   variante?: 'roja' | 'amarilla' | 'hueso';
   class?: string;
+  style?: string;
   deriva?: boolean;
   alt?: string;
 }
@@ -15,6 +16,7 @@ interface Props {
 const {
   variante = 'roja',
   class: clase = '',
+  style,
   deriva = false,
   alt = '',
 } = Astro.props;
@@ -29,4 +31,5 @@ const {
   width="316"
   height="420"
   class={`pointer-events-none select-none ${deriva ? 'deriva' : ''} ${clase}`}
+  style={style}
 />

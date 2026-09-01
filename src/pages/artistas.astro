@@ -4,7 +4,7 @@ import { conBase } from '../lib/base';
 import Encabezado from '../components/Encabezado.astro';
 import RejaArtistas from '../components/RejaArtistas.astro';
 import FichaArtista from '../components/FichaArtista.astro';
-import Silla from '../components/Silla.astro';
+import Estrella from '../components/Estrella.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import { artistas } from '../data/artistas';
 import { festival } from '../data/site';
@@ -30,13 +30,16 @@ const cuantos = artistas.lista.length;
       titulo={artistas.titulo}
       indice="05"
       nota={cuantos ? `${cuantos} nombres` : artistas.estado}
-      fondo="papel"
+      fondo="amarillo"
     >
       {
         cuantos === 0 ? (
           <div class="p-4">
             <div class="ficha">
-              <p class="meta text-rojo">{artistas.estado}</p>
+              <p class="meta flex items-center gap-3 text-tinta">
+                <span class="inline-block h-[2px] w-8 bg-rojo" />
+                {artistas.estado}
+              </p>
               <p class="display mt-3 text-3xl leading-[0.95]">
                 Todavía no hay nombres
               </p>
@@ -63,13 +66,15 @@ const cuantos = artistas.lista.length;
         : `${artistas.titulo} / ${festival.anio}`
     }
     titulo={artistas.titulo}
-    fondo="papel"
+    fondo="amarillo"
   />
 
   {/* Vacía, la sección se aprieta: la ficha de «todavía no hay» flotando en
       media pantalla de blanco se lee como un error de maquetación y no como un
       estado. Llena, la reja va a sangre y no lleva relleno ninguno. */}
-  <section class="bg-papel">
+  {/* El campo pasa a amarillo. El blanco no desaparece: se queda donde tiene
+      oficio, que es el marco de las fotos de cada ficha. */}
+  <section class="bg-amarillo">
     <div class={cuantos ? '' : 'px-4 py-14 sm:px-6 lg:px-10 lg:py-16'}>
       {/* Sin `border-r` en el contenedor: los cantos derechos de la última
           columna son los de las fichas, y el de abajo cierra la reja. */}
@@ -77,22 +82,27 @@ const cuantos = artistas.lista.length;
     </div>
   </section>
 
-  <section class="relative overflow-hidden border-t-2 border-tinta bg-amarillo">
-    <Silla
-      variante="roja"
-      deriva
-      class="absolute -bottom-10 right-4 w-40 opacity-20 lg:w-64"
-    />
+  <section class="relative overflow-hidden border-t-2 border-tinta bg-rojo">
+    <Estrella tinta="amarilla" alto="abajo" />
     <div class="relative px-4 py-20 sm:px-6 lg:px-10">
-      <p class="meta mb-6 text-rojo" data-reveal="lado">{festival.ciudad}</p>
       <p
-        class="display max-w-4xl text-[9vw] leading-[0.95] text-tinta lg:text-[5.5vw]"
+        class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta"
+        data-reveal="lado"
+      >
+        {festival.ciudad}
+      </p>
+      <p
+        class="display max-w-4xl text-[9vw] leading-[0.95] text-amarillo lg:text-[5.5vw]"
         data-lineas
         data-reveal="lineas"
       >
         {festival.fechas}
       </p>
-      <a href={conBase("/programa")} class="boton mt-10" data-reveal="arriba">
+      <a
+        href={conBase("/programa")}
+        class="boton boton--amarillo mt-10"
+        data-reveal="arriba"
+      >
         Ver el programa
       </a>
     </div>
