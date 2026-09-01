@@ -39,8 +39,13 @@ export function pintarPrevia(actividades: any[], dias: string[]): HTMLElement {
 
   dias.forEach((nombre, d) => {
     const delDia = validas.filter((a) => Number(a.dia) === d);
-    const bloque = el('div', { class: 'dia' },
-      el('h4', {}, `${nombre} — ${delDia.length || 'nada'} ${delDia.length === 1 ? 'actividad' : 'actividades'}`));
+    // «nada actividades» era lo que salía con cero: `0 || 'nada'` y el plural
+    // por separado. Los tres casos, dichos enteros.
+    const cuantas =
+      delDia.length === 0 ? 'sin actividades'
+      : delDia.length === 1 ? '1 actividad'
+      : `${delDia.length} actividades`;
+    const bloque = el('div', { class: 'dia' }, el('h4', {}, `${nombre} — ${cuantas}`));
 
     // Una sede por carril, en el orden en que aparecen: así se lee como la
     // rejilla del sitio y no hace falta buscar.
