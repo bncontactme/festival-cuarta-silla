@@ -161,6 +161,11 @@ export const sedes = {
   acciones: {
     conoce: 'Conoce más',
     ubicacion: 'Ubicación',
+    /** El de la ficha del plano de la portada. Ahí se llama por su nombre y no
+     *  «Conoce más» como en `/sedes`: en la ficha del plano hay dos botones
+     *  juntos y uno de ellos ya dice a dónde va —Ubicación—, así que el otro
+     *  tiene que decirlo también o se convierte en una lotería. */
+    instagram: 'Instagram',
     verMapa: 'Ver en el mapa',
     sinMapa: 'Elegí una sede para verla en el mapa',
     // Rótulos del plano de la portada.
