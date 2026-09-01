@@ -119,6 +119,12 @@ const dia = (nombre: string, fecha: string): Dia => ({
 export const programa = {
   titulo: 'Programa',
   estado: '(Próximamente)',
+  /**
+   * Una sola llave para el lanzamiento. En `false`, /programa conserva toda
+   * la rejilla, los días y sus interacciones en el código, pero enseña el
+   * cartel de espera. Cambiarla a `true` publica la programación completa.
+   */
+  publicado: false,
   // "Domingo, 24" es un typo del sitio original; corregido a 27 para que la
   // fecha coincida con el rango anunciado del festival.
   dias: [

@@ -1,0 +1,101 @@
+---
+import { festival, programa } from '../data/site';
+
+interface Props {
+  movil?: boolean;
+}
+
+const { movil = false } = Astro.props;
+const estado = programa.estado.replace(/[()]/g, '');
+---
+
+<article
+  class:list={[
+    'aviso-programa',
+    movil
+      ? 'aviso-programa--movil border-2 border-tinta bg-papel text-tinta shadow-[6px_6px_0_var(--color-tinta)]'
+      : 'ficha ficha--ancha',
+  ]}
+  data-reveal={movil ? undefined : 'escala'}
+>
+  <header
+    class:list={[
+      'meta flex flex-wrap items-center justify-between gap-3 border-b-2 border-tinta bg-tinta text-papel',
+      movil ? 'px-4 py-3 text-[0.5rem]' : 'px-6 py-4 lg:px-8',
+    ]}
+  >
+    <span class="text-amarillo">Programa / {festival.anio}</span>
+    <span>{movil ? '24—27 / 09' : festival.fechas.replace('Del ', '')}</span>
+  </header>
+
+  <div class:list={['aviso-programa-cuerpo', !movil && 'cuadricula']}>
+    <p class:list={['meta text-rojo', movil && 'text-[0.52rem]']}>
+      {festival.ciudad}
+    </p>
+
+    <h2 class="aviso-programa-titulo display">{estado}</h2>
+
+    <div
+      class:list={[
+        'meta flex flex-wrap items-center justify-between gap-3 border-t-2 border-tinta pt-4',
+        movil && 'text-[0.48rem]',
+      ]}
+    >
+      <span>{movil ? festival.fechas : festival.nombre}</span>
+      <span class="text-rojo" aria-hidden="true">★ ★ ★</span>
+    </div>
+  </div>
+</article>
+
+<style>
+  .aviso-programa {
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .aviso-programa-cuerpo {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    min-height: clamp(22rem, 43vw, 38rem);
+    flex-direction: column;
+    justify-content: space-between;
+    padding: clamp(1.5rem, 3vw, 3rem);
+  }
+
+  .aviso-programa-cuerpo::before {
+    position: absolute;
+    z-index: -1;
+    top: -22%;
+    right: 16%;
+    bottom: -22%;
+    width: clamp(4.5rem, 12vw, 10rem);
+    content: '';
+    background: var(--color-rojo);
+    transform: rotate(12deg);
+  }
+
+  .aviso-programa-titulo {
+    position: relative;
+    width: max-content;
+    max-width: 100%;
+    font-size: clamp(3.75rem, 12.4vw, 11rem);
+    line-height: 0.82;
+    letter-spacing: -0.045em;
+    white-space: nowrap;
+  }
+
+  .aviso-programa--movil .aviso-programa-cuerpo {
+    min-height: min(74cqw, 22rem);
+    padding: 1rem;
+  }
+
+  .aviso-programa--movil .aviso-programa-cuerpo::before {
+    right: 13%;
+    width: 4.5rem;
+  }
+
+  .aviso-programa--movil .aviso-programa-titulo {
+    font-size: min(15.5cqw, 4.9rem);
+  }
+</style>

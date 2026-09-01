@@ -5,6 +5,7 @@ import Encabezado from '../components/Encabezado.astro';
 import Marquee from '../components/Marquee.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import Gantt from '../components/Gantt.astro';
+import AvisoPrograma from '../components/AvisoPrograma.astro';
 import {
   programa,
   festival,
@@ -32,7 +33,7 @@ import {
       fondo="amarillo"
     >
       {
-        programa.dias.map((dia, i) => (
+        programa.publicado ? programa.dias.map((dia, i) => (
           <details class="plegable">
             <summary>
               <span class="plegable-indice meta text-[0.6rem] text-rojo">
@@ -71,7 +72,11 @@ import {
               ))}
             </ul>
           </details>
-        ))
+        )) : (
+          <div class="p-4 pb-1">
+            <AvisoPrograma movil />
+          </div>
+        )
       }
 
       <div class="p-4">
@@ -113,6 +118,8 @@ import {
           este selector y él las obedece desde fuera, que es lo mismo que hace
           la lista de días de la portada. En la vista de días se esconden — no
           hay ningún día que elegir— y el script se encarga. */}
+      {
+        programa.publicado ? (
       <div class="ficha ficha--ancha" data-reveal="arriba">
         <div
           class="mb-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-b-2 border-tinta pb-6"
@@ -233,6 +240,10 @@ import {
           </div>
         </div>
       </div>
+        ) : (
+          <AvisoPrograma />
+        )
+      }
 
       {/* Las dos puertas, dentro de la misma sección y no en una banda aparte.
           Con banda propia hacían falta dos fondos seguidos: en amarillo se
