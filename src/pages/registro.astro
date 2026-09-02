@@ -45,6 +45,37 @@ import {
 
 const cuantas = actividadesConRegistro.length;
 
+/**
+ * Cada evento es una tarjeta del color de su tipo.
+ *
+ * Los cuatro colores no son decoración nueva: son los mismos con que la rejilla
+ * de `/programa` pinta las barras, así que quien viene de allá reconoce el
+ * taller por el rojo antes de leer el título. Aquí se usan como campo de la
+ * tarjeta entera y no como un canto de seis píxeles, que era lo que había: en
+ * una página de fondo amarillo, seis píxeles de color no hacen que una fila
+ * parezca un objeto.
+ *
+ * El botón se elige por el campo que le toca debajo, no por el tipo: sobre rojo
+ * o ladrillo va el amarillo, y sobre amarillo o papel el rojo de siempre. Es la
+ * misma regla que ya siguen `boton--amarillo` y `boton--papel` en el resto del
+ * sitio: el botón nunca es del color de lo que tiene detrás.
+ */
+/** Rojo y ladrillo son los campos oscuros de la paleta: los dos escriben en
+ *  amarillo. Sobre ellos cambian dos cosas —el botón y la letra chica— y las
+ *  dos se deciden aquí para no repetir el criterio en cada sitio. */
+const campoOscuro = (tipo: keyof typeof coloresGantt) =>
+  coloresGantt[tipo].texto.includes('amarillo');
+
+const botonDe = (tipo: keyof typeof coloresGantt) =>
+  campoOscuro(tipo) ? 'boton boton--amarillo' : 'boton';
+
+/** La clase de la tarjeta. El modificador vuelca la letra chica a papel: el
+ *  amarillo sobre rojo son 3,67:1 y bajándole la opacidad —que es lo que hace
+ *  el resto de esta lista sobre campos claros— se queda por debajo de 3. Es la
+ *  misma regla que ya sigue la barra de las pantallas de móvil. */
+const claseEvento = (tipo: keyof typeof coloresGantt) =>
+  campoOscuro(tipo) ? 'evento evento--campo-oscuro' : 'evento';
+
 const espera = registro.espera;
 
 /** Lo que se lee bajo el titular: cuántas puertas hay abiertas, o la espera. */
@@ -93,22 +124,28 @@ const descripcion = registroAbierto
                 </span>
               </summary>
 
-              <ul class="divide-y-2 divide-tinta/15 bg-amarillo">
+              <ul class="space-y-4 bg-amarillo p-4">
                 {dia.actividades.map((a) => (
-                  <li class="px-4 py-4">
-                    <p class="meta text-[0.55rem] text-rojo">
-                      {a.inicio}–{a.fin} · {a.sede}
+                  <li
+                    class={claseEvento(a.tipo)}
+                    style={`--fondo:${coloresGantt[a.tipo].fondo};--texto:${coloresGantt[a.tipo].texto}`}
+                  >
+                    <p class="evento-hora">
+                      {a.inicio}–{a.fin}
+                      <span class="evento-tipo">{a.tipo}</span>
                     </p>
-                    <h3 class="mt-1.5 text-base leading-snug font-bold">{a.titulo}</h3>
-                    {a.artista && (
-                      <p class="meta mt-1 text-[0.5rem] opacity-55">{a.artista}</p>
-                    )}
+
+                    <div class="min-w-0">
+                      <h3 class="text-base leading-snug font-bold">{a.titulo}</h3>
+                      {a.artista && <p class="evento-artista text-sm">{a.artista}</p>}
+                      <p class="meta evento-sede text-[0.5rem]">{a.sede}</p>
+                    </div>
 
                     <a
                       href={a.registro}
                       target="_blank"
                       rel="noopener"
-                      class="boton mt-3"
+                      class={`${botonDe(a.tipo)} mt-3`}
                       data-registro={a.registro}
                     >
                       {registro.acciones.registro}{abreEncima(a.registro) ? '' : ' ↗'}
@@ -181,38 +218,42 @@ const descripcion = registroAbierto
                   </p>
                 </header>
 
-                <ul class="divide-y-2 divide-tinta/12">
+                <ul class="mt-6 space-y-5">
                   {dia.actividades.map((a) => {
                     const sede = sedeDe(a.sede);
                     return (
                       <li
-                        class="grid gap-x-6 gap-y-3 border-l-[6px] py-6 pl-4 lg:grid-cols-[8rem_1fr_auto] lg:items-baseline"
-                        style={`border-left-color:${coloresGantt[a.tipo].fondo}`}
+                        class={claseEvento(a.tipo)}
+                        style={`--fondo:${coloresGantt[a.tipo].fondo};--texto:${coloresGantt[a.tipo].texto}`}
                       >
-                        {/* El canto de color es el tipo, y es el mismo que
-                            colorea su barra en la rejilla: quien viene de
-                            /programa reconoce la actividad por el color antes
-                            que por el nombre. Va de canto y no de cuadradito
-                            al lado de la hora porque es la misma forma que
-                            allá — el filete del borde izquierdo de la barra. */}
-                        <p class="meta text-tinta/70">{a.inicio}–{a.fin}</p>
+                        {/* El color es el tipo, y es el mismo con que la
+                            rejilla pinta su barra: quien viene de /programa
+                            reconoce el taller por el rojo antes de leer el
+                            título. Antes era un canto de seis píxeles a la
+                            izquierda de una fila; en una página de fondo
+                            amarillo, seis píxeles no hacen un objeto. */}
+                        <p class="evento-hora">
+                          {a.inicio}–{a.fin}
+                          <span class="evento-tipo">{a.tipo}</span>
+                        </p>
 
                         <div class="min-w-0">
                           <h3 class="text-xl leading-snug font-bold lg:text-2xl">
                             {a.titulo}
                           </h3>
                           {a.artista && (
-                            <p class="mt-1 text-base opacity-70">{a.artista}</p>
+                            <p class="evento-artista text-base">{a.artista}</p>
                           )}
-                          <p class="meta mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-tinta/55">
-                            <span>{a.tipo}</span>
-                            <span aria-hidden="true">·</span>
+                          {/* El subrayado va en `currentColor` y no en rojo:
+                              sobre el campo rojo de un taller, un subrayado
+                              rojo no existe. */}
+                          <p class="meta evento-sede">
                             {sede ? (
                               <a
                                 href={enlaceMapa(sede)}
                                 target="_blank"
                                 rel="noopener"
-                                class="underline decoration-rojo decoration-2 underline-offset-4 hover:text-rojo"
+                                class="underline decoration-current decoration-2 underline-offset-4 hover:opacity-100"
                               >
                                 {a.sede} ↗
                               </a>
@@ -235,7 +276,7 @@ const descripcion = registroAbierto
                           href={a.registro}
                           target="_blank"
                           rel="noopener"
-                          class="boton boton--papel justify-self-start lg:justify-self-end"
+                          class={`${botonDe(a.tipo)} justify-self-start lg:justify-self-end`}
                           data-registro={a.registro}
                         >
                           {registro.acciones.registro}{abreEncima(a.registro) ? '' : ' ↗'}
