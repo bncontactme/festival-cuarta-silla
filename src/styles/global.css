@@ -298,13 +298,55 @@
   .evento {
     --fondo: var(--color-amarillo);
     --texto: var(--color-tinta);
-    display: grid;
-    gap: 0.75rem;
-    padding: 1.25rem;
     background-color: var(--fondo);
     color: var(--texto);
     border: var(--borde) solid var(--color-tinta);
     box-shadow: 6px 6px 0 var(--color-tinta);
+  }
+
+  /* ── Fila: la forma del teléfono ──────────────────────────────────────
+     La hora a la izquierda en columna propia —todas las del día arrancan el
+     título en la misma vertical— y a su derecha qué, dónde y la puerta.
+     Compacta a propósito: es la forma que deja ver el día entero de una vez.
+     La sombra baja a 4 px, como los botones en pantalla chica: seis en un
+     objeto de este alto se comen el hueco entre uno y el siguiente. */
+  .evento--fila {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.2rem 0.9rem;
+    padding: 0.85rem 1rem;
+    box-shadow: 4px 4px 0 var(--color-tinta);
+  }
+
+  .evento--fila .evento-artista {
+    margin-top: 0.15rem;
+  }
+
+  .evento--fila .evento-sede {
+    margin-top: 0.3rem;
+  }
+
+  .evento--fila .evento-puerta {
+    margin-top: 0.55rem;
+  }
+
+  /* ── Bloque: la forma de la pantalla ancha ────────────────────────────
+     De pie y de dos en dos. A lo largo de 1.200 px la fila dejaba el título
+     solo en medio del campo y la puerta a un palmo, al otro extremo; en
+     bloque la actividad entera cabe de una mirada. La puerta se pega abajo
+     —`margin-top:auto`— para que dos tarjetas de la misma fila terminen en la
+     misma raya aunque una tenga el título más largo. */
+  .evento--bloque {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1.5rem;
+  }
+
+  @media (width >= 80rem) {
+    .evento--bloque {
+      padding: 1.75rem 1.9rem;
+    }
   }
 
   /* La hora, que es por lo que se busca en esta página, en mono y a tamaño de
@@ -350,16 +392,58 @@
     opacity: 0.8;
   }
 
-  /* En pantalla ancha, las tres piezas en fila: cuándo, qué, y la puerta.
-     La hora en columna fija para que todas las tarjetas de un día empiecen
-     el título en la misma vertical. */
-  @media (width >= 64rem) {
-    .evento {
-      grid-template-columns: 9.5rem minmax(0, 1fr) auto;
-      align-items: center;
-      gap: 1.75rem;
-      padding: 1.5rem 1.75rem;
-    }
+  /* ── La puerta ────────────────────────────────────────────────────────
+     El mismo enlace con dos pesos, según la forma que lo aloja.
+
+     En la fila, al contorno y pequeño: es una entre varias de un día que se
+     lee de un vistazo, y siete botones macizos apilados pesan más que los
+     títulos. En el bloque, macizo y a lo ancho, que es el remate de la
+     tarjeta y lo único que hay que pulsar.
+
+     Los colores salen de las variables de la tarjeta, así que la puerta
+     nunca es del color de lo que tiene detrás sin que nadie lo decida dos
+     veces: sobre campo rojo sale amarilla, sobre campo amarillo sale tinta.
+     Al pasar el cursor se cambian los dos, que es como se enciende todo lo
+     pulsable de este sitio. */
+  .evento-puerta {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 0.45em;
+    margin-top: 0.65rem;
+    padding: 0.5rem 0.85rem;
+    border: var(--borde) solid currentColor;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.5rem;
+    line-height: 1;
+    transition:
+      background-color 0.2s var(--ease-salida),
+      color 0.2s var(--ease-salida);
+  }
+
+  .evento-puerta:hover,
+  .evento-puerta:focus-visible {
+    background-color: var(--texto);
+    color: var(--fondo);
+  }
+
+  .evento--bloque .evento-puerta {
+    width: 100%;
+    justify-content: center;
+    margin-top: auto;
+    padding: 0.95rem 1.5rem;
+    font-size: 0.72rem;
+    background-color: var(--texto);
+    color: var(--fondo);
+  }
+
+  .evento--bloque .evento-puerta:hover,
+  .evento--bloque .evento-puerta:focus-visible {
+    background-color: transparent;
+    color: var(--texto);
   }
 
   /* ── Enlace subrayado que se dibuja ─────────────────────────────────── */

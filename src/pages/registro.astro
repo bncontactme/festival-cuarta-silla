@@ -60,15 +60,13 @@ const cuantas = actividadesConRegistro.length;
  * en su rótulo, debajo de la hora; el color hace lo que hace en el resto del
  * sitio, que es marcar el ritmo.
  *
- * El botón se elige por el campo que le toca debajo: amarillo sobre rojo, rojo
- * sobre amarillo. Un botón nunca es del color de lo que tiene detrás.
+ * La puerta de cada tarjeta saca sus colores de las mismas variables, así que
+ * nunca es del color de lo que tiene detrás: sobre campo rojo sale amarilla,
+ * sobre campo amarillo sale tinta.
  */
 const campos = ['rojo', 'amarillo'] as const;
 
 const campoDe = (i: number) => campos[i % campos.length];
-
-const botonDe = (i: number) =>
-  campoDe(i) === 'rojo' ? 'boton boton--amarillo' : 'boton';
 
 /** Sobre rojo, la letra chica se vuelca a papel en vez de bajarle la opacidad
  *  al amarillo: son 3,67:1 de partida y apagándolo se queda por debajo de 3.
@@ -129,29 +127,36 @@ const descripcion = registroAbierto
                 </span>
               </summary>
 
-              <ul class="space-y-4 bg-amarillo p-4">
+              {/* En el teléfono, filas. Cada actividad en un bloque de
+                  pantalla entera eran tres pantallas de scroll para tres
+                  eventos: la hora, que es por lo que se busca aquí, se veía de
+                  una en una. En fila caben todas las del día a la vez y el
+                  campo sigue turnándose, que es lo que las separa. */}
+              <ul class="space-y-3 bg-amarillo p-3">
                 {dia.actividades.map((a, i) => (
-                  <li class={claseEvento(i)} style={estiloEvento(i)}>
+                  <li class={`${claseEvento(i)} evento--fila`} style={estiloEvento(i)}>
                     <p class="evento-hora">
-                      {a.inicio}–{a.fin}
+                      {a.inicio}
                       <span class="evento-tipo">{a.tipo}</span>
                     </p>
 
                     <div class="min-w-0">
-                      <h3 class="text-base leading-snug font-bold">{a.titulo}</h3>
-                      {a.artista && <p class="evento-artista text-sm">{a.artista}</p>}
+                      <h3 class="text-sm leading-snug font-bold">{a.titulo}</h3>
+                      {a.artista && (
+                        <p class="evento-artista text-[0.8rem]">{a.artista}</p>
+                      )}
                       <p class="meta evento-sede text-[0.5rem]">{a.sede}</p>
-                    </div>
 
-                    <a
-                      href={a.registro}
-                      target="_blank"
-                      rel="noopener"
-                      class={`${botonDe(i)} mt-3`}
-                      data-registro={a.registro}
-                    >
-                      {registro.acciones.registro}{abreEncima(a.registro) ? '' : ' ↗'}
-                    </a>
+                      <a
+                        href={a.registro}
+                        target="_blank"
+                        rel="noopener"
+                        class="evento-puerta"
+                        data-registro={a.registro}
+                      >
+                        {registro.acciones.registro}{abreEncima(a.registro) ? '' : ' ↗'}
+                      </a>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -220,15 +225,17 @@ const descripcion = registroAbierto
                   </p>
                 </header>
 
-                <ul class="mt-6 space-y-5">
+                {/* En pantalla ancha, bloques y de dos en dos. La fila a lo
+                    largo de 1.200 px dejaba el título solo en medio de un
+                    campo de color con la puerta a un palmo, al otro extremo;
+                    en bloque, la actividad entera —cuándo, qué, dónde y por
+                    dónde se entra— cabe de una mirada. Es el mismo objeto que
+                    en el teléfono, puesto de pie. */}
+                <ul class="mt-6 grid gap-5 lg:grid-cols-2">
                   {dia.actividades.map((a, i) => {
                     const sede = sedeDe(a.sede);
                     return (
-                      <li class={claseEvento(i)} style={estiloEvento(i)}>
-                        {/* Antes el color era un canto de seis píxeles a la
-                            izquierda de una fila; en una página de fondo
-                            amarillo, seis píxeles no hacen un objeto. Ahora es
-                            el campo entero, y se turna con el de al lado. */}
+                      <li class={`${claseEvento(i)} evento--bloque`} style={estiloEvento(i)}>
                         <p class="evento-hora">
                           {a.inicio}–{a.fin}
                           <span class="evento-tipo">{a.tipo}</span>
@@ -273,7 +280,7 @@ const descripcion = registroAbierto
                           href={a.registro}
                           target="_blank"
                           rel="noopener"
-                          class={`${botonDe(i)} justify-self-start lg:justify-self-end`}
+                          class="evento-puerta"
                           data-registro={a.registro}
                         >
                           {registro.acciones.registro}{abreEncima(a.registro) ? '' : ' ↗'}
