@@ -1299,9 +1299,21 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
      línea: si creciera al llenarse, media portada daría un salto cada vez que
      el cursor cruza la rejilla.
      Sigue aquí aunque exista el globo: el globo lo trae el cursor, y esto se
-     lee igual con el tabulador y en un teléfono. */
+     lee igual con el tabulador y en un teléfono.
+
+     `width: 0` con `min-width: 100%` es lo que impide que crezca A LO ANCHO,
+     que era el otro salto y el gordo. `overflow: hidden` recorta lo que se
+     pinta, pero no lo que el elemento MIDE: con `white-space: nowrap`, su
+     ancho mínimo sigue siendo el del renglón entero, y ese mínimo sube por los
+     padres hasta la columna de la portada. Con un título largo la columna del
+     mini pasaba de 657 a 886 px —la rejilla entera se estiraba y la lista de
+     días de al lado se aplastaba de 487 a 258— cada vez que el cursor cruzaba
+     esa barra. Con el ancho declarado en cero, el elemento no aporta ninguna
+     medida a nadie, y el `min-width: 100%` lo estira a lo que le den. */
   .gantt-pista {
     overflow: hidden;
+    width: 0;
+    min-width: 100%;
     min-height: 1.1rem;
     margin-top: 1.1rem;
     border-top: 1px solid color-mix(in srgb, var(--color-tinta) 20%, transparent);
