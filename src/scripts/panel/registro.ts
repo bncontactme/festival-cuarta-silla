@@ -1,21 +1,28 @@
 /**
- * La pestaña de Registro.
+ * La pestaña de Registro. Una columna: el formulario de cada actividad.
  *
  * No es una colección: es **el programa mirado por la puerta de entrar**. La
- * lista de eventos es la misma —`programa.actividades`—, y lo que se edita aquí
- * es, de cada una, su formulario; más las tres cosas que son de la página
- * entera y no caben en ninguna fila.
+ * lista de eventos es la misma —`programa.actividades`— y lo que se edita aquí
+ * es, de cada una, su formulario. Nada más.
  *
- * Por qué así y no una lista propia de «eventos con registro»: dos listas de lo
+ * Ese «nada más» costó una vuelta. Hubo también un interruptor de «el registro
+ * está abierto», un formulario general y una nota de la página, copiando el
+ * interruptor de la rejilla de ejemplo. Sobraba: **aquí no hay un registro al
+ * festival que abrir o cerrar** —se apunta uno por actividad—, así que pegarle
+ * el formulario a una actividad ES abrirle el registro. Lo único que hacía el
+ * interruptor era dejar la página en «Próximamente» con tres formularios ya
+ * cargados, esperando a que alguien se acordara de marcar una casilla.
+ *
+ * Por qué esto y no una lista propia de «eventos con registro»: dos listas de lo
  * mismo se separan el primer día que alguien cambia una hora en una sola de las
  * dos, y entonces el sitio dice una cosa en /programa y otra en /registro. Al
  * ser la misma lista, mover un taller de las 12 a las 13 lo mueve en los dos
  * sitios y no hay nada que sincronizar.
  *
- * La forma también es distinta a propósito. En Programa cada actividad es una
- * ficha de ocho campos porque ahí se escribe; aquí no se escribe una actividad,
- * se repasa una columna de cuarenta —«¿a cuáles les falta el formulario?»—, y para
- * eso lo que sirve es un renglón por actividad y todas a la vista.
+ * La forma sí es distinta a propósito. En Programa cada actividad es una ficha
+ * de nueve campos porque ahí se escribe; aquí no se escribe una actividad, se
+ * repasa una columna de cuarenta —«¿a cuál le falta el formulario?»—, y para eso
+ * lo que sirve es un renglón por actividad y todas a la vista.
  */
 import { el, vaciar } from './dom';
 import type { Ctx } from './campos';
@@ -59,30 +66,6 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
   const seccion = el('section');
   const programa = estado.programa;
 
-  /**
-   * Los ajustes del registro, en una copia.
-   *
-   * No se hace `programa.registro ??= {}` sobre el estado: lo sucio se calcula
-   * comparando el JSON con el que bajó del Worker, así que meterle una clave
-   * vacía al entrar marcaba el programa como «sin guardar» por el solo hecho de
-   * abrir la pestaña — con el punto rojo, el botón encendido y la pregunta al
-   * cerrar, sin que nadie hubiera tocado nada.
-   *
-   * Se escribe al estado sólo cuando hay algo que escribir, y se quita entero
-   * cuando se vacía el último campo. Vaciar los tres tiene que dejar el
-   * programa exactamente como estaba.
-   */
-  const reg: any = { ...(programa.registro ?? {}) };
-
-  function guardarAjustes() {
-    if (Object.keys(reg).length) programa.registro = { ...reg };
-    else delete programa.registro;
-    ctx.cambiado();
-  }
-
-  // La lista de verdad, no una copia: lo que se escribe en un renglón se
-  // escribe en la actividad del programa, que es de lo que va esta pestaña.
-  if (!Array.isArray(programa.actividades)) programa.actividades = [];
   const actos: any[] = programa.actividades;
   const cuenta = (p: Puerta) => actos.filter((a) => puertaDe(a) === p).length;
 
@@ -95,114 +78,15 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
     el('span', { class: 'rotulo', style: 'opacity:.5' },
       `${cuenta('formulario')} de ${actos.length} con formulario`),
     el('p', {},
-      'Aquí no se apunta uno al festival: se apunta a cada actividad. Esta pestaña es la misma lista del Programa, ' +
-      'mirada por su formulario — cambiar una hora se hace allí y se ve aquí, porque es el mismo dato. ' +
-      'En /registro salen SÓLO las que tienen formulario: marcar «Libre» quita la actividad de la página y deja de contarla como pendiente.'),
+      'Pega aquí el formulario de cada actividad y sale en /registro. No hay nada más que darle: ' +
+      'el registro es a los eventos, no al festival.'),
   );
   seccion.append(cabecera);
-
-  // ── El interruptor y lo de la página entera ────────────────────────────────
-  // El interruptor cambia de color y de texto según lo que haya debajo, así que
-  // se guarda para poder cambiarlo en su sitio: repintar la pestaña entera cada
-  // vez que se marca una casilla pierde el scroll y el foco.
-  let nodoInterruptor = interruptor();
-  seccion.append(nodoInterruptor);
-  seccion.append(ajustes());
-
-  function refrescarInterruptor() {
-    const nuevo = interruptor();
-    nodoInterruptor.replaceWith(nuevo);
-    nodoInterruptor = nuevo;
-  }
 
   // ── La lista ───────────────────────────────────────────────────────────────
   const barraFiltro = el('div', { class: 'filtros' });
   const cuerpo = el('div', { class: 'renglones' });
   seccion.append(barraFiltro, cuerpo);
-
-  /**
-   * «El registro está abierto». Es el botón de publicar de esta página, igual
-   * que el de la rejilla de ejemplo lo es del programa, y por la misma razón se
-   * pregunta en vez de deducirse: que haya formularios pegados no quiere decir
-   * que el registro esté abierto — se pegan mientras se prepara.
-   *
-   * Y está atado al otro: no se puede abrir el registro de un programa que
-   * todavía dice ser un andamio, porque enseñar sus actividades aquí sería
-   * publicar por la puerta de atrás lo que la puerta de delante esconde.
-   */
-  function interruptor() {
-    const abierto = reg.abierto === true;
-    const esEjemplo = programa.esEjemplo !== false;
-    const casilla = el('input', {
-      type: 'checkbox', checked: abierto, id: 'registro-abierto',
-      style: 'width:auto;margin-right:.5rem',
-      onchange: (e: any) => {
-        if (e.target.checked) reg.abierto = true;
-        else delete reg.abierto;
-        guardarAjustes();
-        refrescarInterruptor();
-      },
-    });
-
-    const sinPuerta = abierto && !esEjemplo && cuenta('formulario') === 0;
-    const clase = !abierto ? 'ojo' : esEjemplo || sinPuerta ? 'error' : 'bien';
-
-    return el('div', { class: 'aviso ' + clase },
-      el('label', { for: 'registro-abierto', style: 'display:flex;align-items:flex-start;cursor:pointer' },
-        casilla,
-        el('span', {},
-          el('strong', {}, 'El registro está abierto.'),
-          ' ',
-          !abierto
-            ? 'Mientras esté sin marcar, /registro enseña el cartel de «Próximamente» y no se ve ni una actividad, tengan formulario o no. Márcalo cuando ya se pueda entrar.'
-            : esEjemplo
-              ? 'Está marcado, pero el programa sigue marcado como «rejilla de ejemplo» y eso manda: /registro seguirá diciendo «Próximamente». No se puede abrir la entrada a un programa que todavía dice que no es el programa. Publica el programa y esto se abre solo.'
-              : sinPuerta
-                ? 'Está abierto y ninguna actividad tiene formulario: la página va a salir vacía. Rellena la columna de abajo antes de dejarlo así.'
-                : `El registro está publicado: /registro enseña las ${cuenta('formulario')} actividades con formulario. Las de entrada libre no salen ahí: a ésas se entra sin apuntarse, y se dice en su ficha de la rejilla.`,
-        ),
-      ),
-    );
-  }
-
-  /** Lo que no es de ninguna actividad: el formulario general y la nota. */
-  function ajustes() {
-    const caja = el('div', { class: 'fila fila--suelta' });
-    const rejilla = el('div', { class: 'rejilla' });
-
-    const general = el('div', { class: 'campo', style: 'grid-column:span 3' },
-      el('label', {}, 'Formulario general'),
-      el('input', {
-        type: 'url', placeholder: 'https://…', spellcheck: false,
-        value: reg.general ?? '',
-        oninput: (e: any) => {
-          const v = e.target.value.trim();
-          if (v) reg.general = v; else delete reg.general;
-          guardarAjustes();
-        },
-      }),
-      el('span', { class: 'ayuda' },
-        'Uno solo para todo el festival, si lo hay. Sale arriba de la página, encima de la lista. Sin él, cada quien se apunta actividad por actividad, que es lo normal.'),
-    );
-
-    const nota = el('div', { class: 'campo', style: 'grid-column:span 5' },
-      el('label', {}, 'Nota del registro'),
-      el('textarea', {
-        value: reg.nota ?? '',
-        placeholder: 'Cupos, si hay que llegar antes, qué pasa si no te apuntaste…',
-        oninput: (e: any) => {
-          const v = e.target.value.trim();
-          if (v) reg.nota = v; else delete reg.nota;
-          guardarAjustes();
-        },
-      }),
-      el('span', { class: 'ayuda' }, 'Sale debajo del titular de /registro. Máximo 400 caracteres.'),
-    );
-
-    rejilla.append(general, nota);
-    caja.append(el('div', { class: 'cuerpo' }, rejilla));
-    return caja;
-  }
 
   // ── Los renglones ──────────────────────────────────────────────────────────
 
@@ -313,8 +197,7 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
           ctx.cambiado();
           pintarFiltros();
           pintarLista();
-          refrescarInterruptor();
-        },
+            },
       }),
       el('span', {}, 'Libre'),
     );
@@ -332,7 +215,6 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
       // La cuenta de la pestaña y la de los filtros cuentan lo mismo: si una
       // se mueve y la otra no, parece que se perdió algo.
       pintarFiltros();
-      refrescarInterruptor();
       cabecera.querySelector('.rotulo')!.textContent =
         `${cuenta('formulario')} de ${actos.length} con formulario`;
     }

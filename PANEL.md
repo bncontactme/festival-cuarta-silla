@@ -92,7 +92,7 @@ convierta en un editor de sitio web mal hecho.
 |---|---|---|
 | **Sedes** | `site.ts › sedes.lista` | nombre, dirección, coordenada, instagram, pin de Google |
 | **Programa** | `site.ts › actividades` | las barras del Gantt: título, día, inicio, fin, sede, tipo, artista, formulario de registro |
-| **Registro** | *(no existía)* | el mismo programa por la otra puerta: qué actividad tiene formulario, cuál es de entrada libre, y si el registro está abierto |
+| **Registro** | *(no existía)* | el mismo programa por la otra puerta: el formulario de cada actividad |
 | **Artistas** | `artistas.ts › lista` | nombre, disciplina, foto, instagram, sede |
 | **Galería** | `archivo.ts › lista` | ediciones anteriores y sus fotos con pie |
 | **Marcas** | `site.ts › patrocinadores` + `colaboradores` | nombre, logo, enlace |
@@ -149,21 +149,25 @@ cs:build               marca de tiempo del último rebuild disparado
 
 Los tipos son **exactamente** los que ya están en `src/data/*.ts`. No se
 inventa un esquema nuevo: `Sede`, `ActividadGantt`, `Artista`, `Edicion`,
-`Foto`, `Marca` y `Registro` son el contrato, ya están tipados y ya están
+`Foto` y `Marca` son el contrato, ya están tipados y ya están
 comentados campo por campo. Esa documentación se convierte, casi literal, en la
 ayuda que sale al lado de cada campo del panel.
 
-**El registro no tiene clave propia y eso es la decisión, no un atajo.** Vive
-dentro de `cs:col:programa` porque no es otra cosa: son los mismos eventos
-mirados por la puerta de entrar. Con clave aparte harían falta dos guardados
-para publicar una actividad con su formulario, y entre uno y otro cabe un
-registro abierto sobre una programación que no llegó a entrar. Juntos, eso no
-puede pasar.
+**El registro no tiene clave propia, ni ajustes, ni nada suyo.** Son dos campos
+de la actividad y ya:
 
 ```
-programa.registro   { abierto?, general?, nota? }
 ActividadGantt      … + registro?: url  ·  libre?: true
 ```
+
+Hubo una tercera cosa —un `programa.registro` con interruptor de «abierto»,
+formulario general y nota de la página— y se quitó. Sobraba: **aquí no hay un
+registro al festival que abrir o cerrar**, se apunta uno por actividad, así que
+pegarle el formulario a una actividad ES abrirle el registro. Un interruptor que
+sólo puede decir que sí cuando ya hay formularios no decide nada; lo único que
+hizo fue dejar la página en «Próximamente» con tres formularios ya cargados,
+esperando a que alguien se acordara de marcar una casilla. Se supo el mismo día
+que se cargó el programa de verdad.
 
 `libre` existe para separar dos cosas que sin ella se leen igual —«esta
 actividad no pide registro» y «todavía no nos han pasado el formulario»— y que
@@ -385,16 +389,15 @@ El renglón del panel dice de quién es cada uno —«Google Forms», «Tally»,
 dominio a secas—. «Con formulario» no distinguía un enlace bueno de uno pegado
 de otra actividad, y cargando catorce seguidas ése es el error de todos los días.
 
-Y el interruptor **«el registro está abierto»**, que es a `/registro` lo que el
-de la rejilla de ejemplo es a `/programa`. Se declara y no se deduce por lo
-mismo: tener formularios pegados no es tenerlo abierto — se pegan mientras se
-prepara.
+Y no hay interruptor de publicar. Lo hubo —«el registro está abierto»— y se
+quitó: pegar el formulario es publicarlo, y una casilla que sólo puede decir que
+sí cuando ya hay formularios no decide nada. `/registro` enseña lo que hay; si
+no hay nada, el cartel de «Próximamente».
 
-Los dos interruptores están atados, y en un solo sentido: **con el programa
-marcado como rejilla de ejemplo, el registro no abre aunque esté marcado**.
-Enseñar aquí las actividades de una rejilla que `/programa` esconde sería
-publicarla por la puerta de atrás. El panel lo dice con todas sus letras en vez
-de dejar que alguien marque la casilla y se vaya pensando que abrió.
+Queda una sola condición, y no es una decisión nueva: **el programa tiene que
+estar publicado**. Enseñar aquí las actividades de una rejilla que `/programa`
+esconde sería publicarla por la puerta de atrás, y eso ya lo decide el
+interruptor de la rejilla de ejemplo. Una decisión, un sitio.
 
 **Barra de estado permanente**: versión, cuándo se guardó por última vez, si
 hay un rebuild en curso y un enlace a ver el sitio.

@@ -32,7 +32,6 @@ import Cartel from '../components/Cartel.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import {
   registro,
-  registroDatos,
   registroAbierto,
   registroPorDia,
   actividadesConRegistro,
@@ -46,11 +45,7 @@ import {
 
 const cuantas = actividadesConRegistro.length;
 
-/** Con el programa sin publicar falta el programa; con el programa puesto sólo
- *  falta abrir la puerta. No es lo mismo y se nota si se dice mal. */
-const espera = programaPublicado ? registro.espera.conPrograma : registro.espera.sinPrograma;
-
-const nota = registroDatos.nota ?? (registroAbierto ? null : espera);
+const espera = registro.espera;
 
 /** Lo que se lee bajo el titular: cuántas puertas hay abiertas, o la espera. */
 const estado = registroAbierto
@@ -77,25 +72,6 @@ const descripcion = registroAbierto
       fondo="rojo"
       fondoCuerpo="amarillo"
     >
-      {
-        registroAbierto && (nota || registroDatos.general) && (
-          <div class="p-4">
-            {nota && <p class="text-sm leading-snug">{nota}</p>}
-            {registroDatos.general && (
-              <a
-                href={registroDatos.general}
-                target="_blank"
-                rel="noopener"
-                class="boton boton--papel mt-4"
-                data-registro={registroDatos.general}
-              >
-                {registro.acciones.general}{abreEncima(registroDatos.general) ? '' : ' ↗'}
-              </a>
-            )}
-          </div>
-        )
-      }
-
       {
         registroAbierto ? (
           registroPorDia.map((dia) => (
@@ -196,21 +172,6 @@ const descripcion = registroAbierto
               Aquí no se apunta uno al festival: se apunta a cada actividad. Éstas
               son las que piden registro; a las demás se entra sin más.
             </p>
-            {nota && (
-              <p class="mt-4 max-w-xl text-base leading-relaxed text-tinta/70">{nota}</p>
-            )}
-
-            {registroDatos.general && (
-              <a
-                href={registroDatos.general}
-                target="_blank"
-                rel="noopener"
-                class="boton boton--papel mt-7"
-                data-registro={registroDatos.general}
-              >
-                {registro.acciones.general}{abreEncima(registroDatos.general) ? '' : ' ↗'}
-              </a>
-            )}
           </div>
         )
       }
