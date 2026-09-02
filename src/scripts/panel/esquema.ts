@@ -25,6 +25,9 @@ export type Campo = {
   requerido?: boolean;
   /** Lo que se lee al lado de la casilla en un campo `sino`. */
   siNo?: string;
+  /** Sólo en `sede`: ofrece además «Todas las sedes», para los recorridos. Lo
+   *  lleva el programa y no las fichas de artista — nadie expone en todas. */
+  todas?: boolean;
   /** Cuántas columnas de la rejilla ocupa. Por defecto una. */
   ancho?: number;
   /** Carpeta de Cloudinary. Puede depender de la fila (el año, en el archivo). */
@@ -63,6 +66,11 @@ export type Tabla = {
 
 export const TIPOS_ACTIVIDAD = ['taller', 'charla', 'muestra', 'escena'] as const;
 
+/** La sede que no es una sede: los recorridos guiados pasan por todas. Mismo
+ *  texto que `SEDE_TODAS` en `src/data/tipos.ts` y que la constante del
+ *  validador; si cambia en uno, cambia en los tres. */
+export const SEDE_TODAS = 'Todas las sedes';
+
 /** Los colores de la rejilla, para la vista previa. Copiados de `coloresGantt`
  *  en `site.ts`: aquí no se puede importar el sitio, y de todas formas la
  *  previa es un boceto, no la rejilla de verdad. */
@@ -83,7 +91,8 @@ const actividades: Esquema = {
     { clave: 'dia', etiqueta: 'Día', tipo: 'dia', requerido: true, ancho: 2 },
     { clave: 'inicio', etiqueta: 'Empieza', tipo: 'hora', requerido: true },
     { clave: 'fin', etiqueta: 'Termina', tipo: 'hora', requerido: true },
-    { clave: 'sede', etiqueta: 'Sede', tipo: 'sede', requerido: true, ancho: 2 },
+    { clave: 'sede', etiqueta: 'Sede', tipo: 'sede', requerido: true, ancho: 2, todas: true,
+      ayuda: 'Para los recorridos guiados que pasan por varias, elige «Todas las sedes»: la rejilla le da su propio carril y la ficha no promete una dirección que no hay.' },
     { clave: 'tipo', etiqueta: 'Tipo', tipo: 'tipoActividad', requerido: true },
     { clave: 'artista', etiqueta: 'Quién la da', tipo: 'texto', ancho: 2,
       ayuda: 'Sale en la ficha, debajo del título.' },

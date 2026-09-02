@@ -38,6 +38,18 @@ export type Sede = {
   notaMapa?: string;
 };
 
+/**
+ * La sede que no es una sede: los recorridos guiados pasan por todas.
+ *
+ * Es un nombre reservado, no una fila de `sedes`. Meterlo como sede de verdad
+ * habría puesto una estrella en el plano de la portada sobre unas coordenadas
+ * inventadas y una tarjeta con dirección en `/sedes`, que son justo las dos
+ * cosas que un recorrido no tiene. Así, el programa puede apuntar a él —la
+ * rejilla le da su propio carril— y el resto del sitio sabe que ahí no hay
+ * puerta a la que llegar.
+ */
+export const SEDE_TODAS = 'Todas las sedes';
+
 /** Una barra de la rejilla del programa. */
 export type ActividadGantt = {
   titulo: string;
@@ -46,7 +58,8 @@ export type ActividadGantt = {
   /** 24 h, 'HH:MM'. El fin es lo que le da largo a la barra. */
   inicio: string;
   fin: string;
-  /** Tiene que coincidir con un `nombre` de `sedes.lista`. */
+  /** Un `nombre` de `sedes.lista`, o `SEDE_TODAS` para los recorridos que
+   *  pasan por todas. */
   sede: string;
   /** Colorea la barra: uno de `coloresGantt`. */
   tipo: 'taller' | 'charla' | 'muestra' | 'escena';

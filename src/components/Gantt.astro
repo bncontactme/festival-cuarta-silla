@@ -7,6 +7,7 @@ import {
   programa,
   sedeDe,
   enlaceMapa,
+  enTodasLasSedes,
 } from '../data/site';
 
 /**
@@ -423,7 +424,11 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
                   data-cuando={a.cuando}
                   data-horas={`${a.inicio}–${a.fin}`}
                   data-sede={a.sede}
-                  data-direccion={a.sedeInfo?.direccion ?? ''}
+                  data-direccion={
+                    enTodasLasSedes(a.sede)
+                      ? 'El recorrido pasa por las sedes del festival'
+                      : (a.sedeInfo?.direccion ?? '')
+                  }
                   data-mapa={a.sedeInfo ? enlaceMapa(a.sedeInfo) : ''}
                   data-registro={a.registro ?? ''}
                   data-libre={a.libre ? 'si' : ''}
@@ -444,13 +449,20 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
               <div class="gantt-etiqueta" style={`grid-row:${panel.resto.fila}`}>
                 <span class="gantt-etiqueta-nombre">{panel.resto.etiqueta}</span>
               </div>
+              {/* Al día que se estaba mirando, no al programa por defecto.
+                  Llevaba a `/programa` a secas, así que pulsar «+1 sedes» en el
+                  viernes abría el jueves y había que volver a buscar el día del
+                  que venías — con la mitad de la gracia del adelanto perdida en
+                  el camino. El `#dia-N` lo recoge el script de `/programa`. */}
               <a
                 class="gantt-resto"
-                href={conBase('/programa')}
+                href={conBase(`/programa#dia-${panel.clave}`)}
                 style={`grid-column:${panel.resto.col} / span ${panel.resto.largo};grid-row:${panel.resto.fila}`}
               >
                 <span>
-                  {panel.resto.actos} actividades más · {panel.resto.tramo} ↗
+                  {panel.resto.actos === 1
+                    ? '1 actividad más'
+                    : `${panel.resto.actos} actividades más`} · {panel.resto.tramo} ↗
                 </span>
               </a>
             </>

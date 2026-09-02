@@ -154,34 +154,18 @@ const descripcion = registroAbierto
     />
 
     <div class="relative px-4 pt-14 pb-16 sm:px-6 lg:px-10 lg:pt-16">
-      {/* ── La bajada ────────────────────────────────────────────────────
-          Sólo cuando hay lista. «Registro a eventos» no dice cómo funciona
-          esto —la mitad de la gente llega esperando un formulario único del
-          festival— y eso hay que decirlo una vez, arriba.
-
-          Cerrado no lleva bajada, y ése era el problema: encima del cartel de
-          PRÓXIMAMENTE había un rótulo que decía «Próximamente» y un párrafo
-          explicando que todavía no. Tres veces lo mismo, y una de ellas
-          contando por dentro qué interruptor está puesto, que es asunto del
-          panel y no de quien viene a apuntarse. El cartel lo dice solo. */}
-      {
-        registroAbierto && (
-          <div class="max-w-3xl" data-reveal="arriba">
-            <p class="meta text-rojo">{estado}</p>
-            <p class="mt-4 text-lg leading-snug lg:text-xl">
-              Aquí no se apunta uno al festival: se apunta a cada actividad. Éstas
-              son las que piden registro; a las demás se entra sin más.
-            </p>
-          </div>
-        )
-      }
-
       {/* ── La lista ─────────────────────────────────────────────────────
           Un bloque por día y una fila por actividad. La hora manda a la
-          izquierda, como en la rejilla; a la derecha, la puerta. */}
+          izquierda, como en la rejilla; a la derecha, la puerta.
+
+          Sin bajada. La había —explicando que aquí se apunta uno por actividad
+          y no al festival— y era decirle al visitante cómo funciona una página
+          que ya se explica sola: un titular que dice REGISTRO A EVENTOS, los
+          días, y un botón por evento. Lo que se entiende mirando no hace falta
+          contarlo. */}
       {
         registroAbierto ? (
-          <div class="mt-14 space-y-12">
+          <div class="space-y-12">
             {registroPorDia.map((dia) => (
               <section data-reveal="arriba">
                 <header class="flex flex-wrap items-baseline gap-x-5 gap-y-1 border-b-2 border-tinta pb-3">

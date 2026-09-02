@@ -10,8 +10,10 @@
 
 import { contenido, delPanel } from './contenido';
 import type { Sede, Marca, ActividadGantt } from './tipos';
+import { SEDE_TODAS } from './tipos';
 
 export type { Sede, Marca, ActividadGantt };
+export { SEDE_TODAS };
 
 export const festival = {
   nombre: 'Festival de Arte Conceptual',
@@ -249,6 +251,11 @@ export const privacidad = {
  *  salen de `sedes.lista`, que ya los tiene. No se repiten aquí. */
 export const sedeDe = (nombre: string) =>
   sedes.lista.find((s) => s.nombre === nombre);
+
+/** Si una actividad es de las que pasan por todas — un recorrido guiado. No
+ *  tiene dirección ni mapa a los que llevar, y eso no es un hueco: es lo que
+ *  es. */
+export const enTodasLasSedes = (nombre: string) => nombre === SEDE_TODAS;
 
 /** Los cuatro tipos, cada uno con su tinta. El color no pinta la barra entera
  *  —eso era un carnaval—: es el filete de 5 px del canto izquierdo y el
