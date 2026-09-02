@@ -1,6 +1,6 @@
 {
-  "version": 53,
-  "actualizado": "2026-09-02T23:55:14.647Z",
+  "version": 54,
+  "actualizado": "2026-09-02T23:56:13.783Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -445,6 +445,15 @@
         "tipo": "charla",
         "artista": "Colectiva hilos",
         "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
+      },
+      {
+        "titulo": "Inauguración de obra",
+        "dia": 2,
+        "inicio": "20:00",
+        "fin": "23:59",
+        "sede": "Ánima Galería",
+        "tipo": "muestra",
+        "artista": "Ánima Galeria"
       }
     ],
     "esEjemplo": false
