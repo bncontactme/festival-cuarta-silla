@@ -41,7 +41,9 @@ const puertas = [
     /* Sin nombres todavía, la puerta va sin nota: «Por anunciar» debajo de
        ARTISTAS no dice nada que no diga la propia página al abrirla, y en una
        rejilla de cuatro puertas es la única que se disculpa. */
-    nota: artistas.lista.length ? `${artistas.lista.length} nombres` : '',
+    nota: artistas.lista.length
+      ? `${artistas.lista.length} ${artistas.lista.length === 1 ? 'nombre' : 'nombres'}`
+      : '',
     fondo: 'amarillo',
   },
 ] as const;
@@ -87,11 +89,18 @@ const atajos = [
         <span class="sr-only">
           {festival.nombre} — {festival.fechas} — {festival.ciudad}
         </span>
-        <span
-          class="display display-centro block leading-[0.88] text-rojo"
-          aria-hidden="true"
-        >
-          Festival<br />de Arte<br />Conceptual
+        {/* Los tres renglones, con «de Arte» en tinta: es el mismo rótulo
+            del hero de escritorio, y el color parte el nombre por donde lo
+            parte el manual. Van en tres elementos y no en uno con <br>
+            porque cada línea lleva su propio color. */}
+        <span class="display display-centro block leading-[0.88] text-rojo" aria-hidden="true">
+          Festival
+        </span>
+        <span class="display display-centro block leading-[0.88] text-tinta" aria-hidden="true">
+          de Arte
+        </span>
+        <span class="display display-centro block leading-[0.88] text-rojo" aria-hidden="true">
+          Conceptual
         </span>
       </h1>
     </div>

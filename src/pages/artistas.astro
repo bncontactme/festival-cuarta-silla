@@ -29,7 +29,7 @@ const cuantos = artistas.lista.length;
     <Pantalla
       titulo={artistas.titulo}
       indice="05"
-      nota={cuantos ? `${cuantos} nombres` : undefined}
+      nota={cuantos ? `${cuantos} ${cuantos === 1 ? 'nombre' : 'nombres'}` : undefined}
       fondo="amarillo"
     >
       {
