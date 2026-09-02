@@ -205,7 +205,7 @@ export const TABLAS: Record<string, Tabla> = {
   },
   artistas: {
     clave: 'artistas', titulo: 'Artistas', coleccion: 'artistas', esquema: artistas,
-    nota: 'Vacío está bien: la portada y /artistas se pintan solas en su estado «Por anunciar». Con la primera ficha aparece la reja.',
+    nota: 'Vacío está bien: /artistas dice que la selección se anuncia junto con el programa. Con la primera ficha aparece la reja.',
     leer: (e) => e.artistas,
     escribir: (e, l) => { e.artistas = l; },
   },

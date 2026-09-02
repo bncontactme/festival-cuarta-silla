@@ -19,10 +19,16 @@ export type { Artista };
 
 export const artistas = {
   titulo: 'Artistas',
-  estado: 'Por anunciar',
-  /** Lo que se lee en el hueco mientras no haya lista. */
-  vacio:
-    'La selección se anuncia junto con el programa. Se irá publicando también en la cuenta del festival.',
+  /** Lo que se lee en el hueco mientras no haya lista.
+   *
+   *  No lleva rótulo de estado —«Por anunciar», «Todavía no hay nombres»—:
+   *  decir dos veces que la lista está vacía cuando se está viendo vacía no
+   *  informa de nada. Lo único que el visitante no sabe es CUÁNDO, y eso es
+   *  justo lo que dice este texto. */
+  vacio: {
+    titulo: 'La selección se anuncia junto con el programa',
+    nota: 'Se irá publicando también en la cuenta del festival.',
+  },
   acciones: {
     ver: 'Ver a todxs',
     instagram: 'IG',

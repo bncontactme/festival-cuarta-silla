@@ -17,7 +17,7 @@ const cuantos = artistas.lista.length;
   descripcion={
     cuantos
       ? `Lxs ${cuantos} artistas del ${festival.nombre} en ${festival.ciudad}.`
-      : `Artistas del ${festival.nombre}. ${artistas.estado}.`
+      : `Artistas del ${festival.nombre} en ${festival.ciudad}. ${artistas.vacio.titulo}.`
   }
 >
   {/* ── Móvil: una columna, la foto manda ──────────────────────────────── */}
@@ -29,22 +29,18 @@ const cuantos = artistas.lista.length;
     <Pantalla
       titulo={artistas.titulo}
       indice="05"
-      nota={cuantos ? `${cuantos} nombres` : artistas.estado}
+      nota={cuantos ? `${cuantos} nombres` : undefined}
       fondo="amarillo"
     >
       {
         cuantos === 0 ? (
           <div class="p-4">
             <div class="ficha">
-              <p class="meta flex items-center gap-3 text-tinta">
-                <span class="inline-block h-[2px] w-8 bg-rojo" />
-                {artistas.estado}
-              </p>
-              <p class="display mt-3 text-3xl leading-[0.95]">
-                Todavía no hay nombres
+              <p class="display text-3xl leading-[0.95]">
+                {artistas.vacio.titulo}
               </p>
               <p class="mt-4 font-mono text-[0.8rem] leading-relaxed text-tinta/70">
-                {artistas.vacio}
+                {artistas.vacio.nota}
               </p>
             </div>
           </div>
