@@ -247,6 +247,44 @@
     }
   }
 
+  /* ── El registro, dentro de la lista del programa ─────────────────────
+     Un botón de fila: el mismo que la ficha de la rejilla, encogido a la
+     medida de un renglón de la lista de días —en el teléfono y en las cuatro
+     columnas de escritorio, que son estrechas—.
+
+     Al contorno y no macizo: en una columna con seis actividades, seis
+     rectángulos rojos rellenos se leen antes que los títulos, y lo que se
+     viene a leer es el programa. Al pasar el cursor se vuelca y se hace
+     macizo, que es lo que hacen el resto de los botones del sitio.
+
+     El relleno no es decorativo: con `0.5rem` de letra, el alto de la caja se
+     lo da el padding, y por debajo de eso deja de ser algo que un pulgar
+     pueda apuntar. */
+  .registro-fila {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    margin-top: 0.5rem;
+    padding: 0.45rem 0.8rem;
+    border: var(--borde) solid var(--color-rojo);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.5rem;
+    line-height: 1;
+    color: var(--color-rojo);
+    transition:
+      background-color 0.2s var(--ease-salida),
+      color 0.2s var(--ease-salida);
+  }
+
+  .registro-fila:hover,
+  .registro-fila:focus-visible {
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
+  }
+
   /* ── Enlace subrayado que se dibuja ─────────────────────────────────── */
   .enlace {
     position: relative;

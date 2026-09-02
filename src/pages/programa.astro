@@ -75,6 +75,17 @@ import {
                       <span class="meta mt-0.5 block text-[0.5rem] text-tinta/45">
                         {a.sede}
                       </span>
+                      {a.registro && (
+                        <a
+                          href={a.registro}
+                          target="_blank"
+                          rel="noopener"
+                          class="registro-fila"
+                          aria-label={`Registrarme en ${a.titulo}`}
+                        >
+                          Registrarme <span aria-hidden="true">↗</span>
+                        </a>
+                      )}
                     </span>
                   </li>
                 ))}
@@ -243,6 +254,24 @@ import {
                             <span class="meta mt-1 block text-[0.55rem] text-tinta/45">
                               {a.sede}
                             </span>
+                            {/* Sólo las que tienen formulario. Las demás no
+                                llevan nada: un botón apagado, o un renglón
+                                diciendo que todavía no se puede, convierte
+                                una lista de qué hay en una lista de lo que
+                                falta. Quien quiera saber cómo se entra a una
+                                actividad sin botón lo tiene en su ficha de la
+                                rejilla. */}
+                            {a.registro && (
+                              <a
+                                href={a.registro}
+                                target="_blank"
+                                rel="noopener"
+                                class="registro-fila"
+                                aria-label={`Registrarme en ${a.titulo}`}
+                              >
+                                Registrarme <span aria-hidden="true">↗</span>
+                              </a>
+                            )}
                           </span>
                         </li>
                       ))}
