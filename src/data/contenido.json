@@ -1,6 +1,6 @@
 {
-  "version": 50,
-  "actualizado": "2026-09-02T22:49:44.160Z",
+  "version": 51,
+  "actualizado": "2026-09-02T23:46:40.356Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -375,6 +375,26 @@
         "sede": "Casa Dos Guayabos",
         "tipo": "escena",
         "artista": "Festival de arte conceptual"
+      },
+      {
+        "titulo": "Recorrido: Marcha del Arte",
+        "dia": 2,
+        "inicio": "10:00",
+        "fin": "18:00",
+        "sede": "Todas las sedes",
+        "tipo": "muestra",
+        "artista": "Equipo Festival de Arte Conceptual",
+        "libre": true
+      },
+      {
+        "titulo": "Recorrido: Marcha del Arte",
+        "dia": 3,
+        "inicio": "10:00",
+        "fin": "18:00",
+        "sede": "Todas las sedes",
+        "tipo": "muestra",
+        "artista": "Equipo Festival de Arte Conceptual",
+        "libre": true
       }
     ],
     "esEjemplo": false
