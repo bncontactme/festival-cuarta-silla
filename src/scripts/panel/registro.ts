@@ -93,10 +93,11 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
   const cabecera = el('div', { class: 'cabecera' },
     el('h2', {}, 'Registro a eventos'),
     el('span', { class: 'rotulo', style: 'opacity:.5' },
-      `${cuenta('formulario') + cuenta('libre')} de ${actos.length} con puerta`),
+      `${cuenta('formulario')} de ${actos.length} con formulario`),
     el('p', {},
       'Aquí no se apunta uno al festival: se apunta a cada actividad. Esta pestaña es la misma lista del Programa, ' +
-      'mirada por su formulario — cambiar una hora se hace allí y se ve aquí, porque es el mismo dato.'),
+      'mirada por su formulario — cambiar una hora se hace allí y se ve aquí, porque es el mismo dato. ' +
+      'En /registro salen SÓLO las que tienen formulario: marcar «Libre» quita la actividad de la página y deja de contarla como pendiente.'),
   );
   seccion.append(cabecera);
 
@@ -143,7 +144,7 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
       },
     });
 
-    const sinPuerta = abierto && !esEjemplo && cuenta('formulario') + cuenta('libre') === 0;
+    const sinPuerta = abierto && !esEjemplo && cuenta('formulario') === 0;
     const clase = !abierto ? 'ojo' : esEjemplo || sinPuerta ? 'error' : 'bien';
 
     return el('div', { class: 'aviso ' + clase },
@@ -157,8 +158,8 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
             : esEjemplo
               ? 'Está marcado, pero el programa sigue marcado como «rejilla de ejemplo» y eso manda: /registro seguirá diciendo «Próximamente». No se puede abrir la entrada a un programa que todavía dice que no es el programa. Publica el programa y esto se abre solo.'
               : sinPuerta
-                ? 'Está abierto y ninguna actividad tiene formulario ni está marcada como entrada libre: la página va a salir vacía. Rellena la columna de abajo antes de dejarlo así.'
-                : `El registro está publicado: /registro enseña las ${cuenta('formulario') + cuenta('libre')} actividades a las que se puede entrar.`,
+                ? 'Está abierto y ninguna actividad tiene formulario: la página va a salir vacía. Rellena la columna de abajo antes de dejarlo así.'
+                : `El registro está publicado: /registro enseña las ${cuenta('formulario')} actividades con formulario. Las de entrada libre no salen ahí: a ésas se entra sin apuntarse, y se dice en su ficha de la rejilla.`,
         ),
       ),
     );
@@ -333,7 +334,7 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
       pintarFiltros();
       refrescarInterruptor();
       cabecera.querySelector('.rotulo')!.textContent =
-        `${cuenta('formulario') + cuenta('libre')} de ${actos.length} con puerta`;
+        `${cuenta('formulario')} de ${actos.length} con formulario`;
     }
 
     nodo.append(cuando, quien, enlace, libre, marca);

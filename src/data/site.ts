@@ -100,42 +100,31 @@ export const manifiesto = {
     'El arte conceptual propone preguntas capaces de alterar nuestra manera de mirar y habitar la realidad.',
 };
 
-/** Los horarios existen en el original pero sin contenido asignado todavía. */
-const horarios = [
-  '8:00',
-  '9:00',
-  '9:15',
-  '10:15',
-  '11:00',
-  '11:30',
-  '12:15',
-  '14:00',
-  '14:15',
-  '15:00',
-  '15:45',
-  '16:15',
-];
+export type Dia = { dia: string; fecha: string };
 
-export type Slot = { hora: string; actividad: string };
-export type Dia = { dia: string; fecha: string; slots: Slot[] };
-
-const dia = (nombre: string, fecha: string): Dia => ({
-  dia: nombre,
-  fecha,
-  slots: horarios.map((hora) => ({ hora, actividad: '' })),
-});
-
+/**
+ * Los cuatro días.
+ *
+ * Aquí ya no hay horarios. Los había —doce, de las 8:00 a las 16:15, con la
+ * actividad vacía— y venían tal cual del Wix, donde tampoco tenían nada dentro.
+ * La vista «Por días» de `/programa` los pintaba: cuarenta y ocho renglones que
+ * decían «Por anunciar», los mismos cuatro días seguidos, con catorce
+ * actividades de verdad cargadas en el panel y ninguna de ellas a la vista.
+ *
+ * La lista de horas de un día es el día, y el día lo dicen las actividades: sale
+ * de `agendaPorDia`, más abajo, cuando `actividades` ya existe.
+ */
 export const programa = {
   titulo: 'Programa',
   estado: '(Próximamente)',
   // "Domingo, 24" es un typo del sitio original; corregido a 27 para que la
   // fecha coincida con el rango anunciado del festival.
   dias: [
-    dia('Jueves', '24 de septiembre'),
-    dia('Viernes', '25 de septiembre'),
-    dia('Sábado', '26 de septiembre'),
-    dia('Domingo', '27 de septiembre'),
-  ],
+    { dia: 'Jueves', fecha: '24 de septiembre' },
+    { dia: 'Viernes', fecha: '25 de septiembre' },
+    { dia: 'Sábado', fecha: '26 de septiembre' },
+    { dia: 'Domingo', fecha: '27 de septiembre' },
+  ] as Dia[],
 };
 
 /**
@@ -168,10 +157,11 @@ export const registro = {
     sinPrograma: 'Abre junto con el programa. Cada actividad tendrá aquí su formulario.',
     conPrograma: 'El programa ya está. En cuanto abra, cada actividad tendrá aquí su formulario.',
   },
-  /** Lo que se lee cuando está abierto pero una actividad concreta no pide
-   *  registro. No es un hueco: es una respuesta. */
-  libre: 'Entrada libre',
-  libreNota: 'Se entra sin apuntarse, hasta llenar el aforo.',
+  /* Aquí vivían «Entrada libre» y su coletilla, que se pintaban en el sitio del
+     botón de las actividades sin formulario. Se van con ellas: esta página es
+     la de apuntarse, y una actividad a la que se entra sin apuntarse no tiene
+     nada que hacer en una lista de puertas. Que sea libre se dice en su ficha
+     de la rejilla, que es donde alguien pregunta «¿y a ésta cómo entro?». */
   acciones: {
     registro: 'Registrarme',
     general: 'Registro general',
@@ -301,6 +291,24 @@ export const programaPublicado = !ganttEsEjemplo;
 export const actividades: ActividadGantt[] = contenido.programa.actividades;
 
 /**
+ * Los cuatro días con lo que pasa en cada uno, en orden de reloj.
+ *
+ * Es la otra lectura de la misma lista: la rejilla contesta «qué se pisa con
+ * qué» y esto contesta «qué hay a tal hora», que es la pregunta que se hace uno
+ * ya estando en la calle. Las dos salen de `actividades` — antes esta segunda
+ * salía de doce horas escritas a mano que no tenían nada dentro y nunca iban a
+ * tenerlo, así que la vista «Por días» decía «Por anunciar» cuarenta y ocho
+ * veces con el programa ya cargado.
+ */
+export const agendaPorDia = programa.dias.map((d, i) => ({
+  ...d,
+  indice: i,
+  actividades: actividades
+    .filter((a) => a.dia === i)
+    .sort((a, b) => a.inicio.localeCompare(b.inicio)),
+}));
+
+/**
  * Lo que se lee al lado del rótulo «Programa»: en la marquesina de `/programa`,
  * en su cabecera de móvil y en el índice de la portada del móvil.
  *
@@ -375,9 +383,17 @@ export const abreEncima = (url?: string) => proveedorDeFormulario(url) === 'tall
 export const puertaDe = (a: ActividadGantt): 'formulario' | 'libre' | 'pendiente' =>
   a.registro ? 'formulario' : a.libre ? 'libre' : 'pendiente';
 
-/** Las actividades a las que hoy se puede entrar, por día y por hora. */
+/**
+ * Las que salen en `/registro`: **sólo las que tienen formulario**.
+ *
+ * Las de entrada libre no. Se listaban, con su etiqueta de «entrada libre» en
+ * el sitio del botón, y era mezclar dos cosas: esto es la página de apuntarse,
+ * y una actividad a la que se entra sin apuntarse no tiene nada que hacer en
+ * una lista de puertas. Que sea de entrada libre se dice donde toca — en su
+ * ficha de la rejilla, que es donde alguien pregunta «¿y a ésta cómo entro?».
+ */
 export const actividadesConRegistro = actividades
-  .filter((a) => puertaDe(a) !== 'pendiente')
+  .filter((a) => Boolean(a.registro))
   .sort((a, b) => a.dia - b.dia || a.inicio.localeCompare(b.inicio));
 
 /** Agrupadas por día, saltándose los días en los que no hay nada: un día vacío

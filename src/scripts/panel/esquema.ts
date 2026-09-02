@@ -251,9 +251,11 @@ export const PESTANAS: Pestana[] = [
     tablas: [],
     colecciones: ['programa'],
     cuenta: (e) => {
+      // Lo que de verdad sale en /registro: las que tienen formulario. Contar
+      // también las de entrada libre decía un número que la página no daba.
       const actos = e?.programa?.actividades ?? [];
-      const conPuerta = actos.filter((a: any) => a.registro || a.libre).length;
-      return `${conPuerta}/${actos.length}`;
+      const conFormulario = actos.filter((a: any) => a.registro).length;
+      return `${conFormulario}/${actos.length}`;
     },
   },
   { clave: 'sedes', titulo: 'Sedes', tablas: ['sedes'] },

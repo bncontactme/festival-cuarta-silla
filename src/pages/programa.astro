@@ -15,6 +15,7 @@ import {
   estadoPrograma,
   registroAbierto,
   actividadesConRegistro,
+  agendaPorDia,
 } from '../data/site';
 ---
 
@@ -36,7 +37,7 @@ import {
     >
       {
         programaPublicado ? (
-          programa.dias.map((dia, i) => (
+          agendaPorDia.map((dia, i) => (
             <details class="plegable">
               <summary>
                 <span class="plegable-indice meta text-[0.6rem] text-rojo">
@@ -56,21 +57,25 @@ import {
               </summary>
 
               <ul class="divide-y divide-tinta/15 bg-amarillo">
-                {dia.slots.map((slot) => (
+                {dia.actividades.length === 0 && (
+                  <li class="meta px-4 py-3 text-[0.5rem] text-tinta/35">
+                    Por anunciar
+                  </li>
+                )}
+                {dia.actividades.map((a) => (
                   <li class="flex items-baseline gap-3 px-4 py-2.5">
                     <span class="font-mono text-sm font-bold text-rojo tabular-nums">
-                      {slot.hora}
+                      {a.inicio}
                     </span>
                     <span aria-hidden="true" class="text-tinta/25">
                       //
                     </span>
-                    {slot.actividad ? (
-                      <span class="text-sm leading-snug">{slot.actividad}</span>
-                    ) : (
-                      <span class="meta text-[0.5rem] text-tinta/35">
-                        Por anunciar
+                    <span class="min-w-0">
+                      <span class="block text-sm leading-snug">{a.titulo}</span>
+                      <span class="meta mt-0.5 block text-[0.5rem] text-tinta/45">
+                        {a.sede}
                       </span>
-                    )}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -203,30 +208,42 @@ import {
           >
             <div class="grid gap-8 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-tinta/15">
               {
-                programa.dias.map((dia, i) => (
+                agendaPorDia.map((dia, i) => (
                   <article class="lg:px-5 lg:first:pl-0 lg:last:pr-0">
                     <header class="border-b-2 border-rojo pb-4">
                       <p class="meta text-rojo">{String(i + 1).padStart(2, '0')}</p>
                       <h2 class="display mt-2 text-4xl leading-none">{dia.dia}</h2>
-                      <p class="meta mt-2 text-tinta/45">{dia.fecha}</p>
+                      <p class="meta mt-2 text-tinta/45">
+                        {dia.fecha}
+                        {dia.actividades.length > 0 && (
+                          <> · {dia.actividades.length}</>
+                        )}
+                      </p>
                     </header>
 
+                    {/* La hora manda a la izquierda, como en la rejilla; debajo
+                        del título, dónde. Antes eran doce horas escritas a mano
+                        —las que venían del Wix— con la actividad siempre vacía:
+                        cuarenta y ocho renglones diciendo «Por anunciar» con el
+                        programa ya cargado en el panel. */}
                     <ul class="divide-y divide-tinta/12">
-                      {dia.slots.map((slot) => (
+                      {dia.actividades.length === 0 && (
+                        <li class="meta py-3 text-[0.55rem] text-tinta/35">Por anunciar</li>
+                      )}
+                      {dia.actividades.map((a) => (
                         <li class="flex items-baseline gap-3 py-3">
                           <span class="font-mono text-sm font-bold text-rojo tabular-nums">
-                            {slot.hora}
+                            {a.inicio}
                           </span>
                           <span aria-hidden="true" class="text-tinta/25">
                             //
                           </span>
-                          {slot.actividad ? (
-                            <span class="text-sm leading-snug">{slot.actividad}</span>
-                          ) : (
-                            <span class="meta text-[0.55rem] text-tinta/35">
-                              Por anunciar
+                          <span class="min-w-0">
+                            <span class="block text-sm leading-snug">{a.titulo}</span>
+                            <span class="meta mt-1 block text-[0.55rem] text-tinta/45">
+                              {a.sede}
                             </span>
-                          )}
+                          </span>
                         </li>
                       ))}
                     </ul>

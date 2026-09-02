@@ -73,12 +73,31 @@ const aMinutos = (hhmm: string) => {
 };
 const aReloj = (min: number) => `${String(Math.floor(min / 60)).padStart(2, '0')}:00`;
 
-/* El rango sale de las actividades, no de una constante: si el programa
-   arranca a las ocho o termina a la una, la rejilla se estira sola. */
-const desde = Math.floor(Math.min(...actividades.map((a) => aMinutos(a.inicio))) / 60) * 60;
-const hasta = Math.ceil(Math.max(...actividades.map((a) => aMinutos(a.fin))) / 60) * 60;
-const columnas = (hasta - desde) / PASO;
-const horas = Array.from({ length: (hasta - desde) / 60 }, (_, i) => desde + i * 60);
+/**
+ * El eje de horas, medido sobre las actividades que va a enseñar esta rejilla.
+ *
+ * **Y por eso se calcula por panel y no una vez para todo.** Se medía sobre el
+ * programa entero, así que un jueves que empieza a las siete de la tarde
+ * heredaba el eje del viernes —que abre a las dos— y salía con media rejilla en
+ * blanco antes de la primera barra. Cada día trae sus horas y nada más: lo que
+ * no tiene evento no ocupa sitio.
+ *
+ * En la vista por días sí se mide sobre todo, y también es lo correcto: ahí las
+ * cuatro líneas son los cuatro días y tienen que compartir eje para poder
+ * compararse.
+ */
+const ejeDe = (lista: typeof actividades) => {
+  if (!lista.length) return { desde: 0, hasta: 0, columnas: 0, horas: [] as number[] };
+  const desde = Math.floor(Math.min(...lista.map((a) => aMinutos(a.inicio))) / 60) * 60;
+  const hasta = Math.ceil(Math.max(...lista.map((a) => aMinutos(a.fin))) / 60) * 60;
+  return {
+    desde,
+    hasta,
+    columnas: (hasta - desde) / PASO,
+    horas: Array.from({ length: (hasta - desde) / 60 }, (_, i) => desde + i * 60),
+  };
+};
+
 /** Cuántas columnas mide una hora. Lo usan las guías y la fila del reloj. */
 const porHora = 60 / PASO;
 /** En mini se rotula una hora de cada tres: trece rótulos en una columna de
@@ -98,8 +117,9 @@ const MAX_LINEAS_MINI = 6;
  *  Lo que no entra tampoco se pierde — se suma a la línea de abajo. */
 const MAX_CARRILES_MINI = 2;
 
-/** Una barra ya colocada: +2 en la columna porque la 1 es la de etiquetas. */
-const aBarra = (a: (typeof actividades)[number]) => ({
+/** Una barra ya colocada: +2 en la columna porque la 1 es la de etiquetas.
+ *  `desde` es el arranque del eje de SU panel, no el del programa entero. */
+const aBarra = (a: (typeof actividades)[number], desde: number) => ({
   ...a,
   col: Math.round((aMinutos(a.inicio) - desde) / PASO) + 2,
   largo: Math.max(1, Math.round((aMinutos(a.fin) - aMinutos(a.inicio)) / PASO)),
@@ -156,6 +176,7 @@ const paneles =
         // Cada día es su propia rejilla y empieza a contar filas de cero.
         siguienteFila = 2;
         const delDia = actividades.filter((a) => a.dia === i);
+        const eje = ejeDe(delDia);
 
         /* Las sedes, por la hora a la que abren. Antes salían en el orden en
            que estaban escritas en los datos, que no es un orden: la rejilla se
@@ -179,7 +200,7 @@ const paneles =
           return {
             etiqueta: sede,
             nota: `${propias.length}`,
-            ...enCarriles(propias.map(aBarra), mini ? MAX_CARRILES_MINI : Infinity),
+            ...enCarriles(propias.map((a) => aBarra(a, eje.desde)), mini ? MAX_CARRILES_MINI : Infinity),
           };
         });
 
@@ -204,7 +225,7 @@ const paneles =
                 etiqueta: fuera.length ? `+${fuera.length} sedes` : '+ más',
                 actos: sobrantes.length,
                 fila,
-                col: Math.round((ini - desde) / PASO) + 2,
+                col: Math.round((ini - eje.desde) / PASO) + 2,
                 largo: Math.max(1, Math.round((fin - ini) / PASO)),
                 tramo: `${aReloj(Math.floor(ini / 60) * 60)}–${aReloj(Math.ceil(fin / 60) * 60)}`,
               };
@@ -212,6 +233,7 @@ const paneles =
           : null;
 
         return {
+          ...eje,
           clave: String(i),
           titulo: d.dia,
           fecha: d.fecha,
@@ -229,13 +251,17 @@ const paneles =
       })
     : (() => {
         siguienteFila = 2;
+        // Las cuatro líneas son los cuatro días: comparten eje para poder
+        // compararse, así que aquí el rango sí sale de todo el programa.
+        const eje = ejeDe(actividades);
         const lineas = programa.dias.map((d, i) => ({
           etiqueta: mini ? d.dia.slice(0, 3) : d.dia,
           nota: mini ? '' : d.fecha.replace(' de septiembre', ' sep'),
-          ...enCarriles(actividades.filter((a) => a.dia === i).map(aBarra)),
+          ...enCarriles(actividades.filter((a) => a.dia === i).map((a) => aBarra(a, eje.desde))),
         }));
         return [
           {
+            ...eje,
             clave: '0',
             titulo: '',
             fecha: '',
@@ -273,7 +299,9 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
           {paneles[0].titulo} {paneles[0].fecha}
         </span>
         <span class="gantt-rotulo-nota" data-rotulo-nota>
-          {paneles[0].total} actividades · {paneles[0].sedes} sedes
+          {paneles[0].total === 0
+            ? 'Por anunciar'
+            : `${paneles[0].total} actividades · ${paneles[0].sedes} sedes`}
         </span>
       </p>
     )
@@ -305,10 +333,27 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
       que mide. */}
   <div class="gantt-scroll" data-scroll>
     {
-      paneles.map((panel, i) => (
+      paneles.map((panel, i) => panel.total === 0 ? (
+        /* Un día sin nada no es una rejilla vacía: es una frase. Con el eje, la
+           cabecera de horas y las guías puestas sobre cero barras, lo que se
+           veía era una caja en blanco con un reloj encima — se lee como que
+           algo no cargó, no como que ese día todavía no hay programa. */
+        <div
+          class="gantt-vacio"
+          data-panel={i}
+          data-fecha={panel.iso}
+          data-nombre={panel.titulo}
+          data-dia-fecha={panel.fecha}
+          data-total="0"
+          data-sedes="0"
+          hidden={i !== 0}
+        >
+          <p>Este día todavía no tiene actividades anunciadas.</p>
+        </div>
+      ) : (
         <div
           class="gantt"
-          style={`--columnas:${columnas};--horas:${horas.length};--filas:${panel.filas}`}
+          style={`--columnas:${panel.columnas};--horas:${panel.horas.length};--filas:${panel.filas}`}
           data-panel={i}
           data-denso={densidad(panel.filas)}
           data-fecha={panel.iso}
@@ -320,7 +365,7 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
         >
           {/* Guías: una celda por hora, de la cabecera al suelo. Es lo que deja
               leer a qué hora cae una barra sin seguir la fila con el dedo. */}
-          {horas.map((_, h) => (
+          {panel.horas.map((_, h) => (
             <div
               class="gantt-guia"
               style={`grid-column:${h * porHora + 2} / span ${porHora}`}
@@ -329,11 +374,11 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
           ))}
 
           <div class="gantt-esquina" />
-          {horas.map((hora, h) => (
+          {panel.horas.map((hora, h) => (
             <div
               class="gantt-hora"
               style={`grid-column:span ${porHora}`}
-              data-ultima={h === horas.length - 1 ? '' : undefined}
+              data-ultima={h === panel.horas.length - 1 ? '' : undefined}
             >
               {h % cadaHora === 0 ? aReloj(hora) : ''}
             </div>
@@ -691,6 +736,24 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
   .gantt-etiqueta[data-apilada] {
     justify-content: flex-start;
     padding-top: calc(var(--alto-fila) / 2 - 0.85rem);
+  }
+
+  /* Un día sin nada. Ocupa el sitio de la rejilla para que cambiar de día no
+     dé un salto de alto, y dice lo que pasa en vez de enseñar una caja en
+     blanco con un reloj encima. */
+  .gantt-vacio {
+    display: grid;
+    place-items: center;
+    min-height: 10rem;
+    padding: 2rem 1rem;
+    border: 2px dashed color-mix(in srgb, var(--color-tinta) 30%, transparent);
+  }
+
+  .gantt-vacio p {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-align: center;
+    opacity: 0.55;
   }
 
   .gantt-etiqueta-nombre {
@@ -1433,9 +1496,12 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
       if (rotuloNota) {
         const actos = Number(panel.dataset.total ?? 0);
         const sedes = Number(panel.dataset.sedes ?? 0);
-        rotuloNota.textContent =
-          `${actos} ${actos === 1 ? 'actividad' : 'actividades'} · ` +
-          `${sedes} ${sedes === 1 ? 'sede' : 'sedes'}`;
+        // «0 actividades · 0 sedes» encima de un cartel que ya dice que ese día
+        // no hay nada es contarlo dos veces, y la segunda con números.
+        rotuloNota.textContent = actos === 0
+          ? 'Por anunciar'
+          : `${actos} ${actos === 1 ? 'actividad' : 'actividades'} · ` +
+            `${sedes} ${sedes === 1 ? 'sede' : 'sedes'}`;
       }
     }
 

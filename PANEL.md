@@ -167,10 +167,13 @@ ActividadGantt      … + registro?: url  ·  libre?: true
 
 `libre` existe para separar dos cosas que sin ella se leen igual —«esta
 actividad no pide registro» y «todavía no nos han pasado el formulario»— y que
-para el visitante son opuestas. Marcada, la actividad sale en `/registro` como
-entrada libre; sin marcar y sin formulario, no sale, y el panel la cuenta como
-pendiente. Las dos a la vez no significan nada: manda el formulario, y el
-Worker lo dice al guardar.
+para el visitante son opuestas. **En `/registro` salen sólo las que tienen
+formulario**: es la página de apuntarse, y una actividad a la que se entra sin
+apuntarse no tiene nada que hacer en una lista de puertas. Lo que hace `libre`
+es decirlo donde toca —en su ficha de la rejilla, que es donde alguien pregunta
+«¿y a ésta cómo entro?»— y dejar de contarla como pendiente en el panel. Las dos
+a la vez no significan nada: manda el formulario, y el Worker lo dice al
+guardar.
 
 ---
 
