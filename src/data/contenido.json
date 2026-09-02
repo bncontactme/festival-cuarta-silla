@@ -1,6 +1,6 @@
 {
-  "version": 32,
-  "actualizado": "2026-09-02T04:20:06.326Z",
+  "version": 50,
+  "actualizado": "2026-09-02T22:49:44.160Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -51,11 +51,12 @@
     },
     {
       "nombre": "No Museo",
-      "direccion": "Andador Palestina Libre (Constancio Hernández Alvirde), Col. Americana, 44160 Guadalajara, Jal.",
+      "direccion": "Constancio Hernández Alvirde, Col Americana, Americana, 44160 Guadalajara, Jal.",
       "instagram": "https://www.instagram.com/esto_no_es_un_museo/",
+      "mapa": "https://maps.app.goo.gl/UTtcew4WWu6EbrJJ6",
       "coord": [
-        20.6741,
-        -103.35857
+        20.6743854,
+        -103.3587315
       ]
     },
     {
@@ -135,6 +136,10 @@
         20.673916,
         -103.366453
       ]
+    },
+    {
+      "nombre": "Todas Las Sedes",
+      "direccion": "Todas"
     }
   ],
   "programa": {
@@ -210,7 +215,8 @@
         "fin": "18:00",
         "sede": "Ala Rota",
         "tipo": "charla",
-        "artista": "Lorena Van Meeter"
+        "artista": "Lorena Van Meeter",
+        "registro": "https://forms.gle/2YNFXExX9UvyG8qB6"
       },
       {
         "titulo": "Performance pasarela \"tus manos parecen guantes\"",
@@ -267,11 +273,199 @@
         "sede": "Taller Industria Gráfica",
         "tipo": "muestra",
         "artista": "Musica: MATERIA A-TEMPORAL"
+      },
+      {
+        "titulo": "Entretejiendo arrullos “Una ofrenda a las madres que buscan a sus hijas e hijos desaparecidos”",
+        "dia": 0,
+        "inicio": "18:30",
+        "fin": "19:00",
+        "sede": "No Museo",
+        "tipo": "muestra",
+        "artista": "Colectiva Hilos"
+      },
+      {
+        "titulo": "Poesía y performance",
+        "dia": 2,
+        "inicio": "11:30",
+        "fin": "12:00",
+        "sede": "Foro AM",
+        "tipo": "taller",
+        "artista": "Miaulina"
+      },
+      {
+        "titulo": "“Libertad de Presa”",
+        "dia": 2,
+        "inicio": "12:00",
+        "fin": "18:00",
+        "sede": "No Museo",
+        "tipo": "muestra",
+        "artista": "David Landgrave Romo"
+      },
+      {
+        "titulo": "Laboratorio de cuerpos cansados",
+        "dia": 2,
+        "inicio": "12:00",
+        "fin": "14:00",
+        "sede": "Estudio Arrechiga",
+        "tipo": "taller",
+        "artista": "Comuna 9",
+        "registro": "https://forms.gle/2YNFXExX9UvyG8qB6"
+      },
+      {
+        "titulo": "La Paca de Oro",
+        "dia": 2,
+        "inicio": "12:00",
+        "fin": "18:00",
+        "sede": "No Museo",
+        "tipo": "muestra",
+        "artista": "Aura Aceves"
+      },
+      {
+        "titulo": "Metro cuadrado (rebasadito por los bordes) 2023",
+        "dia": 2,
+        "inicio": "12:00",
+        "fin": "18:00",
+        "sede": "No Museo",
+        "tipo": "muestra",
+        "artista": "Alejandro Reyes y Ricardo Atl"
+      },
+      {
+        "titulo": "Charla “Glorieta de los desaparecidos, Una resignificación por la memoria, la búsqueda y la resistencia\"",
+        "dia": 2,
+        "inicio": "15:00",
+        "fin": "17:00",
+        "sede": "Staditche",
+        "tipo": "charla",
+        "artista": "Carlos Valencia",
+        "registro": "https://forms.gle/2YNFXExX9UvyG8qB6"
+      },
+      {
+        "titulo": "Charla “La relación entre la gentrificación y la cultura”",
+        "dia": 2,
+        "inicio": "18:00",
+        "fin": "20:00",
+        "sede": "Cuerpos Parlantes",
+        "tipo": "charla",
+        "artista": "Lirba Cano y Héctor Robledo",
+        "registro": "https://forms.gle/2YNFXExX9UvyG8qB6"
+      },
+      {
+        "titulo": "Inauguración de obra",
+        "dia": 2,
+        "inicio": "20:00",
+        "fin": "23:59",
+        "sede": "Cuerpos Parlantes",
+        "tipo": "escena",
+        "artista": "Cuerpos parlantes"
+      },
+      {
+        "titulo": "Performance ambient inmersivo",
+        "dia": 2,
+        "inicio": "20:00",
+        "fin": "22:00",
+        "sede": "Ala Rota",
+        "tipo": "muestra",
+        "artista": "Ascandra"
+      },
+      {
+        "titulo": "Fiesta del festival de arte conceptual.",
+        "dia": 2,
+        "inicio": "22:00",
+        "fin": "23:59",
+        "sede": "Casa Dos Guayabos",
+        "tipo": "escena",
+        "artista": "Festival de arte conceptual"
       }
     ],
     "esEjemplo": false
   },
-  "artistas": [],
+  "artistas": [
+    {
+      "nombre": "David Montes de Oca",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788374031/cuartasilla/artistas/gc2gh4ogywwloqire1s6.jpg",
+      "instagram": "https://www.instagram.com/_d_m_o_n/"
+    },
+    {
+      "nombre": "Mi yü",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788375585/cuartasilla/artistas/ddfr2upqfraob5wzv4ir.jpg",
+      "instagram": "https://www.instagram.com/_miyu_juls/"
+    },
+    {
+      "nombre": "Fabián Gutiérrez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788375664/cuartasilla/artistas/dlblqk22fc59bt1o6z6h.jpg",
+      "instagram": "https://www.instagram.com/0x000042/"
+    },
+    {
+      "nombre": "Ada Lucia Cortés Alvarez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788375697/cuartasilla/artistas/kvh7uxjxbytduizftrle.jpg",
+      "instagram": "https://www.instagram.com/ada_alvz/"
+    },
+    {
+      "nombre": "Alfredo Esparza Cárdenas",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788375975/cuartasilla/artistas/alfredo-esparza-cardenas/hmgr3ak1rxyhzzxi2eum.jpg",
+      "instagram": "https://www.instagram.com/aesparzac/"
+    },
+    {
+      "nombre": "Ale Poiré",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788376329/cuartasilla/artistas/ale-poire/pjaxb2zmxlbr0rfgfnar.jpg",
+      "instagram": "https://www.instagram.com/ale_poire/"
+    },
+    {
+      "nombre": "Alí Estrada",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788376372/cuartasilla/artistas/yrhuiu90pwg4qg57fkmo.jpg",
+      "instagram": "https://www.instagram.com/alistradaa/"
+    },
+    {
+      "nombre": "Elena Guerrero",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788376419/cuartasilla/artistas/elena-guerrero/nqdxq9vik6kfqn0apums.jpg",
+      "instagram": "https://www.instagram.com/amabledd/"
+    },
+    {
+      "nombre": "Santiago García",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788375534/cuartasilla/artistas/icm1nyvxtztznm4h5ezr.jpg",
+      "instagram": "https://www.instagram.com/_insufrible/"
+    },
+    {
+      "nombre": "Paola Anaid Rodríguez Ávila",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788376537/cuartasilla/artistas/paola-anaid-rodriguez-avila/n8o3qlfwebyttilqaqs0.jpg",
+      "instagram": "https://www.instagram.com/anaiddmonroy/"
+    },
+    {
+      "nombre": "Andrés Blas",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788376588/cuartasilla/artistas/jkl5dlvg8unwp1mk3twh.jpg",
+      "instagram": "https://www.instagram.com/andres_blas.art/"
+    },
+    {
+      "nombre": "David Langrave Romo",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788376642/cuartasilla/artistas/david-landgrave-romo/sozhrjm2ytycfmgkwjbo.jpg",
+      "instagram": "https://www.instagram.com/ap0p.tosis/"
+    },
+    {
+      "nombre": "Arhat Alejandro.",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788376709/cuartasilla/artistas/arhat-alejandro/qla04exj4cufarzjpt65.jpg",
+      "instagram": "https://www.instagram.com/arhat.alejandro/"
+    },
+    {
+      "nombre": "Alejandra Muñoz",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788376745/cuartasilla/artistas/alejandra-munoz/zaio8lwoyaekfvfjuwfy.jpg",
+      "instagram": "https://www.instagram.com/ascandra__/"
+    },
+    {
+      "nombre": "Iosune Salaya",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788376803/cuartasilla/artistas/iosune-salaya/gwvyqqwmjxtpy81vf4yn.jpg",
+      "instagram": "https://www.instagram.com/azul_ultra.amar/"
+    },
+    {
+      "nombre": "Andrea Arroniz",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788383562/cuartasilla/artistas/x8qbh7nqtfdoowjjy8hn.jpg",
+      "instagram": "https://www.instagram.com/andreaesgenial/"
+    },
+    {
+      "nombre": "Enrique Chiu",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788389212/cuartasilla/artistas/n2jc6sq0e4nepmwk5kas.jpg",
+      "instagram": "https://www.instagram.com/enriquechiuarte/"
+    }
+  ],
   "archivo": [],
   "marcas": {
     "patrocinadores": [
@@ -300,7 +494,9 @@
         "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788319089/cuartasilla/marcas/capicua/rcnerf8jocfpz4tzlilp.png"
       },
       {
-        "nombre": "WAYFAR MX"
+        "nombre": "Wayfar MX",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788385572/cuartasilla/marcas/wayfar-mx/fshbinsbrzk8w64dtrfu.webp",
+        "url": "https://wayfar.mx/"
       },
       {
         "nombre": "DC Producciones",
@@ -317,28 +513,72 @@
       {
         "nombre": "Tecnológico de Monterrey",
         "logo": "/patrocinadores/tec-de-monterrey.png"
-      }
-    ],
-    "colaboradores": [
+      },
       {
         "nombre": "Ferazzz",
-        "logo": "/patrocinadores/ferazzz.png"
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788383663/cuartasilla/marcas/ferazzz/bbrkvx3gw6zoxgmlmukz.png"
       },
       {
         "nombre": "Brumma",
-        "logo": "/patrocinadores/brumma.png"
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788383680/cuartasilla/marcas/cto0h8xaxwr7tv8i2aea.png"
       },
       {
         "nombre": "GDL de Noche",
-        "logo": "/patrocinadores/gdl-de-noche.png"
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384132/cuartasilla/marcas/ydrjnnyozhevqcvhut1r.png"
       },
       {
         "nombre": "Visual Negativo",
-        "logo": "/patrocinadores/visual-negativo.jpg"
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384153/cuartasilla/marcas/jojpqlovoigeuhrodwjg.jpg"
       },
       {
-        "nombre": "DC Producciones"
+        "nombre": "CUAAD",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384243/cuartasilla/marcas/chaneque-studio/e0blkr6sygv6e41az8gq.png"
+      },
+      {
+        "nombre": "Maestria en Gestión y Desarrollo Cultural",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384252/cuartasilla/marcas/yfhlg91ugf2jwcpuqi4p.png"
+      },
+      {
+        "nombre": "Gin Marin",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384277/cuartasilla/marcas/x28fxexuhk3wvxugt08g.webp"
+      },
+      {
+        "nombre": "Soda Mate",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384291/cuartasilla/marcas/w763i3zdx3xmvvlzdisj.webp"
+      },
+      {
+        "nombre": "Inquietos Running Club",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384306/cuartasilla/marcas/jubbja8mflycpx2ayepp.png"
+      },
+      {
+        "nombre": "43 Sound System",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384363/cuartasilla/marcas/qtw9kxu1wmht9fht84xb.jpg"
+      },
+      {
+        "nombre": "Taller D´ Arte",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384383/cuartasilla/marcas/jnmhp6a1eyt9yi1tuvgx.png"
+      },
+      {
+        "nombre": "Carajillo de la Casa",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384402/cuartasilla/marcas/mrn9d4uizts6ro73w1gp.jpg"
+      },
+      {
+        "nombre": "Alejandría Cool Brew",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384481/cuartasilla/marcas/qoecjjv2gy8ousxihgbi.jpg"
+      },
+      {
+        "nombre": "Reposo Kombucha",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384521/cuartasilla/marcas/pgbrntaailqhcaubuvwk.jpg"
+      },
+      {
+        "nombre": "Cervecería Barraza Artesanal",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384629/cuartasilla/marcas/fvpt8aup5jb7l84amzzp.jpg"
+      },
+      {
+        "nombre": "Chaneque Studio",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384693/cuartasilla/marcas/hjymra993oduekw2mink.png"
       }
-    ]
+    ],
+    "colaboradores": []
   }
 }
