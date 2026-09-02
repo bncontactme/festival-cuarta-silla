@@ -29,6 +29,21 @@ interface Props {
 
 const { limite, class: clase = '' } = Astro.props;
 const lista = limite ? artistas.lista.slice(0, limite) : artistas.lista;
+
+/**
+ * Cuántas celdas sobran en la última fila, en cada ancho.
+ *
+ * Las fichas se cargan de una en una, y con una sola la página era una tarjeta
+ * a la izquierda y novecientos píxeles de amarillo vacío a su derecha: no se
+ * lee como composición, se lee como que algo no cargó. La reja se termina con
+ * una celda que dice lo que hay —«Por anunciar»—, que es información y no un
+ * hueco, y que se va sola en cuanto las fichas llenan la fila.
+ *
+ * En una columna —el móvil— no se pinta: debajo de una ficha, a lo ancho de la
+ * pantalla, deja de ser el final de una fila y pasa a ser una tarjeta más.
+ */
+const resto2 = (2 - (lista.length % 2)) % 2;
+const resto3 = (3 - (lista.length % 3)) % 3;
 ---
 
 {
@@ -50,6 +65,27 @@ const lista = limite ? artistas.lista.slice(0, limite) : artistas.lista;
       {lista.map((artista, i) => (
         <FichaArtista artista={artista} indice={i} retraso={(i % 3) * 90} />
       ))}
+
+      {(resto2 > 0 || resto3 > 0) && (
+        <li
+          class:list={[
+            'flex-col justify-end border-r-2 border-b-2 border-tinta p-6 lg:p-8',
+            /* Se enseña sólo en el ancho donde de verdad sobra hueco. */
+            resto2 > 0 ? 'hidden sm:flex' : 'hidden',
+            resto3 > 0 ? 'lg:flex' : 'lg:hidden',
+            resto3 === 2 && 'lg:col-span-2',
+          ]}
+          aria-hidden="true"
+        >
+          <p class="meta flex items-center gap-3 text-tinta/60">
+            <span class="inline-block h-[2px] w-8 bg-rojo" />
+            {artistas.estado}
+          </p>
+          <p class="display mt-4 text-3xl leading-[0.95] text-tinta/25 lg:text-4xl">
+            Faltan nombres
+          </p>
+        </li>
+      )}
     </ul>
   )
 }

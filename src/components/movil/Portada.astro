@@ -19,13 +19,14 @@ import {
   programa,
   sedes,
   convocatoriaVoluntarixs,
+  estadoPrograma,
 } from '../../data/site';
 import { artistas } from '../../data/artistas';
 import { archivo } from '../../data/archivo';
 
 const puertas = [
   { n: '01', label: 'Manifiesto', href: '#manifiesto', nota: 'Qué es esto', fondo: 'rojo' },
-  { n: '02', label: programa.titulo, href: '/programa', nota: programa.estado, fondo: 'amarillo' },
+  { n: '02', label: programa.titulo, href: '/programa', nota: estadoPrograma, fondo: 'amarillo' },
   {
     n: '03',
     label: sedes.titulo,

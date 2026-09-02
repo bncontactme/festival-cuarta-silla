@@ -29,6 +29,8 @@ export class ErrorPanel extends Error {
   errores: string[];
   avisos: string[];
   estado: number;
+  /** Sólo en el 409: qué versión traías y cuál hay. */
+  conflicto?: { tuya: number; actual: number };
   constructor(mensaje: string, estado = 0, errores: string[] = [], avisos: string[] = []) {
     super(mensaje);
     this.estado = estado;
@@ -58,19 +60,30 @@ export async function pedir<T = any>(accion: string, extra: Record<string, unkno
   try { datos = await res.json(); } catch { /* algunas respuestas van vacías */ }
 
   if (!res.ok) {
-    throw new ErrorPanel(
+    const fallo = new ErrorPanel(
       datos.error || `El panel contestó ${res.status}`,
       res.status,
       datos.errores || [],
       datos.avisos || [],
     );
+    if (datos.conflicto) fallo.conflicto = datos.conflicto;
+    throw fallo;
   }
   return datos as T;
 }
 
-/** La lectura pública: lo mismo que consume el build del sitio. */
+/**
+ * La lectura pública: lo mismo que consume el build del sitio.
+ *
+ * El `?t=` no es superstición. Esa ruta se sirve con medio minuto de caché
+ * —para que un bucle de recargas no pegue en KV— y esa caché no es la del
+ * navegador sino la del borde de Cloudflare, donde `cache: 'no-store'` no
+ * manda. Sin el parámetro, «Recargar» justo después de guardar —o después de
+ * restaurar una versión, que es cuando más se mira— podía contestar con lo de
+ * antes y hacer creer que no se guardó.
+ */
 export async function leerContenido() {
-  const res = await fetch(`${PANEL_URL}/contenido`, { cache: 'no-store' });
+  const res = await fetch(`${PANEL_URL}/contenido?t=${Date.now()}`, { cache: 'no-store' });
   if (!res.ok) throw new ErrorPanel(`El panel contestó ${res.status} al leer el contenido`, res.status);
   return res.json();
 }
@@ -130,8 +143,19 @@ export async function subirImagen(
 export const MIMES = ['image/png', 'image/jpeg', 'image/webp', 'image/avif'];
 export const PESO_MAX = 10 * 1024 * 1024;
 
+/** El formato que sale de un iPhone por defecto. No es «un archivo raro»: es lo
+ *  que va a llegar la mitad de las veces, y decirlo por su nombre ahorra el
+ *  rato de pensar que la foto está rota. */
+const APPLE = ['image/heic', 'image/heif'];
+
 export function revisarArchivo(f: File): string | null {
-  if (!MIMES.includes(f.type)) return `«${f.name}» no es una imagen (${f.type || 'sin tipo'}). Sirven JPG, PNG, WebP y AVIF.`;
+  const tipo = (f.type || '').toLowerCase();
+  if (APPLE.includes(tipo) || /\.hei[cf]$/i.test(f.name)) {
+    return `«${f.name}» viene en HEIC, el formato del iPhone, y Cloudinary no lo acepta. ` +
+           `En el teléfono: Ajustes › Cámara › Formatos › «Más compatible», y las fotos nuevas salen en JPG. ` +
+           `Para ésta: compártela por WhatsApp o mándatela por correo y llega convertida.`;
+  }
+  if (!MIMES.includes(tipo)) return `«${f.name}» no es una imagen (${f.type || 'sin tipo'}). Sirven JPG, PNG, WebP y AVIF.`;
   if (f.size > PESO_MAX) return `«${f.name}» pesa ${(f.size / 1048576).toFixed(1)} MB y el tope son 10 MB.`;
   return null;
 }

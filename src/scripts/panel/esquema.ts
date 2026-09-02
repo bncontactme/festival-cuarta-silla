@@ -15,7 +15,7 @@
 
 export type TipoCampo =
   | 'texto' | 'area' | 'url' | 'imagen' | 'sede'
-  | 'dia' | 'hora' | 'tipoActividad' | 'numero' | 'coord' | 'fotos';
+  | 'dia' | 'hora' | 'tipoActividad' | 'numero' | 'coord' | 'fotos' | 'sino';
 
 export type Campo = {
   clave: string;
@@ -23,6 +23,8 @@ export type Campo = {
   tipo: TipoCampo;
   ayuda?: string;
   requerido?: boolean;
+  /** Lo que se lee al lado de la casilla en un campo `sino`. */
+  siNo?: string;
   /** Cuántas columnas de la rejilla ocupa. Por defecto una. */
   ancho?: number;
   /** Carpeta de Cloudinary. Puede depender de la fila (el año, en el archivo). */
@@ -38,13 +40,21 @@ export type Esquema = {
   nuevo(): any;
   /** El renglón que resume la fila cuando está plegada o en un mensaje. */
   titula(fila: any, i: number): string;
+  /** La segunda línea de la fila plegada: los datos que dejan reconocerla sin
+   *  abrirla. Sin ella se pinta el nombre del campo que la identifica. */
+  resume?(fila: any, dias: string[]): string;
+  /** Qué texto se busca al filtrar. Por defecto, lo que devuelven las dos de
+   *  arriba. */
+  busca?(fila: any): string;
 };
+
+export type Coleccion = 'sedes' | 'programa' | 'artistas' | 'archivo' | 'marcas';
 
 export type Tabla = {
   clave: string;
   titulo: string;
   /** Qué colección se manda al Worker al guardar esta tabla. */
-  coleccion: 'sedes' | 'programa' | 'artistas' | 'archivo' | 'marcas';
+  coleccion: Coleccion;
   nota?: string;
   esquema: Esquema;
   leer(estado: any): any[];
@@ -78,10 +88,18 @@ const actividades: Esquema = {
     { clave: 'artista', etiqueta: 'Quién la da', tipo: 'texto', ancho: 2,
       ayuda: 'Sale en la ficha, debajo del título.' },
     { clave: 'registro', etiqueta: 'Formulario de registro', tipo: 'url', ancho: 3,
-      ayuda: 'El Tally de esta actividad. Sin él la ficha sale sin botón.' },
+      ayuda: 'El Tally de esta actividad. Es lo que pone el botón «Registrarme» en la ficha de la rejilla y lo que la saca en /registro. Se editan todos juntos en la pestaña Registro.' },
+    { clave: 'libre', etiqueta: 'Entrada libre', tipo: 'sino', siNo: 'Se entra sin apuntarse',
+      ayuda: 'Márcala cuando esta actividad no pide registro. Sin formulario y sin esta marca, la actividad sale como pendiente en la pestaña Registro — que es distinto de ser libre.' },
   ],
   nuevo: () => ({ titulo: '', dia: 0, inicio: '10:00', fin: '12:00', sede: '', tipo: 'taller' }),
   titula: (a) => a.titulo || 'Sin título',
+  resume: (a, dias) => [
+    dias?.[a.dia]?.split(' ')[0] ?? `Día ${Number(a.dia) + 1}`,
+    a.inicio && a.fin ? `${a.inicio}–${a.fin}` : null,
+    a.sede || null,
+    a.tipo || null,
+  ].filter(Boolean).join(' · '),
 };
 
 const sedes: Esquema = {
@@ -101,6 +119,7 @@ const sedes: Esquema = {
   ],
   nuevo: () => ({ nombre: '', direccion: '' }),
   titula: (s) => s.nombre || 'Sede sin nombre',
+  resume: (s) => s.direccion || 'sin dirección',
 };
 
 const artistas: Esquema = {
@@ -118,6 +137,8 @@ const artistas: Esquema = {
   ],
   nuevo: () => ({ nombre: '' }),
   titula: (a) => a.nombre || 'Artista sin nombre',
+  resume: (a) => [a.disciplina, a.sede, a.foto ? 'con retrato' : 'sin retrato']
+    .filter(Boolean).join(' · '),
 };
 
 const archivo: Esquema = {
@@ -137,6 +158,10 @@ const archivo: Esquema = {
   ],
   nuevo: () => ({ edicion: '', anio: String(new Date().getFullYear() - 1), fotos: [] }),
   titula: (e) => [e.edicion, e.anio].filter(Boolean).join(' · ') || 'Edición sin nombre',
+  resume: (e) => {
+    const n = (e.fotos ?? []).length;
+    return [e.lema, n === 1 ? '1 foto' : `${n} fotos`].filter(Boolean).join(' · ');
+  },
 };
 
 const marcas: Esquema = {
@@ -151,6 +176,7 @@ const marcas: Esquema = {
   ],
   nuevo: () => ({ nombre: '' }),
   titula: (m) => m.nombre || 'Marca sin nombre',
+  resume: (m) => m.logo ? 'con logo' : 'sin logo — se pinta el nombre',
 };
 
 // ── Tablas ───────────────────────────────────────────────────────────────────
@@ -192,8 +218,44 @@ export const TABLAS: Record<string, Tabla> = {
   },
 };
 
-export const PESTANAS: { clave: string; titulo: string; tablas: string[] }[] = [
+export type Pestana = {
+  clave: string;
+  titulo: string;
+  tablas: string[];
+  /** Qué colecciones toca, para el punto de «hay algo sin guardar». Por
+   *  defecto, las de sus tablas. Registro lo dice a mano porque no tiene
+   *  tablas: edita el programa desde otra ventana. */
+  colecciones?: Coleccion[];
+  /** Lo que sale al lado del nombre en la pestaña. Por defecto, cuántos
+   *  elementos hay en sus tablas. */
+  cuenta?(estado: any): string;
+};
+
+/**
+ * Las pestañas.
+ *
+ * **Registro no es una colección.** Es la misma lista del programa mirada por
+ * la puerta de entrar: qué actividades tienen formulario, cuáles son de entrada
+ * libre y cuáles siguen pendientes. Guardar desde ahí guarda el programa, y por
+ * eso comparte con él el punto rojo de «sin guardar»: son el mismo dato.
+ *
+ * Podría haber sido una colección propia con su lista de eventos, y habría sido
+ * el error de siempre: dos listas de lo mismo que se separan en cuanto alguien
+ * cambia una hora en una sola de las dos.
+ */
+export const PESTANAS: Pestana[] = [
   { clave: 'programa', titulo: 'Programa', tablas: ['actividades'] },
+  {
+    clave: 'registro',
+    titulo: 'Registro',
+    tablas: [],
+    colecciones: ['programa'],
+    cuenta: (e) => {
+      const actos = e?.programa?.actividades ?? [];
+      const conPuerta = actos.filter((a: any) => a.registro || a.libre).length;
+      return `${conPuerta}/${actos.length}`;
+    },
+  },
   { clave: 'sedes', titulo: 'Sedes', tablas: ['sedes'] },
   { clave: 'artistas', titulo: 'Artistas', tablas: ['artistas'] },
   { clave: 'archivo', titulo: 'Galería', tablas: ['archivo'] },

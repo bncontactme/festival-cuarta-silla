@@ -161,6 +161,29 @@ async function guardar(cuerpo, env, ctx, cors) {
     return json({ error: 'No existe la colección «' + nombre + '»' }, 400, cors);
   }
 
+  // ── Que no se pisen ───────────────────────────────────────────────────────
+  //
+  // Guardar era un `put` a secas: el último que le daba borraba lo del otro sin
+  // que ninguno de los dos se enterara. Con un comité editando y la semana del
+  // festival por delante —dos personas con el panel abierto en dos sedes es el
+  // caso normal, no el raro— eso es perder trabajo en silencio.
+  //
+  // El panel manda la versión que tenía al cargar. Si en KV hay otra, alguien
+  // guardó en medio: se contesta 409 y el panel ofrece recargar. Sin versión no
+  // se comprueba nada, y eso es a propósito: `semilla.mjs` pisa el panel a
+  // sabiendas, que es justo lo que se le pide.
+  const vista = cuerpo.version;
+  if (Number.isFinite(vista)) {
+    const { version } = await leerMeta(env);
+    if ((version || 0) !== vista) {
+      return json({
+        error: 'Alguien más guardó mientras editabas (ibas por la versión ' + vista +
+               ' y ya va la ' + version + '). No se guardó nada para no pisarle el trabajo.',
+        conflicto: { tuya: vista, actual: version },
+      }, 409, cors);
+    }
+  }
+
   // El programa y los artistas nombran sedes, así que hay que tener la lista
   // vigente a mano. Si lo que se está guardando SON las sedes, la lista es la
   // nueva: cambiar el nombre de una sede y sus actividades a la vez tiene que
