@@ -298,15 +298,20 @@
      el color no se escribe dos veces: si el festival cambia el rojo del
      taller, cambia en la rejilla y aquí a la vez. */
   .evento {
-    --fondo: var(--color-papel);
-    --texto: var(--color-tinta);
+    --fondo: var(--color-tinta);
+    --texto: var(--color-amarillo);
     display: grid;
     gap: 0.75rem;
     padding: 1.25rem;
     background-color: var(--fondo);
     color: var(--texto);
     border: var(--borde) solid var(--color-tinta);
-    box-shadow: 6px 6px 0 var(--canto);
+    /* La sombra en tinta y no en `--canto`: la lista vive siempre sobre el
+       campo amarillo de la sección, y la tarjeta de tinta redefine `--canto`
+       en amarillo para que su botón conserve el suyo. Si la sombra colgara de
+       la misma variable, esa tarjeta se quedaría con una sombra amarilla
+       sobre amarillo, es decir, sin sombra. */
+    box-shadow: 6px 6px 0 var(--color-tinta);
   }
 
   /* La hora, que es por lo que se busca en esta página, en mono y a tamaño de

@@ -272,6 +272,25 @@ export const coloresGantt = {
   escena: { fondo: 'var(--color-ladrillo)', texto: 'var(--color-amarillo)' },
 } as const;
 
+/** Los mismos cuatro tipos cuando el color no es un filete sino el CAMPO de
+ *  una tarjeta entera — las de `/registro`.
+ *
+ *  Cambia uno: la muestra va en tinta y no en papel. De filete de cinco
+ *  píxeles el papel es una raya blanca sobre negro; de campo es una tarjeta
+ *  blanca, y este sitio no tiene tarjetas blancas: el papel aquí es el marco
+ *  de una foto, no un fondo. Tinta, amarillo, rojo y ladrillo son las cuatro
+ *  tintas con las que se imprime todo lo demás.
+ *
+ *  Tabla aparte y no un cambio en `coloresGantt` porque en la rejilla el
+ *  filete blanco sigue siendo el que mejor se separa de los otros tres sobre
+ *  la barra negra. Son dos usos distintos del mismo código de color. */
+export const coloresEvento = {
+  taller: { fondo: 'var(--color-rojo)', texto: 'var(--color-amarillo)' },
+  charla: { fondo: 'var(--color-amarillo)', texto: 'var(--color-tinta)' },
+  muestra: { fondo: 'var(--color-tinta)', texto: 'var(--color-amarillo)' },
+  escena: { fondo: 'var(--color-ladrillo)', texto: 'var(--color-amarillo)' },
+} as const;
+
 /** Si lo de abajo todavía es el andamio o ya es la programación.
  *
  *  Lo decide el festival con un interruptor en `/admin`, no se deduce de nada:
