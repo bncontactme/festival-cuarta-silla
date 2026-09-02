@@ -1,6 +1,6 @@
 {
-  "version": 52,
-  "actualizado": "2026-09-02T23:51:42.460Z",
+  "version": 53,
+  "actualizado": "2026-09-02T23:55:14.647Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -431,7 +431,7 @@
         "dia": 3,
         "inicio": "14:00",
         "fin": "16:00",
-        "sede": "Estudio Arrechiga",
+        "sede": "Salón Liminal",
         "tipo": "muestra",
         "artista": "Gerardo Lammers",
         "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
