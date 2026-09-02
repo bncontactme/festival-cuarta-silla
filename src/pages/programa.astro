@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
+import { tarjetaAlterna } from '../lib/campos';
 import Encabezado from '../components/Encabezado.astro';
 import Marquee from '../components/Marquee.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
@@ -56,37 +57,49 @@ import {
                 </span>
               </summary>
 
-              <ul class="divide-y divide-tinta/15 bg-amarillo">
+              {/* Las mismas filas que `/registro`, con el campo turnándose
+                  rojo y amarillo. Abierto un día, doce renglones separados por
+                  un filete sobre un solo campo amarillo se leen como un bloque
+                  de texto: no hay dónde apoyar la vista para contar las
+                  actividades ni para saltar a una. El campo alterno es lo que
+                  las separa, y es el mismo recurso en las dos páginas —una
+                  lista que se turna aquí y otra que se turna allá con distinto
+                  pie se leerían como dos sistemas. */}
+              <ul class="space-y-3 bg-amarillo p-3">
                 {dia.actividades.length === 0 && (
-                  <li class="meta px-4 py-3 text-[0.5rem] text-tinta/35">
+                  <li class="meta px-1 py-2 text-[0.5rem] text-tinta/35">
                     Por anunciar
                   </li>
                 )}
-                {dia.actividades.map((a) => (
-                  <li class="flex items-baseline gap-3 px-4 py-2.5">
-                    <span class="font-mono text-sm font-bold text-rojo tabular-nums">
+                {dia.actividades.map((a, i) => (
+                  <li class={tarjetaAlterna(i, 'fila').clase} style={tarjetaAlterna(i, 'fila').estilo}>
+                    <p class="evento-hora">
                       {a.inicio}
-                    </span>
-                    <span aria-hidden="true" class="text-tinta/25">
-                      //
-                    </span>
-                    <span class="min-w-0">
-                      <span class="block text-sm leading-snug">{a.titulo}</span>
-                      <span class="meta mt-0.5 block text-[0.5rem] text-tinta/45">
-                        {a.sede}
-                      </span>
+                      <span class="evento-tipo">{a.tipo}</span>
+                    </p>
+
+                    <div class="min-w-0">
+                      <h3 class="text-sm leading-snug font-bold">{a.titulo}</h3>
+                      {a.artista && (
+                        <p class="evento-artista text-[0.8rem]">{a.artista}</p>
+                      )}
+                      <p class="meta evento-sede text-[0.5rem]">{a.sede}</p>
+
+                      {/* Sólo las que tienen formulario. Las demás no llevan
+                          nada: un botón apagado convierte una lista de qué hay
+                          en una lista de lo que falta. */}
                       {a.registro && (
                         <a
                           href={a.registro}
                           target="_blank"
                           rel="noopener"
-                          class="registro-fila"
+                          class="evento-puerta"
                           aria-label={`Registrarme en ${a.titulo}`}
                         >
                           Registrarme <span aria-hidden="true">↗</span>
                         </a>
                       )}
-                    </span>
+                    </div>
                   </li>
                 ))}
               </ul>

@@ -25,6 +25,7 @@
  */
 import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
+import { tarjetaAlterna } from '../lib/campos';
 import Encabezado from '../components/Encabezado.astro';
 import Silla from '../components/Silla.astro';
 import Estrella from '../components/Estrella.astro';
@@ -45,40 +46,15 @@ import {
 const cuantas = actividadesConRegistro.length;
 
 /**
- * Cada evento es una tarjeta, y los campos alternan rojo y amarillo.
- *
- * Los campos de este sitio son dos: amarillo y rojo. Salen del feed del
- * festival, donde las publicaciones se turnan, y son los mismos que se turnan
- * en las cuatro puertas de la portada del móvil y en las bandas de todas las
- * páginas. Ni el blanco ni la tinta visten un campo: el papel es el marco de
- * una foto y la tinta es con lo que se escribe.
+ * Cada evento es una tarjeta y los campos se turnan — `lib/campos.ts`.
  *
  * Alternan por posición y no por tipo de actividad. Codificar el tipo por
  * color pedía cuatro campos, y para llegar a cuatro había que meter el papel o
- * la tinta — que es lo que había y lo que no puede ser—, o el hueso y la
- * pizarra, que el cliente ya descartó por apagados. El tipo se sigue leyendo,
- * en su rótulo, debajo de la hora; el color hace lo que hace en el resto del
- * sitio, que es marcar el ritmo.
- *
- * La puerta de cada tarjeta saca sus colores de las mismas variables, así que
- * nunca es del color de lo que tiene detrás: sobre campo rojo sale amarilla,
- * sobre campo amarillo sale tinta.
+ * la tinta —que no visten campos aquí— o el hueso y la pizarra, que el cliente
+ * descartó por apagados. El tipo se sigue leyendo en su rótulo, debajo de la
+ * hora; el color hace lo que hace en el resto del sitio, que es marcar el
+ * ritmo.
  */
-const campos = ['rojo', 'amarillo'] as const;
-
-const campoDe = (i: number) => campos[i % campos.length];
-
-/** Sobre rojo, la letra chica se vuelca a papel en vez de bajarle la opacidad
- *  al amarillo: son 3,67:1 de partida y apagándolo se queda por debajo de 3.
- *  Es la misma regla que ya sigue la barra de las pantallas de móvil. */
-const claseEvento = (i: number) =>
-  campoDe(i) === 'rojo' ? 'evento evento--campo-oscuro' : 'evento';
-
-const estiloEvento = (i: number) =>
-  campoDe(i) === 'rojo'
-    ? '--fondo:var(--color-rojo);--texto:var(--color-amarillo)'
-    : '--fondo:var(--color-amarillo);--texto:var(--color-tinta)';
-
 const espera = registro.espera;
 
 /** Lo que se lee bajo el titular: cuántas puertas hay abiertas, o la espera. */
@@ -134,7 +110,7 @@ const descripcion = registroAbierto
                   campo sigue turnándose, que es lo que las separa. */}
               <ul class="space-y-3 bg-amarillo p-3">
                 {dia.actividades.map((a, i) => (
-                  <li class={`${claseEvento(i)} evento--fila`} style={estiloEvento(i)}>
+                  <li class={tarjetaAlterna(i, 'fila').clase} style={tarjetaAlterna(i, 'fila').estilo}>
                     <p class="evento-hora">
                       {a.inicio}
                       <span class="evento-tipo">{a.tipo}</span>
@@ -235,7 +211,10 @@ const descripcion = registroAbierto
                   {dia.actividades.map((a, i) => {
                     const sede = sedeDe(a.sede);
                     return (
-                      <li class={`${claseEvento(i)} evento--bloque`} style={estiloEvento(i)}>
+                      <li
+                        class={tarjetaAlterna(i, 'bloque').clase}
+                        style={tarjetaAlterna(i, 'bloque').estilo}
+                      >
                         <p class="evento-hora">
                           {a.inicio}–{a.fin}
                           <span class="evento-tipo">{a.tipo}</span>
