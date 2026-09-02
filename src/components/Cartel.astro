@@ -1,0 +1,125 @@
+---
+/**
+ * El cartel de «todavía no».
+ *
+ * Una palabra grande entre dos renglones de Courier, con el canto y la sombra
+ * dura del resto del sitio. Salió de `AvisoPrograma` —el «Próximamente» de la
+ * rejilla— y se separó al hacer falta el mismo cartel en `/registro`: son la
+ * misma declaración en dos puertas de lo mismo, y decirla con dos formas
+ * distintas habría hecho creer que son dos cosas distintas.
+ *
+ * No es un cartel de obras ni un error: es la ficha de papel del sitio diciendo
+ * lo que hay. Por eso lleva arriba y abajo los datos que sí sabemos —cuándo y
+ * dónde—: lo que no se puede dar todavía es la lista, no el festival.
+ */
+interface Props {
+  /** Lo que va arriba a la izquierda: «Programa / 2026», «Registro / 2026». */
+  rotulo: string;
+  /** Lo que va arriba a la derecha. Casi siempre las fechas. */
+  cuando: string;
+  /** La palabra grande. */
+  titulo: string;
+  /** Los dos renglones del pie. */
+  pieIzquierda: string;
+  pieDerecha: string;
+  movil?: boolean;
+  compacto?: boolean;
+  class?: string;
+}
+
+const {
+  rotulo,
+  cuando,
+  titulo,
+  pieIzquierda,
+  pieDerecha,
+  movil = false,
+  compacto = false,
+  class: clase = '',
+} = Astro.props;
+---
+
+<article
+  class:list={[
+    'cartel',
+    movil
+      ? 'cartel--movil border-2 border-tinta bg-papel text-tinta shadow-[6px_6px_0_var(--color-tinta)]'
+      : 'ficha ficha--ancha',
+    compacto && 'cartel--compacto',
+    clase,
+  ]}
+  data-reveal={movil ? undefined : 'escala'}
+>
+  <div class="cartel-cuerpo">
+    <div
+      class:list={[
+        'meta flex flex-wrap items-center justify-between gap-3 border-b-2 border-tinta pb-3',
+        movil && 'text-[0.48rem]',
+      ]}
+    >
+      <span class="text-rojo">{rotulo}</span>
+      <span>{cuando}</span>
+    </div>
+
+    <div class="cartel-centro">
+      <span class="meta text-rojo" aria-hidden="true">★</span>
+      <h2 class="cartel-titulo display display-centro">{titulo}</h2>
+      <slot />
+    </div>
+
+    <div
+      class:list={[
+        'meta flex flex-wrap items-center justify-between gap-3 border-t-2 border-tinta pt-3',
+        movil && 'text-[0.48rem]',
+      ]}
+    >
+      <span>{pieIzquierda}</span>
+      <span>{pieDerecha}</span>
+    </div>
+  </div>
+</article>
+
+<style>
+  .cartel {
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .cartel-cuerpo {
+    display: flex;
+    min-height: clamp(15rem, 25vw, 20rem);
+    flex-direction: column;
+    justify-content: space-between;
+    padding: clamp(1.25rem, 2vw, 2rem);
+  }
+
+  .cartel-centro {
+    display: grid;
+    justify-items: center;
+    gap: 0.65rem;
+    text-align: center;
+  }
+
+  .cartel-titulo {
+    max-width: 100%;
+    font-size: clamp(2.75rem, 7vw, 6.5rem);
+    line-height: 0.9;
+  }
+
+  .cartel--movil .cartel-cuerpo {
+    min-height: min(50cqw, 15rem);
+    padding: 1rem;
+  }
+
+  .cartel--movil .cartel-titulo {
+    font-size: min(11.5cqw, 3.5rem);
+  }
+
+  .cartel--compacto .cartel-cuerpo {
+    min-height: clamp(13rem, 18vw, 16rem);
+  }
+
+  .cartel--compacto .cartel-titulo {
+    font-size: clamp(2.75rem, 5vw, 4.75rem);
+  }
+</style>

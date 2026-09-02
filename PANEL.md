@@ -167,10 +167,13 @@ ActividadGantt      … + registro?: url  ·  libre?: true
 
 `libre` existe para separar dos cosas que sin ella se leen igual —«esta
 actividad no pide registro» y «todavía no nos han pasado el formulario»— y que
-para el visitante son opuestas. Marcada, la actividad sale en `/registro` como
-entrada libre; sin marcar y sin formulario, no sale, y el panel la cuenta como
-pendiente. Las dos a la vez no significan nada: manda el formulario, y el
-Worker lo dice al guardar.
+para el visitante son opuestas. **En `/registro` salen sólo las que tienen
+formulario**: es la página de apuntarse, y una actividad a la que se entra sin
+apuntarse no tiene nada que hacer en una lista de puertas. Lo que hace `libre`
+es decirlo donde toca —en su ficha de la rejilla, que es donde alguien pregunta
+«¿y a ésta cómo entro?»— y dejar de contarla como pendiente en el panel. Las dos
+a la vez no significan nada: manda el formulario, y el Worker lo dice al
+guardar.
 
 ---
 
@@ -365,6 +368,22 @@ repasa una columna de cuarenta —«¿a cuál le falta el Tally?»—, y para es
 sirve es un renglón por actividad, ordenados por día y hora, todos a la vista y
 con el canto de color diciendo en cuál falta. Arriba, los filtros con su cuenta:
 pendientes, con formulario, entrada libre.
+
+**El formulario es una URL y ya.** El festival usa Google Forms; Tally se
+soporta además porque el sitio ya lo abría encima de la página —tiene una API de
+ventana— y quitarlo sería quitar algo que funciona. Todo lo demás se abre en
+otra pestaña, como cualquier enlace, y el botón sólo pinta la flechita cuando de
+verdad se va: una flecha que promete salir y no sale es un botón que miente en
+lo único que promete.
+
+Incrustar un Google Forms no se puede, y no por falta de ganas: `forms.gle` son
+enlaces cortos que sólo se resuelven siguiendo la redirección, así que para
+meterlos en un marco habría que pedirle la página a Google antes de que nadie
+haya pulsado nada — que es exactamente lo que este sitio no hace.
+
+El renglón del panel dice de quién es cada uno —«Google Forms», «Tally», o el
+dominio a secas—. «Con formulario» no distinguía un enlace bueno de uno pegado
+de otra actividad, y cargando catorce seguidas ése es el error de todos los días.
 
 Y el interruptor **«el registro está abierto»**, que es a `/registro` lo que el
 de la rejilla de ejemplo es a `/programa`. Se declara y no se deduce por lo

@@ -100,42 +100,31 @@ export const manifiesto = {
     'El arte conceptual propone preguntas capaces de alterar nuestra manera de mirar y habitar la realidad.',
 };
 
-/** Los horarios existen en el original pero sin contenido asignado todavía. */
-const horarios = [
-  '8:00',
-  '9:00',
-  '9:15',
-  '10:15',
-  '11:00',
-  '11:30',
-  '12:15',
-  '14:00',
-  '14:15',
-  '15:00',
-  '15:45',
-  '16:15',
-];
+export type Dia = { dia: string; fecha: string };
 
-export type Slot = { hora: string; actividad: string };
-export type Dia = { dia: string; fecha: string; slots: Slot[] };
-
-const dia = (nombre: string, fecha: string): Dia => ({
-  dia: nombre,
-  fecha,
-  slots: horarios.map((hora) => ({ hora, actividad: '' })),
-});
-
+/**
+ * Los cuatro días.
+ *
+ * Aquí ya no hay horarios. Los había —doce, de las 8:00 a las 16:15, con la
+ * actividad vacía— y venían tal cual del Wix, donde tampoco tenían nada dentro.
+ * La vista «Por días» de `/programa` los pintaba: cuarenta y ocho renglones que
+ * decían «Por anunciar», los mismos cuatro días seguidos, con catorce
+ * actividades de verdad cargadas en el panel y ninguna de ellas a la vista.
+ *
+ * La lista de horas de un día es el día, y el día lo dicen las actividades: sale
+ * de `agendaPorDia`, más abajo, cuando `actividades` ya existe.
+ */
 export const programa = {
   titulo: 'Programa',
   estado: '(Próximamente)',
   // "Domingo, 24" es un typo del sitio original; corregido a 27 para que la
   // fecha coincida con el rango anunciado del festival.
   dias: [
-    dia('Jueves', '24 de septiembre'),
-    dia('Viernes', '25 de septiembre'),
-    dia('Sábado', '26 de septiembre'),
-    dia('Domingo', '27 de septiembre'),
-  ],
+    { dia: 'Jueves', fecha: '24 de septiembre' },
+    { dia: 'Viernes', fecha: '25 de septiembre' },
+    { dia: 'Sábado', fecha: '26 de septiembre' },
+    { dia: 'Domingo', fecha: '27 de septiembre' },
+  ] as Dia[],
 };
 
 /**
@@ -154,23 +143,25 @@ export const registro = {
   estado: 'Próximamente',
   ciudad: 'Guadalajara',
   /**
-   * Lo que se lee cuando todavía no se puede entrar a nada. Dos, porque son dos
+   * El renglón que acompaña al cartel de espera. Dos, porque son dos
    * situaciones distintas y decir la de al lado se nota: con el programa sin
    * publicar, lo que falta es el programa; con el programa ya puesto, lo único
    * que falta es abrir la puerta.
+   *
+   * Cortos a propósito. Iban debajo de un PRÓXIMAMENTE de sesenta píxeles y de
+   * un rótulo que ya decía «Próximamente»: un párrafo de dos frases explicando
+   * lo mismo por tercera vez, y encima contando por dentro qué interruptor está
+   * puesto — que es asunto del panel, no de quien viene a apuntarse.
    */
   espera: {
-    sinPrograma:
-      'El registro abre junto con el programa. Cada actividad tiene el suyo: ' +
-      'cuando la programación esté cerrada, aquí sale la lista con la puerta de cada una.',
-    conPrograma:
-      'El programa ya está publicado; el registro todavía no. Cuando abra, aquí sale la ' +
-      'lista de actividades con la puerta de cada una: unas con formulario, otras de entrada libre.',
+    sinPrograma: 'Abre junto con el programa. Cada actividad tendrá aquí su formulario.',
+    conPrograma: 'El programa ya está. En cuanto abra, cada actividad tendrá aquí su formulario.',
   },
-  /** Lo que se lee cuando está abierto pero una actividad concreta no pide
-   *  registro. No es un hueco: es una respuesta. */
-  libre: 'Entrada libre',
-  libreNota: 'Se entra sin apuntarse, hasta llenar el aforo.',
+  /* Aquí vivían «Entrada libre» y su coletilla, que se pintaban en el sitio del
+     botón de las actividades sin formulario. Se van con ellas: esta página es
+     la de apuntarse, y una actividad a la que se entra sin apuntarse no tiene
+     nada que hacer en una lista de puertas. Que sea libre se dice en su ficha
+     de la rejilla, que es donde alguien pregunta «¿y a ésta cómo entro?». */
   acciones: {
     registro: 'Registrarme',
     general: 'Registro general',
@@ -300,6 +291,24 @@ export const programaPublicado = !ganttEsEjemplo;
 export const actividades: ActividadGantt[] = contenido.programa.actividades;
 
 /**
+ * Los cuatro días con lo que pasa en cada uno, en orden de reloj.
+ *
+ * Es la otra lectura de la misma lista: la rejilla contesta «qué se pisa con
+ * qué» y esto contesta «qué hay a tal hora», que es la pregunta que se hace uno
+ * ya estando en la calle. Las dos salen de `actividades` — antes esta segunda
+ * salía de doce horas escritas a mano que no tenían nada dentro y nunca iban a
+ * tenerlo, así que la vista «Por días» decía «Por anunciar» cuarenta y ocho
+ * veces con el programa ya cargado.
+ */
+export const agendaPorDia = programa.dias.map((d, i) => ({
+  ...d,
+  indice: i,
+  actividades: actividades
+    .filter((a) => a.dia === i)
+    .sort((a, b) => a.inicio.localeCompare(b.inicio)),
+}));
+
+/**
  * Lo que se lee al lado del rótulo «Programa»: en la marquesina de `/programa`,
  * en su cabecera de móvil y en el índice de la portada del móvil.
  *
@@ -315,7 +324,7 @@ export const estadoPrograma = programaPublicado
 /** ── El registro a eventos ────────────────────────────────────────────────
  *
  * Aquí uno se apunta **por actividad**: cada `ActividadGantt` trae su propio
- * `registro` —su Tally— y la ficha de la rejilla abre ése. `/registro` es la
+ * `registro` —su formulario— y la ficha de la rejilla abre ése. `/registro` es la
  * otra puerta a la misma cosa: las mismas actividades, ordenadas por cuándo se
  * entra en vez de por dónde caen en la rejilla.
  *
@@ -338,15 +347,53 @@ export const registroDatos = contenido.programa.registro ?? {};
  */
 export const registroAbierto = programaPublicado && registroDatos.abierto === true;
 
+/**
+ * De quién es un formulario.
+ *
+ * El festival usa Google Forms; Tally se soporta porque el sitio ya lo abría
+ * encima de la página —tiene una API de ventana— y quitarlo sería quitar algo
+ * que funciona. Cualquier otra dirección se abre en otra pestaña, que es lo que
+ * hace un enlace normal.
+ *
+ * Sirve para dos cosas y las dos importan: el panel puede decir de qué es cada
+ * enlace —pegar el de otra actividad es el error de todos los días— y el botón
+ * del sitio sólo pinta la flechita cuando de verdad se va a otra pestaña.
+ */
+export const proveedorDeFormulario = (url?: string): 'tally' | 'google' | 'otro' | null => {
+  if (!url) return null;
+  try {
+    const { hostname } = new URL(url);
+    if (/(^|\.)tally\.so$/.test(hostname)) return 'tally';
+    if (/(^|\.)(forms\.gle|docs\.google\.com)$/.test(hostname)) return 'google';
+    return 'otro';
+  } catch {
+    return 'otro';
+  }
+};
+
+/** Si el formulario se abre encima de la página en vez de en otra pestaña. Hoy
+ *  sólo Tally: Google Forms reparte enlaces cortos (`forms.gle`) que sólo se
+ *  resuelven siguiendo la redirección, así que no hay forma de incrustarlos sin
+ *  pedirle a Google la página antes de que nadie haya pulsado nada. */
+export const abreEncima = (url?: string) => proveedorDeFormulario(url) === 'tally';
+
 /** Cómo se entra a una actividad. `pendiente` no sale en el sitio: es lo que
  *  todavía no nos han pasado, y una actividad sin puerta no se anuncia con una
  *  puerta vacía. */
 export const puertaDe = (a: ActividadGantt): 'formulario' | 'libre' | 'pendiente' =>
   a.registro ? 'formulario' : a.libre ? 'libre' : 'pendiente';
 
-/** Las actividades a las que hoy se puede entrar, por día y por hora. */
+/**
+ * Las que salen en `/registro`: **sólo las que tienen formulario**.
+ *
+ * Las de entrada libre no. Se listaban, con su etiqueta de «entrada libre» en
+ * el sitio del botón, y era mezclar dos cosas: esto es la página de apuntarse,
+ * y una actividad a la que se entra sin apuntarse no tiene nada que hacer en
+ * una lista de puertas. Que sea de entrada libre se dice donde toca — en su
+ * ficha de la rejilla, que es donde alguien pregunta «¿y a ésta cómo entro?».
+ */
 export const actividadesConRegistro = actividades
-  .filter((a) => puertaDe(a) !== 'pendiente')
+  .filter((a) => Boolean(a.registro))
   .sort((a, b) => a.dia - b.dia || a.inicio.localeCompare(b.inicio));
 
 /** Agrupadas por día, saltándose los días en los que no hay nada: un día vacío

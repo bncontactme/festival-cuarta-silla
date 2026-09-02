@@ -52,7 +52,13 @@ export type ActividadGantt = {
   tipo: 'taller' | 'charla' | 'muestra' | 'escena';
   /** Quién la da. Sale en la ficha, debajo del título. */
   artista?: string;
-  /** Formulario de Tally de esta actividad. Sin él, la ficha sale sin botón. */
+  /**
+   * El formulario de esta actividad. Sin él, la ficha sale sin botón.
+   *
+   * Sirve cualquiera: Google Forms es el que usa el festival, y Tally además se
+   * abre encima de la página en vez de en otra pestaña, porque tiene con qué.
+   * Nada de eso lo decide el dato — es una URL y ya.
+   */
   registro?: string;
   /**
    * Se entra sin apuntarse.
@@ -121,7 +127,7 @@ export type Marca = { nombre: string; logo?: string; url?: string };
  * El registro a eventos, en lo que NO es de una actividad concreta.
  *
  * Aquí uno se apunta **por actividad**: cada `ActividadGantt` trae su propio
- * `registro` —su Tally— y es ahí donde vive el formulario. Esto de al lado son
+ * `registro` —su formulario— y es ahí donde vive. Esto de al lado son
  * las tres cosas que no caben en ninguna fila porque son de la página entera.
  *
  * `abierto` se declara, no se deduce, por lo mismo que `esEjemplo`: que haya

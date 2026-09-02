@@ -14,7 +14,7 @@
  *
  * La forma también es distinta a propósito. En Programa cada actividad es una
  * ficha de ocho campos porque ahí se escribe; aquí no se escribe una actividad,
- * se repasa una columna de cuarenta —«¿a cuáles les falta el Tally?»—, y para
+ * se repasa una columna de cuarenta —«¿a cuáles les falta el formulario?»—, y para
  * eso lo que sirve es un renglón por actividad y todas a la vista.
  */
 import { el, vaciar } from './dom';
@@ -32,6 +32,28 @@ const ROTULO: Record<Puerta, string> = {
   libre: 'Entrada libre',
   pendiente: 'Pendiente',
 };
+
+/**
+ * De quién es el formulario, para decirlo en el renglón.
+ *
+ * «Con formulario» a secas no distingue un Google Forms de un enlace pegado de
+ * cualquier otro sitio, y pegar el de la actividad de al lado —o el del panel
+ * de administración de Forms en vez del de responder— es el error de todos los
+ * días cuando se cargan catorce seguidas. Diciendo cuál es, se ve de reojo.
+ *
+ * La misma regla que `proveedorDeFormulario()` en `site.ts`, escrita otra vez
+ * porque el panel no puede importar el sitio. Son cuatro líneas y no se mueven.
+ */
+function proveedor(url: string): string {
+  try {
+    const { hostname } = new URL(url);
+    if (/(^|\.)tally\.so$/.test(hostname)) return 'Tally';
+    if (/(^|\.)(forms\.gle|docs\.google\.com)$/.test(hostname)) return 'Google Forms';
+    return hostname.replace(/^www\./, '');
+  } catch {
+    return 'enlace raro';
+  }
+}
 
 export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLElement {
   const seccion = el('section');
@@ -71,10 +93,11 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
   const cabecera = el('div', { class: 'cabecera' },
     el('h2', {}, 'Registro a eventos'),
     el('span', { class: 'rotulo', style: 'opacity:.5' },
-      `${cuenta('formulario') + cuenta('libre')} de ${actos.length} con puerta`),
+      `${cuenta('formulario')} de ${actos.length} con formulario`),
     el('p', {},
       'Aquí no se apunta uno al festival: se apunta a cada actividad. Esta pestaña es la misma lista del Programa, ' +
-      'mirada por su formulario — cambiar una hora se hace allí y se ve aquí, porque es el mismo dato.'),
+      'mirada por su formulario — cambiar una hora se hace allí y se ve aquí, porque es el mismo dato. ' +
+      'En /registro salen SÓLO las que tienen formulario: marcar «Libre» quita la actividad de la página y deja de contarla como pendiente.'),
   );
   seccion.append(cabecera);
 
@@ -121,7 +144,7 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
       },
     });
 
-    const sinPuerta = abierto && !esEjemplo && cuenta('formulario') + cuenta('libre') === 0;
+    const sinPuerta = abierto && !esEjemplo && cuenta('formulario') === 0;
     const clase = !abierto ? 'ojo' : esEjemplo || sinPuerta ? 'error' : 'bien';
 
     return el('div', { class: 'aviso ' + clase },
@@ -135,8 +158,8 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
             : esEjemplo
               ? 'Está marcado, pero el programa sigue marcado como «rejilla de ejemplo» y eso manda: /registro seguirá diciendo «Próximamente». No se puede abrir la entrada a un programa que todavía dice que no es el programa. Publica el programa y esto se abre solo.'
               : sinPuerta
-                ? 'Está abierto y ninguna actividad tiene formulario ni está marcada como entrada libre: la página va a salir vacía. Rellena la columna de abajo antes de dejarlo así.'
-                : `El registro está publicado: /registro enseña las ${cuenta('formulario') + cuenta('libre')} actividades a las que se puede entrar.`,
+                ? 'Está abierto y ninguna actividad tiene formulario: la página va a salir vacía. Rellena la columna de abajo antes de dejarlo así.'
+                : `El registro está publicado: /registro enseña las ${cuenta('formulario')} actividades con formulario. Las de entrada libre no salen ahí: a ésas se entra sin apuntarse, y se dice en su ficha de la rejilla.`,
         ),
       ),
     );
@@ -259,7 +282,7 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
 
     const enlace = el('input', {
       type: 'url', spellcheck: false,
-      placeholder: a.libre ? 'entrada libre — sin formulario' : 'https://tally.so/r/…',
+      placeholder: a.libre ? 'entrada libre — sin formulario' : 'https://forms.gle/… o https://tally.so/r/…',
       value: a.registro ?? '',
       disabled: Boolean(a.libre),
       oninput: (e: any) => {
@@ -296,19 +319,22 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
       el('span', {}, 'Libre'),
     );
 
-    const marca = el('span', { class: 'renglon-marca' }, ROTULO[estadoPuerta]);
+    const rotulo = (a: any) =>
+      puertaDe(a) === 'formulario' ? proveedor(a.registro) : ROTULO[puertaDe(a)];
+
+    const marca = el('span', { class: 'renglon-marca' }, rotulo(a));
 
     function marcarEstado() {
       const ahora = puertaDe(a);
       nodo.className = 'renglon renglon--' + ahora;
-      marca.textContent = ROTULO[ahora];
+      marca.textContent = rotulo(a);
       enlace.disabled = Boolean(a.libre);
       // La cuenta de la pestaña y la de los filtros cuentan lo mismo: si una
       // se mueve y la otra no, parece que se perdió algo.
       pintarFiltros();
       refrescarInterruptor();
       cabecera.querySelector('.rotulo')!.textContent =
-        `${cuenta('formulario') + cuenta('libre')} de ${actos.length} con puerta`;
+        `${cuenta('formulario')} de ${actos.length} con formulario`;
     }
 
     nodo.append(cuando, quien, enlace, libre, marca);
