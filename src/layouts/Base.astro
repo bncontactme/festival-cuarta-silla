@@ -90,6 +90,11 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
          cargador que no se quita es una puerta cerrada. Sin JS, `#carga` se
          queda en `display:none` y nadie se entera. -->
     <style is:inline>
+      /* La primera visita no enciende el cargador —juega la entrada de la
+         portada— así que el campo amarillo tiene que estar puesto ya, o entre
+         el primer cuadro y la hoja de estilos se cuela un blanco. */
+      html[data-intro] { background: #fffd00; }
+
       #carga { display: none; }
 
       html[data-carga] { overflow: hidden; }
@@ -146,9 +151,8 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
       // El cargador: campo amarillo y la silla roja mientras carga.
       //
       // Sólo en el móvil, y NO cuando va a jugarse la entrada de la portada:
-      // ésa ya abre con la silla sobre su fondo y encadenar los dos sería la
-      // misma imagen dos veces, con un salto de color en medio. Una cosa a la
-      // vez.
+      // ésa abre con la misma imagen —silla roja sobre amarillo— y encadenar
+      // las dos sería verla dos veces seguidas. Una cosa a la vez.
       //
       // Se decide aquí, en línea y antes del primer pintado, por lo mismo que
       // la entrada: más tarde ya habría habido un cuadro en blanco, que es

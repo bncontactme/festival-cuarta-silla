@@ -272,6 +272,7 @@ export const coloresGantt = {
   escena: { fondo: 'var(--color-ladrillo)', texto: 'var(--color-amarillo)' },
 } as const;
 
+
 /** Si lo de abajo todavía es el andamio o ya es la programación.
  *
  *  Lo decide el festival con un interruptor en `/admin`, no se deduce de nada:

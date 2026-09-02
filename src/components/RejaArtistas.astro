@@ -11,9 +11,10 @@ import { artistas } from '../data/artistas';
  * filas—; lo único propio es el estado vacío.
  *
  * El vacío no es un error ni un cartel de obras: es la misma ficha de papel
- * con sombra dura que usa el resto del sitio, diciendo lo que hay que decir.
- * Mientras `artistas.lista` esté vacía se pinta eso; en cuanto haya un nombre
- * se pinta la reja. Nadie tiene que venir a cambiar una plantilla.
+ * con sombra dura que usa el resto del sitio, y dice lo único que no se ve
+ * solo —cuándo habrá nombres—, no que no los haya. Mientras `artistas.lista`
+ * esté vacía se pinta eso; en cuanto haya un nombre se pinta la reja. Nadie
+ * tiene que venir a cambiar una plantilla.
  *
  * La reja no lleva cantos propios, igual que la de sedes: los filetes los
  * ponen las fichas (`border-r-2 border-b-2`) y el de arriba lo pone lo que
@@ -36,8 +37,9 @@ const lista = limite ? artistas.lista.slice(0, limite) : artistas.lista;
  * Las fichas se cargan de una en una, y con una sola la página era una tarjeta
  * a la izquierda y novecientos píxeles de amarillo vacío a su derecha: no se
  * lee como composición, se lee como que algo no cargó. La reja se termina con
- * una celda que dice lo que hay —«Por anunciar»—, que es información y no un
- * hueco, y que se va sola en cuanto las fichas llenan la fila.
+ * una celda muda que sólo cierra los filetes de la fila, y que se va sola en
+ * cuanto las fichas la llenan. Muda a propósito: un letrero contando lo que
+ * falta convierte el final de una fila en una disculpa.
  *
  * En una columna —el móvil— no se pinta: debajo de una ficha, a lo ancho de la
  * pantalla, deja de ser el final de una fila y pasa a ser una tarjeta más.
@@ -49,15 +51,11 @@ const resto3 = (3 - (lista.length % 3)) % 3;
 {
   lista.length === 0 ? (
     <div class={`ficha ficha--ancha max-w-3xl ${clase}`} data-reveal="escala">
-      <p class="meta flex items-center gap-3 text-tinta">
-        <span class="inline-block h-[2px] w-8 bg-rojo" />
-        {artistas.estado}
-      </p>
-      <p class="display mt-4 text-4xl leading-[0.95] lg:text-5xl">
-        Todavía no hay nombres
+      <p class="display text-4xl leading-[0.95] lg:text-5xl">
+        {artistas.vacio.titulo}
       </p>
       <p class="mt-5 max-w-[52ch] font-mono text-sm leading-relaxed text-tinta/70">
-        {artistas.vacio}
+        {artistas.vacio.nota}
       </p>
     </div>
   ) : (
@@ -76,15 +74,7 @@ const resto3 = (3 - (lista.length % 3)) % 3;
             resto3 === 2 && 'lg:col-span-2',
           ]}
           aria-hidden="true"
-        >
-          <p class="meta flex items-center gap-3 text-tinta/60">
-            <span class="inline-block h-[2px] w-8 bg-rojo" />
-            {artistas.estado}
-          </p>
-          <p class="display mt-4 text-3xl leading-[0.95] text-tinta/25 lg:text-4xl">
-            Faltan nombres
-          </p>
-        </li>
+        />
       )}
     </ul>
   )

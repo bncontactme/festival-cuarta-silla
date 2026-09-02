@@ -247,6 +247,205 @@
     }
   }
 
+  /* ── El registro, dentro de la lista del programa ─────────────────────
+     Un botón de fila: el mismo que la ficha de la rejilla, encogido a la
+     medida de un renglón de la lista de días —en el teléfono y en las cuatro
+     columnas de escritorio, que son estrechas—.
+
+     Al contorno y no macizo: en una columna con seis actividades, seis
+     rectángulos rojos rellenos se leen antes que los títulos, y lo que se
+     viene a leer es el programa. Al pasar el cursor se vuelca y se hace
+     macizo, que es lo que hacen el resto de los botones del sitio.
+
+     El relleno no es decorativo: con `0.5rem` de letra, el alto de la caja se
+     lo da el padding, y por debajo de eso deja de ser algo que un pulgar
+     pueda apuntar. */
+  .registro-fila {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    margin-top: 0.5rem;
+    padding: 0.45rem 0.8rem;
+    border: var(--borde) solid var(--color-rojo);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.5rem;
+    line-height: 1;
+    color: var(--color-rojo);
+    transition:
+      background-color 0.2s var(--ease-salida),
+      color 0.2s var(--ease-salida);
+  }
+
+  .registro-fila:hover,
+  .registro-fila:focus-visible {
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
+  }
+
+  /* ── Evento: la tarjeta de /registro ──────────────────────────────────
+     Un rectángulo con el canto y la sombra dura de la casa, y el campo
+     turnándose entre los dos del sitio: rojo, amarillo, rojo. Sobre el
+     amarillo de la sección eso es lo que hace que se lea como un objeto
+     puesto encima y no como una fila de una lista; la que cae en amarillo se
+     sostiene igual, porque lo que la separa del campo son el filete y la
+     sombra, no el color. Es el mismo recurso que las puertas de la portada
+     del móvil, que también se turnan.
+
+     `--fondo` y `--texto` los pone cada `<li>` según su posición. */
+  .evento {
+    --fondo: var(--color-amarillo);
+    --texto: var(--color-tinta);
+    background-color: var(--fondo);
+    color: var(--texto);
+    border: var(--borde) solid var(--color-tinta);
+    box-shadow: 6px 6px 0 var(--color-tinta);
+  }
+
+  /* ── Fila: la forma del teléfono ──────────────────────────────────────
+     La hora a la izquierda en columna propia —todas las del día arrancan el
+     título en la misma vertical— y a su derecha qué, dónde y la puerta.
+     Compacta a propósito: es la forma que deja ver el día entero de una vez.
+     La sombra baja a 4 px, como los botones en pantalla chica: seis en un
+     objeto de este alto se comen el hueco entre uno y el siguiente. */
+  .evento--fila {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.2rem 0.9rem;
+    padding: 0.85rem 1rem;
+    box-shadow: 4px 4px 0 var(--color-tinta);
+  }
+
+  .evento--fila .evento-artista {
+    margin-top: 0.15rem;
+  }
+
+  .evento--fila .evento-sede {
+    margin-top: 0.3rem;
+  }
+
+  .evento--fila .evento-puerta {
+    margin-top: 0.55rem;
+  }
+
+  /* ── Bloque: la forma de la pantalla ancha ────────────────────────────
+     De pie y de dos en dos. A lo largo de 1.200 px la fila dejaba el título
+     solo en medio del campo y la puerta a un palmo, al otro extremo; en
+     bloque la actividad entera cabe de una mirada. La puerta se pega abajo
+     —`margin-top:auto`— para que dos tarjetas de la misma fila terminen en la
+     misma raya aunque una tenga el título más largo. */
+  .evento--bloque {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1.5rem;
+  }
+
+  @media (width >= 80rem) {
+    .evento--bloque {
+      padding: 1.75rem 1.9rem;
+    }
+  }
+
+  /* La hora, que es por lo que se busca en esta página, en mono y a tamaño de
+     dato y no de letra chica. Debajo, el tipo.
+     Los 19,2 px tampoco son estéticos: sobre el campo rojo la hora va en
+     amarillo —3,67:1—, y ese contraste sólo basta a partir de 18,66 px en
+     negrita. Por debajo habría que volcarla a papel y perder el amarillo. */
+  .evento-hora {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.2rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .evento-tipo {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .evento-artista {
+    margin-top: 0.25rem;
+    opacity: 0.75;
+  }
+
+  .evento-sede {
+    margin-top: 0.5rem;
+    opacity: 0.7;
+  }
+
+  /* Sobre el campo rojo, la letra chica se vuelca a papel en vez de bajarle
+     la opacidad al amarillo: amarillo sobre rojo son 3,67:1 de partida, y
+     apagándolo se queda por debajo de 3. Es lo mismo que hace la barra de las
+     pantallas de móvil, y por lo mismo. */
+  .evento--campo-oscuro .evento-tipo,
+  .evento--campo-oscuro .evento-artista,
+  .evento--campo-oscuro .evento-sede {
+    color: var(--color-papel);
+    opacity: 0.8;
+  }
+
+  /* ── La puerta ────────────────────────────────────────────────────────
+     El mismo enlace con dos pesos, según la forma que lo aloja.
+
+     En la fila, al contorno y pequeño: es una entre varias de un día que se
+     lee de un vistazo, y siete botones macizos apilados pesan más que los
+     títulos. En el bloque, macizo y a lo ancho, que es el remate de la
+     tarjeta y lo único que hay que pulsar.
+
+     Los colores salen de las variables de la tarjeta, así que la puerta
+     nunca es del color de lo que tiene detrás sin que nadie lo decida dos
+     veces: sobre campo rojo sale amarilla, sobre campo amarillo sale tinta.
+     Al pasar el cursor se cambian los dos, que es como se enciende todo lo
+     pulsable de este sitio. */
+  .evento-puerta {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 0.45em;
+    margin-top: 0.65rem;
+    padding: 0.5rem 0.85rem;
+    border: var(--borde) solid currentColor;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.5rem;
+    line-height: 1;
+    transition:
+      background-color 0.2s var(--ease-salida),
+      color 0.2s var(--ease-salida);
+  }
+
+  .evento-puerta:hover,
+  .evento-puerta:focus-visible {
+    background-color: var(--texto);
+    color: var(--fondo);
+  }
+
+  .evento--bloque .evento-puerta {
+    width: 100%;
+    justify-content: center;
+    margin-top: auto;
+    padding: 0.95rem 1.5rem;
+    font-size: 0.72rem;
+    background-color: var(--texto);
+    color: var(--fondo);
+  }
+
+  .evento--bloque .evento-puerta:hover,
+  .evento--bloque .evento-puerta:focus-visible {
+    background-color: transparent;
+    color: var(--texto);
+  }
+
   /* ── Enlace subrayado que se dibuja ─────────────────────────────────── */
   .enlace {
     position: relative;

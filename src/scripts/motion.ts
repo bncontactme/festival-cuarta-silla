@@ -206,7 +206,7 @@ function iniciarEntrada() {
 
   raiz.addEventListener('pointerdown', terminar, { once: true, passive: true });
   raiz.addEventListener('keydown', terminar, { once: true });
-  setTimeout(terminar, 2200);
+  setTimeout(terminar, 1700);
 }
 
 /** Menú móvil. */

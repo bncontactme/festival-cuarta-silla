@@ -25,6 +25,7 @@
  */
 import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
+import { tarjetaAlterna } from '../lib/campos';
 import Encabezado from '../components/Encabezado.astro';
 import Silla from '../components/Silla.astro';
 import Estrella from '../components/Estrella.astro';
@@ -39,12 +40,21 @@ import {
   programaPublicado,
   sedeDe,
   enlaceMapa,
-  coloresGantt,
   abreEncima,
 } from '../data/site';
 
 const cuantas = actividadesConRegistro.length;
 
+/**
+ * Cada evento es una tarjeta y los campos se turnan — `lib/campos.ts`.
+ *
+ * Alternan por posición y no por tipo de actividad. Codificar el tipo por
+ * color pedía cuatro campos, y para llegar a cuatro había que meter el papel o
+ * la tinta —que no visten campos aquí— o el hueso y la pizarra, que el cliente
+ * descartó por apagados. El tipo se sigue leyendo en su rótulo, debajo de la
+ * hora; el color hace lo que hace en el resto del sitio, que es marcar el
+ * ritmo.
+ */
 const espera = registro.espera;
 
 /** Lo que se lee bajo el titular: cuántas puertas hay abiertas, o la espera. */
@@ -93,26 +103,36 @@ const descripcion = registroAbierto
                 </span>
               </summary>
 
-              <ul class="divide-y-2 divide-tinta/15 bg-amarillo">
-                {dia.actividades.map((a) => (
-                  <li class="px-4 py-4">
-                    <p class="meta text-[0.55rem] text-rojo">
-                      {a.inicio}–{a.fin} · {a.sede}
+              {/* En el teléfono, filas. Cada actividad en un bloque de
+                  pantalla entera eran tres pantallas de scroll para tres
+                  eventos: la hora, que es por lo que se busca aquí, se veía de
+                  una en una. En fila caben todas las del día a la vez y el
+                  campo sigue turnándose, que es lo que las separa. */}
+              <ul class="space-y-3 bg-amarillo p-3">
+                {dia.actividades.map((a, i) => (
+                  <li class={tarjetaAlterna(i, 'fila').clase} style={tarjetaAlterna(i, 'fila').estilo}>
+                    <p class="evento-hora">
+                      {a.inicio}
+                      <span class="evento-tipo">{a.tipo}</span>
                     </p>
-                    <h3 class="mt-1.5 text-base leading-snug font-bold">{a.titulo}</h3>
-                    {a.artista && (
-                      <p class="meta mt-1 text-[0.5rem] opacity-55">{a.artista}</p>
-                    )}
 
-                    <a
-                      href={a.registro}
-                      target="_blank"
-                      rel="noopener"
-                      class="boton mt-3"
-                      data-registro={a.registro}
-                    >
-                      {registro.acciones.registro}{abreEncima(a.registro) ? '' : ' ↗'}
-                    </a>
+                    <div class="min-w-0">
+                      <h3 class="text-sm leading-snug font-bold">{a.titulo}</h3>
+                      {a.artista && (
+                        <p class="evento-artista text-[0.8rem]">{a.artista}</p>
+                      )}
+                      <p class="meta evento-sede text-[0.5rem]">{a.sede}</p>
+
+                      <a
+                        href={a.registro}
+                        target="_blank"
+                        rel="noopener"
+                        class="evento-puerta"
+                        data-registro={a.registro}
+                      >
+                        {registro.acciones.registro}{abreEncima(a.registro) ? '' : ' ↗'}
+                      </a>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -181,38 +201,42 @@ const descripcion = registroAbierto
                   </p>
                 </header>
 
-                <ul class="divide-y-2 divide-tinta/12">
-                  {dia.actividades.map((a) => {
+                {/* En pantalla ancha, bloques y de dos en dos. La fila a lo
+                    largo de 1.200 px dejaba el título solo en medio de un
+                    campo de color con la puerta a un palmo, al otro extremo;
+                    en bloque, la actividad entera —cuándo, qué, dónde y por
+                    dónde se entra— cabe de una mirada. Es el mismo objeto que
+                    en el teléfono, puesto de pie. */}
+                <ul class="mt-6 grid gap-5 lg:grid-cols-2">
+                  {dia.actividades.map((a, i) => {
                     const sede = sedeDe(a.sede);
                     return (
                       <li
-                        class="grid gap-x-6 gap-y-3 border-l-[6px] py-6 pl-4 lg:grid-cols-[8rem_1fr_auto] lg:items-baseline"
-                        style={`border-left-color:${coloresGantt[a.tipo].fondo}`}
+                        class={tarjetaAlterna(i, 'bloque').clase}
+                        style={tarjetaAlterna(i, 'bloque').estilo}
                       >
-                        {/* El canto de color es el tipo, y es el mismo que
-                            colorea su barra en la rejilla: quien viene de
-                            /programa reconoce la actividad por el color antes
-                            que por el nombre. Va de canto y no de cuadradito
-                            al lado de la hora porque es la misma forma que
-                            allá — el filete del borde izquierdo de la barra. */}
-                        <p class="meta text-tinta/70">{a.inicio}–{a.fin}</p>
+                        <p class="evento-hora">
+                          {a.inicio}–{a.fin}
+                          <span class="evento-tipo">{a.tipo}</span>
+                        </p>
 
                         <div class="min-w-0">
                           <h3 class="text-xl leading-snug font-bold lg:text-2xl">
                             {a.titulo}
                           </h3>
                           {a.artista && (
-                            <p class="mt-1 text-base opacity-70">{a.artista}</p>
+                            <p class="evento-artista text-base">{a.artista}</p>
                           )}
-                          <p class="meta mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-tinta/55">
-                            <span>{a.tipo}</span>
-                            <span aria-hidden="true">·</span>
+                          {/* El subrayado va en `currentColor` y no en rojo:
+                              sobre el campo rojo de un taller, un subrayado
+                              rojo no existe. */}
+                          <p class="meta evento-sede">
                             {sede ? (
                               <a
                                 href={enlaceMapa(sede)}
                                 target="_blank"
                                 rel="noopener"
-                                class="underline decoration-rojo decoration-2 underline-offset-4 hover:text-rojo"
+                                class="underline decoration-current decoration-2 underline-offset-4 hover:opacity-100"
                               >
                                 {a.sede} ↗
                               </a>
@@ -235,7 +259,7 @@ const descripcion = registroAbierto
                           href={a.registro}
                           target="_blank"
                           rel="noopener"
-                          class="boton boton--papel justify-self-start lg:justify-self-end"
+                          class="evento-puerta"
                           data-registro={a.registro}
                         >
                           {registro.acciones.registro}{abreEncima(a.registro) ? '' : ' ↗'}
