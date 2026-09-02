@@ -88,7 +88,7 @@ const actividades: Esquema = {
     { clave: 'artista', etiqueta: 'Quién la da', tipo: 'texto', ancho: 2,
       ayuda: 'Sale en la ficha, debajo del título.' },
     { clave: 'registro', etiqueta: 'Formulario de registro', tipo: 'url', ancho: 3,
-      ayuda: 'El Tally de esta actividad. Es lo que pone el botón «Registrarme» en la ficha de la rejilla y lo que la saca en /registro. Se editan todos juntos en la pestaña Registro.' },
+      ayuda: 'El formulario de esta actividad: Google Forms, Tally o el que sea. Es lo que pone el botón «Registrarme» en la ficha de la rejilla y lo que la saca en /registro. Se editan todos juntos en la pestaña Registro.' },
     { clave: 'libre', etiqueta: 'Entrada libre', tipo: 'sino', siNo: 'Se entra sin apuntarse',
       ayuda: 'Márcala cuando esta actividad no pide registro. Sin formulario y sin esta marca, la actividad sale como pendiente en la pestaña Registro — que es distinto de ser libre.' },
   ],

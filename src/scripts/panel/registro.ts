@@ -14,7 +14,7 @@
  *
  * La forma también es distinta a propósito. En Programa cada actividad es una
  * ficha de ocho campos porque ahí se escribe; aquí no se escribe una actividad,
- * se repasa una columna de cuarenta —«¿a cuáles les falta el Tally?»—, y para
+ * se repasa una columna de cuarenta —«¿a cuáles les falta el formulario?»—, y para
  * eso lo que sirve es un renglón por actividad y todas a la vista.
  */
 import { el, vaciar } from './dom';
@@ -32,6 +32,28 @@ const ROTULO: Record<Puerta, string> = {
   libre: 'Entrada libre',
   pendiente: 'Pendiente',
 };
+
+/**
+ * De quién es el formulario, para decirlo en el renglón.
+ *
+ * «Con formulario» a secas no distingue un Google Forms de un enlace pegado de
+ * cualquier otro sitio, y pegar el de la actividad de al lado —o el del panel
+ * de administración de Forms en vez del de responder— es el error de todos los
+ * días cuando se cargan catorce seguidas. Diciendo cuál es, se ve de reojo.
+ *
+ * La misma regla que `proveedorDeFormulario()` en `site.ts`, escrita otra vez
+ * porque el panel no puede importar el sitio. Son cuatro líneas y no se mueven.
+ */
+function proveedor(url: string): string {
+  try {
+    const { hostname } = new URL(url);
+    if (/(^|\.)tally\.so$/.test(hostname)) return 'Tally';
+    if (/(^|\.)(forms\.gle|docs\.google\.com)$/.test(hostname)) return 'Google Forms';
+    return hostname.replace(/^www\./, '');
+  } catch {
+    return 'enlace raro';
+  }
+}
 
 export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLElement {
   const seccion = el('section');
@@ -259,7 +281,7 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
 
     const enlace = el('input', {
       type: 'url', spellcheck: false,
-      placeholder: a.libre ? 'entrada libre — sin formulario' : 'https://tally.so/r/…',
+      placeholder: a.libre ? 'entrada libre — sin formulario' : 'https://forms.gle/… o https://tally.so/r/…',
       value: a.registro ?? '',
       disabled: Boolean(a.libre),
       oninput: (e: any) => {
@@ -296,12 +318,15 @@ export function pintarRegistro(estado: any, ctx: Ctx, dias: string[]): HTMLEleme
       el('span', {}, 'Libre'),
     );
 
-    const marca = el('span', { class: 'renglon-marca' }, ROTULO[estadoPuerta]);
+    const rotulo = (a: any) =>
+      puertaDe(a) === 'formulario' ? proveedor(a.registro) : ROTULO[puertaDe(a)];
+
+    const marca = el('span', { class: 'renglon-marca' }, rotulo(a));
 
     function marcarEstado() {
       const ahora = puertaDe(a);
       nodo.className = 'renglon renglon--' + ahora;
-      marca.textContent = ROTULO[ahora];
+      marca.textContent = rotulo(a);
       enlace.disabled = Boolean(a.libre);
       // La cuenta de la pestaña y la de los filtros cuentan lo mismo: si una
       // se mueve y la otra no, parece que se perdió algo.

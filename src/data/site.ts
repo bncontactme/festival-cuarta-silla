@@ -154,18 +154,19 @@ export const registro = {
   estado: 'Próximamente',
   ciudad: 'Guadalajara',
   /**
-   * Lo que se lee cuando todavía no se puede entrar a nada. Dos, porque son dos
+   * El renglón que acompaña al cartel de espera. Dos, porque son dos
    * situaciones distintas y decir la de al lado se nota: con el programa sin
    * publicar, lo que falta es el programa; con el programa ya puesto, lo único
    * que falta es abrir la puerta.
+   *
+   * Cortos a propósito. Iban debajo de un PRÓXIMAMENTE de sesenta píxeles y de
+   * un rótulo que ya decía «Próximamente»: un párrafo de dos frases explicando
+   * lo mismo por tercera vez, y encima contando por dentro qué interruptor está
+   * puesto — que es asunto del panel, no de quien viene a apuntarse.
    */
   espera: {
-    sinPrograma:
-      'El registro abre junto con el programa. Cada actividad tiene el suyo: ' +
-      'cuando la programación esté cerrada, aquí sale la lista con la puerta de cada una.',
-    conPrograma:
-      'El programa ya está publicado; el registro todavía no. Cuando abra, aquí sale la ' +
-      'lista de actividades con la puerta de cada una: unas con formulario, otras de entrada libre.',
+    sinPrograma: 'Abre junto con el programa. Cada actividad tendrá aquí su formulario.',
+    conPrograma: 'El programa ya está. En cuanto abra, cada actividad tendrá aquí su formulario.',
   },
   /** Lo que se lee cuando está abierto pero una actividad concreta no pide
    *  registro. No es un hueco: es una respuesta. */
@@ -315,7 +316,7 @@ export const estadoPrograma = programaPublicado
 /** ── El registro a eventos ────────────────────────────────────────────────
  *
  * Aquí uno se apunta **por actividad**: cada `ActividadGantt` trae su propio
- * `registro` —su Tally— y la ficha de la rejilla abre ése. `/registro` es la
+ * `registro` —su formulario— y la ficha de la rejilla abre ése. `/registro` es la
  * otra puerta a la misma cosa: las mismas actividades, ordenadas por cuándo se
  * entra en vez de por dónde caen en la rejilla.
  *
@@ -337,6 +338,36 @@ export const registroDatos = contenido.programa.registro ?? {};
  *     puerta de atrás. La misma decisión no puede dar dos respuestas.
  */
 export const registroAbierto = programaPublicado && registroDatos.abierto === true;
+
+/**
+ * De quién es un formulario.
+ *
+ * El festival usa Google Forms; Tally se soporta porque el sitio ya lo abría
+ * encima de la página —tiene una API de ventana— y quitarlo sería quitar algo
+ * que funciona. Cualquier otra dirección se abre en otra pestaña, que es lo que
+ * hace un enlace normal.
+ *
+ * Sirve para dos cosas y las dos importan: el panel puede decir de qué es cada
+ * enlace —pegar el de otra actividad es el error de todos los días— y el botón
+ * del sitio sólo pinta la flechita cuando de verdad se va a otra pestaña.
+ */
+export const proveedorDeFormulario = (url?: string): 'tally' | 'google' | 'otro' | null => {
+  if (!url) return null;
+  try {
+    const { hostname } = new URL(url);
+    if (/(^|\.)tally\.so$/.test(hostname)) return 'tally';
+    if (/(^|\.)(forms\.gle|docs\.google\.com)$/.test(hostname)) return 'google';
+    return 'otro';
+  } catch {
+    return 'otro';
+  }
+};
+
+/** Si el formulario se abre encima de la página en vez de en otra pestaña. Hoy
+ *  sólo Tally: Google Forms reparte enlaces cortos (`forms.gle`) que sólo se
+ *  resuelven siguiendo la redirección, así que no hay forma de incrustarlos sin
+ *  pedirle a Google la página antes de que nadie haya pulsado nada. */
+export const abreEncima = (url?: string) => proveedorDeFormulario(url) === 'tally';
 
 /** Cómo se entra a una actividad. `pendiente` no sale en el sitio: es lo que
  *  todavía no nos han pasado, y una actividad sin puerta no se anuncia con una

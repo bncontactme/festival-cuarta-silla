@@ -501,8 +501,11 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
       </dl>
 
       <div class="gantt-ficha-acciones">
+        {/* El rótulo lo pone el script: con Tally la ficha se abre encima de la
+            página y no lleva flecha; con Google Forms —o cualquier otro— se va
+            a otra pestaña y sí. */}
         <a class="gantt-ficha-boton" target="_blank" rel="noopener" data-f-registro>
-          Registrarme ↗
+          Registrarme
         </a>
         <a
           class="gantt-ficha-boton gantt-ficha-boton--suave"
@@ -1303,7 +1306,11 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
 
   const abrirTally = (url: string) => {
     const id = idDeTally(url);
-    // Cualquier cosa que no sea un tally.so/r/… se abre como siempre.
+    // Cualquier otro formulario —Google Forms, que es el que usa el festival—
+    // se abre como cualquier enlace: en otra pestaña. Los `forms.gle` son
+    // enlaces cortos que sólo se resuelven siguiendo la redirección, así que no
+    // hay forma de incrustarlos sin pedirle la página a Google antes de que
+    // nadie haya pulsado nada, y eso es justo lo que este sitio no hace.
     if (!id) return void window.open(url, '_blank', 'noopener');
     cargarTally()
       .then(() => {
@@ -1594,6 +1601,7 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
       if (registro && sin) {
         if (d.registro) {
           registro.href = d.registro;
+          registro.textContent = idDeTally(d.registro) ? 'Registrarme' : 'Registrarme ↗';
           registro.hidden = false;
           sin.hidden = true;
         } else {
