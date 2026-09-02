@@ -275,45 +275,11 @@ class Verificador {
       this.aviso('programa', 'queda publicado y sin ninguna actividad: el sitio va a enseñar la rejilla vacía. Si estás rehaciéndolo, marca «esto todavía es la rejilla de ejemplo».');
     }
 
-    const registro = this.registro(
-      bruto === datos ? undefined : datos.registro,
-      { esEjemplo, actividades },
-    );
-
-    // `podar` respeta `false` y las listas vacías: lo único que se cae aquí es
-    // un `registro` que no trae nada que guardar.
-    return podar({ actividades, esEjemplo, registro });
-  }
-
-  /**
-   * Las tres cosas del registro que no son de una actividad.
-   *
-   * Lo que sí es de cada actividad —su formulario— se valida arriba, con el
-   * resto de la fila. Aquí sólo cabe lo de la página entera.
-   */
-  registro(datos, { esEjemplo, actividades }) {
-    const r = podar({
-      abierto: this.bandera(datos && datos.abierto),
-      general: this.enlace(datos && datos.general, 'registro.general'),
-      nota:    this.texto(datos && datos.nota, 'registro.nota', { max: 400 }),
-    });
-
-    if (!r.abierto) return Object.keys(r).length ? r : undefined;
-
-    // Abierto sobre una rejilla escondida no abre nada: el sitio no puede
-    // enseñar los eventos de un programa que dijiste que todavía no lo es.
-    // No se bloquea —lo normal es marcar esto y publicar el programa a
-    // continuación— pero desde el panel no se ve, así que se dice.
-    if (esEjemplo) {
-      this.aviso('registro', 'está abierto pero el programa sigue marcado como rejilla de ejemplo: mientras eso siga así, /registro enseña «Próximamente». Publica el programa y el registro se abre solo.');
-    }
-
-    const conPuerta = actividades.filter(a => a.registro || a.libre).length;
-    if (!esEjemplo && !conPuerta) {
-      this.aviso('registro', 'está abierto y ninguna actividad tiene formulario ni está marcada como entrada libre: la página va a salir vacía.');
-    }
-
-    return r;
+    // El registro no tiene ajustes que guardar: se apunta uno por actividad, y
+    // el formulario de cada una se valida arriba con el resto de su fila. Hubo
+    // un `registro` con interruptor de «abierto», formulario general y nota, y
+    // se quitó — pegarle el formulario a una actividad ES abrirle el registro.
+    return podar({ actividades, esEjemplo });
   }
 
   artistas(datos) {

@@ -65,9 +65,10 @@ export type ActividadGantt = {
    *
    * Existe para separar dos cosas que sin ella se leen igual —«esta actividad
    * no pide registro» y «todavía no nos han pasado el formulario»—, y que para
-   * el visitante son opuestas. Marcada, `/registro` la lista como entrada
-   * libre; sin marcar y sin formulario, la actividad se queda fuera de la
-   * página y el panel la cuenta como pendiente.
+   * el visitante son opuestas. En `/registro` no cambia nada: allí salen sólo
+   * las que tienen formulario, porque es la página de apuntarse. Lo que hace es
+   * decirlo en la ficha de la rejilla, que es donde alguien pregunta «¿y a ésta
+   * cómo entro?», y que el panel deje de contarla como pendiente.
    */
   libre?: boolean;
 };
@@ -123,29 +124,6 @@ export type Edicion = {
  *  prefiero un hueco honesto a inventar un archivo que no nos dieron. */
 export type Marca = { nombre: string; logo?: string; url?: string };
 
-/**
- * El registro a eventos, en lo que NO es de una actividad concreta.
- *
- * Aquí uno se apunta **por actividad**: cada `ActividadGantt` trae su propio
- * `registro` —su formulario— y es ahí donde vive. Esto de al lado son
- * las tres cosas que no caben en ninguna fila porque son de la página entera.
- *
- * `abierto` se declara, no se deduce, por lo mismo que `esEjemplo`: que haya
- * formularios pegados no quiere decir que el registro esté abierto —se pegan
- * mientras se preparan—, y anunciar un registro que todavía no lo está es el
- * error caro. Sin la clave, cerrado.
- */
-export type Registro = {
-  /** Si `/registro` enseña los eventos o el cartel de «Próximamente». */
-  abierto?: boolean;
-  /** Un formulario para todo el festival, si lo hay. Va aparte de los de cada
-   *  actividad y sale arriba de la página. */
-  general?: string;
-  /** Qué contar sobre el registro: cupos, si hace falta llegar antes, qué
-   *  actividades son de entrada libre. Sale debajo del titular. */
-  nota?: string;
-};
-
 /** Lo que devuelve `GET /contenido` del Worker y lo que hay en
  *  `contenido.json`. Las cinco colecciones y de dónde viene la instantánea. */
 export type Contenido = {
@@ -165,12 +143,6 @@ export type Contenido = {
      *  ejemplo ya cuenta como usarlo. Es una decisión, y la toma quien sabe si
      *  eso de ahí es el programa o no. */
     esEjemplo?: boolean;
-    /** El registro a eventos. Vive DENTRO del programa y no en una colección
-     *  propia porque no es otra cosa: son los mismos eventos mirados por la
-     *  puerta de entrar. Así, además, el interruptor de «abierto» y las
-     *  actividades a las que se apunta se guardan de una sola vez, y no puede
-     *  quedar un registro abierto sobre una programación que no entró. */
-    registro?: Registro;
   };
   artistas: Artista[];
   archivo: Edicion[];

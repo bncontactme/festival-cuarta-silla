@@ -52,27 +52,25 @@ r = validar('programa', {
 ok('formulario manda sobre libre', !('libre' in r.datos.actividades[0]) && r.avisos.length === 1,
    JSON.stringify(r.avisos));
 
+// El registro no tiene ajustes: se apunta uno por actividad y el formulario va
+// en la fila. Lo que llegue en `registro` se cae por el desagüe, no se guarda.
 r = validar('programa', {
-  actividades: [base()], esEjemplo: false, registro: { abierto: true, nota: '  hola   mundo ' },
+  actividades: [base()], esEjemplo: false, registro: { abierto: true, nota: 'lo que sea' },
 }, { sedes: SEDES });
-ok('registro.abierto se guarda', r.datos.registro.abierto === true, JSON.stringify(r.datos.registro));
-ok('registro.nota se normaliza', r.datos.registro.nota === 'hola mundo', JSON.stringify(r.datos.registro));
-ok('abierto sin ninguna puerta avisa', r.avisos.some((a) => a.includes('ninguna actividad')),
-   JSON.stringify(r.avisos));
+ok('el registro de la página ya no se guarda', !('registro' in r.datos), JSON.stringify(r.datos));
 
 r = validar('programa', {
-  actividades: [base({ registro: 'https://tally.so/r/x' })], esEjemplo: true, registro: { abierto: true },
+  actividades: [base({ registro: 'https://forms.gle/abc' })], esEjemplo: false,
 }, { sedes: SEDES });
-ok('abierto sobre rejilla de ejemplo avisa', r.avisos.some((a) => a.includes('rejilla de ejemplo')),
-   JSON.stringify(r.avisos));
+ok('un Google Forms pasa', r.errores.length === 0 && r.datos.actividades[0].registro === 'https://forms.gle/abc',
+   JSON.stringify(r.errores));
 
 r = validar('programa', {
-  actividades: [base()], esEjemplo: false, registro: { general: 'http://inseguro.com' },
+  actividades: [base({ registro: 'http://inseguro.com/form' })], esEjemplo: false,
 }, { sedes: SEDES });
-ok('general en http se rechaza', r.errores.some((e) => e.startsWith('registro.general')), JSON.stringify(r.errores));
+ok('un formulario en http se rechaza', r.errores.some((e) => e.includes('.registro')), JSON.stringify(r.errores));
 
 r = validar('programa', { actividades: [base()], esEjemplo: false }, { sedes: SEDES });
-ok('sin registro no se guarda la clave', !('registro' in r.datos), JSON.stringify(r.datos));
 ok('esEjemplo:false sobrevive a podar', r.datos.esEjemplo === false, JSON.stringify(r.datos));
 ok('la lista de actividades sobrevive', r.datos.actividades.length === 1);
 

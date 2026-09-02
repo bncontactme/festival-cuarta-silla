@@ -143,20 +143,17 @@ export const registro = {
   estado: 'Próximamente',
   ciudad: 'Guadalajara',
   /**
-   * El renglón que acompaña al cartel de espera. Dos, porque son dos
-   * situaciones distintas y decir la de al lado se nota: con el programa sin
-   * publicar, lo que falta es el programa; con el programa ya puesto, lo único
-   * que falta es abrir la puerta.
+   * El renglón que acompaña al cartel de espera.
    *
-   * Cortos a propósito. Iban debajo de un PRÓXIMAMENTE de sesenta píxeles y de
-   * un rótulo que ya decía «Próximamente»: un párrafo de dos frases explicando
-   * lo mismo por tercera vez, y encima contando por dentro qué interruptor está
-   * puesto — que es asunto del panel, no de quien viene a apuntarse.
+   * Uno solo desde que se fue el interruptor: ya no hay dos situaciones que
+   * distinguir —«falta el programa» y «falta abrir»—, porque abrir dejó de ser
+   * un acto aparte. Falta lo mismo en los dos casos: que las actividades traigan
+   * su formulario.
+   *
+   * Corto a propósito. Va debajo de un PRÓXIMAMENTE de sesenta píxeles, y un
+   * párrafo explicando lo mismo por segunda vez no es información, es relleno.
    */
-  espera: {
-    sinPrograma: 'Abre junto con el programa. Cada actividad tendrá aquí su formulario.',
-    conPrograma: 'El programa ya está. En cuanto abra, cada actividad tendrá aquí su formulario.',
-  },
+  espera: 'Cada actividad tiene su formulario. En cuanto los tengamos, salen aquí.',
   /* Aquí vivían «Entrada libre» y su coletilla, que se pintaban en el sitio del
      botón de las actividades sin formulario. Se van con ellas: esta página es
      la de apuntarse, y una actividad a la que se entra sin apuntarse no tiene
@@ -164,7 +161,6 @@ export const registro = {
      de la rejilla, que es donde alguien pregunta «¿y a ésta cómo entro?». */
   acciones: {
     registro: 'Registrarme',
-    general: 'Registro general',
     programa: 'Ver el programa',
     mapa: 'Ubicación',
   },
@@ -332,20 +328,24 @@ export const estadoPrograma = programaPublicado
  * diseño: dos listas de lo mismo se separan el primer día que alguien cambia
  * una hora en una sola de las dos.
  */
-export const registroDatos = contenido.programa.registro ?? {};
-
 /**
  * Si `/registro` enseña la lista o el cartel de espera.
  *
- * Son dos condiciones y las dos hacen falta:
+ * **Se deduce, no se declara, y eso es una corrección.** Hubo un interruptor de
+ * «el registro está abierto», con su formulario general y su nota, copiando el
+ * de la rejilla de ejemplo. Sobraba, y estorbaba: aquí no hay un registro al
+ * festival que abrir o cerrar —se apunta uno por actividad—, así que pegarle el
+ * formulario a una actividad ES abrirle el registro. Un interruptor que sólo
+ * puede decir que sí cuando ya hay formularios no decide nada; lo único que
+ * hacía era dejar la página en «Próximamente» con tres formularios cargados
+ * esperando a que alguien se acordara de marcar una casilla.
  *
- *   · El festival marcó el registro como abierto, que se declara y no se
- *     deduce — tener formularios pegados no es tenerlo abierto.
- *   · El programa está publicado. Esto no es un detalle: enseñar aquí las
- *     actividades de una rejilla que /programa esconde sería publicarla por la
- *     puerta de atrás. La misma decisión no puede dar dos respuestas.
+ * Queda la única condición que sí es una condición: **el programa publicado**.
+ * Enseñar aquí las actividades de una rejilla que `/programa` esconde sería
+ * publicarla por la puerta de atrás, y ésa no es una decisión nueva — es la
+ * misma, y ya está tomada en el otro sitio.
  */
-export const registroAbierto = programaPublicado && registroDatos.abierto === true;
+export const registroAbierto = programaPublicado && actividades.some((a) => a.registro);
 
 /**
  * De quién es un formulario.
