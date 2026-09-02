@@ -1,6 +1,6 @@
 {
-  "version": 54,
-  "actualizado": "2026-09-02T23:56:13.783Z",
+  "version": 55,
+  "actualizado": "2026-09-02T23:58:19.515Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -286,10 +286,10 @@
       {
         "titulo": "Poesía y performance",
         "dia": 2,
-        "inicio": "11:30",
-        "fin": "12:00",
+        "inicio": "19:00",
+        "fin": "20:00",
         "sede": "Foro AM",
-        "tipo": "taller",
+        "tipo": "muestra",
         "artista": "Miaulina"
       },
       {
