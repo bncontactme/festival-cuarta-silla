@@ -25,8 +25,10 @@ on:
   repository_dispatch:
     types: [publicar]
 
+# `contents: write` es para el respaldo del contenido, abajo: el job comitea la
+# instantánea que se acaba de publicar. Lo demás es lo que pide Pages.
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -64,6 +66,36 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
+      # El contenido que se acaba de publicar, guardado en el repositorio.
+      #
+      # KV es la fuente, pero sólo conserva las últimas veinte versiones: la
+      # copia comiteada llegó a estar dieciocho guardados por detrás, a un paso
+      # de salirse de esa ventana. Esto deja el histórico del contenido en git
+      # —que es lo que `scripts/instantanea.mjs` dice que quiere ser— y de paso
+      # da de dónde reconstruir si el panel se cae o se vacía.
+      #
+      # Va después de subir el artefacto y con `continue-on-error`: es un
+      # respaldo, y un respaldo no puede impedir que el sitio se publique.
+      #
+      # No dispara otro build: GitHub no lanza workflows con los push hechos
+      # con `GITHUB_TOKEN`. El `[skip ci]` está para quien lea el histórico.
+      - name: Respaldar el contenido
+        continue-on-error: true
+        run: |
+          if git diff --quiet -- src/data/contenido.json; then
+            echo "El contenido no cambió desde el último build."
+            exit 0
+          fi
+          version=$(node -p "require('./src/data/contenido.json').version")
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/data/contenido.json
+          git commit -m "contenido: instantánea del panel (versión $version) [skip ci]"
+          # Alguien pudo empujar mientras se construía: el respaldo se pone
+          # detrás de lo que haya en vez de pelearse por la punta de la rama.
+          git pull --rebase origin ${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }}
 
   publicar:
     needs: construir

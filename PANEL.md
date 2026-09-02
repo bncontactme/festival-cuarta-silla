@@ -213,6 +213,7 @@ firmar       { carpeta, content_type } → parámetros firmados de Cloudinary
 medios       { carpeta } → lo que ya hay subido, para reusarlo
 borrar-medio { public_id } → sólo dentro de cuartasilla/
 publicar     dispara el rebuild a mano
+estado-build cómo TERMINÓ el último build (se lo pregunta a Actions)
 historial    las últimas 20 versiones
 restaurar    { version } → vuelve atrás
 ```
@@ -443,11 +444,26 @@ renglones seguidos, no se lanzan diez builds. Y hay un botón «Publicar ahora»
 explícito, porque el día del festival quieres poder forzarlo y ver la barra
 moverse.
 
+**Y se comprueba que haya salido bien.** El panel decía «publicado hace 3 min»
+sabiendo sólo cuándo se había LANZADO el build. La noche del 2 de septiembre la
+portada tumbó la construcción —una lista de marcas vacía, dividir entre cero— y
+el festival guardó diez veces leyendo diez veces que sí, con el sitio parado
+hora y media. Ahora la barra pregunta a Actions cómo acabó: dice «publicado ✓»
+sólo cuando lo está, y cuando no, lo grita con el enlace al fallo. Tras guardar
+se queda mirando tres minutos, que es lo que tarda en saberse.
+
+Lo guardado nunca estuvo en peligro —eso vive en KV y tiene sus 20 versiones—,
+pero nadie se enteraba de que el sitio no lo estaba enseñando, que para quien
+usa el panel es casi lo mismo.
+
 ---
 
 ## Respaldos y deshacer
 
 - Cada guardado deja una instantánea `cs:hist:<version>`; se conservan 20.
+- Cada build que sale bien comitea `src/data/contenido.json` en el repositorio
+  (ver `publicar.yml`). Veinte versiones son pocas cuando el festival se pasa
+  una tarde guardando: el histórico de git no tiene tope y sobrevive al panel.
   «Historial» las lista y «Restaurar» vuelve a cualquiera. Un panel sin
   deshacer es un panel que da miedo usar, y un panel que da miedo no se usa.
 - Respaldo semanal por cron a Cloudinary, igual que GDN.

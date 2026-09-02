@@ -32,6 +32,17 @@ let estado: any = null;
 let limpio: Record<string, string> = {};
 let meta: { version: number; actualizado: string | null; ultimoDeploy?: string | null } =
   { version: 0, actualizado: null };
+/** Cómo terminó el último intento de publicar. `ultimoDeploy` sólo dice
+ *  cuándo se LANZÓ uno; esto se lo pregunta a Actions a través del Worker. */
+type Build = {
+  estado: 'ok' | 'falló' | 'corriendo' | 'desconocido' | 'sin-actions';
+  cuando?: string;
+  url?: string;
+};
+let build: Build = { estado: 'desconocido' };
+let vigilando: ReturnType<typeof setTimeout> | undefined;
+/** El run del que ya se avisó, para no repetir el aviso en cada vistazo. */
+let falloAvisado = '';
 let pestanaActiva = PESTANAS[0].clave;
 let erroresPorColeccion: Record<string, string[]> = {};
 let guardando = false;
@@ -72,6 +83,9 @@ async function entrar(pass: string) {
     $('#entrada').hidden = true;
     $('#armazon').hidden = false;
     await cargar();
+    // Lo primero que hay que saber al entrar es si lo último que se guardó
+    // llegó al sitio. Si no llegó, sale el aviso antes de tocar nada.
+    mirarBuild();
   } catch (e: any) {
     olvidarClave();
     $('#entrada-queja').textContent = e.message || 'No entró';
@@ -92,6 +106,44 @@ async function cargar() {
     pintar();
   } catch (e: any) {
     avisar(e.message || String(e), 'error', 'No se pudo leer el contenido');
+  }
+}
+
+// ── ¿Se publicó de verdad? ───────────────────────────────────────────────────
+//
+// La barra decía «publicado hace 3 min» sabiendo sólo cuándo se había lanzado
+// el build. La noche que la portada tumbó la construcción, el festival guardó
+// diez veces y diez veces leyó que sí, con el sitio parado desde hacía hora y
+// media. Guardar nunca estuvo en peligro —eso vive en el Worker y tiene sus
+// veinte versiones de historial—, pero nadie se enteró de que el sitio no lo
+// estaba enseñando.
+
+/** Pregunta cómo quedó la última publicación.
+ *
+ *  `insistir` es para después de guardar: el build tarda minuto y medio, así
+ *  que se vuelve a mirar cada veinte segundos mientras corra. Nunca tira: si
+ *  no se puede saber, se dice que no se sabe. */
+async function mirarBuild({ insistir = 0 } = {}) {
+  clearTimeout(vigilando);
+  try {
+    build = await pedir<Build>('estado-build');
+  } catch {
+    build = { estado: 'desconocido' };
+  }
+  estadoBarras();
+
+  if (build.estado === 'falló' && build.url && falloAvisado !== build.url) {
+    falloAvisado = build.url;
+    avisar(
+      'Lo que guardaste está a salvo —el panel lo tiene—, pero el sitio no lo está enseñando: el último intento de publicar falló. Avisa a quien lleva el sitio.',
+      'error',
+      'La publicación falló',
+      [build.url],
+    );
+    return;
+  }
+  if (insistir > 0 && build.estado !== 'ok' && build.estado !== 'sin-actions') {
+    vigilando = setTimeout(() => mirarBuild({ insistir: insistir - 1 }), 20000);
   }
 }
 
@@ -236,9 +288,17 @@ function estadoBarras() {
     : n === 0
       ? 'todo guardado'
       : `${n} ${n === 1 ? 'sección' : 'secciones'} sin guardar`;
+  // «Publicado» sólo cuando Actions dice que sí. Mientras no se sepa, se
+  // enseña el lanzamiento y se llama por su nombre: lanzada, no publicada.
+  const publicacion =
+    build.estado === 'ok' ? ` · publicado ✓ ${cuando(build.cuando ?? null)}`
+    : build.estado === 'falló' ? ' · ⚠ la última publicación falló'
+    : build.estado === 'corriendo' ? ' · publicando…'
+    : meta.ultimoDeploy ? ` · lanzada ${cuando(meta.ultimoDeploy)}`
+    : '';
   $('#estado-version').textContent =
-    `versión ${meta.version} · guardado ${cuando(meta.actualizado)}` +
-    (meta.ultimoDeploy ? ` · publicado ${cuando(meta.ultimoDeploy)}` : '');
+    `versión ${meta.version} · guardado ${cuando(meta.actualizado)}` + publicacion;
+  $('#estado-version').classList.toggle('mal', build.estado === 'falló');
   // Refresca el punto rojo y la cuenta de las pestañas sin repintar el
   // formulario, que borraría lo que se está escribiendo.
   //
@@ -349,10 +409,14 @@ async function guardar() {
   if (avisos.length) {
     avisar('Se guardó, pero hay cosas que mirar:', 'ojo', 'Ojo', avisos);
   }
+  // Tres minutos de vigilancia: si el build se cae, quien guardó se entera
+  // aquí y no dos días después, mirando el sitio.
+  if (despliegue?.disparado) mirarBuild({ insistir: 9 });
+
   if (!choque && !Object.keys(erroresPorColeccion).length) {
     avisar(
       despliegue?.disparado
-        ? 'Guardado. El sitio se está reconstruyendo: tarda un minuto y medio en verse.'
+        ? 'Guardado. El sitio se está reconstruyendo: tarda un minuto y medio en verse. La barra de arriba dice cómo acaba.'
         : despliegue?.motivo === 'freno'
           ? `Guardado. Ya hay una publicación en camino; la siguiente se puede lanzar en ${despliegue.faltan} s.`
           : despliegue?.motivo === 'sin-hook'
@@ -382,6 +446,7 @@ async function publicar() {
     if (r.ok) {
       meta.ultimoDeploy = r.ultimoDeploy;
       avisar('Se lanzó la publicación. En un minuto y medio el sitio ya la trae.', 'bien');
+      mirarBuild({ insistir: 9 });
     } else {
       avisar(r.mensaje || `No se pudo publicar (${r.motivo}).`, 'ojo');
     }

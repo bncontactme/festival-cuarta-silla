@@ -132,6 +132,7 @@ export default {
         case 'medios':       return await medios(cuerpo, env, cors);
         case 'borrar-medio': return await borrarMedio(cuerpo, env, cors);
         case 'publicar':     return await publicar(env, cors, true);
+        case 'estado-build': return await estadoBuild(env, cors);
         case 'historial':    return json({ ok: true, versiones: await listarHistorial(env) }, 200, cors);
         case 'restaurar':    return await volver(cuerpo, env, ctx, cors);
         default:             return json({ error: 'No sé hacer «' + cuerpo.accion + '»' }, 400, cors);
@@ -294,6 +295,60 @@ async function publicarSilencioso(env) {
   } catch (e) {
     return { disparado: false, motivo: String(e.message || e) };
   }
+}
+
+/** Cómo TERMINÓ el último intento de publicar.
+ *
+ *  Hasta aquí el panel sabía sólo cuándo se había DISPARADO un build —eso es
+ *  `ultimoDeploy`— y lo enseñaba como «publicado hace 3 min». La noche que la
+ *  portada tumbó la construcción, el festival guardó diez veces y diez veces
+ *  leyó que sí, con el sitio congelado desde hacía hora y media. Decirle que
+ *  algo se publicó sin haberlo comprobado es la peor de las mentiras que puede
+ *  contar un panel: la que hace cerrar la pestaña tranquilo.
+ *
+ *  Así que se le pregunta a quien lo sabe. El repositorio es público y la API
+ *  de Actions contesta sin credenciales; el token se manda si está, porque el
+ *  límite por IP es corto y las de un Worker son compartidas.
+ *
+ *  Nunca tira: si GitHub no contesta, el panel se queda como estaba —sin saber—
+ *  y eso es lo que dice. Un «desconocido» honesto vale más que un ✓ inventado. */
+async function estadoBuild(env, cors) {
+  if (!env.GITHUB_REPO) return json({ ok: true, estado: 'sin-actions' }, 200, cors);
+
+  const cabeceras = {
+    'Accept': 'application/vnd.github+json',
+    'User-Agent': 'cuartasilla-panel',
+  };
+  if (env.GITHUB_TOKEN) cabeceras.Authorization = 'Bearer ' + env.GITHUB_TOKEN;
+
+  let runs;
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${env.GITHUB_REPO}/actions/runs?per_page=10`,
+      { headers: cabeceras },
+    );
+    if (!res.ok) return json({ ok: true, estado: 'desconocido', motivo: 'github-' + res.status }, 200, cors);
+    runs = (await res.json()).workflow_runs || [];
+  } catch (e) {
+    return json({ ok: true, estado: 'desconocido', motivo: String(e.message || e) }, 200, cors);
+  }
+
+  // Los cancelados no cuentan: el propio workflow cancela el build en curso
+  // cuando entra otro (`concurrency: cancel-in-progress`), así que la mitad de
+  // la lista son cancelaciones que no dicen nada de cómo quedó el sitio.
+  const run = runs.find((r) => r.conclusion !== 'cancelled');
+  if (!run) return json({ ok: true, estado: 'desconocido' }, 200, cors);
+
+  const estado = run.status !== 'completed'
+    ? 'corriendo'
+    : run.conclusion === 'success' ? 'ok' : 'falló';
+
+  return json({
+    ok: true,
+    estado,
+    cuando: run.updated_at,
+    url: run.html_url,
+  }, 200, cors);
 }
 
 // ── Cloudinary ────────────────────────────────────────────────────────────────

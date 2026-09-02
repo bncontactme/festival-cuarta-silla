@@ -107,6 +107,10 @@ button { cursor: pointer; }
 }
 .barra .marca span { color: var(--amarillo); }
 .barra .estado { font-family: var(--mono); font-size: 0.7rem; opacity: 0.75; }
+/* El día que la publicación se cae, este renglón deja de ser un dato de fondo:
+   es lo único en pantalla que dice que el sitio no está enseñando lo que se
+   acaba de guardar. En amarillo y no en rojo, que la barra es tinta. */
+.barra .estado.mal { opacity: 1; color: var(--amarillo); font-weight: 700; }
 .barra .empuje { margin-left: auto; }
 /* En escritorio el grupo no existe: sus botones son hijos de la barra como
    antes. Sólo se vuelve caja en el teléfono, para poder mandarlo a otra fila. */
