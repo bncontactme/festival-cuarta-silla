@@ -13,10 +13,12 @@
 import Silla from '../Silla.astro';
 import { conBase } from '../../lib/base';
 import {
+  actividadesConRegistro,
   festival,
   manifiesto,
   privacidad,
   programa,
+  registro,
   registroEventos,
   sedes,
   convocatoriaVoluntarixs,
@@ -25,17 +27,28 @@ import {
 import { artistas } from '../../data/artistas';
 import { archivo } from '../../data/archivo';
 
-/* «Registro» a secas, arriba a la derecha de la portada, se lee como darse de
-   alta en la web. El nombre entero —el mismo de la barra de escritorio y del
-   pie— dice a qué se apunta uno. No cabe en un renglón a este cuerpo, así que
-   se parte por la última palabra: «Registro a / eventos». Se calcula y no se
-   escribe a mano para que siga saliendo de `site.ts` como en todas partes. */
-const partes = registroEventos.label.split(' ');
-const registroCola = partes.pop();
-const registroCabeza = partes.join(' ');
+/* El registro y el manifiesto se cambian el sitio.
+ *
+ * «Registro» metido en la esquina de la barra se leía como darse de alta en la
+ * web, y el nombre entero no cabe ahí. Como puerta cabe, y además es a lo que
+ * se viene: de las cuatro es la única donde el visitante HACE algo. El
+ * manifiesto —que es de leer, no de hacer— se va a la esquina que deja libre,
+ * donde sigue a un toque.
+ *
+ * Cuántos eventos, si los hay; si todavía no hay formularios, lo que se va a
+ * encontrar al entrar, que es mejor saberlo antes de pulsar. */
+const cuantosEventos = actividadesConRegistro.length;
 
 const puertas = [
-  { n: '01', label: 'Manifiesto', href: '#manifiesto', nota: 'Qué es esto', fondo: 'rojo' },
+  {
+    n: '01',
+    label: registroEventos.label,
+    href: registroEventos.href,
+    nota: cuantosEventos
+      ? `${cuantosEventos} ${cuantosEventos === 1 ? 'evento' : 'eventos'}`
+      : registro.estado,
+    fondo: 'rojo',
+  },
   { n: '02', label: programa.titulo, href: '/programa', nota: estadoPrograma, fondo: 'amarillo' },
   {
     n: '03',
@@ -83,13 +96,15 @@ const atajos = [
           Festival de arte<br />conceptual
         </span>
       </span>
+      {/* «Manifiesto» y no `manifiesto.titulo`: el título es la pregunta
+          entera —«¿Qué entendemos por arte conceptual?»— y en la esquina de
+          una barra de 3,25 rem se come el renglón y empuja el nombre del
+          festival a tres. La pregunta se lee dentro, que es su sitio. */}
       <a
-        href={conBase(registroEventos.href)}
-        class="border-l-2 border-tinta px-4"
+        href="#manifiesto"
+        class="meta border-l-2 border-tinta px-4 font-bold text-rojo"
       >
-        <span class="meta block text-right leading-[1.2] font-bold text-rojo">
-          {registroCabeza}<br />{registroCola}
-        </span>
+        Manifiesto
       </a>
     </header>
 
@@ -192,7 +207,10 @@ const atajos = [
       <a href="#portada" class="meta border-r-2 border-tinta bg-amarillo px-4 font-bold text-tinta">
         <span aria-hidden="true">←</span>&nbsp; Volver
       </a>
-      <span class="meta px-4 text-papel/80">01</span>
+      {/* Ya no es la puerta 01 —la rejilla numerada arranca en el
+          registro—, así que el índice es el año, como en las demás
+          pantallas que no tienen número. */}
+      <span class="meta px-4 text-papel/80">{festival.anio}</span>
     </div>
 
     <div class="movil-cuerpo px-4 py-6">
