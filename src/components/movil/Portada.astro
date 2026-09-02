@@ -17,12 +17,22 @@ import {
   manifiesto,
   privacidad,
   programa,
+  registroEventos,
   sedes,
   convocatoriaVoluntarixs,
   estadoPrograma,
 } from '../../data/site';
 import { artistas } from '../../data/artistas';
 import { archivo } from '../../data/archivo';
+
+/* «Registro» a secas, arriba a la derecha de la portada, se lee como darse de
+   alta en la web. El nombre entero —el mismo de la barra de escritorio y del
+   pie— dice a qué se apunta uno. No cabe en un renglón a este cuerpo, así que
+   se parte por la última palabra: «Registro a / eventos». Se calcula y no se
+   escribe a mano para que siga saliendo de `site.ts` como en todas partes. */
+const partes = registroEventos.label.split(' ');
+const registroCola = partes.pop();
+const registroCabeza = partes.join(' ');
 
 const puertas = [
   { n: '01', label: 'Manifiesto', href: '#manifiesto', nota: 'Qué es esto', fondo: 'rojo' },
@@ -74,10 +84,12 @@ const atajos = [
         </span>
       </span>
       <a
-        href={conBase("/registro")}
-        class="meta border-l-2 border-tinta px-4 font-bold text-rojo"
+        href={conBase(registroEventos.href)}
+        class="border-l-2 border-tinta px-4"
       >
-        Registro
+        <span class="meta block text-right leading-[1.2] font-bold text-rojo">
+          {registroCabeza}<br />{registroCola}
+        </span>
       </a>
     </header>
 
