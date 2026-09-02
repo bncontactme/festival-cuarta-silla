@@ -1,6 +1,6 @@
 {
-  "version": 10,
-  "actualizado": "2026-09-01T21:01:25.158Z",
+  "version": 32,
+  "actualizado": "2026-09-02T04:20:06.326Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -21,7 +21,7 @@
       ]
     },
     {
-      "nombre": "Temporal",
+      "nombre": "Ex convento Santa Teresa",
       "direccion": "C. Donato Guerra 25, Zona Centro, 44100 Guadalajara, Jal.",
       "instagram": "https://www.instagram.com/temporal___________/",
       "mapa": "https://maps.app.goo.gl/Fsu7vg12MzBCtbxD8",
@@ -108,12 +108,12 @@
     },
     {
       "nombre": "Salón Liminal",
-      "direccion": "C. Independencia 795, Zona Centro, 44100 Guadalajara, Jal.",
+      "direccion": "Av. Miguel Hidalgo y Costilla 720, Zona Centro, 44100 Guadalajara, Jal.",
       "instagram": "https://www.instagram.com/salonliminal/",
-      "mapa": "https://maps.app.goo.gl/17i56g378cvg5t7j9",
+      "mapa": "https://maps.app.goo.gl/WeTtSUqxPQ2vc5Qv9",
       "coord": [
-        20.678033,
-        -103.354007
+        20.6772012,
+        -103.3564653
       ]
     },
     {
@@ -138,47 +138,173 @@
     }
   ],
   "programa": {
-    "actividades": [],
-    "esEjemplo": true
+    "actividades": [
+      {
+        "titulo": "Apertura musical",
+        "dia": 0,
+        "inicio": "19:00",
+        "fin": "19:30",
+        "sede": "No Museo",
+        "tipo": "escena",
+        "artista": "Arielo"
+      },
+      {
+        "titulo": "Palabras de Inauguración",
+        "dia": 0,
+        "inicio": "19:30",
+        "fin": "20:00",
+        "sede": "No Museo",
+        "tipo": "charla",
+        "artista": "Equipo del festival"
+      },
+      {
+        "titulo": "¨El coro de las familias buscadoras de Jalisco¨",
+        "dia": 0,
+        "inicio": "20:00",
+        "fin": "20:40",
+        "sede": "No Museo",
+        "tipo": "muestra",
+        "artista": "El Coro Inolvidable"
+      },
+      {
+        "titulo": "Oratoria Política",
+        "dia": 0,
+        "inicio": "21:00",
+        "fin": "22:00",
+        "sede": "No Museo",
+        "tipo": "escena",
+        "artista": "Oratoria Política"
+      },
+      {
+        "titulo": "Fiesta de Inauguración",
+        "dia": 0,
+        "inicio": "23:00",
+        "fin": "23:59",
+        "sede": "Staditche",
+        "tipo": "escena",
+        "artista": "dsgstng677, Kalbox y (sorpresa)"
+      },
+      {
+        "titulo": "Presentación del manga “Carmen caracol & Tello cucaracho: Agentes secretos del arte contemporáneo”",
+        "dia": 1,
+        "inicio": "14:00",
+        "fin": "15:00",
+        "sede": "Staditche",
+        "tipo": "muestra",
+        "artista": "Telo Visión",
+        "registro": "https://forms.gle/2YNFXExX9UvyG8qB6"
+      },
+      {
+        "titulo": "Activación Habitáculo No. 1",
+        "dia": 1,
+        "inicio": "15:00",
+        "fin": "16:00",
+        "sede": "No Museo",
+        "tipo": "muestra",
+        "artista": "Rubi Zaira Flores Cruz"
+      },
+      {
+        "titulo": "Subvertir lo cotidiano: Resistencias artísticas insospechadas en América Latina, 1970-1985",
+        "dia": 1,
+        "inicio": "16:00",
+        "fin": "18:00",
+        "sede": "Ala Rota",
+        "tipo": "charla",
+        "artista": "Lorena Van Meeter"
+      },
+      {
+        "titulo": "Performance pasarela \"tus manos parecen guantes\"",
+        "dia": 1,
+        "inicio": "17:00",
+        "fin": "18:00",
+        "sede": "No Museo",
+        "tipo": "muestra",
+        "artista": "Jesús Irene"
+      },
+      {
+        "titulo": "Taller Performance “En la silla: acción conceptual”",
+        "dia": 1,
+        "inicio": "18:00",
+        "fin": "19:00",
+        "sede": "Salón Liminal",
+        "tipo": "taller",
+        "artista": "Zahira Rico",
+        "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
+      },
+      {
+        "titulo": "“El poder contestatario del arte feminista”",
+        "dia": 1,
+        "inicio": "18:00",
+        "fin": "20:00",
+        "sede": "Cuerpos Parlantes",
+        "tipo": "charla",
+        "artista": "Lirba Cano y Brote.doc",
+        "registro": "https://forms.gle/7QyDj9q2BsjHem9m8"
+      },
+      {
+        "titulo": "Inauguración",
+        "dia": 1,
+        "inicio": "20:00",
+        "fin": "23:59",
+        "sede": "Cuerpos Parlantes",
+        "tipo": "escena",
+        "artista": "Cuerpos parlantes"
+      },
+      {
+        "titulo": "Performance Pasarela “Como entender al otro desde el yo”",
+        "dia": 1,
+        "inicio": "19:00",
+        "fin": "20:15",
+        "sede": "Ex convento Santa Teresa",
+        "tipo": "muestra",
+        "artista": "Visual Negativo, RE.CREA.LAB, Cerro de los espejos y RAD"
+      },
+      {
+        "titulo": "Inauguración \"Burdo\". Exhibición individual de Gabriela Girbau",
+        "dia": 1,
+        "inicio": "19:00",
+        "fin": "23:59",
+        "sede": "Taller Industria Gráfica",
+        "tipo": "muestra",
+        "artista": "Musica: MATERIA A-TEMPORAL"
+      }
+    ],
+    "esEjemplo": false
   },
   "artistas": [],
   "archivo": [],
   "marcas": {
     "patrocinadores": [
       {
-        "nombre": "Minerva",
-        "logo": "/patrocinadores/minerva.png"
-      },
-      {
         "nombre": "Cielito Lindo",
-        "logo": "/patrocinadores/cielito-lindo.jpg"
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788318855/cuartasilla/marcas/cielito-lindo/tvt9eiptguw0tloswunk.jpg"
       },
       {
-        "nombre": "Clase 33",
-        "logo": "/patrocinadores/clase-33.jpg"
-      },
-      {
-        "nombre": "Mezcania"
+        "nombre": "Mezcania",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788319060/cuartasilla/marcas/mezcania/m5mhi4ogk5vah6htkgod.png"
       },
       {
         "nombre": "RE.CREA.LAB",
         "logo": "/patrocinadores/recrealab.png"
       },
       {
-        "nombre": "MESH"
+        "nombre": "MESH",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788319071/cuartasilla/marcas/mesh/jsjl9zhyml2u8j0ecxxg.webp"
       },
       {
         "nombre": "1800",
         "logo": "/patrocinadores/1800.png"
       },
       {
-        "nombre": "Capicua"
+        "nombre": "Capicua",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788319089/cuartasilla/marcas/capicua/rcnerf8jocfpz4tzlilp.png"
       },
       {
-        "nombre": "Suero"
+        "nombre": "WAYFAR MX"
       },
       {
-        "nombre": "DC Producciones"
+        "nombre": "DC Producciones",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788319126/cuartasilla/marcas/dc-producciones/vsfuw4krm1njucr6jk6p.png"
       },
       {
         "nombre": "Universidad de Guadalajara",
