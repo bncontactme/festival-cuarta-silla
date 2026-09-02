@@ -286,37 +286,30 @@
   }
 
   /* ── Evento: la tarjeta de /registro ──────────────────────────────────
-     Un rectángulo del color de su tipo —los cuatro de la rejilla— con el
-     canto y la sombra dura de la casa. Sobre el amarillo de la sección, eso
-     es lo que hace que se lea como un objeto puesto encima y no como una
-     fila de una lista; el `charla`, que es amarillo sobre amarillo, se
-     sostiene igual porque lo que lo separa del campo son el filete y la
+     Un rectángulo con el canto y la sombra dura de la casa, y el campo
+     turnándose entre los dos del sitio: rojo, amarillo, rojo. Sobre el
+     amarillo de la sección eso es lo que hace que se lea como un objeto
+     puesto encima y no como una fila de una lista; la que cae en amarillo se
+     sostiene igual, porque lo que la separa del campo son el filete y la
      sombra, no el color. Es el mismo recurso que las puertas de la portada
-     del móvil.
+     del móvil, que también se turnan.
 
-     `--fondo` y `--texto` los pone cada `<li>` desde `coloresGantt`, así que
-     el color no se escribe dos veces: si el festival cambia el rojo del
-     taller, cambia en la rejilla y aquí a la vez. */
+     `--fondo` y `--texto` los pone cada `<li>` según su posición. */
   .evento {
-    --fondo: var(--color-tinta);
-    --texto: var(--color-amarillo);
+    --fondo: var(--color-amarillo);
+    --texto: var(--color-tinta);
     display: grid;
     gap: 0.75rem;
     padding: 1.25rem;
     background-color: var(--fondo);
     color: var(--texto);
     border: var(--borde) solid var(--color-tinta);
-    /* La sombra en tinta y no en `--canto`: la lista vive siempre sobre el
-       campo amarillo de la sección, y la tarjeta de tinta redefine `--canto`
-       en amarillo para que su botón conserve el suyo. Si la sombra colgara de
-       la misma variable, esa tarjeta se quedaría con una sombra amarilla
-       sobre amarillo, es decir, sin sombra. */
     box-shadow: 6px 6px 0 var(--color-tinta);
   }
 
   /* La hora, que es por lo que se busca en esta página, en mono y a tamaño de
      dato y no de letra chica. Debajo, el tipo.
-     Los 19,2 px tampoco son estéticos: sobre el rojo de un taller la hora va en
+     Los 19,2 px tampoco son estéticos: sobre el campo rojo la hora va en
      amarillo —3,67:1—, y ese contraste sólo basta a partir de 18,66 px en
      negrita. Por debajo habría que volcarla a papel y perder el amarillo. */
   .evento-hora {
@@ -346,7 +339,7 @@
     opacity: 0.7;
   }
 
-  /* Sobre rojo y ladrillo, la letra chica se vuelca a papel en vez de bajarle
+  /* Sobre el campo rojo, la letra chica se vuelca a papel en vez de bajarle
      la opacidad al amarillo: amarillo sobre rojo son 3,67:1 de partida, y
      apagándolo se queda por debajo de 3. Es lo mismo que hace la barra de las
      pantallas de móvil, y por lo mismo. */

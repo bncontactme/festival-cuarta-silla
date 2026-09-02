@@ -39,54 +39,47 @@ import {
   programaPublicado,
   sedeDe,
   enlaceMapa,
-  coloresEvento,
   abreEncima,
 } from '../data/site';
 
 const cuantas = actividadesConRegistro.length;
 
 /**
- * Cada evento es una tarjeta del color de su tipo.
+ * Cada evento es una tarjeta, y los campos alternan rojo y amarillo.
  *
- * Los colores son los del tipo de actividad —los mismos que la rejilla de
- * `/programa` usa en sus barras—, aquí como campo de la tarjeta entera y no
- * como un canto de seis píxeles: en una página de fondo amarillo, seis píxeles
- * de color no hacen que una fila parezca un objeto.
+ * Los campos de este sitio son dos: amarillo y rojo. Salen del feed del
+ * festival, donde las publicaciones se turnan, y son los mismos que se turnan
+ * en las cuatro puertas de la portada del móvil y en las bandas de todas las
+ * páginas. Ni el blanco ni la tinta visten un campo: el papel es el marco de
+ * una foto y la tinta es con lo que se escribe.
  *
- * Ninguna tarjeta va en blanco: las cuatro tintas son rojo, amarillo, tinta y
- * ladrillo. La tabla está en `coloresEvento` —al lado de `coloresGantt` y con
- * el porqué de la única que cambia entre las dos, la muestra.
+ * Alternan por posición y no por tipo de actividad. Codificar el tipo por
+ * color pedía cuatro campos, y para llegar a cuatro había que meter el papel o
+ * la tinta — que es lo que había y lo que no puede ser—, o el hueso y la
+ * pizarra, que el cliente ya descartó por apagados. El tipo se sigue leyendo,
+ * en su rótulo, debajo de la hora; el color hace lo que hace en el resto del
+ * sitio, que es marcar el ritmo.
  *
- * El botón se elige por el campo que le toca debajo, no por el tipo: sobre rojo
- * o ladrillo va el amarillo, y sobre amarillo o papel el rojo de siempre. Es la
- * misma regla que ya siguen `boton--amarillo` y `boton--papel` en el resto del
- * sitio: el botón nunca es del color de lo que tiene detrás.
+ * El botón se elige por el campo que le toca debajo: amarillo sobre rojo, rojo
+ * sobre amarillo. Un botón nunca es del color de lo que tiene detrás.
  */
-/** Rojo y ladrillo son los campos oscuros de la paleta: los dos escriben en
- *  amarillo. Sobre ellos cambian dos cosas —el botón y la letra chica— y las
- *  dos se deciden aquí para no repetir el criterio en cada sitio. */
-const campoOscuro = (tipo: keyof typeof coloresEvento) =>
-  coloresEvento[tipo].texto.includes('amarillo');
+const campos = ['rojo', 'amarillo'] as const;
 
-const botonDe = (tipo: keyof typeof coloresEvento) =>
-  campoOscuro(tipo) ? 'boton boton--amarillo' : 'boton';
+const campoDe = (i: number) => campos[i % campos.length];
 
-/** La clase de la tarjeta. El modificador vuelca la letra chica a papel: el
- *  amarillo sobre rojo son 3,67:1 y bajándole la opacidad —que es lo que hace
- *  el resto de esta lista sobre campos claros— se queda por debajo de 3. Es la
- *  misma regla que ya sigue la barra de las pantallas de móvil. */
-const claseEvento = (tipo: keyof typeof coloresEvento) =>
-  campoOscuro(tipo) ? 'evento evento--campo-oscuro' : 'evento';
+const botonDe = (i: number) =>
+  campoDe(i) === 'rojo' ? 'boton boton--amarillo' : 'boton';
 
-/** El estilo en línea de una tarjeta: su campo, su tinta y —sólo cuando el
- *  campo es negro— el canto en amarillo, que es lo que hace que el botón de
- *  dentro conserve su sombra en vez de proyectar negro sobre negro. Es la
- *  misma regla que ya usan las secciones oscuras del sitio. */
-const estiloEvento = (tipo: keyof typeof coloresEvento) => {
-  const { fondo, texto } = coloresEvento[tipo];
-  const canto = fondo.includes('tinta') ? ';--canto:var(--color-amarillo)' : '';
-  return `--fondo:${fondo};--texto:${texto}${canto}`;
-};
+/** Sobre rojo, la letra chica se vuelca a papel en vez de bajarle la opacidad
+ *  al amarillo: son 3,67:1 de partida y apagándolo se queda por debajo de 3.
+ *  Es la misma regla que ya sigue la barra de las pantallas de móvil. */
+const claseEvento = (i: number) =>
+  campoDe(i) === 'rojo' ? 'evento evento--campo-oscuro' : 'evento';
+
+const estiloEvento = (i: number) =>
+  campoDe(i) === 'rojo'
+    ? '--fondo:var(--color-rojo);--texto:var(--color-amarillo)'
+    : '--fondo:var(--color-amarillo);--texto:var(--color-tinta)';
 
 const espera = registro.espera;
 
@@ -137,11 +130,8 @@ const descripcion = registroAbierto
               </summary>
 
               <ul class="space-y-4 bg-amarillo p-4">
-                {dia.actividades.map((a) => (
-                  <li
-                    class={claseEvento(a.tipo)}
-                    style={estiloEvento(a.tipo)}
-                  >
+                {dia.actividades.map((a, i) => (
+                  <li class={claseEvento(i)} style={estiloEvento(i)}>
                     <p class="evento-hora">
                       {a.inicio}–{a.fin}
                       <span class="evento-tipo">{a.tipo}</span>
@@ -157,7 +147,7 @@ const descripcion = registroAbierto
                       href={a.registro}
                       target="_blank"
                       rel="noopener"
-                      class={`${botonDe(a.tipo)} mt-3`}
+                      class={`${botonDe(i)} mt-3`}
                       data-registro={a.registro}
                     >
                       {registro.acciones.registro}{abreEncima(a.registro) ? '' : ' ↗'}
@@ -231,19 +221,14 @@ const descripcion = registroAbierto
                 </header>
 
                 <ul class="mt-6 space-y-5">
-                  {dia.actividades.map((a) => {
+                  {dia.actividades.map((a, i) => {
                     const sede = sedeDe(a.sede);
                     return (
-                      <li
-                        class={claseEvento(a.tipo)}
-                        style={estiloEvento(a.tipo)}
-                      >
-                        {/* El color es el tipo, y es el mismo con que la
-                            rejilla pinta su barra: quien viene de /programa
-                            reconoce el taller por el rojo antes de leer el
-                            título. Antes era un canto de seis píxeles a la
+                      <li class={claseEvento(i)} style={estiloEvento(i)}>
+                        {/* Antes el color era un canto de seis píxeles a la
                             izquierda de una fila; en una página de fondo
-                            amarillo, seis píxeles no hacen un objeto. */}
+                            amarillo, seis píxeles no hacen un objeto. Ahora es
+                            el campo entero, y se turna con el de al lado. */}
                         <p class="evento-hora">
                           {a.inicio}–{a.fin}
                           <span class="evento-tipo">{a.tipo}</span>
@@ -288,7 +273,7 @@ const descripcion = registroAbierto
                           href={a.registro}
                           target="_blank"
                           rel="noopener"
-                          class={`${botonDe(a.tipo)} justify-self-start lg:justify-self-end`}
+                          class={`${botonDe(i)} justify-self-start lg:justify-self-end`}
                           data-registro={a.registro}
                         >
                           {registro.acciones.registro}{abreEncima(a.registro) ? '' : ' ↗'}
