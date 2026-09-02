@@ -9,6 +9,7 @@
 import { PESTANAS, TABLAS } from './esquema';
 import { pintarTabla } from './tabla';
 import { pintarPrevia } from './previa';
+import { pintarRegistro } from './registro';
 import { el, vaciar, cuando } from './dom';
 import {
   pedir, leerContenido, ponerClave, olvidarClave, recordada, ErrorPanel,
@@ -99,9 +100,18 @@ async function cargar() {
 const ctx = {
   sedes: () => (estado?.sedes ?? []).map((s: any) => s.nombre).filter(Boolean),
   dias: () => DIAS,
-  cambiado: () => { estadoBarras(); },
+  cambiado: () => { estadoBarras(); refrescarPrevia(); },
   avisar: (m: string, c?: 'error' | 'ojo' | 'bien') => avisar(m, c ?? 'ojo'),
+  irA: (clave: string) => { pestanaActiva = clave; pintar(); window.scrollTo({ top: 0 }); },
 };
+
+/** Qué colecciones toca una pestaña, para el punto de «sin guardar». */
+const colecciones = (p: (typeof PESTANAS)[number]): string[] =>
+  p.colecciones ?? [...new Set(p.tablas.map((t) => TABLAS[t].coleccion))];
+
+const cuentaDe = (p: (typeof PESTANAS)[number]): string =>
+  p.cuenta ? p.cuenta(estado)
+           : String(p.tablas.reduce((n, t) => n + TABLAS[t].leer(estado).length, 0));
 
 function pintar() {
   pintarPestanas();
@@ -113,26 +123,58 @@ function pintarPestanas() {
   const barra = $('#pestanas');
   vaciar(barra);
   for (const p of PESTANAS) {
-    const cuantos = p.tablas.reduce((n, t) => n + TABLAS[t].leer(estado).length, 0);
-    const cols = new Set(p.tablas.map((t) => TABLAS[t].coleccion));
     const boton = el('button', {
       type: 'button', role: 'tab',
       'aria-selected': String(p.clave === pestanaActiva),
-      class: [...cols].some(sucia) ? 'sucia' : '',
+      class: colecciones(p).some(sucia) ? 'sucia' : '',
       onclick: () => { pestanaActiva = p.clave; pintar(); },
-    }, p.titulo, el('span', { class: 'cuenta' }, String(cuantos)));
+    }, p.titulo, el('span', { class: 'cuenta' }, cuentaDe(p)));
     barra.append(boton);
   }
+}
+
+/**
+ * La rejilla en chiquito de la pestaña de Programa.
+ *
+ * Se guarda aparte para poder cambiarla sola. Antes se pintaba una vez con el
+ * lienzo y no se volvía a tocar: se editaba una hora y la previa seguía
+ * enseñando la de antes hasta que cambiabas de pestaña y volvías. Eso vacía la
+ * pestaña de sentido — está ahí para ver si algo se encima ANTES de guardar, y
+ * lo que enseñaba era el estado anterior.
+ */
+let nodoPrevia: HTMLElement | null = null;
+let previaPedida: ReturnType<typeof setTimeout> | null = null;
+
+function refrescarPrevia() {
+  if (!nodoPrevia || pestanaActiva !== 'programa') return;
+  // Se llama en cada tecla. Rehacer cuarenta barras por letra escrita es
+  // trabajo tirado, así que se juntan las que caigan seguidas.
+  //
+  // Con `requestAnimationFrame` no: en una pestaña de fondo no corre, y esto
+  // tiene que quedar al día aunque nadie esté mirando —se mira al volver—.
+  if (previaPedida) clearTimeout(previaPedida);
+  previaPedida = setTimeout(() => {
+    previaPedida = null;
+    if (!nodoPrevia || pestanaActiva !== 'programa') return;
+    const nueva = pintarPrevia(estado.programa.actividades, DIAS);
+    nodoPrevia.replaceWith(nueva);
+    nodoPrevia = nueva;
+  }, 120);
 }
 
 function pintarLienzo() {
   const lienzo = $('#lienzo');
   vaciar(lienzo);
+  nodoPrevia = null;
   const p = PESTANAS.find((x) => x.clave === pestanaActiva)!;
 
   if (p.clave === 'programa') {
     lienzo.append(interruptorEjemplo());
-    lienzo.append(pintarPrevia(estado.programa.actividades, DIAS));
+    nodoPrevia = pintarPrevia(estado.programa.actividades, DIAS);
+    lienzo.append(nodoPrevia);
+  }
+  if (p.clave === 'registro') {
+    lienzo.append(pintarRegistro(estado, ctx, DIAS));
   }
   for (const t of p.tablas) {
     const tabla = TABLAS[t];
@@ -177,7 +219,7 @@ function interruptorEjemplo() {
         el('strong', {}, 'Esto todavía es la rejilla de ejemplo.'),
         ' ',
         marcado
-          ? 'Mientras esté marcado, el sitio no enseña el programa: ni aquí ni en la portada. En su lugar sale el cartel de «Próximamente». Desmárcalo cuando la rejilla ya sea la buena — eso la publica.'
+          ? 'Mientras esté marcado, el sitio no enseña el programa: ni aquí, ni en la portada, ni en /registro —que son estos mismos eventos—. En su lugar sale el cartel de «Próximamente». Desmárcalo cuando la rejilla ya sea la buena: eso la publica, y deja que el registro se pueda abrir.'
           : peligro
             ? 'Está desmarcado y no hay ni una actividad: si guardas así, el sitio publica el programa VACÍO — la rejilla sin nada dentro. Vuelve a marcarlo mientras cargas el programa de verdad; con él marcado sale el cartel de «Próximamente».'
             : 'El programa está publicado: el sitio lo enseña entero. Vuelve a marcarlo si todavía es un andamio y prefieres esconderlo.',
@@ -205,18 +247,33 @@ function estadoBarras() {
   // con la tabla ya vacía. Dos números distintos para lo mismo en la misma
   // pantalla es peor que no poner ninguno: parece que se perdió algo.
   [...$('#pestanas').children].forEach((nodo, i) => {
-    const cols = new Set(PESTANAS[i].tablas.map((t) => TABLAS[t].coleccion));
-    nodo.classList.toggle('sucia', [...cols].some(sucia));
+    nodo.classList.toggle('sucia', colecciones(PESTANAS[i]).some(sucia));
     const cuenta = nodo.querySelector('.cuenta');
-    if (cuenta) {
-      cuenta.textContent = String(
-        PESTANAS[i].tablas.reduce((n, t) => n + TABLAS[t].leer(estado).length, 0),
-      );
-    }
+    if (cuenta) cuenta.textContent = cuentaDe(PESTANAS[i]);
   });
 }
 
 // ── Guardar ──────────────────────────────────────────────────────────────────
+
+/**
+ * En qué pestaña se ve una colección.
+ *
+ * `marcas` sale en dos tablas de la misma pestaña y `programa` en dos pestañas
+ * —Programa y Registro—; las marcas rojas de una fila las pinta la tabla, así
+ * que para el programa la buena es siempre Programa.
+ */
+function pestanaDe(coleccion: string, clave = false): string {
+  const p = PESTANAS.find((x) => x.tablas.some((t) => TABLAS[t].coleccion === coleccion));
+  return p ? (clave ? p.clave : p.titulo) : coleccion;
+}
+
+/** Lleva la vista a la primera casilla en rojo. Un listado de quejas arriba
+ *  dice cuántas hay; lo que las arregla es ver cuál de las cuarenta filas. */
+function aLaPrimeraMala() {
+  const mala = document.querySelector('.campo.malo, .fila.mala');
+  mala?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  (mala?.querySelector('input, select, textarea') as HTMLElement)?.focus();
+}
 
 async function guardar() {
   if (guardando || !haySucias()) return;
@@ -231,26 +288,54 @@ async function guardar() {
 
   const avisos: string[] = [];
   let despliegue: any = null;
+  /** Un 409 no deja errores de contenido que marcar, así que sin esto el
+   *  «Guardado.» del final salía igual — encima del aviso que decía que no. */
+  let choque = false;
   erroresPorColeccion = {};
 
   for (const c of orden) {
     try {
-      const r: any = await pedir('guardar', { coleccion: c, datos: estado[c] });
+      // La versión viaja para que el Worker pueda decir «alguien guardó en
+      // medio» en vez de dejar que uno pise al otro sin enterarse.
+      const r: any = await pedir('guardar', { coleccion: c, datos: estado[c], version: meta.version });
       limpio[c] = JSON.stringify(estado[c]);
       meta = { version: r.version, actualizado: r.actualizado, ultimoDeploy: r.ultimoDeploy ?? meta.ultimoDeploy };
       if (r.avisos?.length) avisos.push(...r.avisos);
       if (r.despliegue) despliegue = r.despliegue;
     } catch (e: any) {
       const err = e as ErrorPanel;
+
+      // ── Alguien más guardó ─────────────────────────────────────────────
+      // No es un dato malo: es que hay otra pestaña abierta con el panel. No
+      // se pierde nada de lo escrito —sigue en pantalla— pero hay que mirar
+      // qué cambió antes de volver a mandarlo encima.
+      if (err.estado === 409) {
+        avisar(
+          err.message + ' Lo que escribiste sigue aquí. Abre el sitio o recarga en otra pestaña para ver qué cambió; ' +
+          'si tu versión es la buena, vuelve a darle a Guardar y esta vez entra.',
+          'error', 'Alguien más guardó',
+        );
+        // Se sube al día para que el siguiente intento no vuelva a chocar: el
+        // aviso ya se dio, y repetirlo en bucle no ayuda a nadie.
+        meta.version = err.conflicto?.actual ?? meta.version;
+        choque = true;
+        break;
+      }
+
       erroresPorColeccion[c] = err.errores ?? [];
       avisar(
         err.errores?.length
-          ? 'Nada de esta sección se guardó. Lo que falta está marcado en rojo abajo.'
+          ? `Nada de esta sección se guardó. Te dejo en «${pestanaDe(c)}» con lo que falta marcado en rojo.`
           : err.message,
         'error',
         `No se guardó «${c}»`,
         err.errores ?? [],
       );
+      // La queja dice «marcado en rojo» y las marcas viven en la pestaña de esa
+      // colección: si el fallo es del programa y estabas en Sedes, el aviso
+      // señalaba a una pantalla en la que no hay nada rojo que ver. Se va a
+      // donde está el problema.
+      if (err.errores?.length) pestanaActiva = pestanaDe(c, true);
       // Se corta aquí: si las sedes no entraron, seguir con el programa sólo
       // produce una segunda tanda de quejas sobre lo mismo.
       break;
@@ -259,11 +344,12 @@ async function guardar() {
 
   guardando = false;
   pintar();
+  if (Object.keys(erroresPorColeccion).length) aLaPrimeraMala();
 
   if (avisos.length) {
     avisar('Se guardó, pero hay cosas que mirar:', 'ojo', 'Ojo', avisos);
   }
-  if (!Object.keys(erroresPorColeccion).length) {
+  if (!choque && !Object.keys(erroresPorColeccion).length) {
     avisar(
       despliegue?.disparado
         ? 'Guardado. El sitio se está reconstruyendo: tarda un minuto y medio en verse.'

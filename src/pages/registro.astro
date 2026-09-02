@@ -1,68 +1,168 @@
 ---
+/**
+ * Registro a eventos.
+ *
+ * Lo que había aquí era la tarjeta que vino del Wix: «Fecha: A determinar»,
+ * «Hora: A determinar», un botón apagado, y una nota que decía «La fecha y la
+ * hora se muestran como A determinar» — la descripción del hueco, no contenido.
+ * Nada de eso podía dejar de ser un hueco nunca, porque no estaba enchufado a
+ * ningún dato.
+ *
+ * Ahora sí: **al registro se entra por actividad**, cada `ActividadGantt` trae
+ * su `registro`, y esta página es esa misma lista ordenada por cuándo se entra.
+ * Es la misma que pinta la rejilla de `/programa` —el mismo array, no una copia
+ * paralela— así que mover un taller de las 12 a las 13 lo mueve aquí también.
+ *
+ * Dos estados, y ninguno inventa nada:
+ *
+ *   · Cerrado — el festival no ha abierto el registro, o el programa todavía
+ *     está marcado como rejilla de ejemplo. Sale el cartel de espera con las
+ *     fechas de verdad, que es más de lo que decía «A determinar».
+ *   · Abierto — la lista, por días. Cada actividad con su puerta: el formulario
+ *     de Tally, o «entrada libre» cuando no pide registro. Lo que todavía no
+ *     tiene ninguna de las dos no sale: una actividad sin puerta anunciada con
+ *     una puerta vacía es peor que no anunciarla.
+ */
 import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
 import Encabezado from '../components/Encabezado.astro';
 import Silla from '../components/Silla.astro';
 import Estrella from '../components/Estrella.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
-import { registro, festival } from '../data/site';
-import { artistas } from '../data/artistas';
+import {
+  registro,
+  registroDatos,
+  registroAbierto,
+  registroPorDia,
+  actividadesConRegistro,
+  festival,
+  programaPublicado,
+  sedeDe,
+  enlaceMapa,
+  coloresGantt,
+  puertaDe,
+} from '../data/site';
+
+const cuantas = actividadesConRegistro.length;
+
+/** Con el programa sin publicar falta el programa; con el programa puesto sólo
+ *  falta abrir la puerta. No es lo mismo y se nota si se dice mal. */
+const espera = programaPublicado ? registro.espera.conPrograma : registro.espera.sinPrograma;
+
+const nota = registroDatos.nota ?? (registroAbierto ? null : espera);
+
+/** Lo que se lee bajo el titular: cuántas puertas hay abiertas, o la espera. */
+const estado = registroAbierto
+  ? cuantas === 1
+    ? '1 actividad abierta'
+    : `${cuantas} actividades abiertas`
+  : registro.estado;
+
+const descripcion = registroAbierto
+  ? `Regístrate a las actividades del ${festival.nombre}. ${festival.fechas}, ${festival.ciudad}.`
+  : `${registro.titulo} del ${festival.nombre}. ${registro.estado}.`;
 ---
 
-<Base
-  titulo={registro.titulo}
-  descripcion={`${registro.titulo} del ${festival.nombre}. ${registro.estado}.`}
->
-  {/* ── Móvil: la ficha y poco más ─────────────────────────────────────── */}
+<Base titulo={registro.titulo} descripcion={descripcion}>
+  {/* ── Móvil ─────────────────────────────────────────────────────────────
+      La misma decisión que en Sedes y en Programa: los días plegados, y el
+      que interesa se abre. Un listado corrido de treinta actividades con su
+      botón son ocho pantallas de scroll para encontrar la del sábado. */}
   <Fragment slot="movil">
     <Pantalla
       titulo={registro.titulo}
       indice="04"
-      nota={registro.estado}
+      nota={estado}
       fondo="rojo"
       fondoCuerpo="amarillo"
     >
       <div class="p-4">
-        <article
-          class="border-2 border-tinta bg-papel text-tinta shadow-[6px_6px_0_var(--color-tinta)]"
-        >
-          <header class="border-b-2 border-tinta bg-tinta px-4 py-4 text-papel">
-            <p class="meta text-[0.55rem] text-amarillo">{registro.ciudad}</p>
-            <h2 class="display mt-2 text-4xl leading-none">
-              {registro.estado}
-            </h2>
-          </header>
+        {nota && <p class="text-sm leading-snug">{nota}</p>}
 
-          <dl class="divide-y divide-tinta/20 px-4">
-            {
-              [
-                ['Fecha', 'A determinar'],
-                ['Hora', 'A determinar'],
-                ['Lugar', registro.ciudad],
-              ].map(([k, v]) => (
-                <div class="flex items-baseline gap-4 py-3">
-                  <dt class="meta w-16 shrink-0 text-[0.55rem] text-rojo">
-                    {k}
-                  </dt>
-                  <dd class="font-mono text-sm">{v}</dd>
-                </div>
-              ))
-            }
-          </dl>
+        {
+          registroAbierto && registroDatos.general && (
+            <a
+              href={registroDatos.general}
+              target="_blank"
+              rel="noopener"
+              class="boton boton--papel mt-4"
+            >
+              {registro.acciones.general} ↗
+            </a>
+          )
+        }
+      </div>
 
-          <p
-            class="meta border-t-2 border-tinta px-4 py-3 text-[0.5rem] leading-relaxed text-tinta/55"
-          >
-            {registro.nota}
-          </p>
-        </article>
+      {
+        registroAbierto ? (
+          registroPorDia.map((dia) => (
+            <details class="plegable">
+              <summary>
+                <span class="meta bg-amarillo px-1.5 py-0.5 text-[0.6rem] text-tinta">
+                  {String(dia.indice + 1).padStart(2, '0')}
+                </span>
+                <span>
+                  <span class="display block text-2xl leading-none">{dia.dia}</span>
+                  <span class="plegable-nota meta mt-1 block text-[0.5rem] opacity-50">
+                    {dia.actividades.length === 1
+                      ? '1 actividad'
+                      : `${dia.actividades.length} actividades`}
+                  </span>
+                </span>
+                <span class="plegable-signo" aria-hidden="true">
+                  +
+                </span>
+              </summary>
 
-        <p class="meta mt-5 text-[0.55rem] leading-relaxed text-tinta/50">
-          {registro.estado} — el registro abrirá junto con el programa.
-        </p>
+              <ul class="divide-y-2 divide-tinta/15 bg-amarillo">
+                {dia.actividades.map((a) => (
+                  <li class="px-4 py-4">
+                    <p class="meta text-[0.55rem] text-rojo">
+                      {a.inicio}–{a.fin} · {a.sede}
+                    </p>
+                    <h3 class="mt-1.5 text-base leading-snug font-bold">{a.titulo}</h3>
+                    {a.artista && (
+                      <p class="meta mt-1 text-[0.5rem] opacity-55">{a.artista}</p>
+                    )}
 
-        <a href={conBase("/artistas")} class="boton boton--papel mt-5">
-          {artistas.titulo}
+                    {puertaDe(a) === 'formulario' ? (
+                      <a
+                        href={a.registro}
+                        target="_blank"
+                        rel="noopener"
+                        class="boton mt-3"
+                        data-registro={a.registro}
+                      >
+                        {registro.acciones.registro} ↗
+                      </a>
+                    ) : (
+                      <p class="meta mt-3 inline-block border-2 border-tinta px-2 py-1 text-[0.5rem]">
+                        {registro.libre}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ))
+        ) : (
+          <div class="px-4 pb-4">
+            <article class="border-2 border-tinta bg-papel text-tinta shadow-[6px_6px_0_var(--color-tinta)]">
+              <header class="border-b-2 border-tinta bg-tinta px-4 py-4 text-papel">
+                <p class="meta text-[0.55rem] text-amarillo">{festival.ciudad}</p>
+                <h2 class="display mt-2 text-4xl leading-none">{registro.estado}</h2>
+              </header>
+              <p class="meta px-4 py-4 text-[0.55rem] leading-relaxed">
+                {festival.fechas}
+              </p>
+            </article>
+          </div>
+        )
+      }
+
+      <div class="p-4">
+        <a href={conBase("/programa")} class="boton boton--papel">
+          {registro.acciones.programa}
         </a>
       </div>
     </Pantalla>
@@ -81,64 +181,167 @@ import { artistas } from '../data/artistas';
       class="absolute -right-8 -bottom-12 w-48 opacity-15 lg:w-80"
     />
 
-    {/* Apretado por abajo: la nota es lo último que hay y con `py-28` quedaba
-        un palmo de vacío entre ella y la banda de cierre. */}
-    <div class="relative px-4 pt-16 pb-14 sm:px-6 lg:px-10 lg:pt-20 lg:pb-16">
-      <!-- Tarjeta de evento en estado "por definir" -->
-      <article
-        class="max-w-2xl border-2 border-tinta bg-papel shadow-[10px_10px_0_var(--color-tinta)]"
-        data-reveal="escala"
-      >
-        <header class="border-b-2 border-tinta bg-tinta px-6 py-5 text-papel">
-          <p class="meta text-amarillo">{registro.ciudad}</p>
-          <h2 class="display mt-3 text-5xl leading-none lg:text-6xl">
-            {registro.estado}
-          </h2>
-        </header>
+    <div class="relative px-4 pt-14 pb-16 sm:px-6 lg:px-10 lg:pt-16">
+      {/* ── La bajada ────────────────────────────────────────────────────
+          Una sola línea que dice cómo funciona esto, porque «registro a
+          eventos» no lo dice: la mitad de la gente llega esperando un
+          formulario único del festival. */}
+      <div class="max-w-3xl" data-reveal="arriba">
+        <p class="meta text-rojo">{estado}</p>
+        <p class="mt-4 text-lg leading-snug lg:text-xl">
+          {
+            registroAbierto
+              ? 'Aquí no se apunta uno al festival: se apunta a cada actividad. Cada una tiene su propio formulario, y las de entrada libre no piden ninguno.'
+              : espera
+          }
+        </p>
+        {nota && registroAbierto && (
+          <p class="mt-4 max-w-xl text-base leading-relaxed text-tinta/70">{nota}</p>
+        )}
 
-        <div class="px-6 py-8">
-          <dl class="space-y-4">
-            <div class="flex items-baseline gap-4 border-b border-tinta/20 pb-4">
-              <dt class="meta w-24 shrink-0 text-rojo">Fecha</dt>
-              <dd class="font-mono text-base">A determinar</dd>
-            </div>
-            <div class="flex items-baseline gap-4 border-b border-tinta/20 pb-4">
-              <dt class="meta w-24 shrink-0 text-rojo">Hora</dt>
-              <dd class="font-mono text-base">A determinar</dd>
-            </div>
-            <div class="flex items-baseline gap-4">
-              <dt class="meta w-24 shrink-0 text-rojo">Lugar</dt>
-              <dd class="font-mono text-base">{registro.ciudad}</dd>
-            </div>
-          </dl>
+        {
+          registroDatos.general && registroAbierto && (
+            <a
+              href={registroDatos.general}
+              target="_blank"
+              rel="noopener"
+              class="boton boton--papel mt-7"
+              data-registro={registroDatos.general}
+            >
+              {registro.acciones.general} ↗
+            </a>
+          )
+        }
+      </div>
 
-          <p class="meta mt-8 leading-relaxed text-tinta/55">
-            {registro.nota}
-          </p>
-        </div>
+      {/* ── La lista ─────────────────────────────────────────────────────
+          Un bloque por día y una fila por actividad. La hora manda a la
+          izquierda, como en la rejilla; a la derecha, la puerta. */}
+      {
+        registroAbierto ? (
+          <div class="mt-14 space-y-12">
+            {registroPorDia.map((dia) => (
+              <section data-reveal="arriba">
+                <header class="flex flex-wrap items-baseline gap-x-5 gap-y-1 border-b-2 border-tinta pb-3">
+                  <p class="meta text-rojo">
+                    {String(dia.indice + 1).padStart(2, '0')}
+                  </p>
+                  <h2 class="display text-4xl leading-none lg:text-5xl">{dia.dia}</h2>
+                  <p class="meta text-tinta/50">{dia.fecha}</p>
+                  <p class="meta ml-auto text-tinta/50">
+                    {dia.actividades.length === 1
+                      ? '1 actividad'
+                      : `${dia.actividades.length} actividades`}
+                  </p>
+                </header>
 
-        <footer class="flex flex-wrap gap-3 border-t-2 border-tinta px-6 py-5">
-          {/* El mismo botón dormido que el de donar en la portada: un
-              tratamiento para «esto existe y todavía no está abierto», no uno
-              por página. */}
-          <button type="button" class="boton boton--papel boton--dormido" disabled>
-            {registro.acciones.registro}
-          </button>
-          <a href={conBase("/programa")} class="boton boton--papel">
-            {registro.acciones.leerMas}
-          </a>
-        </footer>
-      </article>
+                <ul class="divide-y-2 divide-tinta/12">
+                  {dia.actividades.map((a) => {
+                    const sede = sedeDe(a.sede);
+                    return (
+                      <li
+                        class="grid gap-x-6 gap-y-3 border-l-[6px] py-6 pl-4 lg:grid-cols-[8rem_1fr_auto] lg:items-baseline"
+                        style={`border-left-color:${coloresGantt[a.tipo].fondo}`}
+                      >
+                        {/* El canto de color es el tipo, y es el mismo que
+                            colorea su barra en la rejilla: quien viene de
+                            /programa reconoce la actividad por el color antes
+                            que por el nombre. Va de canto y no de cuadradito
+                            al lado de la hora porque es la misma forma que
+                            allá — el filete del borde izquierdo de la barra. */}
+                        <p class="meta text-tinta/70">{a.inicio}–{a.fin}</p>
 
-      <p class="meta mt-10 max-w-md text-tinta/50" data-reveal="arriba">
-        {registro.estado} — el registro abrirá junto con el programa.
-      </p>
+                        <div class="min-w-0">
+                          <h3 class="text-xl leading-snug font-bold lg:text-2xl">
+                            {a.titulo}
+                          </h3>
+                          {a.artista && (
+                            <p class="mt-1 text-base opacity-70">{a.artista}</p>
+                          )}
+                          <p class="meta mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-tinta/55">
+                            <span>{a.tipo}</span>
+                            <span aria-hidden="true">·</span>
+                            {sede ? (
+                              <a
+                                href={enlaceMapa(sede)}
+                                target="_blank"
+                                rel="noopener"
+                                class="underline decoration-rojo decoration-2 underline-offset-4 hover:text-rojo"
+                              >
+                                {a.sede} ↗
+                              </a>
+                            ) : (
+                              <span>{a.sede}</span>
+                            )}
+                          </p>
+                        </div>
+
+                        {/* La puerta. Con formulario es un botón; sin él, el
+                            hecho dicho por su nombre — «entrada libre» es una
+                            respuesta, no un hueco. */}
+                        {puertaDe(a) === 'formulario' ? (
+                          <a
+                            href={a.registro}
+                            target="_blank"
+                            rel="noopener"
+                            class="boton boton--papel justify-self-start lg:justify-self-end"
+                            data-registro={a.registro}
+                          >
+                            {registro.acciones.registro} ↗
+                          </a>
+                        ) : (
+                          <p
+                            class="meta justify-self-start border-2 border-tinta px-3 py-2 lg:justify-self-end"
+                            title={registro.libreNota}
+                          >
+                            {registro.libre}
+                          </p>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ))}
+          </div>
+        ) : (
+          /* Cerrado. La tarjeta se queda, pero deja de mentir: en vez de tres
+             renglones que dicen «a determinar» —que es lo que decía el Wix—,
+             las fechas que sí sabemos y la puerta al programa. */
+          <article
+            class="mt-12 max-w-2xl border-2 border-tinta bg-papel shadow-[10px_10px_0_var(--color-tinta)]"
+            data-reveal="escala"
+          >
+            <header class="border-b-2 border-tinta bg-tinta px-6 py-5 text-papel">
+              <p class="meta text-amarillo">{festival.ciudad}</p>
+              <h2 class="display mt-3 text-5xl leading-none lg:text-6xl">
+                {registro.estado}
+              </h2>
+            </header>
+
+            <dl class="px-6 py-8">
+              <div class="flex items-baseline gap-4 border-b border-tinta/20 pb-4">
+                <dt class="meta w-24 shrink-0 text-rojo">Cuándo</dt>
+                <dd class="font-mono text-base">{festival.fechas.replace('Del ', '')}</dd>
+              </div>
+              <div class="mt-4 flex items-baseline gap-4">
+                <dt class="meta w-24 shrink-0 text-rojo">Dónde</dt>
+                <dd class="font-mono text-base">{festival.ciudad}</dd>
+              </div>
+            </dl>
+
+            <footer class="border-t-2 border-tinta px-6 py-5">
+              <a href={conBase("/programa")} class="boton boton--papel">
+                {registro.acciones.programa}
+              </a>
+            </footer>
+          </article>
+        )
+      }
     </div>
   </section>
 
-  {/* La misma secuencia de Sedes: rojo → amarillo → rojo. El papel queda
-      contenido en la tarjeta, donde sí funciona como superficie de lectura,
-      y deja de ocupar una banda completa. */}
+  {/* La misma secuencia de Sedes: rojo → amarillo → rojo. */}
   <section class="relative overflow-hidden border-t-2 border-tinta bg-rojo text-amarillo">
     <Estrella tinta="amarilla" alto="abajo" />
     <div class="relative px-4 py-20 sm:px-6 lg:px-10">
@@ -150,7 +353,9 @@ import { artistas } from '../data/artistas';
         {festival.fechas}
       </p>
       <div class="mt-10 flex flex-wrap gap-4" data-reveal="arriba">
-        <a href={conBase("/programa")} class="boton boton--amarillo">Ver el programa</a>
+        <a href={conBase("/programa")} class="boton boton--amarillo">
+          {registro.acciones.programa}
+        </a>
         {
           festival.donaciones.paypal && (
             <a
@@ -166,4 +371,76 @@ import { artistas } from '../data/artistas';
       </div>
     </div>
   </section>
+
+  <script>
+    /**
+     * El formulario abre encima de la página, y el código de Tally se descarga
+     * **en el primer clic**.
+     *
+     * Es la misma regla que en la ficha de la rejilla, y por lo mismo: aquí no
+     * se le pide nada a terceros —las tipografías son propias, el plano es
+     * propio, no hay Google—, y cargar el widget al entrar rompería eso para
+     * todo el que sólo viene a mirar qué hay.
+     *
+     * El `href` real se queda puesto: sin JS, con el script bloqueado o si la
+     * red falla, el botón sigue siendo un enlace que abre el formulario en otra
+     * pestaña. Nunca se queda muerto.
+     */
+    declare global {
+      interface Window {
+        Tally?: {
+          openPopup: (
+            id: string,
+            opciones?: { layout?: 'modal' | 'default'; width?: number },
+          ) => void;
+        };
+      }
+    }
+
+    const TALLY = 'https://tally.so/widgets/embed.js';
+    let cargando: Promise<void> | null = null;
+
+    const idDeTally = (url: string) => {
+      try {
+        const u = new URL(url);
+        if (!/(^|\.)tally\.so$/.test(u.hostname)) return null;
+        return u.pathname.split('/').filter(Boolean).pop() ?? null;
+      } catch {
+        return null;
+      }
+    };
+
+    const cargar = () => {
+      if (window.Tally) return Promise.resolve();
+      if (cargando) return cargando;
+      cargando = new Promise<void>((listo, falla) => {
+        const s = document.createElement('script');
+        s.src = TALLY;
+        s.async = true;
+        s.onload = () => listo();
+        s.onerror = () => falla(new Error('Tally no cargó'));
+        document.head.append(s);
+      });
+      return cargando;
+    };
+
+    document.addEventListener('click', (e) => {
+      const enlace = (e.target as HTMLElement).closest<HTMLAnchorElement>('[data-registro]');
+      if (!enlace) return;
+      // Respetar los gestos de «abrir en pestaña nueva» del usuario.
+      if (e.metaKey || e.ctrlKey || e.shiftKey || (e as MouseEvent).button !== 0) return;
+
+      const url = enlace.href;
+      const id = idDeTally(url);
+      if (!id) return; // Cualquier cosa que no sea un tally.so/r/… va como siempre.
+
+      e.preventDefault();
+      cargar()
+        .then(() => {
+          if (window.Tally?.openPopup) window.Tally.openPopup(id, { layout: 'modal', width: 640 });
+          else window.open(url, '_blank', 'noopener');
+        })
+        .catch(() => window.open(url, '_blank', 'noopener'));
+    });
+  </script>
 </Base>

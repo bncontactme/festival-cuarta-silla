@@ -18,6 +18,9 @@ export type Ctx = {
   dias: () => string[];
   cambiado: () => void;
   avisar: (mensaje: string, clase?: 'error' | 'ojo' | 'bien') => void;
+  /** Cambiar de pestaña desde dentro de una vista. Lo usa Registro para mandar
+   *  al Programa cuando todavía no hay ni una actividad que registrar. */
+  irA?: (pestana: string) => void;
 };
 
 /**
@@ -95,6 +98,22 @@ function control(campo: Campo, fila: any, ctx: Ctx): HTMLElement {
         opciones.unshift({ valor: actual, texto: `⚠ ${actual} (ya no existe)` });
       }
       return desplegable(opciones, actual, escribe, campo.requerido ? 'elegir sede…' : 'sin sede');
+    }
+
+    case 'sino': {
+      // Sólo se guarda el sí. Un `false` en el JSON del repo es una clave que
+      // no dice nada y que mueve el diff cada vez que alguien toca la casilla.
+      const casilla = el('input', {
+        type: 'checkbox',
+        checked: fila[campo.clave] === true,
+        style: 'width:auto',
+        onchange: (e: any) => {
+          if (e.target.checked) fila[campo.clave] = true;
+          else delete fila[campo.clave];
+          ctx.cambiado();
+        },
+      });
+      return el('label', { class: 'sino' }, casilla, el('span', {}, campo.siNo ?? 'Sí'));
     }
 
     case 'coord':
@@ -179,6 +198,7 @@ function imagen(campo: Campo, fila: any, ctx: Ctx) {
   const caja = el('div', { class: 'imagen' });
   const marco = el('div', { class: 'marco' });
   const derecha = el('div', { style: 'display:grid;gap:.3rem;min-width:0' });
+  const mandos = el('div', { style: 'display:flex;gap:.3rem' });
   const barra = el('div', { class: 'barrita', hidden: true }, el('i'));
   const relleno = barra.querySelector('i') as HTMLElement;
 
@@ -193,11 +213,34 @@ function imagen(campo: Campo, fila: any, ctx: Ctx) {
     },
   });
 
+  /**
+   * Miniatura y botones, los dos.
+   *
+   * Los botones se repintaban una sola vez, al construir el campo, así que la
+   * foto que acababas de subir se veía pero no traía «Quitar»: para deshacer
+   * una foto equivocada había que recargar el panel y perder todo lo demás sin
+   * guardar. Es un caso de cada día —te confundes de archivo— y no tenía salida.
+   */
   function pintar() {
     marco.replaceChildren(
       fila[campo.clave]
         ? el('img', { src: fila[campo.clave], alt: '', loading: 'lazy' })
         : el('span', { class: 'rotulo', style: 'opacity:.4' }, 'sin foto'),
+    );
+    mandos.replaceChildren(
+      el('button', { type: 'button', class: 'boton suave', onclick: () => elegir.click() },
+        fila[campo.clave] ? 'Cambiar' : 'Subir'),
+      ...(fila[campo.clave]
+        ? [el('button', {
+            type: 'button', class: 'boton suave',
+            onclick: () => {
+              delete fila[campo.clave];
+              hueco.value = '';
+              pintar();
+              ctx.cambiado();
+            },
+          }, 'Quitar')]
+        : []),
     );
   }
 
@@ -234,17 +277,7 @@ function imagen(campo: Campo, fila: any, ctx: Ctx) {
     const f = e.dataTransfer?.files?.[0]; if (f) subir(f);
   });
 
-  derecha.append(
-    el('div', { style: 'display:flex;gap:.3rem' },
-      el('button', { type: 'button', class: 'boton suave', onclick: () => elegir.click() }, 'Subir'),
-      fila[campo.clave]
-        ? el('button', { type: 'button', class: 'boton suave', onclick: () => {
-            delete fila[campo.clave]; hueco.value = ''; pintar(); ctx.cambiado();
-          } }, 'Quitar')
-        : null,
-    ),
-    hueco, barra, elegir,
-  );
+  derecha.append(mandos, hueco, barra, elegir);
 
   pintar();
   caja.append(marco, derecha);

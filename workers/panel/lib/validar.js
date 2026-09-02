@@ -14,7 +14,7 @@
 // las claves. Lo que queda en KV siempre está limpio, y así el JSON que se
 // comitea al repo no cambia por un espacio de más.
 
-import { pelar } from './slug.js';
+import { pelar, masParecido } from './slug.js';
 
 /** Cuánto cabe. No son límites de diseño, son frenos: KV aguanta 25 MB por
  *  valor y un panel no debería poder acercarse ni de lejos. */
@@ -143,13 +143,19 @@ class Verificador {
     if (!s) return undefined;
     if (this.sedesValidas.includes(s)) return s;
 
-    const parecida = this.sedesValidas.find(n => pelar(n) === pelar(s));
+    const parecida = masParecido(s, this.sedesValidas);
     this.error(
       donde,
       '«' + s + '» no está en la lista de sedes' +
         (parecida ? ' — ¿querías decir «' + parecida + '»?' : ''),
     );
     return undefined;
+  }
+
+  /** Un sí o un no. Sólo se guarda el sí: un `false` en el JSON del repo es
+   *  una clave que no dice nada y que ensucia el diff. */
+  bandera(valor) {
+    return valor === true ? true : undefined;
   }
 
   lista(datos, donde, tope) {
@@ -226,7 +232,15 @@ class Verificador {
         tipo:     TIPOS.includes(a.tipo) ? a.tipo : undefined,
         artista:  this.texto(a.artista, d + '.artista', { max: 120 }),
         registro: this.enlace(a.registro, d + '.registro'),
+        libre:    this.bandera(a.libre),
       };
+      // Las dos a la vez no significan nada: o se apunta uno o se entra y ya.
+      // Casi siempre es que se marcó «entrada libre» y después llegó el
+      // formulario, así que manda el formulario y se dice.
+      if (act.registro && act.libre) {
+        delete act.libre;
+        this.aviso(d, '«' + (act.titulo || 'sin título') + '» estaba marcada como entrada libre y tiene formulario: manda el formulario');
+      }
       if (act.dia === undefined) this.error(d + '.dia', 'hace falta el día (0 = jueves … 3 = domingo)');
       if (!act.tipo) this.error(d + '.tipo', 'tiene que ser uno de: ' + TIPOS.join(', '));
       if (act.inicio && act.fin && minutos(act.fin) <= minutos(act.inicio)) {
@@ -261,7 +275,45 @@ class Verificador {
       this.aviso('programa', 'queda publicado y sin ninguna actividad: el sitio va a enseñar la rejilla vacía. Si estás rehaciéndolo, marca «esto todavía es la rejilla de ejemplo».');
     }
 
-    return { actividades, esEjemplo };
+    const registro = this.registro(
+      bruto === datos ? undefined : datos.registro,
+      { esEjemplo, actividades },
+    );
+
+    // `podar` respeta `false` y las listas vacías: lo único que se cae aquí es
+    // un `registro` que no trae nada que guardar.
+    return podar({ actividades, esEjemplo, registro });
+  }
+
+  /**
+   * Las tres cosas del registro que no son de una actividad.
+   *
+   * Lo que sí es de cada actividad —su formulario— se valida arriba, con el
+   * resto de la fila. Aquí sólo cabe lo de la página entera.
+   */
+  registro(datos, { esEjemplo, actividades }) {
+    const r = podar({
+      abierto: this.bandera(datos && datos.abierto),
+      general: this.enlace(datos && datos.general, 'registro.general'),
+      nota:    this.texto(datos && datos.nota, 'registro.nota', { max: 400 }),
+    });
+
+    if (!r.abierto) return Object.keys(r).length ? r : undefined;
+
+    // Abierto sobre una rejilla escondida no abre nada: el sitio no puede
+    // enseñar los eventos de un programa que dijiste que todavía no lo es.
+    // No se bloquea —lo normal es marcar esto y publicar el programa a
+    // continuación— pero desde el panel no se ve, así que se dice.
+    if (esEjemplo) {
+      this.aviso('registro', 'está abierto pero el programa sigue marcado como rejilla de ejemplo: mientras eso siga así, /registro enseña «Próximamente». Publica el programa y el registro se abre solo.');
+    }
+
+    const conPuerta = actividades.filter(a => a.registro || a.libre).length;
+    if (!esEjemplo && !conPuerta) {
+      this.aviso('registro', 'está abierto y ninguna actividad tiene formulario ni está marcada como entrada libre: la página va a salir vacía.');
+    }
+
+    return r;
   }
 
   artistas(datos) {

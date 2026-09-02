@@ -108,6 +108,9 @@ button { cursor: pointer; }
 .barra .marca span { color: var(--amarillo); }
 .barra .estado { font-family: var(--mono); font-size: 0.7rem; opacity: 0.75; }
 .barra .empuje { margin-left: auto; }
+/* En escritorio el grupo no existe: sus botones son hijos de la barra como
+   antes. Sólo se vuelve caja en el teléfono, para poder mandarlo a otra fila. */
+.barra .secundarios { display: contents; }
 
 .pestanas {
   display: flex;
@@ -190,7 +193,7 @@ button { cursor: pointer; }
 /* ── Campos ─────────────────────────────────────────────────────────────── */
 
 input[type='text'], input[type='password'], input[type='url'],
-input[type='number'], input[type='time'], select, textarea {
+input[type='number'], input[type='time'], input[type='search'], select, textarea {
   width: 100%;
   border: 2px solid var(--tinta);
   background: var(--papel);
@@ -198,8 +201,38 @@ input[type='number'], input[type='time'], select, textarea {
   font-family: var(--mono);
   font-size: 0.8rem;
 }
+input[disabled] { background: var(--humo); opacity: 0.6; cursor: not-allowed; }
 textarea { resize: vertical; min-height: 3.5rem; }
-select { appearance: none; background-image: none; border-radius: 0; }
+
+/* El `appearance:none` deja el desplegable idéntico a un campo de texto, y en
+   una fila de actividad hay tres —Día, Sede y Tipo— entre seis cajas que se
+   escriben a mano: nadie sabe cuáles se despliegan hasta que las toca. Se
+   quita el chevron del sistema, sí, pero se dibuja uno propio: la caja tiene
+   que decir lo que hace. */
+select {
+  appearance: none;
+  border-radius: 0;
+  padding-right: 1.6rem;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--tinta) 50%),
+    linear-gradient(135deg, var(--tinta) 50%, transparent 50%);
+  background-position: calc(100% - 0.85rem) 55%, calc(100% - 0.55rem) 55%;
+  background-size: 0.3rem 0.3rem, 0.3rem 0.3rem;
+  background-repeat: no-repeat;
+}
+
+/* Una casilla con su rótulo al lado, con la caja del mismo alto que un campo
+   para que la fila no dé un escalón. */
+.sino {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.sino input { accent-color: var(--rojo); width: 1rem; height: 1rem; }
 
 .campo { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
 .campo > label {
@@ -224,6 +257,10 @@ select { appearance: none; background-image: none; border-radius: 0; }
   display: grid;
   grid-template-columns: 2.25rem 1fr;
 }
+.fila .columna { min-width: 0; }
+/* La suelta no se pliega ni se arrastra: es una caja de ajustes con forma de
+   fila, para que el ojo la lea como parte de la misma lista. */
+.fila--suelta { grid-template-columns: 1fr; }
 .fila.arrastrando { opacity: 0.35; }
 .fila.destino { border-color: var(--rojo); box-shadow: 0 -3px 0 var(--rojo); }
 .fila.mala { border-color: var(--rojo); }
@@ -242,6 +279,16 @@ select { appearance: none; background-image: none; border-radius: 0; }
 .fila .asa:active { cursor: grabbing; }
 .fila .asa .num { font-family: var(--mono); font-size: 0.65rem; opacity: 0.6; }
 .fila .asa .puntos { line-height: 0.6; font-size: 0.9rem; letter-spacing: 1px; }
+
+/* Plegada, el asa es lo que manda el alto de la fila: cuatro cosas apiladas
+   —flecha, puntos, número, flecha— son ochenta y cinco píxeles para enseñar un
+   renglón de veinte. Se aprieta hasta que el alto lo ponga el renglón, que es
+   lo que se viene a leer. Los puntos se van: el asa entera sigue siendo el
+   agarre, y ahí ya no hay sitio para un adorno. */
+.fila:not(.abierta) .asa { gap: 0; padding: 0; justify-content: center; }
+.fila:not(.abierta) .asa .puntos { display: none; }
+.fila:not(.abierta) .asa .num { font-size: 0.58rem; }
+.fila:not(.abierta) .asa .mover { padding: 0; font-size: 0.55rem; line-height: 0.85; }
 .fila .asa .mover {
   background: none; border: 0; color: var(--papel);
   font-size: 0.7rem; line-height: 1; padding: 0.1rem 0.2rem; opacity: 0.55;
@@ -251,6 +298,52 @@ select { appearance: none; background-image: none; border-radius: 0; }
 .fila .cuerpo { padding: 0.6rem 0.7rem; display: grid; gap: 0.5rem; }
 .fila .rejilla { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
 .fila .acciones { display: flex; gap: 0.4rem; justify-content: flex-end; }
+
+/* ── El renglón plegado ─────────────────────────────────────────────────── */
+
+.fila .resumen {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  background: none;
+  border: 0;
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  min-width: 0;
+}
+.fila.abierta .resumen { border-bottom: 1px solid var(--raya); }
+.fila .resumen:hover { background: var(--amarillo); }
+.fila .resumen-signo {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  line-height: 1;
+  width: 0.8rem;
+  flex: none;
+  opacity: 0.5;
+}
+.fila .resumen-texto {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.fila .resumen strong { font-size: 0.9rem; }
+.fila .resumen-nota {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  opacity: 0.55;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Buscar y desplegar ─────────────────────────────────────────────────── */
+
+.cabecera-mandos { display: flex; gap: 0.4rem; align-items: center; margin-left: auto; }
+.buscador { width: min(16rem, 44vw); }
+.cabecera-mandos [hidden] { display: none !important; }
 
 /* ── Imagen ─────────────────────────────────────────────────────────────── */
 
@@ -323,6 +416,93 @@ select { appearance: none; background-image: none; border-radius: 0; }
 .previa .leyenda { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.6rem; font-family: var(--mono); font-size: 0.62rem; }
 .previa .leyenda i { display: inline-block; width: 0.7rem; height: 0.7rem; border: 1px solid var(--tinta); margin-right: 0.25rem; vertical-align: -1px; }
 
+/* ── Registro ───────────────────────────────────────────────────────────── */
+/*
+ * Un renglón por actividad y todas a la vista. Aquí no se escribe una
+ * actividad —eso es la pestaña de Programa—: se repasa una columna, «¿a cuáles
+ * les falta el Tally?», y para eso lo que sirve es ver treinta de un golpe.
+ */
+
+.filtros { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+.filtros .filtro {
+  border: 2px solid var(--tinta);
+  background: var(--papel);
+  padding: 0.3rem 0.65rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.filtros .filtro .cuenta { opacity: 0.5; }
+.filtros .filtro.puesto { background: var(--tinta); color: var(--papel); }
+.filtros .filtro.puesto .cuenta { opacity: 0.7; }
+
+.renglones { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.dia-corte {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 0.9rem 0 0.15rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid var(--raya);
+}
+.dia-corte:first-child { margin-top: 0; }
+
+.renglon {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(9rem, 1fr) minmax(10rem, 1.2fr) auto 7.5rem;
+  gap: 0.6rem;
+  align-items: center;
+  background: var(--papel);
+  border: 2px solid var(--tinta);
+  /* El canto de color es el estado. Se lee de reojo bajando la lista, que es
+     como se repasa: lo rojo es lo que falta. */
+  border-left-width: 6px;
+  padding: 0.35rem 0.6rem;
+}
+.renglon--formulario { border-left-color: var(--tinta); }
+.renglon--libre { border-left-color: var(--amarillo); }
+.renglon--pendiente { border-left-color: var(--rojo); background: #fff8f8; }
+
+.renglon-cuando { font-size: 0.72rem; opacity: 0.75; }
+.renglon-que { display: grid; min-width: 0; }
+.renglon-que strong { font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.renglon-donde {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  opacity: 0.55;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.renglon-marca {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: right;
+  opacity: 0.6;
+}
+.renglon--pendiente .renglon-marca { color: var(--rojo); opacity: 1; }
+
+@media (max-width: 900px) {
+  .renglon {
+    grid-template-columns: 1fr auto;
+    gap: 0.3rem 0.6rem;
+    padding: 0.5rem 0.6rem;
+  }
+  .renglon-cuando { order: 1; }
+  .renglon-marca { order: 2; }
+  .renglon-que { order: 3; grid-column: 1 / -1; }
+  .renglon > input { order: 4; grid-column: 1 / -1; }
+  .renglon .sino { order: 5; grid-column: 1 / -1; }
+}
+
 /* ── Historial ──────────────────────────────────────────────────────────── */
 
 .panelillo {
@@ -339,5 +519,41 @@ select { appearance: none; background-image: none; border-radius: 0; }
 
 @media (max-width: 640px) {
   .fila .rejilla { grid-template-columns: 1fr; }
+  /* El ancho se lo pide la rejilla de arriba, y en un teléfono un `span 3`
+     dentro de una sola columna se sale de la pantalla. */
+  .fila .rejilla > .campo { grid-column: 1 / -1 !important; }
   .lienzo { padding: 0.75rem; }
+
+  /*
+   * La barra de arriba, en un teléfono, eran cinco botones apilados: ciento
+   * ochenta píxeles de herramientas antes de ver una sola actividad, en la
+   * pantalla donde menos sitio hay. Y de esos cinco, el que se usa a las once
+   * de la noche desde una sede es «Guardar», que vive abajo y siempre a la
+   * vista.
+   *
+   * Se quedan arriba los dos que se pulsan sin pensar —Recargar y Salir—; los
+   * otros tres se van a una fila propia que hace scroll de lado, como las
+   * pestañas. Ninguno desaparece: esconder un botón detrás de un menú en una
+   * herramienta que se usa cuatro días al año es esconderlo para siempre.
+   */
+  .barra { gap: 0.4rem 0.5rem; padding: 0.45rem 0.7rem; }
+  .barra .marca { font-size: 0.9rem; }
+  .barra .estado { width: 100%; order: 3; font-size: 0.62rem; }
+  .barra .empuje { margin-left: auto; }
+  .barra .boton { padding: 0.3rem 0.55rem; font-size: 0.65rem; }
+  .barra .secundarios {
+    order: 4;
+    width: 100%;
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding-bottom: 0.1rem;
+  }
+  .barra .secundarios .boton { white-space: nowrap; }
+
+  .cabecera-mandos { width: 100%; margin-left: 0; }
+  .buscador { width: 100%; }
+
+  .previa .carril { grid-template-columns: 5rem 1fr; }
+  .previa .horas { grid-template-columns: 5rem 1fr; }
 }

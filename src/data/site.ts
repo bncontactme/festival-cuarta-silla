@@ -138,12 +138,45 @@ export const programa = {
   ],
 };
 
+/**
+ * El texto de `/registro`.
+ *
+ * La `nota` de antes decía «La fecha y la hora se muestran como A determinar»:
+ * no era contenido, era la descripción del hueco, arrastrada del Wix con el
+ * resto. La página que la enseñaba tampoco lo era — una tarjeta con «Fecha: a
+ * determinar», «Hora: a determinar» y un botón apagado—, y desde el día que hay
+ * panel eso ya no hace falta: aquí se apunta uno **por actividad**, y las
+ * actividades están en el programa. Lo que se enseña ahora es la lista de
+ * verdad, y este objeto se queda sólo con el texto que la envuelve.
+ */
 export const registro = {
   titulo: 'Registro a eventos',
   estado: 'Próximamente',
-  nota: 'La fecha y la hora se muestran como A determinar',
   ciudad: 'Guadalajara',
-  acciones: { leerMas: 'Leer más', registro: 'Registro' },
+  /**
+   * Lo que se lee cuando todavía no se puede entrar a nada. Dos, porque son dos
+   * situaciones distintas y decir la de al lado se nota: con el programa sin
+   * publicar, lo que falta es el programa; con el programa ya puesto, lo único
+   * que falta es abrir la puerta.
+   */
+  espera: {
+    sinPrograma:
+      'El registro abre junto con el programa. Cada actividad tiene el suyo: ' +
+      'cuando la programación esté cerrada, aquí sale la lista con la puerta de cada una.',
+    conPrograma:
+      'El programa ya está publicado; el registro todavía no. Cuando abra, aquí sale la ' +
+      'lista de actividades con la puerta de cada una: unas con formulario, otras de entrada libre.',
+  },
+  /** Lo que se lee cuando está abierto pero una actividad concreta no pide
+   *  registro. No es un hueco: es una respuesta. */
+  libre: 'Entrada libre',
+  libreNota: 'Se entra sin apuntarse, hasta llenar el aforo.',
+  acciones: {
+    registro: 'Registrarme',
+    general: 'Registro general',
+    programa: 'Ver el programa',
+    mapa: 'Ubicación',
+  },
 };
 
 /* `Sede` vive ahora en `tipos.ts` y se re-exporta arriba. */
@@ -265,6 +298,66 @@ export const ganttEsEjemplo = contenido.programa.esEjemplo !== false;
 export const programaPublicado = !ganttEsEjemplo;
 
 export const actividades: ActividadGantt[] = contenido.programa.actividades;
+
+/**
+ * Lo que se lee al lado del rótulo «Programa»: en la marquesina de `/programa`,
+ * en su cabecera de móvil y en el índice de la portada del móvil.
+ *
+ * Era `programa.estado`, escrito a mano y siempre «(Próximamente)». Eso estaba
+ * bien mientras no hubiera programa; el día que el festival desmarcara la
+ * casilla, la rejilla saldría publicada con tres carteles alrededor diciendo
+ * que todavía no hay. Ahora lo dice el dato.
+ */
+export const estadoPrograma = programaPublicado
+  ? `${actividades.length} ${actividades.length === 1 ? 'actividad' : 'actividades'} · ${programa.dias.length} días`
+  : programa.estado;
+
+/** ── El registro a eventos ────────────────────────────────────────────────
+ *
+ * Aquí uno se apunta **por actividad**: cada `ActividadGantt` trae su propio
+ * `registro` —su Tally— y la ficha de la rejilla abre ése. `/registro` es la
+ * otra puerta a la misma cosa: las mismas actividades, ordenadas por cuándo se
+ * entra en vez de por dónde caen en la rejilla.
+ *
+ * No hay una lista aparte de «eventos con registro» y eso es lo que importa del
+ * diseño: dos listas de lo mismo se separan el primer día que alguien cambia
+ * una hora en una sola de las dos.
+ */
+export const registroDatos = contenido.programa.registro ?? {};
+
+/**
+ * Si `/registro` enseña la lista o el cartel de espera.
+ *
+ * Son dos condiciones y las dos hacen falta:
+ *
+ *   · El festival marcó el registro como abierto, que se declara y no se
+ *     deduce — tener formularios pegados no es tenerlo abierto.
+ *   · El programa está publicado. Esto no es un detalle: enseñar aquí las
+ *     actividades de una rejilla que /programa esconde sería publicarla por la
+ *     puerta de atrás. La misma decisión no puede dar dos respuestas.
+ */
+export const registroAbierto = programaPublicado && registroDatos.abierto === true;
+
+/** Cómo se entra a una actividad. `pendiente` no sale en el sitio: es lo que
+ *  todavía no nos han pasado, y una actividad sin puerta no se anuncia con una
+ *  puerta vacía. */
+export const puertaDe = (a: ActividadGantt): 'formulario' | 'libre' | 'pendiente' =>
+  a.registro ? 'formulario' : a.libre ? 'libre' : 'pendiente';
+
+/** Las actividades a las que hoy se puede entrar, por día y por hora. */
+export const actividadesConRegistro = actividades
+  .filter((a) => puertaDe(a) !== 'pendiente')
+  .sort((a, b) => a.dia - b.dia || a.inicio.localeCompare(b.inicio));
+
+/** Agrupadas por día, saltándose los días en los que no hay nada: un día vacío
+ *  con su titular y nada debajo se lee como un error del sitio. */
+export const registroPorDia = programa.dias
+  .map((dia, i) => ({
+    ...dia,
+    indice: i,
+    actividades: actividadesConRegistro.filter((a) => a.dia === i),
+  }))
+  .filter((d) => d.actividades.length > 0);
 
 /** ── Red de seguridad ─────────────────────────────────────────────────────
  *

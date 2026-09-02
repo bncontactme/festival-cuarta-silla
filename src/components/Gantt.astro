@@ -381,6 +381,7 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
                   data-direccion={a.sedeInfo?.direccion ?? ''}
                   data-mapa={a.sedeInfo ? enlaceMapa(a.sedeInfo) : ''}
                   data-registro={a.registro ?? ''}
+                  data-libre={a.libre ? 'si' : ''}
                   data-color={coloresGantt[a.tipo].fondo}
                 >
                   <span class="gantt-barra-titulo">{a.titulo}</span>
@@ -513,7 +514,11 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
         </a>
       </div>
 
-      <p class="gantt-ficha-sin" data-f-sin hidden>Sin registro previo</p>
+      {/* Sin formulario hay dos casos distintos y antes se decían igual: que
+          la actividad no pida registro —que es una respuesta— y que todavía no
+          nos hayan pasado el Tally —que es un hueco—. El texto lo pone el
+          script según `data-libre`. */}
+      <p class="gantt-ficha-sin" data-f-sin hidden></p>
     </div>
   )
 }
@@ -693,6 +698,12 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
     text-overflow: ellipsis;
     text-transform: uppercase;
     white-space: nowrap;
+    /* Anton pone la tilde de las mayúsculas por encima de la caja de línea, y
+       con `overflow: hidden` —que hace falta para el «…» de lo que no cabe—
+       la Ó de INAUGURACIÓN salía decapitada. Se le da aire a la caja de
+       recorte y se le quita por fuera: la tilde entra y nada se mueve. */
+    padding-block: 0.18em;
+    margin-block: -0.18em;
   }
   .gantt-etiqueta-nota {
     margin-top: 0.2rem;
@@ -757,6 +768,12 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
     text-overflow: ellipsis;
     text-transform: uppercase;
     white-space: nowrap;
+    /* Anton pone la tilde de las mayúsculas por encima de la caja de línea, y
+       con `overflow: hidden` —que hace falta para el «…» de lo que no cabe—
+       la Ó de INAUGURACIÓN salía decapitada. Se le da aire a la caja de
+       recorte y se le quita por fuera: la tilde entra y nada se mueve. */
+    padding-block: 0.18em;
+    margin-block: -0.18em;
   }
   .gantt-barra-hora {
     display: block;
@@ -1582,6 +1599,9 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
         } else {
           registro.removeAttribute('href');
           registro.hidden = true;
+          sin.textContent = d.libre
+            ? 'Entrada libre · sin registro'
+            : 'El registro de esta actividad todavía no está abierto';
           sin.hidden = false;
         }
       }

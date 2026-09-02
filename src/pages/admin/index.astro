@@ -45,8 +45,9 @@ const config = {
         <p class="rotulo">Festival de Arte Conceptual</p>
         <h1>Panel</h1>
         <p>
-          Desde aquí se cargan el programa, las sedes, lxs artistas, el archivo
-          y las marcas. Lo que se guarda aquí es lo que sale en el sitio.
+          Desde aquí se cargan el programa, el registro a eventos, las sedes,
+          lxs artistas, el archivo y las marcas. Lo que se guarda aquí es lo que
+          sale en el sitio.
         </p>
 
         <label>
@@ -79,10 +80,16 @@ const config = {
         <span class="marca">La Cuarta Silla · <span>Panel</span></span>
         <span class="estado" id="estado-version">…</span>
         <span class="empuje"></span>
-        <button type="button" class="boton" id="historial-boton">Historial</button>
+        {/* Los dos que se pulsan sin pensar se quedan siempre a mano; los
+            otros tres se agrupan para poder mandarlos a su propia fila en un
+            teléfono, donde cinco botones apilados eran media pantalla de
+            herramientas antes de ver una actividad. */}
         <button type="button" class="boton" id="recargar-boton" title="Volver a bajar lo que hay guardado">Recargar</button>
-        <button type="button" class="boton" id="publicar-boton" title="Reconstruir el sitio ahora">Publicar ahora</button>
-        <a class="boton" href={conBase('/')} target="_blank" rel="noopener">Ver el sitio ↗</a>
+        <span class="secundarios">
+          <button type="button" class="boton" id="historial-boton">Historial</button>
+          <button type="button" class="boton" id="publicar-boton" title="Reconstruir el sitio ahora">Publicar ahora</button>
+          <a class="boton" href={conBase('/')} target="_blank" rel="noopener">Ver el sitio ↗</a>
+        </span>
         <button type="button" class="boton" id="salir-boton">Salir</button>
       </header>
 

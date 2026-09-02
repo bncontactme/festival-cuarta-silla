@@ -12,6 +12,9 @@ import {
   accionPrincipal,
   registroEventos,
   programaPublicado,
+  estadoPrograma,
+  registroAbierto,
+  actividadesConRegistro,
 } from '../data/site';
 ---
 
@@ -28,7 +31,7 @@ import {
     <Pantalla
       titulo={programa.titulo}
       indice="02"
-      nota={programa.estado}
+      nota={estadoPrograma}
       fondo="amarillo"
     >
       {
@@ -91,7 +94,7 @@ import {
   <Encabezado indice={`Programa ${festival.anio}`} titulo={programa.titulo} />
 
   <Marquee
-    items={[programa.estado, festival.fechas, programa.estado, festival.ciudad]}
+    items={[estadoPrograma, festival.fechas, estadoPrograma, festival.ciudad]}
     duracion="34s"
     class="meta border-b-2 border-tinta bg-rojo py-4 text-amarillo"
   />
@@ -251,7 +254,11 @@ import {
           ★ {accionPrincipal.label} ★
         </a>
         <a href={conBase(registroEventos.href)} class="boton boton--papel">
-          {registroEventos.label}
+          {
+            registroAbierto
+              ? `${registroEventos.label} · ${actividadesConRegistro.length}`
+              : registroEventos.label
+          }
         </a>
       </div>
     </div>
