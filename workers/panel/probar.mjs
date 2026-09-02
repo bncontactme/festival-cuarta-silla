@@ -91,8 +91,12 @@ ok('coordenada buena pasa', r.errores.length === 0 && r.datos[0].coord.length ==
 r = validar('programa', { actividades: [base({ fin: '09:00' })] }, { sedes: SEDES });
 ok('fin antes que inicio se rechaza', r.errores.some((e) => e.includes('termina')), JSON.stringify(r.errores));
 
-r = validar('marcas', { patrocinadores: [{ nombre: 'X', logo: '/patrocinadores/x.png' }], colaboradores: [] }, {});
+r = validar('marcas', { patrocinadores: [{ nombre: 'X', logo: '/patrocinadores/x.png' }] }, {});
 ok('logo del repo pasa', r.errores.length === 0 && r.datos.patrocinadores[0].logo === '/patrocinadores/x.png');
+
+// Lo que llegue con la clave vieja se cae por el camino: una lista y ya.
+r = validar('marcas', { patrocinadores: [{ nombre: 'X' }], colaboradores: [{ nombre: 'Y' }] }, {});
+ok('colaboradores ya no se guarda', r.errores.length === 0 && !('colaboradores' in r.datos));
 
 console.log(fallos ? `\n${fallos} fallo(s)\n` : '\nTodo bien\n');
 process.exit(fallos ? 1 : 0);

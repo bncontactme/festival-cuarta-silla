@@ -343,21 +343,22 @@ class Verificador {
     return ediciones;
   }
 
+  /* Una sola lista. Hubo un `colaboradores` al lado que se turnaba la cinta de
+     la portada con éste; se fue del sitio y se va de aquí. Lo que quede escrito
+     en KV con esa clave se ignora y desaparece en el primer guardado. */
   marcas(datos) {
-    const una = (lista, quienes) =>
-      this.lista(lista || [], quienes, TOPES.marcas).map((m, i) => {
-        const d = quienes + '[' + i + ']';
-        return podar({
-          nombre: this.texto(m.nombre, d + '.nombre', { max: 80, requerido: true }),
-          logo:   this.imagen(m.logo, d + '.logo'),
-          url:    this.enlace(m.url, d + '.url'),
-        });
+    const lista = this.lista(
+      (datos && datos.patrocinadores) || [], 'patrocinadores', TOPES.marcas,
+    ).map((m, i) => {
+      const d = 'patrocinadores[' + i + ']';
+      return podar({
+        nombre: this.texto(m.nombre, d + '.nombre', { max: 80, requerido: true }),
+        logo:   this.imagen(m.logo, d + '.logo'),
+        url:    this.enlace(m.url, d + '.url'),
       });
+    });
 
-    return {
-      patrocinadores: una(datos && datos.patrocinadores, 'patrocinadores'),
-      colaboradores:  una(datos && datos.colaboradores, 'colaboradores'),
-    };
+    return { patrocinadores: lista };
   }
 }
 

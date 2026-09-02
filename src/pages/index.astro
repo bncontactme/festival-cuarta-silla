@@ -15,7 +15,6 @@ import {
   manifiesto,
   sedes,
   patrocinadores,
-  colaboradores,
   programa,
   programaPublicado,
 } from '../data/site';
@@ -514,86 +513,84 @@ const sillasSedes = [
     </div>
   </section>
 
-  <!-- ══ PATROCINADORES → COLABORADORES ═══════════════════════════════════
-       La cinta original, con el mismo collage de sillas que usa Sedes detrás
-       de las fichas. -->
-  {
-    (() => {
-      const PASO = 240;
-      const VELOCIDAD = 52;
-      const grupos = [
-        { clave: 'patrocinadores', indice: '04', datos: patrocinadores, turno: 18000 },
-        { clave: 'colaboradores', indice: '05', datos: colaboradores, turno: 10000 },
-      ];
+  <!-- ══ PATROCINADORES ══════════════════════════════════════════════════
+       Una cinta y una sola: aquí había un relevo entre Patrocinadores y
+       Colaboradores —dos bloques turnándose el mismo hueco cada quince
+       segundos— y la distinción no la usaba nadie. El festival metía todo en
+       Patrocinadores, así que el segundo turno era un bloque vacío rotando en
+       silencio; y el día que se quedó del todo sin marcas tumbó el build. Una
+       lista, un rótulo, sin turnos.
 
-      return (
-        <section
-          class="cinta-marcas relative overflow-hidden border-b-2 border-tinta"
-          data-cinta
-          data-dormida
-          data-grupo="patrocinadores"
-        >
-          <div class="cinta-sillas absolute inset-0" aria-hidden="true">
-            {
-              sillasSedes.map((silla) => (
+       El collage de sillas del fondo es el mismo que usa Sedes detrás de las
+       fichas. -->
+  {
+    patrocinadores.lista.length > 0 &&
+      (() => {
+        /* Cuánto mide un mosaico con su margen, y a qué velocidad corre la
+           tira (píxeles por segundo). De aquí salen las dos cuentas de abajo. */
+        const PASO = 240;
+        const VELOCIDAD = 52;
+
+        /* La lista se repite hasta cubrir de sobra el ancho de una pantalla:
+           con tres marcas, la tira tendría huecos entre vuelta y vuelta. El
+           `max(1, …)` es el suelo, y `length > 0` allá arriba es lo que evita
+           dividir entre cero —que daba `Infinity` y reventaba el build al
+           construir el arreglo. */
+        const repes = Math.max(
+          1,
+          Math.ceil(1600 / PASO / patrocinadores.lista.length),
+        );
+        const unidad = Array.from(
+          { length: repes },
+          () => patrocinadores.lista,
+        ).flat();
+        const duracion = ((unidad.length * PASO) / VELOCIDAD).toFixed(1);
+
+        return (
+          <section
+            class="cinta-marcas relative overflow-hidden border-b-2 border-tinta"
+            data-cinta
+            data-dormida
+          >
+            <div class="cinta-sillas absolute inset-0" aria-hidden="true">
+              {sillasSedes.map((silla) => (
                 <Silla
                   variante="roja"
                   class="silla-sede"
                   style={`--x:${silla.x}%;--y:${silla.y}%;--ancho:${silla.ancho}vw;--giro:${silla.giro}deg;--opa:${silla.opa};`}
                 />
-              ))
-            }
-          </div>
+              ))}
+            </div>
 
-          <div class="cinta-cabecera relative px-4 pt-12 pb-9 sm:px-6 lg:px-10 lg:pt-16">
-            <p class="meta cinta-acento mb-7 flex items-center gap-4">
-              <span class="cinta-filete inline-block h-[2px] w-12" />
-              <span data-rotulo>04 / {patrocinadores.titulo}</span>
-            </p>
-            <h2
-              class="display text-[9vw] leading-[0.9] lg:text-[4.5vw]"
-              data-titulo
-            >
-              {patrocinadores.titulo}
-            </h2>
-          </div>
+            <div class="cinta-cabecera relative px-4 pt-12 pb-9 sm:px-6 lg:px-10 lg:pt-16">
+              <p class="meta cinta-acento mb-7 flex items-center gap-4">
+                <span class="cinta-filete inline-block h-[2px] w-12" />
+                <span>04 / {patrocinadores.titulo}</span>
+              </p>
+              <h2 class="display text-[9vw] leading-[0.9] lg:text-[4.5vw]">
+                {patrocinadores.titulo}
+              </h2>
+            </div>
 
-          <div class="cinta-pista relative pb-16 lg:pb-20">
-            {grupos.map(({ clave, indice, datos, turno }, n) => {
-              const repes = Math.max(1, Math.ceil(1600 / PASO / datos.lista.length));
-              const unidad = Array.from({ length: repes }, () => datos.lista).flat();
-              const duracion = ((unidad.length * PASO) / VELOCIDAD).toFixed(1);
-              return (
-                <div
-                  class="grupo-marcas"
-                  data-oculto={n === 0 ? undefined : ''}
-                  data-grupo-nombre={clave}
-                  data-indice={indice}
-                  data-titulo-grupo={datos.titulo}
-                  data-espera={turno}
-                  aria-hidden={n === 0 ? 'false' : 'true'}
-                >
-                  <p class="meta rotulo-grupo px-4 pb-4 sm:px-6 lg:px-10">
-                    {indice} / {datos.titulo}
-                  </p>
-                  <div class="cinta-ventana overflow-hidden" role="marquee">
-                    <div class="marquee" style={`--duracion: ${duracion}s`}>
-                      {[0, 1].map((copia) => (
-                        <div class="flex shrink-0" aria-hidden={copia === 1}>
-                          {unidad.map((marca) => (
-                            <Mosaico marca={marca} class="mr-4" />
-                          ))}
-                        </div>
+            <div class="cinta-pista relative pb-16 lg:pb-20">
+              <div class="cinta-ventana overflow-hidden" role="marquee">
+                {/* Dos copias de la misma tira, la segunda escondida de los
+                    lectores de pantalla: la animación corre la primera hasta
+                    su ancho y la segunda entra detrás sin costura. */}
+                <div class="marquee" style={`--duracion: ${duracion}s`}>
+                  {[0, 1].map((copia) => (
+                    <div class="flex shrink-0" aria-hidden={copia === 1}>
+                      {unidad.map((marca) => (
+                        <Mosaico marca={marca} class="mr-4" />
                       ))}
                     </div>
-                  </div>
+                  ))}
                 </div>
-              );
-            })}
-          </div>
-        </section>
-      );
-    })()
+              </div>
+            </div>
+          </section>
+        );
+      })()
   }
 
   <!-- ══ CIERRE ═════════════════════════════════════════════════════════ -->
@@ -659,87 +656,24 @@ const sillasSedes = [
   </section>
 
   <script>
+    /* Lo único que le queda de guion a la cinta: pausarla cuando no está en
+       cuadro y dejarla quieta si el sistema pide menos movimiento. La rotación
+       entre grupos se fue con Colaboradores. */
     const cinta = document.querySelector('[data-cinta]');
     if (cinta) {
-      const grupos = [...cinta.querySelectorAll('[data-grupo-nombre]')] as HTMLElement[];
-      const cabecera = cinta.querySelector('.cinta-cabecera');
-      const titulo = cinta.querySelector('[data-titulo]');
-      const rotulo = cinta.querySelector('[data-rotulo]');
-      const SALIDA = 420;
-      let actual = 0;
-      let mudando = false;
-      let reloj: ReturnType<typeof setTimeout> | undefined;
-
-      const armarTurno = (grupo: HTMLElement) => {
-        clearTimeout(reloj);
-        reloj = setTimeout(cambiar, Number(grupo.dataset.espera ?? 12000));
-      };
-
-      function cambiar() {
-        if (mudando) return;
-        mudando = true;
-        clearTimeout(reloj);
-
-        const saliente = grupos[actual];
-        actual = (actual + 1) % grupos.length;
-        const entrante = grupos[actual];
-
-        cinta.setAttribute('data-grupo', entrante.dataset.grupoNombre ?? '');
-        saliente.dataset.estado = 'saliendo';
-        if (cabecera instanceof HTMLElement) cabecera.dataset.estado = 'saliendo';
-
-        setTimeout(() => {
-          saliente.dataset.oculto = '';
-          saliente.setAttribute('aria-hidden', 'true');
-          delete saliente.dataset.estado;
-
-          const nombre = entrante.dataset.tituloGrupo ?? '';
-          if (titulo) titulo.textContent = nombre;
-          if (rotulo) rotulo.textContent = `${entrante.dataset.indice} / ${nombre}`;
-          if (cabecera instanceof HTMLElement) delete cabecera.dataset.estado;
-
-          delete entrante.dataset.oculto;
-          entrante.setAttribute('aria-hidden', 'false');
-          entrante.dataset.estado = 'entrando';
-          setTimeout(() => delete entrante.dataset.estado, 800);
-          armarTurno(entrante);
-          mudando = false;
-        }, SALIDA);
-      }
-
-      const dormir = () => {
-        clearTimeout(reloj);
-        mudando = false;
-        actual = 0;
-        grupos.forEach((grupo, i) => {
-          delete grupo.dataset.estado;
-          grupo.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
-          if (i === 0) delete grupo.dataset.oculto;
-          else grupo.dataset.oculto = '';
-        });
-        cinta.setAttribute('data-grupo', grupos[0].dataset.grupoNombre ?? '');
-        const nombre = grupos[0].dataset.tituloGrupo ?? '';
-        if (titulo) titulo.textContent = nombre;
-        if (rotulo) rotulo.textContent = `${grupos[0].dataset.indice} / ${nombre}`;
-        cinta.setAttribute('data-dormida', '');
-      };
-
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        /* Quieta se lee arrastrando: el CSS le devuelve el scroll a la tira y
+           esconde la copia de repuesto, que sin animación sería la lista
+           escrita dos veces. */
         cinta.setAttribute('data-quieta', 'si');
         cinta.removeAttribute('data-dormida');
-        grupos.forEach((grupo) => {
-          delete grupo.dataset.oculto;
-          grupo.setAttribute('aria-hidden', 'false');
-        });
       } else {
+        /* Fuera de cuadro la animación se pausa: nace dormida —el atributo
+           viene puesto en el HTML— y despierta al asomarse. */
         const ojo = new IntersectionObserver(
           ([entrada]) => {
-            if (entrada.isIntersecting) {
-              cinta.removeAttribute('data-dormida');
-              armarTurno(grupos[actual]);
-            } else {
-              dormir();
-            }
+            if (entrada.isIntersecting) cinta.removeAttribute('data-dormida');
+            else cinta.setAttribute('data-dormida', '');
           },
           { threshold: 0 },
         );

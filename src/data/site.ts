@@ -209,6 +209,10 @@ export const sedes = {
 
 /** Quién pone. **Se edita en `/admin`.**
  *
+ *  Una sola lista. Hubo un segundo grupo —Colaboradores— que se turnaba la
+ *  cinta de la portada con éste, pero el festival metía todo aquí y la
+ *  distinción no la usaba nadie.
+ *
  *  Los logos que ya estaban salen del sitio viejo (Wix), reescalados a 600 px
  *  de lado y servidos desde `public/`; los que suba el festival van a
  *  Cloudinary. `imagen()` trata igual a los dos.
@@ -218,11 +222,6 @@ export const sedes = {
 export const patrocinadores = {
   titulo: 'Patrocinadores',
   lista: contenido.marcas.patrocinadores,
-};
-
-export const colaboradores = {
-  titulo: 'Colaboradores',
-  lista: contenido.marcas.colaboradores,
 };
 
 export const privacidad = {

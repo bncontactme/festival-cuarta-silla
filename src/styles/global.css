@@ -1079,20 +1079,13 @@
 }
 
 /* — Cinta de marcas ————————————————————————————————————————————————
-   Conserva el relevo original, pero evita el golpe amarillo → negro. La cara
-   de Colaboradores pasa a papel y el rojo lleva el cambio de energía. */
+   Una banda amarilla más, como Sedes: aquí hubo un relevo entre Patrocinadores
+   y Colaboradores que se turnaban el hueco cambiando de color, y de eso sólo
+   quedaban ya las transiciones —los dos grupos habían acabado pintados igual—.
+   Sin turnos, la cinta no cambia de cara y no necesita animar el cambio. */
 .cinta-marcas {
   background-color: var(--color-amarillo);
   color: var(--color-tinta);
-  transition:
-    background-color 0.75s var(--ease-salida),
-    color 0.75s var(--ease-salida);
-}
-
-.cinta-marcas[data-grupo='colaboradores'] {
-  background-color: var(--color-amarillo);
-  color: var(--color-tinta);
-  --anillo: var(--color-tinta);
 }
 
 .cinta-acento {
@@ -1102,31 +1095,12 @@
   background-color: var(--color-rojo);
 }
 
-.cinta-marcas [data-titulo] {
-  color: var(--color-tinta);
-  transition: color 0.75s var(--ease-salida);
-}
-.cinta-marcas[data-grupo='colaboradores'] [data-titulo] {
-  color: var(--color-tinta);
-}
-
 /* El collage es el de Sedes, ajustado al alto menor de la cinta. Las fichas
    blancas lo recortan y el encabezado queda por encima. */
 .cinta-marcas .silla-sede {
   width: clamp(6rem, var(--ancho), 12rem);
 }
 
-.cinta-pista {
-  display: grid;
-}
-.cinta-pista > .grupo-marcas {
-  grid-area: 1 / 1;
-}
-.grupo-marcas[data-oculto] {
-  visibility: hidden;
-  opacity: 0;
-}
-.grupo-marcas[data-oculto] .marquee,
 .cinta-marcas[data-dormida] .marquee {
   animation-play-state: paused;
 }
@@ -1137,48 +1111,7 @@
   width: 14rem;
   box-shadow: 6px 6px 0 var(--color-rojo);
 }
-.grupo-marcas[data-estado='saliendo'] {
-  animation: marcas-salen 0.42s var(--ease-cortina) forwards;
-}
-.grupo-marcas[data-estado='entrando'] {
-  animation: marcas-entran 0.8s var(--ease-salida) both;
-}
-@keyframes marcas-salen {
-  to {
-    opacity: 0;
-    translate: 0 -14%;
-  }
-}
-@keyframes marcas-entran {
-  from {
-    opacity: 0;
-    translate: 0 16%;
-  }
-}
-
-.cinta-cabecera {
-  transition:
-    opacity 0.35s var(--ease-salida),
-    translate 0.35s var(--ease-salida);
-}
-.cinta-cabecera[data-estado='saliendo'] {
-  opacity: 0;
-  translate: 0 -0.6rem;
-}
-
-.rotulo-grupo {
-  display: none;
-  color: var(--color-tinta);
-}
-.cinta-marcas[data-quieta] .rotulo-grupo {
-  display: block;
-}
-.cinta-marcas[data-quieta] .cinta-pista {
-  display: block;
-}
-.cinta-marcas[data-quieta] .grupo-marcas + .grupo-marcas {
-  margin-top: 3rem;
-}
+/* Movimiento reducido: la tira deja de correr sola y se lee arrastrando. */
 .cinta-marcas[data-quieta] .marquee {
   width: auto;
 }

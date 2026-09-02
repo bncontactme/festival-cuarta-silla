@@ -69,7 +69,7 @@ function reciennacido(datos, copia) {
   if (!copia) return false;
   const cuenta = (d) =>
     d.sedes.length + d.programa.actividades.length + d.artistas.length +
-    d.archivo.length + d.marcas.patrocinadores.length + d.marcas.colaboradores.length;
+    d.archivo.length + d.marcas.patrocinadores.length;
   return cuenta(datos) < cuenta(copia);
 }
 
@@ -123,7 +123,7 @@ const cuenta = [
   `${datos.programa.actividades.length} actividades`,
   `${datos.artistas.length} artistas`,
   `${datos.archivo.length} ediciones`,
-  `${datos.marcas.patrocinadores.length + datos.marcas.colaboradores.length} marcas`,
+  `${datos.marcas.patrocinadores.length} marcas`,
 ].join(' · ');
 
 log('✓', `versión ${datos.version} — ${cuenta}`);

@@ -217,13 +217,9 @@ export const TABLAS: Record<string, Tabla> = {
   },
   patrocinadores: {
     clave: 'patrocinadores', titulo: 'Patrocinadores', coleccion: 'marcas', esquema: marcas,
+    nota: 'Una sola lista: el grupo «Colaboradores» que se turnaba la cinta de la portada ya no existe.',
     leer: (e) => e.marcas.patrocinadores,
     escribir: (e, l) => { e.marcas.patrocinadores = l; },
-  },
-  colaboradores: {
-    clave: 'colaboradores', titulo: 'Colaboradores', coleccion: 'marcas', esquema: marcas,
-    leer: (e) => e.marcas.colaboradores,
-    escribir: (e, l) => { e.marcas.colaboradores = l; },
   },
 };
 
@@ -270,5 +266,5 @@ export const PESTANAS: Pestana[] = [
   { clave: 'sedes', titulo: 'Sedes', tablas: ['sedes'] },
   { clave: 'artistas', titulo: 'Artistas', tablas: ['artistas'] },
   { clave: 'archivo', titulo: 'Galería', tablas: ['archivo'] },
-  { clave: 'marcas', titulo: 'Marcas', tablas: ['patrocinadores', 'colaboradores'] },
+  { clave: 'marcas', titulo: 'Marcas', tablas: ['patrocinadores'] },
 ];

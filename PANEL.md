@@ -95,7 +95,7 @@ convierta en un editor de sitio web mal hecho.
 | **Registro** | *(no existía)* | el mismo programa por la otra puerta: el formulario de cada actividad |
 | **Artistas** | `artistas.ts › lista` | nombre, disciplina, foto, instagram, sede |
 | **Galería** | `archivo.ts › lista` | ediciones anteriores y sus fotos con pie |
-| **Marcas** | `site.ts › patrocinadores` + `colaboradores` | nombre, logo, enlace |
+| **Marcas** | `site.ts › patrocinadores` | nombre, logo, enlace |
 
 **NO se mueve** — esto es el sitio, no contenido:
 
@@ -140,7 +140,7 @@ cs:col:sedes           Sede[]
 cs:col:programa        { actividades: ActividadGantt[], esEjemplo, registro }
 cs:col:artistas        Artista[]
 cs:col:archivo         Edicion[]
-cs:col:marcas          { patrocinadores: Marca[], colaboradores: Marca[] }
+cs:col:marcas          { patrocinadores: Marca[] }
 
 cs:meta                { version, actualizado, ultimoDeploy }
 cs:hist:<version>      instantánea completa (se conservan las últimas 20)
@@ -274,7 +274,7 @@ Carpetas en Cloudinary, dentro de la cuenta que ya existe:
 ```
 cuartasilla/artistas/<slug>          retratos, 4:5
 cuartasilla/archivo/<anio>/          las ediciones anteriores, 4:3
-cuartasilla/marcas/                  logos de patrocinadores y colaboradores
+cuartasilla/marcas/                  logos de patrocinadores
 cuartasilla/sedes/                   por si algún día las sedes llevan foto
 ```
 

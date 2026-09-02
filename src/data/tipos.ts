@@ -133,8 +133,8 @@ export type Edicion = {
   fotos: Foto[];
 };
 
-/** Patrocinadores y colaboradores. Sin `logo` se pinta el nombre en display:
- *  prefiero un hueco honesto a inventar un archivo que no nos dieron. */
+/** Quién pone. Sin `logo` se pinta el nombre en display: prefiero un hueco
+ *  honesto a inventar un archivo que no nos dieron. */
 export type Marca = { nombre: string; logo?: string; url?: string };
 
 /** Lo que devuelve `GET /contenido` del Worker y lo que hay en
@@ -159,5 +159,8 @@ export type Contenido = {
   };
   artistas: Artista[];
   archivo: Edicion[];
-  marcas: { patrocinadores: Marca[]; colaboradores: Marca[] };
+  /** Una sola lista. El Worker todavía guarda un `colaboradores` al lado
+   *  —vacío, y ahí se queda hasta que toque limpiar KV—: el sitio ya no lo
+   *  lee y el panel ya no lo enseña. */
+  marcas: { patrocinadores: Marca[] };
 };

@@ -21,7 +21,7 @@ export const COLECCIONES = {
   programa: { clave: 'cs:col:programa', vacio: { actividades: [] } },
   artistas: { clave: 'cs:col:artistas', vacio: [] },
   archivo:  { clave: 'cs:col:archivo',  vacio: [] },
-  marcas:   { clave: 'cs:col:marcas',   vacio: { patrocinadores: [], colaboradores: [] } },
+  marcas:   { clave: 'cs:col:marcas',   vacio: { patrocinadores: [] } },
 };
 
 export const NOMBRES = Object.keys(COLECCIONES);
@@ -116,8 +116,7 @@ export async function listarHistorial(env) {
           programa:  ((snap.programa || {}).actividades || []).length,
           artistas:  (snap.artistas || []).length,
           archivo:   (snap.archivo || []).length,
-          marcas:    ((snap.marcas || {}).patrocinadores || []).length +
-                     ((snap.marcas || {}).colaboradores || []).length,
+          marcas:    ((snap.marcas || {}).patrocinadores || []).length,
         },
       };
     }),
