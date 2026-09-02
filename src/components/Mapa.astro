@@ -679,8 +679,13 @@ const conEstrella = lista.filter((s) => s.punto);
     gap: 1rem;
   }
   /* Sin esto, una dirección larga —López Cotilla 1360, con colonia y código
-     postal— empuja el botón a una línea propia y el pie crece de golpe. */
-  .mapa-pie-ficha > div {
+     postal— empuja el botón a una línea propia y el pie crece de golpe.
+
+     `:first-child` y no `> div` a secas: la regla cogía también la caja de los
+     botones y le daba `flex: 1`, que además pisa el `shrink-0` que trae puesto.
+     Los dos hijos crecían por igual, así que los botones se plantaban a mitad
+     de camino con un palmo de amarillo a su derecha en vez de ir al canto. */
+  .mapa-pie-ficha > div:first-child {
     flex: 1;
     min-width: 0;
   }

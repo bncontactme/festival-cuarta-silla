@@ -7,7 +7,7 @@
  * de seguir —y de arreglar a las once de la noche— que cualquier otra cosa.
  */
 import type { Campo } from './esquema';
-import { TIPOS_ACTIVIDAD } from './esquema';
+import { TIPOS_ACTIVIDAD, SEDE_TODAS } from './esquema';
 import { el } from './dom';
 import { subirImagen, revisarArchivo } from './api';
 
@@ -92,9 +92,17 @@ function control(campo: Campo, fila: any, ctx: Ctx): HTMLElement {
       const nombres = ctx.sedes();
       const actual = fila[campo.clave] ?? '';
       const opciones = nombres.map((n) => ({ valor: n, texto: n }));
+
+      // Los recorridos guiados pasan por todas, y eso no es una sede: no tiene
+      // dirección, ni coordenada, ni tarjeta en /sedes. Va arriba del todo
+      // porque es la excepción, no una más de la lista.
+      if (campo.todas) {
+        opciones.unshift({ valor: SEDE_TODAS, texto: `★ ${SEDE_TODAS}` });
+      }
+
       // Una sede que ya no existe —porque la renombraron— no se puede esconder:
       // se enseña marcada para que se vea que hay que arreglarla.
-      if (actual && !nombres.includes(actual)) {
+      if (actual && actual !== SEDE_TODAS && !nombres.includes(actual)) {
         opciones.unshift({ valor: actual, texto: `⚠ ${actual} (ya no existe)` });
       }
       return desplegable(opciones, actual, escribe, campo.requerido ? 'elegir sede…' : 'sin sede');

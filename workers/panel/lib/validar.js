@@ -34,6 +34,13 @@ const CUADRO_GDL = { lat: [20.55, 20.80], lon: [-103.50, -103.20] };
 
 const TIPOS = ['taller', 'charla', 'muestra', 'escena'];
 
+/** La sede que no es una sede. Los recorridos guiados pasan por todas, así que
+ *  el programa tiene que poder decirlo sin inventarse una fila en `sedes` — que
+ *  traería dirección, coordenada y una estrella en el plano de la portada, tres
+ *  cosas que un recorrido no tiene. Mismo texto que `SEDE_TODAS` en
+ *  `src/data/tipos.ts`; si cambia allí, cambia aquí. */
+const SEDE_TODAS = 'Todas las sedes';
+
 /**
  * @param nombre  cuál de las cinco colecciones
  * @param datos   lo que mandó el panel
@@ -138,9 +145,11 @@ class Verificador {
 
   /** El corazón del asunto: `sedeDe()` empareja por nombre EXACTO. Una tilde
    *  de más y la ficha sale sin dirección y sin mapa. */
-  sede(valor, donde, { requerido = false } = {}) {
+  sede(valor, donde, { requerido = false, todas = false } = {}) {
     const s = this.texto(valor, donde, { max: 80, requerido });
     if (!s) return undefined;
+    // Sólo el programa: una ficha de artista no puede estar «en todas».
+    if (todas && s === SEDE_TODAS) return s;
     if (this.sedesValidas.includes(s)) return s;
 
     const parecida = masParecido(s, this.sedesValidas);
@@ -211,6 +220,9 @@ class Verificador {
     const vistos = new Set();
     salida.forEach((s, i) => {
       if (!s.nombre) return;
+      if (s.nombre === SEDE_TODAS) {
+        this.error('sedes[' + i + '].nombre', '«' + SEDE_TODAS + '» es un nombre reservado: es lo que el programa usa para los recorridos que pasan por todas. Ponle otro.');
+      }
       const k = pelar(s.nombre);
       if (vistos.has(k)) this.error('sedes[' + i + '].nombre', '«' + s.nombre + '» está repetida');
       vistos.add(k);
@@ -228,7 +240,7 @@ class Verificador {
         dia:      this.entero(a.dia, d + '.dia', { min: 0, max: 3 }),
         inicio:   this.hora(a.inicio, d + '.inicio'),
         fin:      this.hora(a.fin, d + '.fin'),
-        sede:     this.sede(a.sede, d + '.sede', { requerido: true }),
+        sede:     this.sede(a.sede, d + '.sede', { requerido: true, todas: true }),
         tipo:     TIPOS.includes(a.tipo) ? a.tipo : undefined,
         artista:  this.texto(a.artista, d + '.artista', { max: 120 }),
         registro: this.enlace(a.registro, d + '.registro'),
@@ -255,7 +267,9 @@ class Verificador {
     for (let i = 0; i < actividades.length; i++) {
       for (let j = i + 1; j < actividades.length; j++) {
         const a = actividades[i], b = actividades[j];
-        if (!a.sede || a.sede !== b.sede || a.dia !== b.dia) continue;
+        // Un recorrido que pasa por todas se cruza con medio programa por
+        // definición: avisarlo sería avisar de lo que es.
+        if (!a.sede || a.sede === SEDE_TODAS || a.sede !== b.sede || a.dia !== b.dia) continue;
         if (!a.inicio || !a.fin || !b.inicio || !b.fin) continue;
         if (minutos(a.inicio) < minutos(b.fin) && minutos(b.inicio) < minutos(a.fin)) {
           this.aviso('programa', '«' + a.titulo + '» y «' + b.titulo + '» se enciman en ' + a.sede);

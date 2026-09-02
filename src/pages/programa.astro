@@ -324,5 +324,35 @@ import {
         }
       });
     }
+
+    /**
+     * Llegar a un día concreto: `/programa#dia-2`.
+     *
+     * Es lo que enlaza la barra de «+N sedes» del adelanto de la portada. Sin
+     * esto llevaba a `/programa` a secas y abría el jueves, así que pulsarla en
+     * el viernes te dejaba buscando otra vez el día del que venías.
+     *
+     * Se hace pulsando la pestaña del día en vez de tocando la rejilla por
+     * dentro: el mando ya sabe cambiar de panel, mover la burbuja y repintar el
+     * rótulo, y duplicar eso aquí sería tener dos sitios que deciden qué día se
+     * ve. También responde a `hashchange`, para cuando ya estás en la página y
+     * llega otro enlace.
+     */
+    function irAlDiaDelHash() {
+      const m = /^#dia-(\d+)$/.exec(location.hash);
+      if (!m) return;
+      const boton = document.querySelector<HTMLElement>(
+        `[data-dias-programa] [data-dia="${m[1]}"]`,
+      );
+      if (!boton) return;
+      // Si el hash llega con la vista de días puesta, primero la rejilla: es la
+      // única que tiene días que elegir.
+      const rejilla = document.querySelector<HTMLElement>('[data-vista="rejilla"]');
+      if (rejilla && rejilla.getAttribute('aria-selected') !== 'true') rejilla.click();
+      boton.click();
+    }
+
+    irAlDiaDelHash();
+    addEventListener('hashchange', irAlDiaDelHash);
   </script>
 </Base>

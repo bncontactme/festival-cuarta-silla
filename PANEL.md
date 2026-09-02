@@ -169,6 +169,17 @@ hizo fue dejar la página en «Próximamente» con tres formularios ya cargados,
 esperando a que alguien se acordara de marcar una casilla. Se supo el mismo día
 que se cargó el programa de verdad.
 
+**«Todas las sedes» es un nombre reservado, no una fila de `sedes`.** Los
+recorridos guiados pasan por todas, y el programa tiene que poder decirlo; darlo
+de alta como sede de verdad habría puesto una estrella en el plano de la portada
+sobre unas coordenadas inventadas y una tarjeta con dirección en `/sedes`, que
+son justo las dos cosas que un recorrido no tiene. Sale el primero en el
+desplegable de Sede —marcado con una estrella, porque es la excepción y no una
+más—, la rejilla le da su propio carril, y su ficha dice «el recorrido pasa por
+las sedes del festival» en vez de un hueco donde iría la dirección. El validador
+lo acepta sólo en el programa —nadie expone en todas— y no deja llamar así a una
+sede de verdad.
+
 `libre` existe para separar dos cosas que sin ella se leen igual —«esta
 actividad no pide registro» y «todavía no nos han pasado el formulario»— y que
 para el visitante son opuestas. **En `/registro` salen sólo las que tienen
