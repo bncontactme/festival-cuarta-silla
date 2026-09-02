@@ -1,7 +1,7 @@
 ---
 /**
- * La portada móvil: la silla en medio y, encima, el color llenando la
- * pantalla. Luego cuatro puertas.
+ * La portada móvil: la silla roja en medio del campo amarillo. Luego cuatro
+ * puertas.
  *
  * No es la home de escritorio recortada — no lleva manifiesto, ni adelanto de
  * sedes, ni patrocinadores. Es un índice: dice cuándo, dónde, y a dónde ir.
@@ -38,9 +38,10 @@ const puertas = [
     n: '04',
     label: artistas.titulo,
     href: '/artistas',
-    nota: artistas.lista.length
-      ? `${artistas.lista.length} nombres`
-      : artistas.estado,
+    /* Sin nombres todavía, la puerta va sin nota: «Por anunciar» debajo de
+       ARTISTAS no dice nada que no diga la propia página al abrirla, y en una
+       rejilla de cuatro puertas es la única que se disculpa. */
+    nota: artistas.lista.length ? `${artistas.lista.length} nombres` : '',
     fondo: 'amarillo',
   },
 ] as const;
@@ -62,12 +63,6 @@ const atajos = [
 
 <div class="movil-marco" id="portada">
   <div class="portada">
-    {/* El fondo oscuro del que arranca todo y el amarillo que lo inunda */}
-    <div class="portada-lienzo" aria-hidden="true">
-      <span class="portada-capa capa--tinta"></span>
-      <span class="portada-capa capa--amarillo"></span>
-    </div>
-
     <header class="movil-barra portada-barra">
       {/* Mismo cambio que la barra de escritorio: la silla vive en la escena
           de abajo, así que aquí queda el nombre a dos renglones y nada más. */}
@@ -127,9 +122,11 @@ const atajos = [
               <span class="puerta-titulo display block text-3xl leading-none">
                 {p.label}
               </span>
-              <span class="puerta-nota meta mt-1 block text-[0.5rem]">
-                {p.nota}
-              </span>
+              {p.nota && (
+                <span class="puerta-nota meta mt-1 block text-[0.5rem]">
+                  {p.nota}
+                </span>
+              )}
             </span>
             <span class="puerta-flecha display text-2xl" aria-hidden="true">
               {p.externa ? '↗' : '→'}

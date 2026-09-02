@@ -101,33 +101,17 @@
      PORTADA
      ═════════════════════════════════════════════════════════════════════ */
 
+  /* El campo amarillo, desde el primer cuadro y sin capas encima: es el mismo
+     que pinta el cargador, así que la primera visita y las siguientes abren
+     con la misma imagen —silla roja sobre amarillo— y no hay salto de color
+     entre una y otra. */
   .portada {
     position: relative;
     display: flex;
     flex-direction: column;
     height: 100%;
-    isolation: isolate;
-  }
-
-  /* Las capas de color que inundan la pantalla. Van detrás de todo y no
-     participan del flujo. */
-  .portada-lienzo {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    overflow: hidden;
-  }
-
-  .portada-capa {
-    position: absolute;
-    inset: 0;
-  }
-
-  .capa--tinta {
-    background-color: var(--color-tinta);
-  }
-  .capa--amarillo {
     background-color: var(--color-amarillo);
+    isolation: isolate;
   }
 
   /* ── El bloque de la silla ──────────────────────────────────────────── */
@@ -334,7 +318,8 @@
 
   /* ═════════════════════════════════════════════════════════════════════
      ENTRADA
-     La silla en medio y, sobre ella, el color llenando la pantalla.
+     La silla roja crece en el centro del campo amarillo y luego cede el
+     sitio: de sujeto a marca de agua, y encima cae el rótulo.
 
      Todo cuelga de `[data-intro='si']`, que pone el script en línea del
      <head> antes del primer pintado y sólo en la portada y una vez por
@@ -344,38 +329,33 @@
      ═════════════════════════════════════════════════════════════════════ */
 
   @media (prefers-reduced-motion: no-preference) {
-    /* La silla, a tamaño y opacidad de sujeto, sobre el fondo oscuro */
+    /* La silla, a tamaño y opacidad de sujeto, sola en el amarillo */
     [data-intro='si'] .portada-silla {
       animation:
         silla-entra 0.5s var(--ease-salida) both,
-        silla-cede 0.5s var(--ease-salida) 1.05s both;
+        silla-cede 0.5s var(--ease-salida) 0.55s both;
     }
 
-    /* El amarillo sube desde el canto inferior y se come la pantalla */
-    [data-intro='si'] .capa--amarillo {
-      animation: inundar 0.6s var(--ease-cortina) 0.5s both;
-    }
-
-    /* El rótulo rojo cae sobre el amarillo ya asentado */
+    /* El rótulo rojo cae mientras la silla se retira */
     [data-intro='si'] .portada-rotulo {
-      animation: asomar 0.5s var(--ease-salida) 1.05s both;
+      animation: asomar 0.5s var(--ease-salida) 0.55s both;
     }
 
     /* La franja roja barre de izquierda a derecha, como un tachón */
     [data-intro='si'] .portada-datos {
-      animation: tachar 0.45s var(--ease-cortina) 1.25s both;
+      animation: tachar 0.45s var(--ease-cortina) 0.75s both;
     }
 
     /* Y las puertas, al final */
     [data-intro='si'] .portada-puertas,
     [data-intro='si'] .portada-atajos,
     [data-intro='si'] .portada-legal {
-      animation: asomar 0.5s var(--ease-salida) 1.45s both;
+      animation: asomar 0.5s var(--ease-salida) 0.95s both;
     }
 
     /* La barra de arriba entra con el texto */
     [data-intro='si'] .portada-barra {
-      animation: asomar 0.5s var(--ease-salida) 1.15s both;
+      animation: asomar 0.5s var(--ease-salida) 0.65s both;
     }
 
     /* Durante la entrada, lo interactivo todavía es invisible. Un enlace a
@@ -423,15 +403,6 @@
     to {
       opacity: 0.16;
       translate: 0 0;
-    }
-  }
-
-  @keyframes inundar {
-    from {
-      clip-path: inset(100% 0 0 0);
-    }
-    to {
-      clip-path: inset(0 0 0 0);
     }
   }
 
