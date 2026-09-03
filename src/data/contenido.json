@@ -1,6 +1,6 @@
 {
-  "version": 61,
-  "actualizado": "2026-09-03T03:47:45.452Z",
+  "version": 62,
+  "actualizado": "2026-09-03T03:50:33.801Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -446,11 +446,11 @@
       },
       {
         "titulo": "Introducción al arte conceptual latinoamericano",
-        "dia": 3,
-        "inicio": "14:00",
-        "fin": "16:00",
-        "sede": "Salón Liminal",
-        "tipo": "muestra",
+        "dia": 2,
+        "inicio": "18:00",
+        "fin": "19:00",
+        "sede": "Casa Feria",
+        "tipo": "charla",
         "artista": "Gerardo Lammers",
         "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
       },
