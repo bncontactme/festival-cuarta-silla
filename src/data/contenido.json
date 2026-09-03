@@ -1,6 +1,6 @@
 {
-  "version": 63,
-  "actualizado": "2026-09-03T04:07:30.247Z",
+  "version": 64,
+  "actualizado": "2026-09-03T04:11:16.778Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -369,9 +369,9 @@
         "dia": 2,
         "inicio": "20:00",
         "fin": "23:59",
-        "sede": "Cuerpos Parlantes",
+        "sede": "Ánima Galería",
         "tipo": "escena",
-        "artista": "Cuerpos parlantes",
+        "artista": "Ánima Galeria",
         "libre": true
       },
       {
