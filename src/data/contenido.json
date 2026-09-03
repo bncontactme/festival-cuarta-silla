@@ -1,6 +1,6 @@
 {
-  "version": 58,
-  "actualizado": "2026-09-03T02:04:54.217Z",
+  "version": 59,
+  "actualizado": "2026-09-03T03:46:56.761Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -151,7 +151,8 @@
         "fin": "19:30",
         "sede": "No Museo",
         "tipo": "escena",
-        "artista": "Arielo"
+        "artista": "Arielo",
+        "libre": true
       },
       {
         "titulo": "Palabras de Inauguración",
@@ -160,7 +161,8 @@
         "fin": "20:00",
         "sede": "No Museo",
         "tipo": "charla",
-        "artista": "Equipo del festival"
+        "artista": "Equipo del festival",
+        "libre": true
       },
       {
         "titulo": "¨El coro de las familias buscadoras de Jalisco¨",
@@ -169,7 +171,8 @@
         "fin": "20:40",
         "sede": "No Museo",
         "tipo": "muestra",
-        "artista": "El Coro Inolvidable"
+        "artista": "El Coro Inolvidable",
+        "libre": true
       },
       {
         "titulo": "Oratoria Política",
@@ -178,7 +181,8 @@
         "fin": "22:00",
         "sede": "No Museo",
         "tipo": "escena",
-        "artista": "Oratoria Política"
+        "artista": "Oratoria Política",
+        "libre": true
       },
       {
         "titulo": "Fiesta de Inauguración",
@@ -187,7 +191,8 @@
         "fin": "23:59",
         "sede": "Staditche",
         "tipo": "escena",
-        "artista": "dsgstng677, Kalbox y (sorpresa)"
+        "artista": "dsgstng677, Kalbox y (sorpresa)",
+        "libre": true
       },
       {
         "titulo": "Presentación del manga “Carmen caracol & Tello cucaracho: Agentes secretos del arte contemporáneo”",
@@ -206,7 +211,8 @@
         "fin": "16:00",
         "sede": "No Museo",
         "tipo": "muestra",
-        "artista": "Rubi Zaira Flores Cruz"
+        "artista": "Rubi Zaira Flores Cruz",
+        "libre": true
       },
       {
         "titulo": "Subvertir lo cotidiano: Resistencias artísticas insospechadas en América Latina, 1970-1985",
@@ -225,7 +231,8 @@
         "fin": "18:00",
         "sede": "No Museo",
         "tipo": "muestra",
-        "artista": "Jesús Irene"
+        "artista": "Jesús Irene",
+        "libre": true
       },
       {
         "titulo": "Taller Performance “En la silla: acción conceptual”",
@@ -254,7 +261,8 @@
         "fin": "23:59",
         "sede": "Cuerpos Parlantes",
         "tipo": "escena",
-        "artista": "Cuerpos parlantes"
+        "artista": "Cuerpos parlantes",
+        "libre": true
       },
       {
         "titulo": "Performance Pasarela “Como entender al otro desde el yo”",
@@ -263,7 +271,8 @@
         "fin": "20:15",
         "sede": "Ex convento Santa Teresa",
         "tipo": "muestra",
-        "artista": "Visual Negativo, RE.CREA.LAB, Cerro de los espejos y RAD"
+        "artista": "Visual Negativo, RE.CREA.LAB, Cerro de los espejos y RAD",
+        "libre": true
       },
       {
         "titulo": "Inauguración \"Burdo\". Exhibición individual de Gabriela Girbau",
@@ -272,7 +281,8 @@
         "fin": "23:59",
         "sede": "Taller Industria Gráfica",
         "tipo": "muestra",
-        "artista": "Musica: MATERIA A-TEMPORAL"
+        "artista": "Musica: MATERIA A-TEMPORAL",
+        "libre": true
       },
       {
         "titulo": "Entretejiendo arrullos “Una ofrenda a las madres que buscan a sus hijas e hijos desaparecidos”",
@@ -281,7 +291,8 @@
         "fin": "19:00",
         "sede": "No Museo",
         "tipo": "muestra",
-        "artista": "Colectiva Hilos"
+        "artista": "Colectiva Hilos",
+        "libre": true
       },
       {
         "titulo": "Poesía y performance",
@@ -290,7 +301,8 @@
         "fin": "20:00",
         "sede": "Foro AM",
         "tipo": "muestra",
-        "artista": "Miaulina"
+        "artista": "Miaulina",
+        "libre": true
       },
       {
         "titulo": "“Libertad de Presa”",
@@ -299,7 +311,8 @@
         "fin": "18:00",
         "sede": "No Museo",
         "tipo": "muestra",
-        "artista": "David Landgrave Romo"
+        "artista": "David Landgrave Romo",
+        "libre": true
       },
       {
         "titulo": "Laboratorio de cuerpos cansados",
@@ -318,7 +331,8 @@
         "fin": "18:00",
         "sede": "No Museo",
         "tipo": "muestra",
-        "artista": "Oro Radio"
+        "artista": "Oro Radio",
+        "libre": true
       },
       {
         "titulo": "Metro cuadrado (rebasadito por los bordes) 2023",
@@ -327,7 +341,8 @@
         "fin": "18:00",
         "sede": "No Museo",
         "tipo": "muestra",
-        "artista": "Alejandro Reyes y Ricardo Atl"
+        "artista": "Alejandro Reyes y Ricardo Atl",
+        "libre": true
       },
       {
         "titulo": "Charla “Glorieta de los desaparecidos, Una resignificación por la memoria, la búsqueda y la resistencia\"",
@@ -356,7 +371,8 @@
         "fin": "23:59",
         "sede": "Cuerpos Parlantes",
         "tipo": "escena",
-        "artista": "Cuerpos parlantes"
+        "artista": "Cuerpos parlantes",
+        "libre": true
       },
       {
         "titulo": "Performance ambient inmersivo",
@@ -365,7 +381,8 @@
         "fin": "22:00",
         "sede": "Ala Rota",
         "tipo": "muestra",
-        "artista": "Ascandra"
+        "artista": "Ascandra",
+        "libre": true
       },
       {
         "titulo": "Fiesta del festival de arte conceptual.",
@@ -374,7 +391,8 @@
         "fin": "23:59",
         "sede": "Casa Dos Guayabos",
         "tipo": "escena",
-        "artista": "Festival de arte conceptual"
+        "artista": "Festival de arte conceptual",
+        "libre": true
       },
       {
         "titulo": "Recorrido: Marcha del Arte",
@@ -453,7 +471,8 @@
         "fin": "23:59",
         "sede": "Ánima Galería",
         "tipo": "muestra",
-        "artista": "Ánima Galeria"
+        "artista": "Ánima Galeria",
+        "libre": true
       }
     ],
     "esEjemplo": false
