@@ -1,6 +1,6 @@
 {
-  "version": 65,
-  "actualizado": "2026-09-03T04:12:43.511Z",
+  "version": 66,
+  "actualizado": "2026-09-03T04:13:39.547Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -363,16 +363,6 @@
         "tipo": "charla",
         "artista": "Lirba Cano y Héctor Robledo",
         "registro": "https://forms.gle/2YNFXExX9UvyG8qB6"
-      },
-      {
-        "titulo": "Inauguración de obra",
-        "dia": 2,
-        "inicio": "20:00",
-        "fin": "23:59",
-        "sede": "Ánima Galería",
-        "tipo": "escena",
-        "artista": "Ánima Galeria",
-        "libre": true
       },
       {
         "titulo": "Performance ambient inmersivo",
