@@ -1,21 +1,33 @@
 ---
 /**
- * La portada móvil: la silla roja en medio del campo amarillo. Luego cuatro
- * puertas.
+ * La portada móvil: la silla roja en medio del campo amarillo, y debajo
+ * cuánto falta. Todo lo demás —incluido el manifiesto— vive detrás de una
+ * sola puerta, el índice, que se abre desde la barra y sube desde el canto
+ * de abajo cuando se toca.
  *
- * No es la home de escritorio recortada — no lleva manifiesto, ni adelanto de
- * sedes, ni patrocinadores. Es un índice: dice cuándo, dónde, y a dónde ir.
- * Todo lo demás está a un toque de distancia y cabe en su propia pantalla.
+ * No es la home de escritorio recortada — es un cartel con un reloj y un
+ * índice: dice cuándo, dónde, y guarda el resto a un toque.
+ *
+ * Aquí hubo cuatro puertas de 70 px y un renglón de atajos, y el manifiesto
+ * tenía su propio atajo en la barra. Entre las dos cosas se llevaban 326 px
+ * de una pantalla de 812 para dar seis destinos que casi nadie mira dos
+ * veces: se entra al sitio a ver qué es y cuándo es. Ahora esos destinos
+ * —manifiesto incluido, al final de la lista— viven en la hoja del índice,
+ * la barra sólo abre esa puerta, y el cartel se queda con el alto que le
+ * sobraba: la silla crece y el reloj deja de ser un renglón para ser los
+ * cuatro números del escritorio.
  *
  * La secuencia de entrada vive entera en movil.css; aquí sólo están las
  * piezas que anima.
  */
 import Silla from '../Silla.astro';
+import Mosaico from '../Mosaico.astro';
 import { conBase } from '../../lib/base';
 import {
   actividadesConRegistro,
   festival,
   manifiesto,
+  patrocinadores,
   privacidad,
   programa,
   registro,
@@ -27,63 +39,99 @@ import {
 import { artistas } from '../../data/artistas';
 import { archivo } from '../../data/archivo';
 
-/* El registro y el manifiesto se cambian el sitio.
- *
- * «Registro» metido en la esquina de la barra se leía como darse de alta en la
- * web, y el nombre entero no cabe ahí. Como puerta cabe, y además es a lo que
- * se viene: de las cuatro es la única donde el visitante HACE algo. El
- * manifiesto —que es de leer, no de hacer— se va a la esquina que deja libre,
- * donde sigue a un toque.
- *
- * Cuántos eventos, si los hay; si todavía no hay formularios, lo que se va a
- * encontrar al entrar, que es mejor saberlo antes de pulsar. */
+/* Los cuatro campos del reloj, los mismos del escritorio. El reloj de
+   `motion.ts` rellena los `[data-campo]` que encuentre dentro de un
+   `[data-cuenta]`, así que pedir cuatro en vez de uno no cuesta una línea de
+   guion: hasta ahora el móvil sólo pedía los días. */
+const cuenta = [
+  { campo: 'dias', label: 'Días' },
+  { campo: 'horas', label: 'Horas' },
+  { campo: 'minutos', label: 'Min' },
+  { campo: 'segundos', label: 'Seg' },
+] as const;
+
+/* Cuántos eventos, si los hay; si todavía no hay formularios, lo que se va a
+   encontrar al entrar, que es mejor saberlo antes de pulsar. */
 const cuantosEventos = actividadesConRegistro.length;
 
-const puertas = [
+/** El índice: todo lo que el sitio tiene, con su cifra al lado.
+ *
+ * El manifiesto va al final y no al principio: es lo único de la lista que
+ * no lleva a otra sección del sitio, sino a la pantalla `#manifiesto` que ya
+ * vive aquí mismo — la letra chica del índice, después de los destinos de
+ * verdad. El aviso de privacidad no entra: es la línea legal del pie, no una
+ * sección.
+ *
+ * La cifra no se escribe a mano: sale de la posición en la lista, así que
+ * mover una entrada —como el manifiesto, que ya se ha movido dos veces— no
+ * obliga a renumerar las demás. «Apoya» aparece sólo cuando exista la cuenta
+ * de PayPal; hasta entonces el índice tiene siete entradas y no una
+ * desactivada pidiendo perdón. */
+const indice = [
   {
-    n: '01',
     label: registroEventos.label,
     href: registroEventos.href,
     nota: cuantosEventos
       ? `${cuantosEventos} ${cuantosEventos === 1 ? 'evento' : 'eventos'}`
       : registro.estado,
-    fondo: 'rojo',
   },
-  { n: '02', label: programa.titulo, href: '/programa', nota: estadoPrograma, fondo: 'amarillo' },
+  { label: programa.titulo, href: '/programa', nota: estadoPrograma },
   {
-    n: '03',
     label: sedes.titulo,
     href: '/sedes',
     nota: `${sedes.lista.length} lugares`,
-    fondo: 'rojo',
   },
   {
-    n: '04',
     label: artistas.titulo,
     href: '/artistas',
-    /* Sin nombres todavía, la puerta va sin nota: «Por anunciar» debajo de
-       ARTISTAS no dice nada que no diga la propia página al abrirla, y en una
-       rejilla de cuatro puertas es la única que se disculpa. */
+    /* Sin nombres todavía, la entrada va sin nota: «Por anunciar» debajo de
+       ARTISTAS no dice nada que no diga la propia página al abrirla. */
     nota: artistas.lista.length
       ? `${artistas.lista.length} ${artistas.lista.length === 1 ? 'nombre' : 'nombres'}`
       : '',
-    fondo: 'amarillo',
   },
-] as const;
-
-/** Los atajos del pie de la portada. No son puertas: son la letra chica del
- *  índice. Se quedan fuera de las cuatro grandes a propósito —una quinta
- *  puerta le come 70 px a la escena de la silla, y en un iPhone SE la silla,
- *  que mide 217 px, se recortaría contra el `overflow: hidden` del marco—.
- *  La convocatoria de voluntarixs comparte esta franja con la galería;
- *  «Apoya» sólo aparece cuando exista la cuenta de PayPal. */
-const atajos = [
-  { label: archivo.titulo, href: '/galeria' },
-  { ...convocatoriaVoluntarixs, externa: true },
+  {
+    label: archivo.titulo,
+    href: '/galeria',
+    nota: archivo.lista.length
+      ? `${archivo.lista.length} ${archivo.lista.length === 1 ? 'edición' : 'ediciones'}`
+      : archivo.estado,
+  },
+  {
+    label: 'Voluntarixs',
+    href: convocatoriaVoluntarixs.href,
+    nota: 'Convocatoria',
+    externa: true,
+  },
   ...(festival.donaciones.paypal
-    ? [{ label: 'Apoya', href: festival.donaciones.paypal, externa: true }]
+    ? [
+        {
+          label: 'Apoya',
+          href: festival.donaciones.paypal,
+          nota: 'Donar',
+          externa: true,
+        },
+      ]
     : []),
-];
+  { label: 'Manifiesto', href: '#manifiesto' },
+].map((entrada, i) => ({ ...entrada, n: String(i + 1).padStart(2, '0') }));
+
+/* ── La cinta de marcas ──────────────────────────────────────────────────
+   La misma tira del escritorio a escala de teléfono: la ficha mide 5.5rem
+   —88 px— más medio rem de aire, y la tira corre a 42 px por segundo, más
+   despacio que los 52 de allá porque aquí el recorrido visible es un tercio.
+
+   Con veintitantas marcas una vuelta ya cubre de sobra el ancho del teléfono;
+   el `repes` es el seguro para el día que queden dos, y el `length > 0` de
+   abajo es lo que evita dividir entre cero. */
+const PASO = 96;
+const VELOCIDAD = 42;
+const repes = Math.max(
+  1,
+  Math.ceil(600 / PASO / Math.max(1, patrocinadores.lista.length)),
+);
+const tira = Array.from({ length: repes }, () => patrocinadores.lista).flat();
+const duracionCinta = ((tira.length * PASO) / VELOCIDAD).toFixed(1);
 ---
 
 <div class="movil-marco" id="portada">
@@ -96,15 +144,16 @@ const atajos = [
           Festival de arte<br />conceptual
         </span>
       </span>
-      {/* «Manifiesto» y no `manifiesto.titulo`: el título es la pregunta
-          entera —«¿Qué entendemos por arte conceptual?»— y en la esquina de
-          una barra de 3,25 rem se come el renglón y empuja el nombre del
-          festival a tres. La pregunta se lee dentro, que es su sitio. */}
+      {/* El índice, no el manifiesto: es la única puerta que le queda a la
+          portada, así que vive en la esquina de la barra, donde antes vivía
+          el atajo al manifiesto. El manifiesto no se pierde — es la entrada
+          01 de la lista de abajo, con el mismo número que lleva en la
+          sección homónima de escritorio. */}
       <a
-        href="#manifiesto"
+        href="#indice"
         class="meta border-l-2 border-tinta px-4 font-bold text-rojo"
       >
-        Manifiesto
+        Índice
       </a>
     </header>
 
@@ -132,59 +181,61 @@ const atajos = [
       </h1>
     </div>
 
-    {/* Cuándo y cuánto falta, en una línea en vez de cuatro cajas */}
-    <div class="portada-datos" data-cuenta={festival.inicioISO}>
-      <p class="meta text-[0.6rem]">
+    {/* ── El tiempo ──────────────────────────────────────────────────────
+        Cuándo y cuánto falta. Era un renglón con los días; ahora son los
+        cuatro números del escritorio, que es lo que pide una portada donde
+        sólo quedan dos cosas: el cartel y esto.
+
+        Es además el tercer color de la portada, y por eso es un elemento de
+        verdad y no una capa de la animación: entra barriendo y se queda. */}
+    <div class="portada-tiempo" data-cuenta={festival.inicioISO}>
+      <p class="meta portada-cuando">
         24 — 27 SEP {festival.anio}
-        <span class="opacity-50" aria-hidden="true">/</span>
+        <span class="opacity-55" aria-hidden="true">/</span>
         Guadalajara
       </p>
-      <p class="meta mt-1 text-[0.6rem] opacity-70">
-        Faltan <span class="font-bold opacity-100" data-campo="dias">--</span> días
-      </p>
+      <dl class="portada-reloj">
+        {
+          cuenta.map(({ campo, label }) => (
+            <div>
+              <dd class="display display-centro" data-campo={campo}>
+                --
+              </dd>
+              <dt class="meta">{label}</dt>
+            </div>
+          ))
+        }
+      </dl>
     </div>
 
-    <nav class="portada-puertas" aria-label="Secciones">
-      {
-        puertas.map((p) => (
-          <a
-            href={conBase(p.href)}
-            class={`puerta puerta--${p.fondo}`}
-            target={p.externa ? '_blank' : undefined}
-            rel={p.externa ? 'noopener' : undefined}
-          >
-            <span class="puerta-numero meta text-[0.6rem]">{p.n}</span>
-            <span>
-              <span class="puerta-titulo display block text-3xl leading-none">
-                {p.label}
-              </span>
-              {p.nota && (
-                <span class="puerta-nota meta mt-1 block text-[0.5rem]">
-                  {p.nota}
-                </span>
-              )}
-            </span>
-            <span class="puerta-flecha display text-2xl" aria-hidden="true">
-              {p.externa ? '↗' : '→'}
-            </span>
-          </a>
-        ))
-      }
-    </nav>
-
-    <nav class="portada-atajos" aria-label="Más">
-      {
-        atajos.map((a) => (
-          <a
-            href={conBase(a.href)}
-            target={a.externa ? '_blank' : undefined}
-            rel={a.externa ? 'noopener' : undefined}
-          >
-            {a.label} <span aria-hidden="true">{a.externa ? '↗' : '→'}</span>
-          </a>
-        ))
-      }
-    </nav>
+    {/* ── Patrocinadores ─────────────────────────────────────────────────
+        La misma cinta del escritorio, a escala de teléfono. Las fichas son
+        blancas sobre el rojo: en el feed el blanco es exactamente eso, la
+        tira de logos y el marco de las fotos, nunca un fondo decorativo. */}
+    {
+      patrocinadores.lista.length > 0 && (
+        <section class="portada-marcas" aria-label={patrocinadores.titulo}>
+          <p class="meta portada-marcas-rotulo">
+            <span class="portada-marcas-filete" aria-hidden="true" />
+            {patrocinadores.titulo}
+          </p>
+          <div class="portada-pista">
+            {/* Dos copias de la misma tira, la segunda escondida de los
+                lectores de pantalla: la animación corre la primera hasta su
+                ancho y la segunda entra detrás sin costura. */}
+            <div class="marquee" style={`--duracion: ${duracionCinta}s`}>
+              {[0, 1].map((copia) => (
+                <div class="flex shrink-0" aria-hidden={copia === 1}>
+                  {tira.map((marca) => (
+                    <Mosaico marca={marca} class="mr-2" />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )
+    }
 
     {/* El pie del sitio grande no se pinta aquí, y con él se iba el único
         enlace al aviso de privacidad. Una línea basta. */}
@@ -192,6 +243,52 @@ const atajos = [
       <a href={conBase("/privacidad")} class="enlace">{privacidad.titulo}</a>
       <span class="opacity-40"> · {festival.creditoFooter}</span>
     </p>
+
+    {/* ── La hoja del índice ─────────────────────────────────────────────
+        Sube desde el canto de abajo al tocar el tirador y tapa el reloj, la
+        cinta y la línea legal; el cartel se queda asomando arriba, que es lo
+        que dice dónde estás.
+
+        `:target` otra vez, como el manifiesto: sin una línea de JS, con URL
+        de verdad y con el botón atrás del teléfono cerrándola. La ✕ del asa
+        vuelve a `#portada`, que es lo mismo que hace el manifiesto. */}
+    <nav id="indice" class="portada-hoja" aria-label="Índice del sitio">
+      <a href="#portada" class="portada-asa">
+        <span class="display portada-asa-rotulo">Índice</span>
+        <span class="portada-asa-cerrar" aria-hidden="true">✕</span>
+        <span class="sr-only">Cerrar el índice</span>
+      </a>
+
+      <ul>
+        {
+          indice.map((e) => (
+            <li>
+              <a
+                href={conBase(e.href)}
+                class="indice-fila"
+                target={e.externa ? '_blank' : undefined}
+                rel={e.externa ? 'noopener' : undefined}
+              >
+                <span class="indice-numero meta">{e.n}</span>
+                {/* Nombre y nota en una sola columna, apilados: puestos en la
+                    misma fila que el número compiten por el ancho y un
+                    nombre largo —«Registro a eventos»— y una nota larga
+                    —«33 actividades · 4 días»— se parten cada uno en dos
+                    líneas y chocan entre sí. Apilados, cada uno tiene la
+                    columna entera para él solo. */}
+                <span class="indice-cuerpo">
+                  <span class="indice-nombre display">{e.label}</span>
+                  {e.nota && <span class="indice-nota meta">{e.nota}</span>}
+                </span>
+                <span class="indice-flecha display" aria-hidden="true">
+                  {e.externa ? '↗' : '→'}
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
   </div>
 
   {/* ── Manifiesto: pantalla con :target ─────────────────────────────── */}
@@ -207,9 +304,9 @@ const atajos = [
       <a href="#portada" class="meta border-r-2 border-tinta bg-amarillo px-4 font-bold text-tinta">
         <span aria-hidden="true">←</span>&nbsp; Volver
       </a>
-      {/* Ya no es la puerta 01 —la rejilla numerada arranca en el
-          registro—, así que el índice es el año, como en las demás
-          pantallas que no tienen número. */}
+      {/* El manifiesto lleva número dentro del índice, pero esta es su
+          propia pantalla y no una fila de la lista: aquí el índice es el
+          año, como en las demás pantallas que no tienen número. */}
       <span class="meta px-4 text-papel/80">{festival.anio}</span>
     </div>
 
