@@ -1,6 +1,6 @@
 {
-  "version": 62,
-  "actualizado": "2026-09-03T03:50:33.801Z",
+  "version": 63,
+  "actualizado": "2026-09-03T04:07:30.247Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -437,8 +437,8 @@
       {
         "titulo": "Performance con mariachi",
         "dia": 3,
-        "inicio": "19:00",
-        "fin": "20:00",
+        "inicio": "21:00",
+        "fin": "23:30",
         "sede": "Staditche",
         "tipo": "muestra",
         "artista": "Perro.sin.luz",
