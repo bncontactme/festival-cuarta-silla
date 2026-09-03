@@ -1,6 +1,6 @@
 {
-  "version": 57,
-  "actualizado": "2026-09-03T02:02:45.851Z",
+  "version": 58,
+  "actualizado": "2026-09-03T02:04:54.217Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -543,6 +543,12 @@
       "nombre": "Enrique Chiu",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788389212/cuartasilla/artistas/n2jc6sq0e4nepmwk5kas.jpg",
       "instagram": "https://www.instagram.com/enriquechiuarte/"
+    },
+    {
+      "nombre": "Oro Radio",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788401074/cuartasilla/artistas/wsnwhzjyrj8rdmhfiknt.jpg",
+      "instagram": "https://www.instagram.com/oro_radio/",
+      "sede": "No Museo"
     }
   ],
   "archivo": [],
