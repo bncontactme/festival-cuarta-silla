@@ -1,6 +1,6 @@
 {
-  "version": 59,
-  "actualizado": "2026-09-03T03:46:56.761Z",
+  "version": 61,
+  "actualizado": "2026-09-03T03:47:45.452Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -307,7 +307,7 @@
       {
         "titulo": "“Libertad de Presa”",
         "dia": 2,
-        "inicio": "12:00",
+        "inicio": "14:00",
         "fin": "18:00",
         "sede": "No Museo",
         "tipo": "muestra",
@@ -337,7 +337,7 @@
       {
         "titulo": "Metro cuadrado (rebasadito por los bordes) 2023",
         "dia": 2,
-        "inicio": "12:00",
+        "inicio": "13:00",
         "fin": "18:00",
         "sede": "No Museo",
         "tipo": "muestra",
