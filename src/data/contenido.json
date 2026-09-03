@@ -1,6 +1,6 @@
 {
-  "version": 64,
-  "actualizado": "2026-09-03T04:11:16.778Z",
+  "version": 65,
+  "actualizado": "2026-09-03T04:12:43.511Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -255,7 +255,7 @@
         "registro": "https://forms.gle/7QyDj9q2BsjHem9m8"
       },
       {
-        "titulo": "Inauguración",
+        "titulo": "Inauguración con la malnacidagdl",
         "dia": 1,
         "inicio": "20:00",
         "fin": "23:59",
