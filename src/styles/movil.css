@@ -4,8 +4,9 @@
 
    Esto no es el sitio de escritorio reflotado: es otro sitio. Misma paleta,
    misma tipografía, mismos cantos de 2px — otra estructura. El de escritorio
-   es una revista que se lee de arriba abajo; éste es una portada con cuatro
-   puertas, y detrás de cada puerta una pantalla que cabe entera.
+   es una revista que se lee de arriba abajo; éste es un cartel con un reloj:
+   el resto del sitio vive en una sola hoja, el índice, que sube desde abajo
+   cuando se toca.
 
    Por eso las páginas traen dos contenidos y no uno adaptado: `<Fragment
    slot="movil">` y el resto. Sólo se pinta uno de los dos, nunca los dos.
@@ -162,10 +163,9 @@
    * franja roja. Es el mismo problema que ya tenía el titular de escritorio y
    * se resuelve igual, con un `min()` que mide lo que sobra de pantalla.
    *
-   * De dónde sale el 30.6rem: lo fijo de la portada mide 457 px —barra 52,
-   * franja de datos 56, cuatro puertas 236, tira de atajos 33, línea legal 28,
-   * más filetes— y la escena se queda con el resto menos su relleno de 2rem.
-   * Eso son 28.6rem + 2rem.
+   * De dónde sale el número: lo fijo de la portada —barra, tiempo, tirador,
+   * cinta de marcas, línea legal, más filetes— medido en devtools, y la
+   * escena se queda con el resto menos su relleno de 2rem.
    *
    * Y el 3.22 en vez de 2.64 (tres líneas a 0.88 de interlínea): Anton pinta
    * las mayúsculas por fuera de su caja de línea, así que la caja sólo puede
@@ -175,132 +175,112 @@
    * Comprobado en 360×640, 375×667, 390×844 y 430×932: sólo actúa en los dos
    * primeros, en el resto sigue mandando el 16cqw de siempre. */
   .portada-rotulo .display {
-    font-size: min(16cqw, calc((100dvh - 30.6rem) / 3.22));
+    font-size: min(16cqw, calc((100dvh - 20.1rem) / 3.22));
   }
 
-  /* ── Franja de datos ────────────────────────────────────────────────────
-     Es el tercer color de la portada, y por eso es un elemento de verdad y no
-     una capa de la animación: un rojo que aparece y luego queda tapado por
-     las puertas se lee como un error. Éste entra barriendo y se queda. */
-  .portada-datos {
+  /* ── El tiempo ──────────────────────────────────────────────────────────
+     Es el tercer color de la portada, y por eso es un elemento de verdad y
+     no una capa de la animación: un rojo que aparece y luego queda tapado
+     por el índice se lee como un error. Éste entra barriendo y se queda.
+
+     Los cuatro números son los del contador de escritorio. Antes aquí sólo
+     vivían los días, en un renglón de texto corrido — con las cuatro
+     puertas fuera, el reloj tiene sitio para ser lo que es en cualquier otra
+     pantalla del sitio: una cifra por campo, no una frase. */
+  .portada-tiempo {
     flex: none;
     border-top: var(--borde) solid var(--color-tinta);
     border-bottom: var(--borde) solid var(--color-tinta);
     background-color: var(--color-rojo);
     color: var(--color-amarillo);
-    padding: 0.6rem 1rem;
   }
 
-  /* ── Las cuatro puertas ─────────────────────────────────────────────── */
-  .portada-puertas {
-    flex: none;
+  .portada-cuando {
+    padding: 0.6rem 1rem 0.45rem;
   }
 
-  .puerta {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-    padding: 0.7rem 1rem;
-    border-bottom: var(--borde) solid var(--color-tinta);
-    transition: background-color 0.25s var(--ease-salida);
-  }
-
-  .puerta--amarillo {
-    background-color: var(--color-amarillo);
-    color: var(--color-tinta);
-  }
-
-  .puerta--rojo {
-    background-color: var(--color-rojo);
-    color: var(--color-amarillo);
-  }
-
-  .puerta-numero {
-    flex: 0 0 1.75rem;
-    text-align: center;
-  }
-
-  .puerta--amarillo .puerta-numero {
-    color: var(--color-tinta);
-    border-bottom: 2px solid var(--color-rojo);
-  }
-
-  .puerta--amarillo .puerta-nota {
-    color: color-mix(in srgb, var(--color-tinta) 45%, transparent);
-  }
-
-  .puerta--rojo .puerta-numero {
-    align-self: flex-start;
-    background-color: var(--color-amarillo);
-    color: var(--color-tinta);
-    padding: 0.15rem 0.35rem;
-  }
-
-  .puerta--rojo .puerta-nota {
-    color: var(--color-papel);
-    opacity: 0.8;
-  }
-
-  .puerta:last-child {
-    border-bottom: 0;
-  }
-
-  .puerta--amarillo:active {
-    background-color: var(--color-rojo);
-    color: var(--color-amarillo);
-  }
-
-  .puerta--rojo:active {
-    background-color: var(--color-amarillo);
-    color: var(--color-tinta);
-  }
-
-  .puerta-flecha {
-    margin-left: auto;
-  }
-
-  /* ── Atajos ─────────────────────────────────────────────────────────────
-     Un renglón compacto entre las puertas y la línea legal, con lo que no
-     merece una puerta entera: el archivo, la convocatoria de voluntarixs y
-     —cuando exista la cuenta— el enlace de donar. Es la letra chica del
-     índice, no una quinta puerta: una quinta puerta le quita 70 px a la escena
-     de la silla y en las pantallas cortas se recorta contra el marco.
-
-     `grid-auto-columns: 1fr` reparte todos los accesos a partes iguales, así
-     que el renglón se lee igual de bien con el enlace de donar apagado. */
-  .portada-atajos {
-    flex: none;
+  .portada-reloj {
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
-    border-top: var(--borde) solid var(--color-tinta);
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid
+      color-mix(in srgb, var(--color-papel) 25%, transparent);
+  }
+
+  .portada-reloj > div {
+    padding: 0.4rem 0.25rem 0.55rem;
+    text-align: center;
+    border-right: 1px solid
+      color-mix(in srgb, var(--color-papel) 25%, transparent);
+  }
+
+  .portada-reloj > div:last-child {
+    border-right: 0;
+  }
+
+  .portada-reloj dd {
+    font-size: 1.9rem;
+    line-height: 1;
+  }
+
+  .portada-reloj dt {
+    margin-top: 0.2rem;
+    color: color-mix(in srgb, var(--color-papel) 65%, transparent);
+  }
+
+  /* ── Patrocinadores ─────────────────────────────────────────────────────
+     La misma cinta del escritorio, encogida a la anchura de un teléfono:
+     las fichas blancas —`.mosaico`, de global.css— y el `marquee` corriendo
+     sin fin. Va sobre rojo: el blanco de las fichas hace de tercer color
+     aquí, nunca el fondo. */
+  .portada-marcas {
+    flex: none;
+    background-color: var(--color-rojo);
+    padding: 0.55rem 0 0.65rem;
+    overflow: hidden;
+  }
+
+  .portada-marcas-rotulo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 1rem 0.5rem;
+    color: var(--color-papel);
+  }
+
+  .portada-marcas-filete {
+    display: inline-block;
+    width: 1.75rem;
+    height: 2px;
     background-color: var(--color-amarillo);
   }
 
-  .portada-atajos > a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    padding: 0.55rem 0.75rem;
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 0.55rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-tinta);
-    transition: background-color 0.25s var(--ease-salida);
+  .portada-pista {
+    overflow: hidden;
+    padding-left: 1rem;
   }
 
-  /* El filete que los separa va sólo entre medias: con `border-left` en todos,
-     el primero llevaría una raya contra el canto del marco. */
-  .portada-atajos > a + a {
-    border-left: var(--borde) solid var(--color-tinta);
+  /* Las fichas del escritorio a un tercio de su tamaño: 14rem allá, 4.75rem
+     aquí — siguen entrando cuatro y monedas, que es lo que dice que la tira
+     sigue. */
+  .portada-marcas .mosaico {
+    width: 4.75rem;
+    margin-right: 0.5rem;
+    box-shadow: 4px 4px 0 var(--color-amarillo);
   }
 
-  .portada-atajos > a:active {
-    background-color: var(--color-rojo);
-    color: var(--color-amarillo);
+  /* Movimiento reducido: sin JS que ponga un `data-quieta`, la propia media
+     query basta — la animación ya la mata `.marquee` en global.css, y aquí
+     sólo hace falta soltar el ancho y dejar que se lea arrastrando. */
+  @media (prefers-reduced-motion: reduce) {
+    .portada-pista {
+      overflow-x: auto;
+    }
+    .portada-pista .marquee {
+      width: auto;
+    }
+    .portada-pista .marquee > div[aria-hidden='true'] {
+      display: none;
+    }
   }
 
   .portada-legal {
@@ -342,18 +322,18 @@
     }
 
     /* La franja roja barre de izquierda a derecha, como un tachón */
-    [data-intro='si'] .portada-datos {
+    [data-intro='si'] .portada-tiempo {
       animation: tachar 0.45s var(--ease-cortina) 0.75s both;
     }
 
-    /* Y las puertas, al final */
-    [data-intro='si'] .portada-puertas,
-    [data-intro='si'] .portada-atajos,
+    /* Y el resto, al final: la cinta de marcas y el legal */
+    [data-intro='si'] .portada-marcas,
     [data-intro='si'] .portada-legal {
       animation: asomar 0.5s var(--ease-salida) 0.95s both;
     }
 
-    /* La barra de arriba entra con el texto */
+    /* La barra de arriba entra con el texto — y con ella, el índice: es el
+       único enlace que le queda, así que basta con que la barra aparezca. */
     [data-intro='si'] .portada-barra {
       animation: asomar 0.5s var(--ease-salida) 0.65s both;
     }
@@ -363,8 +343,7 @@
        trampa: se desactivan hasta que aparecen. El toque para saltar la
        entrada lo recoge el <html>, así que no se pierde. */
     [data-intro='si'] .portada-barra,
-    [data-intro='si'] .portada-puertas,
-    [data-intro='si'] .portada-atajos,
+    [data-intro='si'] .portada-marcas,
     [data-intro='si'] .portada-legal {
       pointer-events: none;
     }
@@ -373,11 +352,11 @@
   /* La silla arranca centrada en la PANTALLA, no en su hueco de la retícula:
      mientras el resto no ha aparecido, su sitio definitivo queda un palmo
      por encima del centro óptico y se nota. `--desvio` es la mitad de lo que
-     ocupan la franja, las puertas y el legal menos la barra: bloques de alto
+     ocupan el tiempo, la cinta y el legal menos la barra: bloques de alto
      fijo — el único que estira con la pantalla es la escena — así que el
      número vale igual en cualquier teléfono. */
   .portada-silla {
-    --desvio: 10rem;
+    --desvio: 5.8rem;
   }
 
   @keyframes silla-entra {
@@ -455,6 +434,129 @@
   }
 
   /* ═════════════════════════════════════════════════════════════════════
+     LA HOJA DEL ÍNDICE
+     Es la única puerta que le queda a la portada. Mismo mecanismo que el
+     manifiesto de arriba —`:target`, sin una línea de JS, con el atrás del
+     teléfono cerrándola— pero en vez de una cortina que cae desde arriba,
+     una hoja que se saca desde el canto de abajo: sube y tapa el tiempo, el
+     tirador y la cinta; el cartel se queda asomando arriba, que es lo que
+     dice en qué pantalla sigues estando.
+     ═════════════════════════════════════════════════════════════════════ */
+
+  .portada-hoja {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
+    translate: 0 100%;
+    visibility: hidden;
+    transition:
+      translate 0.4s var(--ease-cortina),
+      visibility 0s linear 0.4s;
+  }
+
+  .portada-hoja:target {
+    translate: 0 0;
+    visibility: visible;
+    transition:
+      translate 0.4s var(--ease-cortina),
+      visibility 0s;
+  }
+
+  .portada-asa {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 3.25rem;
+    padding: 0 1rem;
+    background-color: var(--color-amarillo);
+    color: var(--color-tinta);
+    border-bottom: var(--borde) solid var(--color-tinta);
+  }
+
+  .portada-asa-rotulo {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .portada-asa-cerrar {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  .portada-hoja ul {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+
+  .indice-fila {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--color-amarillo) 28%, transparent);
+    transition: background-color 0.25s var(--ease-salida);
+  }
+
+  .indice-numero {
+    flex: 0 0 1.5rem;
+    align-self: flex-start;
+    padding-top: 0.3rem;
+    color: var(--color-papel);
+    opacity: 0.85;
+  }
+
+  /* Nombre y nota apilados, con la columna entera para ellos: es lo que
+     evita que un nombre largo y una nota larga se partan en dos líneas y
+     choquen entre sí compitiendo por el mismo ancho. */
+  .indice-cuerpo {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .indice-nombre {
+    display: block;
+    font-size: 1.45rem;
+    line-height: 1.05;
+  }
+
+  .indice-nota {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--color-papel);
+    opacity: 0.8;
+  }
+
+  .indice-flecha {
+    flex: none;
+    align-self: center;
+    font-size: 1.1rem;
+  }
+
+  .indice-fila:active {
+    background-color: var(--color-amarillo);
+    color: var(--color-tinta);
+  }
+
+  .indice-fila:active .indice-numero,
+  .indice-fila:active .indice-nota {
+    color: var(--color-tinta);
+    opacity: 0.6;
+  }
+
+  .indice-fila:active .indice-flecha {
+    color: var(--color-rojo);
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════
      ACORDEONES
      Cuatro días o ocho sedes caben en una pantalla si vienen plegados.
      `<details>` lo hace nativo: sin JS, accesible y con búsqueda del
@@ -508,7 +610,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .movil-modal {
+    .movil-modal,
+    .portada-hoja {
       transition: none;
     }
   }
