@@ -97,6 +97,15 @@ const indice = [
       ? `${archivo.lista.length} ${archivo.lista.length === 1 ? 'edición' : 'ediciones'}`
       : archivo.estado,
   },
+  /* Patrocinadores no tiene página propia —en escritorio es una banda de la
+     home— así que aquí abre su pantalla `:target`, como el manifiesto. La
+     cinta del pie los enseña pasando; ésta los enseña quietos y todos, que
+     es lo que hace falta cuando alguien viene a buscar una marca. */
+  {
+    label: patrocinadores.titulo,
+    href: '#patrocinadores',
+    nota: `${patrocinadores.lista.length} marcas`,
+  },
   {
     label: 'Voluntarixs',
     href: convocatoriaVoluntarixs.href,
@@ -330,4 +339,49 @@ const duracionCinta = ((tira.length * PASO) / VELOCIDAD).toFixed(1);
       </blockquote>
     </div>
   </section>
+
+  {/* ── Patrocinadores: pantalla con :target ─────────────────────────── */}
+  {/* La cinta del pie los enseña de paso y a tamaño de cinta; aquí están
+      todos, quietos y a doble columna, que es como se busca una marca.
+
+      `movil-modal--diferida`: son 27 imágenes más en una portada que ya
+      lleva las de la cinta. Sin eso el teléfono las pide todas al abrir la
+      home, para una pantalla que a lo mejor nadie abre. */}
+  {
+    patrocinadores.lista.length > 0 && (
+      <section
+        id="patrocinadores"
+        class="movil-modal movil-modal--diferida bg-amarillo text-tinta"
+        aria-label={patrocinadores.titulo}
+      >
+        <div class="movil-barra bg-amarillo">
+          <a
+            href="#indice"
+            class="meta border-r-2 border-tinta bg-rojo px-4 font-bold text-papel"
+          >
+            <span aria-hidden="true">←</span>&nbsp; Índice
+          </a>
+          <span class="meta px-4 opacity-55">
+            {patrocinadores.lista.length} marcas
+          </span>
+        </div>
+
+        <div class="movil-cuerpo">
+          <div class="border-b-2 border-tinta px-4 py-5">
+            <h2 class="display text-[12cqw] leading-[0.92]">
+              {patrocinadores.titulo}
+            </h2>
+          </div>
+
+          {/* Sobre rojo y en dos columnas: las fichas son blancas, así que
+              el campo tiene que ser el contrario para que se recorten. */}
+          <div class="grid grid-cols-2 gap-3 bg-rojo p-4">
+            {patrocinadores.lista.map((marca) => (
+              <Mosaico marca={marca} class="marca-ficha" />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
 </div>
