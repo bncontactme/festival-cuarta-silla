@@ -285,13 +285,15 @@
     width: 8.75rem;
   }
 
-  /* Parar y crecer son el mismo gesto, así que van con el mismo disparador.
-     `.marquee:hover` de global.css sólo para cuando el dedo cae encima de la
-     tira; sobre el rótulo de la banda crecía sin pararse, que es media
-     interacción. Desde la banda entera, las dos cosas pasan a la vez. */
+  /* Y sigue corriendo mientras crece. `.marquee:hover` de global.css la para
+     en seco al tocarla, que en el escritorio está bien —el puntero se posa
+     para leer un logo— pero en el teléfono el dedo pasa por encima al
+     desplazarse y dejaba la cinta plantada sin que nadie se lo pidiera. Aquí
+     el toque hace una sola cosa: agrandar. */
+  .portada-marcas .marquee:hover,
   .portada-marcas:hover .marquee,
   .portada-marcas:focus-within .marquee {
-    animation-play-state: paused;
+    animation-play-state: running;
   }
 
   /* Movimiento reducido: sin JS que ponga un `data-quieta`, la propia media
