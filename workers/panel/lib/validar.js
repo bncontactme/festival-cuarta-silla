@@ -220,7 +220,11 @@ class Verificador {
     const vistos = new Set();
     salida.forEach((s, i) => {
       if (!s.nombre) return;
-      if (s.nombre === SEDE_TODAS) {
+      // Pelado y no `===`: con la comparación exacta, «Todas Las Sedes» pasaba
+      // el filtro y entraba como sede de verdad —con «Todas» de dirección—,
+      // que es justo lo que este aviso venía a impedir. Así lo caza escrito
+      // como se escriba.
+      if (pelar(s.nombre) === pelar(SEDE_TODAS)) {
         this.error('sedes[' + i + '].nombre', '«' + SEDE_TODAS + '» es un nombre reservado: es lo que el programa usa para los recorridos que pasan por todas. Ponle otro.');
       }
       const k = pelar(s.nombre);

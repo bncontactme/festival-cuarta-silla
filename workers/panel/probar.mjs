@@ -85,6 +85,14 @@ r = validar('sedes', [
 ], {});
 ok('sede repetida se rechaza', r.errores.some((e) => e.includes('está repetida')), JSON.stringify(r.errores));
 
+// El nombre reservado, escrito como se escriba. Con `===` se colaba «Todas Las
+// Sedes» y acababa de sede de verdad —con «Todas» de dirección— en el sitio.
+for (const nombre of ['Todas las sedes', 'Todas Las Sedes', 'todas las sedes', 'Todas  Las  Sedes']) {
+  r = validar('sedes', [{ nombre, direccion: 'Todas' }], {});
+  ok(`«${nombre}» se rechaza como sede`,
+     r.errores.some((e) => e.includes('nombre reservado')), JSON.stringify(r.errores));
+}
+
 r = validar('sedes', [{ nombre: 'X', direccion: 'Y', coord: [20.67, -103.35] }], {});
 ok('coordenada buena pasa', r.errores.length === 0 && r.datos[0].coord.length === 2, JSON.stringify(r.errores));
 
