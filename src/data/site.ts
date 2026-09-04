@@ -178,6 +178,28 @@ export const enlaceMapa = (sede: Sede) =>
     sede.direccion,
   )}`;
 
+/** Sin tildes, sin mayúsculas y sin dobles espacios: así se comparan nombres
+ *  de sede que alguien teclea en el panel, donde «Todas Las Sedes» y «todas
+ *  las sedes» son la misma cosa escrita dos veces. */
+const pelar = (s: string) =>
+  s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+
+/** Si una actividad es de las que pasan por todas — un recorrido guiado. No
+ *  tiene dirección ni mapa a los que llevar, y eso no es un hueco: es lo que
+ *  es.
+ *
+ *  Compara pelado y no con `===` porque esto se escribe a mano en el panel:
+ *  el nombre reservado es «Todas las sedes» y en el contenido apareció como
+ *  «Todas Las Sedes», que con una comparación exacta son dos cosas distintas
+ *  —y una de ellas, un recorrido sin carril—. */
+export const enTodasLasSedes = (nombre: string) =>
+  pelar(nombre) === pelar(SEDE_TODAS);
+
 export const sedes = {
   titulo: 'Sedes',
   acciones: {
@@ -197,12 +219,24 @@ export const sedes = {
     credito: 'Cartografía © OpenStreetMap',
   },
   /**
-   * Las catorce sedes. **Se editan en `/admin`**, no aquí.
+   * Las sedes de verdad. **Se editan en `/admin`**, no aquí.
    *
    * El orden es el que se pinta y no es alfabético: es el de la lista que nos
    * pasaron, y el panel deja arrastrar para cambiarlo.
+   *
+   * El filtro saca «Todas las sedes» de la lista. Es un nombre reservado para
+   * los recorridos que pasan por varias —lo dice `SEDE_TODAS` en `tipos.ts`—,
+   * pero en el panel alguien lo dio de alta como sede, con «Todas» de
+   * dirección. Como fila de `sedes` ponía una tarjeta con dirección en
+   * `/sedes`, una estrella en el plano y un lugar de más en todas las cuentas
+   * del sitio: quince donde hay catorce. Sirve para decir dónde pasa un
+   * evento, no es un sitio al que se pueda ir.
+   *
+   * Se filtra aquí y no borrando la fila en `contenido.json` porque ese
+   * archivo lo regenera `scripts/instantanea.mjs` en cada build: la fila
+   * volvería en la siguiente instantánea del panel.
    */
-  lista: contenido.sedes,
+  lista: contenido.sedes.filter((s) => !enTodasLasSedes(s.nombre)),
 };
 
 /* `Marca` vive ahora en `tipos.ts` y se re-exporta arriba. */
@@ -251,10 +285,8 @@ export const privacidad = {
 export const sedeDe = (nombre: string) =>
   sedes.lista.find((s) => s.nombre === nombre);
 
-/** Si una actividad es de las que pasan por todas — un recorrido guiado. No
- *  tiene dirección ni mapa a los que llevar, y eso no es un hueco: es lo que
- *  es. */
-export const enTodasLasSedes = (nombre: string) => nombre === SEDE_TODAS;
+/* `enTodasLasSedes` se define arriba, junto a `sedes`: la lista lo necesita
+   para filtrarse a sí misma. */
 
 /** Los cuatro tipos, cada uno con su tinta. El color no pinta la barra entera
  *  —eso era un carnaval—: es el filete de 5 px del canto izquierdo y el
@@ -443,18 +475,13 @@ export const registroPorDia = programa.dias
  */
 {
   const nombres = sedes.lista.map((s) => s.nombre);
-  /** Sin tildes, sin mayúsculas y sin dobles espacios: así se detecta el
-   *  «quisiste decir…» sin depender de cómo se tecleó. */
-  const pelar = (s: string) =>
-    s
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .toLowerCase()
-      .replace(/\s+/g, ' ')
-      .trim();
 
+  /* «Todas las sedes» no está en `nombres` —se filtra de la lista, porque no
+     es una sede— y aquí no es un error: es el nombre reservado con el que un
+     recorrido dice que pasa por varias. Sin esta salvedad, cada recorrido del
+     programa saldría en el aviso como una sede mal escrita. */
   const sueltas = actividades
-    .filter((a) => !nombres.includes(a.sede))
+    .filter((a) => !enTodasLasSedes(a.sede) && !nombres.includes(a.sede))
     .map((a) => {
       const parecida = nombres.find((n) => pelar(n) === pelar(a.sede));
       return `  · «${a.sede}» (en «${a.titulo}»)${

@@ -163,9 +163,10 @@
    * franja roja. Es el mismo problema que ya tenía el titular de escritorio y
    * se resuelve igual, con un `min()` que mide lo que sobra de pantalla.
    *
-   * De dónde sale el número: lo fijo de la portada —barra, tiempo, tirador,
-   * cinta de marcas, línea legal, más filetes— medido en devtools, y la
-   * escena se queda con el resto menos su relleno de 2rem.
+   * De dónde sale el número: lo fijo de la portada —barra 52, tiempo 105,
+   * cinta de marcas 114, línea legal 37, filetes incluidos: 308 px— medido
+   * en devtools, y la escena se queda con el resto menos su relleno de 2rem.
+   * Eso son 19.25rem + 2rem, redondeado hacia arriba.
    *
    * Y el 3.22 en vez de 2.64 (tres líneas a 0.88 de interlínea): Anton pinta
    * las mayúsculas por fuera de su caja de línea, así que la caja sólo puede
@@ -175,7 +176,7 @@
    * Comprobado en 360×640, 375×667, 390×844 y 430×932: sólo actúa en los dos
    * primeros, en el resto sigue mandando el 16cqw de siempre. */
   .portada-rotulo .display {
-    font-size: min(16cqw, calc((100dvh - 20.1rem) / 3.22));
+    font-size: min(16cqw, calc((100dvh - 21.3rem) / 3.22));
   }
 
   /* ── El tiempo ──────────────────────────────────────────────────────────
@@ -259,13 +260,40 @@
     padding-left: 1rem;
   }
 
-  /* Las fichas del escritorio a un tercio de su tamaño: 14rem allá, 4.75rem
-     aquí — siguen entrando cuatro y monedas, que es lo que dice que la tira
-     sigue. */
+  /* Las fichas del escritorio a media escala: 14rem allá, 6.5rem aquí. A
+     4.75rem entraban seis en el ancho del teléfono, pero un logotipo dentro
+     de una caja de 76 px no se lee — que es de lo que sirve una cinta de
+     patrocinadores. A 6.5rem entran cuatro y monedas: siguen asomando por el
+     canto —que es lo que dice que la tira sigue— y ya se distingue la marca. */
   .portada-marcas .mosaico {
-    width: 4.75rem;
+    width: 6.5rem;
     margin-right: 0.5rem;
     box-shadow: 4px 4px 0 var(--color-amarillo);
+    transition: width 0.28s var(--ease-salida);
+  }
+
+  /* Al tocarla, la tira se para —eso ya lo hace `.marquee:hover` en
+     global.css— y además crece: parada pero del mismo tamaño, el gesto no
+     tiene premio. Un tercio más de caja es lo que hace legible un logotipo
+     que en cinta sólo se intuye.
+
+     `:focus-within` acompaña al `:hover` para el teclado, y en el teléfono
+     el toque enciende el `:hover` y lo deja encendido hasta tocar fuera,
+     que es justo la duración que le sirve a esto. */
+  .portada-marcas:hover .mosaico,
+  .portada-marcas:focus-within .mosaico {
+    width: 8.75rem;
+  }
+
+  /* Y sigue corriendo mientras crece. `.marquee:hover` de global.css la para
+     en seco al tocarla, que en el escritorio está bien —el puntero se posa
+     para leer un logo— pero en el teléfono el dedo pasa por encima al
+     desplazarse y dejaba la cinta plantada sin que nadie se lo pidiera. Aquí
+     el toque hace una sola cosa: agrandar. */
+  .portada-marcas .marquee:hover,
+  .portada-marcas:hover .marquee,
+  .portada-marcas:focus-within .marquee {
+    animation-play-state: running;
   }
 
   /* Movimiento reducido: sin JS que ponga un `data-quieta`, la propia media
@@ -356,7 +384,7 @@
      fijo — el único que estira con la pantalla es la escena — así que el
      número vale igual en cualquier teléfono. */
   .portada-silla {
-    --desvio: 5.8rem;
+    --desvio: 6.4rem;
   }
 
   @keyframes silla-entra {
@@ -433,14 +461,35 @@
       visibility 0s;
   }
 
+  /* La pantalla de marcas trae 27 fichas más dentro de la portada. No cuesta
+     descarga —son las mismas URLs que ya pide la cinta del pie, así que
+     salen de la caché— pero sí maquetar y decodificar 27 imágenes para algo
+     que a lo mejor no se abre. `content-visibility` se salta ese trabajo
+     mientras la pantalla está cerrada. */
+  .movil-modal--diferida {
+    content-visibility: hidden;
+  }
+
+  .movil-modal--diferida:target {
+    content-visibility: visible;
+  }
+
+  /* Las fichas de la rejilla llenan su columna: el ancho lo pone la rejilla
+     de dos, no las 13rem que trae `.mosaico` puesto desde el escritorio. */
+  .marca-ficha {
+    width: 100%;
+  }
+
   /* ═════════════════════════════════════════════════════════════════════
      LA HOJA DEL ÍNDICE
      Es la única puerta que le queda a la portada. Mismo mecanismo que el
-     manifiesto de arriba —`:target`, sin una línea de JS, con el atrás del
-     teléfono cerrándola— pero en vez de una cortina que cae desde arriba,
-     una hoja que se saca desde el canto de abajo: sube y tapa el tiempo, el
-     tirador y la cinta; el cartel se queda asomando arriba, que es lo que
-     dice en qué pantalla sigues estando.
+     manifiesto de arriba: `:target`, sin una línea de JS, con el atrás del
+     teléfono cerrándola.
+
+     Aparece y ya — sin deslizarse. Subía desde el canto de abajo como una
+     hoja que se saca, y el gesto contaba un arrastre que nadie ha hecho:
+     esto se abre de un toque, así que el movimiento sobra. Queda un fundido
+     corto, lo justo para que no dé un salto seco.
      ═════════════════════════════════════════════════════════════════════ */
 
   .portada-hoja {
@@ -451,18 +500,18 @@
     flex-direction: column;
     background-color: var(--color-rojo);
     color: var(--color-amarillo);
-    translate: 0 100%;
+    opacity: 0;
     visibility: hidden;
     transition:
-      translate 0.4s var(--ease-cortina),
-      visibility 0s linear 0.4s;
+      opacity 0.16s var(--ease-salida),
+      visibility 0s linear 0.16s;
   }
 
   .portada-hoja:target {
-    translate: 0 0;
+    opacity: 1;
     visibility: visible;
     transition:
-      translate 0.4s var(--ease-cortina),
+      opacity 0.16s var(--ease-salida),
       visibility 0s;
   }
 
