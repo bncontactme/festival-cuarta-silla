@@ -234,10 +234,25 @@
      sin fin. Va sobre rojo: el blanco de las fichas hace de tercer color
      aquí, nunca el fondo. */
   .portada-marcas {
+    position: relative;
     flex: none;
     background-color: var(--color-rojo);
     padding: 0.55rem 0 0.65rem;
     overflow: hidden;
+  }
+
+  /* La etiqueta que recoge el toque, tapando la banda entera. */
+  .cinta-lupa-tapa {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+  }
+
+  /* El foco del teclado no puede vivir en la casilla, que es invisible: se
+     pinta sobre la banda, que es lo que se va a mover. */
+  .cinta-lupa:focus-visible ~ .cinta-lupa-tapa {
+    outline: var(--borde) solid var(--color-amarillo);
+    outline-offset: -4px;
   }
 
   .portada-marcas-rotulo {
@@ -272,27 +287,20 @@
     transition: width 0.28s var(--ease-salida);
   }
 
-  /* Al tocarla, la tira se para —eso ya lo hace `.marquee:hover` en
-     global.css— y además crece: parada pero del mismo tamaño, el gesto no
-     tiene premio. Un tercio más de caja es lo que hace legible un logotipo
-     que en cinta sólo se intuye.
-
-     `:focus-within` acompaña al `:hover` para el teclado, y en el teléfono
-     el toque enciende el `:hover` y lo deja encendido hasta tocar fuera,
-     que es justo la duración que le sirve a esto. */
-  .portada-marcas:hover .mosaico,
-  .portada-marcas:focus-within .mosaico {
+  /* Un toque agranda, el siguiente devuelve la ficha a su tamaño. Colgaba de
+     `:hover`, que en un teléfono se enciende al tocar y se queda encendido:
+     el gesto tenía ida pero no vuelta. La casilla tiene las dos. */
+  .cinta-lupa:checked ~ .portada-pista .mosaico {
     width: 8.75rem;
   }
 
-  /* Y sigue corriendo mientras crece. `.marquee:hover` de global.css la para
-     en seco al tocarla, que en el escritorio está bien —el puntero se posa
-     para leer un logo— pero en el teléfono el dedo pasa por encima al
-     desplazarse y dejaba la cinta plantada sin que nadie se lo pidiera. Aquí
-     el toque hace una sola cosa: agrandar. */
-  .portada-marcas .marquee:hover,
-  .portada-marcas:hover .marquee,
-  .portada-marcas:focus-within .marquee {
+  /* Y sigue corriendo, agrandada o no. `.marquee:hover` de global.css la para
+     en seco, que en el escritorio está bien —el puntero se posa para leer un
+     logo— pero en el teléfono el dedo pasa por encima al desplazarse y dejaba
+     la cinta plantada sin que nadie se lo pidiera. Aquí el toque hace una
+     sola cosa: cambiar de tamaño. */
+  .portada-marcas .marquee,
+  .portada-marcas .marquee:hover {
     animation-play-state: running;
   }
 

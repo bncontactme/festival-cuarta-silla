@@ -224,6 +224,20 @@ const duracionCinta = ((tira.length * PASO) / VELOCIDAD).toFixed(1);
     {
       patrocinadores.lista.length > 0 && (
         <section class="portada-marcas" aria-label={patrocinadores.titulo}>
+          {/* La lupa de la cinta, con una casilla y sin una línea de JS.
+              Agrandar colgaba de `:hover`, y en un teléfono el `:hover` se
+              enciende al tocar y se queda encendido: se agrandaba y ya no
+              había manera de devolverla a su tamaño. Una casilla sí tiene
+              las dos caras del gesto — un toque agranda, el siguiente
+              encoge— y de paso se maneja con el teclado, que un `:hover` no.
+
+              Va antes de la tira porque el selector la busca hacia adelante
+              (`:checked ~ .portada-pista`). */}
+          <input
+            id="cinta-lupa"
+            type="checkbox"
+            class="cinta-lupa sr-only"
+          />
           <p class="meta portada-marcas-rotulo">
             <span class="portada-marcas-filete" aria-hidden="true" />
             {patrocinadores.titulo}
@@ -242,6 +256,14 @@ const duracionCinta = ((tira.length * PASO) / VELOCIDAD).toFixed(1);
               ))}
             </div>
           </div>
+
+          {/* La etiqueta, del tamaño de la banda entera: el dedo no tiene que
+              acertarle a una ficha que además se está moviendo. Va al final y
+              en absoluto para quedar por encima de la tira sin robarle sitio;
+              el texto es el nombre accesible de la casilla. */}
+          <label for="cinta-lupa" class="cinta-lupa-tapa">
+            <span class="sr-only">Agrandar los logotipos</span>
+          </label>
         </section>
       )
     }
