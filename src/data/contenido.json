@@ -1,6 +1,6 @@
 {
-  "version": 70,
-  "actualizado": "2026-09-06T01:05:08.844Z",
+  "version": 71,
+  "actualizado": "2026-09-06T01:14:50.695Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -860,8 +860,11 @@
       {
         "nombre": "Chaneque Studio",
         "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384693/cuartasilla/marcas/hjymra993oduekw2mink.png"
+      },
+      {
+        "nombre": "Melé Miscelánea Sustentable",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788657284/cuartasilla/marcas/mele-miscelanea-sustentable/j7kwl7otujeberdnpgse.jpg"
       }
-    ],
-    "colaboradores": []
+    ]
   }
 }
