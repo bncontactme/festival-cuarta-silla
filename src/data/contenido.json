@@ -1,6 +1,6 @@
 {
-  "version": 66,
-  "actualizado": "2026-09-03T04:13:39.547Z",
+  "version": 67,
+  "actualizado": "2026-09-06T00:29:34.138Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -439,7 +439,7 @@
         "dia": 2,
         "inicio": "18:00",
         "fin": "19:00",
-        "sede": "Casa Feria",
+        "sede": "Staditche",
         "tipo": "charla",
         "artista": "Gerardo Lammers",
         "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
