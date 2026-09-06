@@ -1,6 +1,6 @@
 {
-  "version": 67,
-  "actualizado": "2026-09-06T00:29:34.138Z",
+  "version": 68,
+  "actualizado": "2026-09-06T00:30:32.221Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -438,7 +438,7 @@
         "titulo": "Introducción al arte conceptual latinoamericano",
         "dia": 2,
         "inicio": "18:00",
-        "fin": "19:00",
+        "fin": "20:00",
         "sede": "Staditche",
         "tipo": "charla",
         "artista": "Gerardo Lammers",
