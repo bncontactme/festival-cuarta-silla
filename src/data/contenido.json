@@ -1,6 +1,6 @@
 {
-  "version": 84,
-  "actualizado": "2026-09-08T22:59:31.523Z",
+  "version": 85,
+  "actualizado": "2026-09-08T23:08:18.592Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1330,6 +1330,12 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907600/cuartasilla/artistas/lipmzpqiumtfebj9nvse.jpg",
       "instagram": "https://www.instagram.com/zahildur/",
       "sede": "Salón Liminal"
+    },
+    {
+      "nombre": "Colectiva Hilos",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788908883/cuartasilla/artistas/aafuhohv3kcydklprwh4.jpg",
+      "instagram": "https://www.instagram.com/colectivahilos/",
+      "sede": "No Museo"
     }
   ],
   "archivo": [],
