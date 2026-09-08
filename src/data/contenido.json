@@ -1,6 +1,6 @@
 {
-  "version": 78,
-  "actualizado": "2026-09-08T21:01:05.776Z",
+  "version": 79,
+  "actualizado": "2026-09-08T21:34:46.476Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -808,7 +808,146 @@
     {
       "nombre": "Eduardo Paniagua",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788656706/cuartasilla/artistas/eduardo-paniagua/t58cqsmeegfgactlhkhd.jpg",
-      "instagram": "https://www.instagram.com/orizabaveinticuatro/"
+      "instagram": "https://www.instagram.com/orizabaveinticuatro/",
+      "sede": "Staditche"
+    },
+    {
+      "nombre": "Hixim",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788901395/cuartasilla/artistas/zirguikv2qkpqoatmqrs.jpg",
+      "instagram": "https://www.instagram.com/hixim/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Galería Jaime Nuno",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788901574/cuartasilla/artistas/cpnjugcz5txxiwy2o0xm.jpg",
+      "instagram": "https://www.instagram.com/galeriajaimenuno/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Eloy Basaldua Castañeda",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788901692/cuartasilla/artistas/eloy-basaldua-castaneda/jer5fscadsvigctxucat.jpg",
+      "instagram": "https://www.instagram.com/notorious_eloy/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Emmanuel Arias",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788901793/cuartasilla/artistas/odcli1tlbmbxklqfmyfn.jpg",
+      "instagram": "https://www.instagram.com/bigbullpapi",
+      "sede": "Casa Feria"
+    },
+    {
+      "nombre": "Ernesto Renteria Flores",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788901893/cuartasilla/artistas/lsiwydziksaoxeqf3hwf.jpg",
+      "instagram": "https://www.instagram.com/perro.sin.luz/",
+      "sede": "Staditche"
+    },
+    {
+      "nombre": "Esperanza Plazola Espitia",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902350/cuartasilla/artistas/flfd5css8eimiknz2ab4.jpg",
+      "instagram": "https://www.instagram.com/peraplazolart/",
+      "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Fernanda Carolina Gutiérrez López",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902381/cuartasilla/artistas/sedu07gd8t2cvttdryqh.jpg",
+      "instagram": "https://www.instagram.com/karoma_da/",
+      "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Fernanda Leaño",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902413/cuartasilla/artistas/iljfwifcdwmaffcggyu2.jpg",
+      "instagram": "https://www.instagram.com/fernandaleano/",
+      "sede": "Estallido Art Project"
+    },
+    {
+      "nombre": "Fernando Gress Muñoz",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902444/cuartasilla/artistas/rpjkylm0zjpwnkvurftj.jpg",
+      "instagram": "https://www.instagram.com/ponib0y/",
+      "sede": "Staditche"
+    },
+    {
+      "nombre": "Francisco Gaytan",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902473/cuartasilla/artistas/zf1kdwp7koicvr2i1nbb.jpg",
+      "instagram": "https://www.instagram.com/gcuadrada/",
+      "sede": "Ala Rota"
+    },
+    {
+      "nombre": "Francisco Israel Espinoza Victorio",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902512/cuartasilla/artistas/dwuruk10tve1qw95fyx3.jpg",
+      "instagram": "https://www.instagram.com/israel.espinoza.v/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Gallo Gang",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902542/cuartasilla/artistas/l1uaeoh1qym2mewsd1jc.jpg",
+      "instagram": "https://www.instagram.com/enelcorraldelgallo/",
+      "sede": "Estudio Arrechiga"
+    },
+    {
+      "nombre": "Genesis Pinedo Martinez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902581/cuartasilla/artistas/y184xlxiqqbnoj5wstm1.jpg",
+      "instagram": "https://www.instagram.com/jardin.de.genesis/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Iosune Salaya",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902614/cuartasilla/artistas/easitiz3hr9fshcw5lxq.jpg",
+      "instagram": "https://www.instagram.com/azulultraamar/",
+      "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Iskar",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902869/cuartasilla/artistas/uuanemjxz2yu1hofiqno.jpg",
+      "instagram": "https://www.instagram.com/iskar.art/",
+      "sede": "Casa Dos Guayabos"
+    },
+    {
+      "nombre": "Iván García",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902930/cuartasilla/artistas/x5ujagzfnqvyijtngp2g.jpg",
+      "instagram": "https://www.instagram.com/ivanlaffontt/",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Ixchel Sabina Aguilar Flores",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902965/cuartasilla/artistas/mt8ofheihnwm3iqvle8t.jpg",
+      "instagram": "https://www.instagram.com/xelsab/",
+      "sede": "Estudio Arrechiga"
+    },
+    {
+      "nombre": "Jacqueline García",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903019/cuartasilla/artistas/jm2yg9j086mhhvzm9o2i.jpg",
+      "instagram": "https://www.instagram.com/lasseer_/",
+      "sede": "Casa Dos Guayabos"
+    },
+    {
+      "nombre": "Javier Eduardo Sánchez Hernández",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903062/cuartasilla/artistas/o5qcdgjowkjglvthhetv.jpg",
+      "instagram": "https://www.instagram.com/eduardo___sh/",
+      "sede": "Staditche"
+    },
+    {
+      "nombre": "Jenny Vivas",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903121/cuartasilla/artistas/bobhdkev1ryesfnq6lru.jpg",
+      "instagram": "https://www.instagram.com/jennv_art/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Jenni Torres",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903204/cuartasilla/artistas/prwlmwmb9n8yrqtco7je.jpg",
+      "instagram": "https://www.instagram.com/jenntorres_42/",
+      "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Jessica D. Sanguino González",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903237/cuartasilla/artistas/peo9nxmw2cfxfcuwa5em.jpg",
+      "instagram": "https://www.instagram.com/gota.ddessden/",
+      "sede": "Estudio Arrechiga"
+    },
+    {
+      "nombre": "Jesús Irene",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903269/cuartasilla/artistas/eanmtwv7bfe3av6oyxqd.jpg",
+      "instagram": "https://www.instagram.com/irene_en_camara_lenta/",
+      "sede": "No Museo"
     }
   ],
   "archivo": [],
