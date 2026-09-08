@@ -1,6 +1,6 @@
 {
-  "version": 76,
-  "actualizado": "2026-09-08T03:31:18.384Z",
+  "version": 77,
+  "actualizado": "2026-09-08T04:42:41.590Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -519,7 +519,7 @@
         "tipo": "escena"
       },
       {
-        "titulo": "Concierto: Corridos Cristeros – Espectro Corridos (\"Los Dos Amigos\")",
+        "titulo": "Concierto: Espectro Corridos (\"Los Dos Amigos\")",
         "dia": 2,
         "inicio": "21:15",
         "fin": "22:30",
