@@ -1,6 +1,6 @@
 {
-  "version": 79,
-  "actualizado": "2026-09-08T21:34:46.476Z",
+  "version": 80,
+  "actualizado": "2026-09-08T22:16:31.570Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -948,6 +948,210 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903269/cuartasilla/artistas/eanmtwv7bfe3av6oyxqd.jpg",
       "instagram": "https://www.instagram.com/irene_en_camara_lenta/",
       "sede": "No Museo"
+    },
+    {
+      "nombre": "Jimena Herreria",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903410/cuartasilla/artistas/yvxjihcsmt6wnlqhrijl.jpg",
+      "instagram": "https://www.instagram.com/mena.herreria/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Job Samaniego Rivera",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903449/cuartasilla/artistas/g35zfr0srjxpj2lsrhvj.jpg",
+      "instagram": "https://www.instagram.com/tapatixtriste/",
+      "sede": "Estudio Arrechiga"
+    },
+    {
+      "nombre": "José G. Rivera",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903538/cuartasilla/artistas/fa1awpsut7zgv4odgqh9.jpg",
+      "instagram": "https://www.instagram.com/joooseg/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "José de Jesús De La Torre Anaya",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903576/cuartasilla/artistas/btegamm5izgs2riszihf.jpg",
+      "instagram": "https://www.instagram.com/joe_066/",
+      "sede": "Staditche"
+    },
+    {
+      "nombre": "Jovany Cuarenta",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903612/cuartasilla/artistas/wsukqqgcdycka18bgkqj.jpg",
+      "instagram": "https://www.instagram.com/cuarenta.art/",
+      "sede": "Ala Rota"
+    },
+    {
+      "nombre": "Juan Jose Cordeña",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903669/cuartasilla/artistas/i3sffzasxfr4mmdtgkpb.jpg",
+      "instagram": "https://www.instagram.com/jhomtajhomta/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Kiakari Prado Mendoza",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903709/cuartasilla/artistas/zr2gpucetnh34vuxlwxf.jpg",
+      "instagram": "https://www.instagram.com/kiakaripradom/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Leonardo Ascencio Ramírez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903744/cuartasilla/artistas/qzgg0j4ukd98382hta1r.jpg",
+      "instagram": "https://www.instagram.com/leonardo_ascncio/",
+      "sede": "Staditche"
+    },
+    {
+      "nombre": "Lino Octavio Ramírez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903781/cuartasilla/artistas/sttp7yu5pvliae5oq6jq.jpg",
+      "instagram": "https://www.instagram.com/linovite_art/",
+      "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "Lorea de la Peña",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903820/cuartasilla/artistas/tr5x5bhbxggvotknunrw.jpg",
+      "instagram": "https://www.instagram.com/loreadlpe/",
+      "sede": "Staditche"
+    },
+    {
+      "nombre": "Lucano",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903869/cuartasilla/artistas/ly7dytrbrvutouufo6xm.jpg",
+      "instagram": "https://www.instagram.com/estudiovanidad/",
+      "sede": "Foro AM"
+    },
+    {
+      "nombre": "Luis Fernando Gómez Villalpando",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903916/cuartasilla/artistas/depdohatscqandqkliqu.jpg",
+      "instagram": "https://www.instagram.com/fg.villalpando/",
+      "sede": "Casa Feria"
+    },
+    {
+      "nombre": "Luis Flores Valente",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903959/cuartasilla/artistas/rz8qvmxbciwisbarqbck.jpg",
+      "instagram": "https://www.instagram.com/unpezdebabel/",
+      "sede": "Estudio Arrechiga"
+    },
+    {
+      "nombre": "Luisa Dozell",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788904011/cuartasilla/artistas/mmtb5jk5maxl6dm1hazg.jpg",
+      "instagram": "https://www.instagram.com/d0zell/",
+      "sede": "Casa Feria"
+    },
+    {
+      "nombre": "Manuel Rodríguez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788904109/cuartasilla/artistas/mgcxxcqbhmygvmnpc8gi.jpg",
+      "instagram": "https://www.instagram.com/mrodriguezart/",
+      "sede": "Foro AM"
+    },
+    {
+      "nombre": "Marcela Moreno Medina",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788904145/cuartasilla/artistas/xx0tqy4t79j9fe4pnf1g.jpg",
+      "instagram": "https://www.instagram.com/marcegmm.arte/",
+      "sede": "Ala Rota"
+    },
+    {
+      "nombre": "María Inés Martín Villaseñor",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788904205/cuartasilla/artistas/lkvxoqycbjd5qvmpj6au.jpg",
+      "instagram": "https://www.instagram.com/ines.table.mente/",
+      "sede": "Estallido Art Project"
+    },
+    {
+      "nombre": "María José Benítez Galindo",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788904305/cuartasilla/artistas/cy3ex8fqrhtt3y4ak6ks.jpg",
+      "instagram": "https://www.instagram.com/mariajose_benitezg/",
+      "sede": "Casa Feria"
+    },
+    {
+      "nombre": "María José Martínez Castellanos",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788904358/cuartasilla/artistas/ijogzfi0qknu0nfdtekt.jpg",
+      "instagram": "https://www.instagram.com/marijo.martinezc/",
+      "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Mariana Beltrán",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788904496/cuartasilla/artistas/t395cafzct0dwcld57xe.jpg",
+      "instagram": "https://www.instagram.com/mariana_belmas/",
+      "sede": "Casa Feria"
+    },
+    {
+      "nombre": "Mariana Rivas",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788904543/cuartasilla/artistas/igl7vn6q1wxugcu00ago.jpg",
+      "instagram": "https://www.instagram.com/lilith.sin.cabeza/",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Mariana Tavares",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788904584/cuartasilla/artistas/slayazaimvg65pxubd7a.jpg",
+      "instagram": "https://www.instagram.com/mar.expuesto/",
+      "sede": "Casa Feria"
+    },
+    {
+      "nombre": "Mar",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788904621/cuartasilla/artistas/duebspjhntm1ilxnqifm.jpg",
+      "instagram": "https://www.instagram.com/m.m.a.r.s/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Melissa Holguin",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788904691/cuartasilla/artistas/wyvwy2htdd684ipznjiq.jpg",
+      "instagram": "https://www.instagram.com/meldemiiel/",
+      "sede": "Foro AM"
+    },
+    {
+      "nombre": "Mia",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905036/cuartasilla/artistas/mia/uyjjs1qj3uivcvfn0jyd.jpg",
+      "instagram": "https://www.instagram.com/esabohemia/",
+      "sede": "Estudio Arrechiga"
+    },
+    {
+      "nombre": "Miguel Ángel Vega Magallón",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905079/cuartasilla/artistas/q1z2aukqvjkbjssdvqhp.jpg",
+      "instagram": "https://www.instagram.com/vegamvm/",
+      "sede": "Estudio Arrechiga"
+    },
+    {
+      "nombre": "Miguel Galindo Alvarado",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905141/cuartasilla/artistas/x3omymueqvpwugitfl7m.jpg",
+      "instagram": "https://www.instagram.com/metiche_metiche/",
+      "sede": "Casa Feria"
+    },
+    {
+      "nombre": "Milo Nava",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905182/cuartasilla/artistas/klyyprchgxzdvfgdyopg.jpg",
+      "instagram": "https://www.instagram.com/ekrovtt/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Mimi Valdivia",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905219/cuartasilla/artistas/qbdfgxrdtrwlrp7qlzzn.jpg",
+      "instagram": "https://www.instagram.com/mimi_._miim/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Miriam Rodríguez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905269/cuartasilla/artistas/mdsfugzwszt9lvhidwym.jpg",
+      "instagram": "https://www.instagram.com/miriam.rodriguezm/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Narda Mora",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905312/cuartasilla/artistas/yy0rho2vmvobwnzgz5vt.jpg",
+      "instagram": "https://www.instagram.com/nannarttt/",
+      "sede": "Foro AM"
+    },
+    {
+      "nombre": "Natalia Puga",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905411/cuartasilla/artistas/sxhnwdqmbupwxcvzwjs3.jpg",
+      "instagram": "https://www.instagram.com/ladelaestrellaenlafrente/",
+      "sede": "Ala Rota"
+    },
+    {
+      "nombre": "Natalia Robles",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905448/cuartasilla/artistas/dxudbdenrmnbsdfi2xv4.jpg",
+      "instagram": "https://www.instagram.com/roblerojo_/",
+      "sede": "Casa Dos Guayabos"
+    },
+    {
+      "nombre": "Oliver O Casillas",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905573/cuartasilla/artistas/itij1i3r0erk9mk9m7tq.jpg",
+      "instagram": "https://www.instagram.com/casillas_oliver/",
+      "sede": "Casa Feria"
     }
   ],
   "archivo": [],
