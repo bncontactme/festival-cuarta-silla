@@ -1,6 +1,6 @@
 {
-  "version": 75,
-  "actualizado": "2026-09-08T03:15:58.951Z",
+  "version": 76,
+  "actualizado": "2026-09-08T03:31:18.384Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -149,6 +149,16 @@
       "coord": [
         20.6844537,
         -103.366086
+      ]
+    },
+    {
+      "nombre": "Estampa Café",
+      "direccion": "C. Justo Sierra 1689, Col Americana, Zona Centro, 44160 Guadalajara, Jal.",
+      "instagram": "https://www.instagram.com/estampacafe/",
+      "mapa": "https://maps.app.goo.gl/Z9Zzkag3P3UQzsWo6",
+      "coord": [
+        20.6778493,
+        -103.3634779
       ]
     }
   ],
