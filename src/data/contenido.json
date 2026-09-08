@@ -1,6 +1,6 @@
 {
-  "version": 74,
-  "actualizado": "2026-09-08T03:03:20.703Z",
+  "version": 75,
+  "actualizado": "2026-09-08T03:15:58.951Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -465,14 +465,56 @@
         "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
       },
       {
-        "titulo": "Inauguración de obra",
+        "titulo": "Inauguración de exposición colectiva \"Lo que las paredes no rezan\"",
         "dia": 2,
         "inicio": "20:00",
-        "fin": "23:59",
+        "fin": "23:00",
         "sede": "Ánima Galería",
         "tipo": "muestra",
         "artista": "Ánima Galeria",
         "libre": true
+      },
+      {
+        "titulo": "Performance \"Criptofonía del Ámen\"",
+        "dia": 2,
+        "inicio": "20:05",
+        "fin": "20:20",
+        "sede": "Ánima Galería",
+        "tipo": "escena",
+        "artista": "Ánima Galeria",
+        "libre": true
+      },
+      {
+        "titulo": "\"Realidad Alterada\" por Emanuel VR",
+        "dia": 2,
+        "inicio": "20:20",
+        "fin": "20:35",
+        "sede": "Ánima Galería",
+        "tipo": "muestra"
+      },
+      {
+        "titulo": "\"Optofotofonía Especular\" – Ricardo Baldío - Music fiction Act",
+        "dia": 2,
+        "inicio": "20:35",
+        "fin": "21:00",
+        "sede": "Ánima Galería",
+        "tipo": "muestra"
+      },
+      {
+        "titulo": "Performance: \"Libertad de Preso\" – David Landgrave Romo (CDMX)",
+        "dia": 2,
+        "inicio": "21:00",
+        "fin": "21:15",
+        "sede": "Ánima Galería",
+        "tipo": "escena"
+      },
+      {
+        "titulo": "Concierto: Corridos Cristeros – Espectro Corridos (\"Los Dos Amigos\")",
+        "dia": 2,
+        "inicio": "21:15",
+        "fin": "22:30",
+        "sede": "Ánima Galería",
+        "tipo": "escena"
       }
     ],
     "esEjemplo": false
