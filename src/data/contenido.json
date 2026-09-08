@@ -1,6 +1,6 @@
 {
-  "version": 81,
-  "actualizado": "2026-09-08T22:47:22.011Z",
+  "version": 82,
+  "actualizado": "2026-09-08T22:57:40.733Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -292,7 +292,7 @@
         "sede": "Ex convento Santa Teresa",
         "tipo": "muestra",
         "artista": "Visual Negativo, RE.CREA.LAB, Cerro de los espejos y RAD",
-        "libre": true
+        "registro": "https://forms.gle/7QyDj9q2BsjHem9m8"
       },
       {
         "titulo": "Inauguración \"Burdo\". Exhibición individual de Gabriela Girbau",
