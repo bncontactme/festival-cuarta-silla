@@ -1,6 +1,6 @@
 {
-  "version": 82,
-  "actualizado": "2026-09-08T22:57:40.733Z",
+  "version": 83,
+  "actualizado": "2026-09-08T22:58:56.670Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1318,6 +1318,18 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907600/cuartasilla/artistas/lipmzpqiumtfebj9nvse.jpg",
       "instagram": "https://www.instagram.com/zahildur/",
       "sede": "Salón Liminal"
+    },
+    {
+      "nombre": "Tahis Calderón",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788908291/cuartasilla/artistas/ym1o6sf6kqbov3wrmvgq.jpg",
+      "instagram": "https://www.instagram.com/tahiser_/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Visual Negativo",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788908323/cuartasilla/artistas/pgsy5rl9jbpz3g8lifkp.jpg",
+      "instagram": "https://www.instagram.com/visualnegativo/",
+      "sede": "Ex convento Santa Teresa"
     }
   ],
   "archivo": [],
