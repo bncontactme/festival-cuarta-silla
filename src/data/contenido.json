@@ -1,6 +1,6 @@
 {
-  "version": 80,
-  "actualizado": "2026-09-08T22:16:31.570Z",
+  "version": 81,
+  "actualizado": "2026-09-08T22:47:22.011Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1152,6 +1152,172 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905573/cuartasilla/artistas/itij1i3r0erk9mk9m7tq.jpg",
       "instagram": "https://www.instagram.com/casillas_oliver/",
       "sede": "Casa Feria"
+    },
+    {
+      "nombre": "Oscar Rodríguez Hernández",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905910/cuartasilla/artistas/zp1xskdg7latsvxqrsmo.jpg",
+      "instagram": "https://www.instagram.com/cerro_de.los_espejos/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Pablo Cobian",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905954/cuartasilla/artistas/kokor6ax33ya3hpfvkfb.jpg",
+      "instagram": "https://www.instagram.com/hcobianarchivo/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Pamela Flores Escalante",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905994/cuartasilla/artistas/n650s8ftmyyeh8nsbamy.jpg",
+      "instagram": "https://www.instagram.com/pamdeoliva/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Paola Llamas Dinero",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906048/cuartasilla/artistas/f0ucnsguonvhzahskqvq.jpg",
+      "instagram": "https://www.instagram.com/paola.llamasdinero/",
+      "sede": "Foro AM"
+    },
+    {
+      "nombre": "Pascual Gomez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906089/cuartasilla/artistas/ci6woam9c4ep3e2lloao.jpg",
+      "instagram": "https://www.instagram.com/pascuartart/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Patricia Figueroa",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906125/cuartasilla/artistas/vt1xparyzi9eimvaaxr3.jpg",
+      "instagram": "https://www.instagram.com/_patricia_figueroa/",
+      "sede": "Ala Rota"
+    },
+    {
+      "nombre": "Paty.lo",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906174/cuartasilla/artistas/ethea1kf1uito0hptryl.jpg",
+      "instagram": "https://www.instagram.com/paty.lo/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Paulina Hurtado",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906215/cuartasilla/artistas/vddnd8glrqm07yat9kvq.jpg",
+      "instagram": "https://www.instagram.com/miaulina/",
+      "sede": "Foro AM"
+    },
+    {
+      "nombre": "Rafael Junior Gonzáles Pinchi",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906246/cuartasilla/artistas/vzg8vwawsx4wy0q3kevg.jpg",
+      "instagram": "https://www.instagram.com/rafelgonzales/",
+      "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "Raquel Barrios",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906288/cuartasilla/artistas/aqpzsblsw6gilv6oc1sn.jpg",
+      "instagram": "https://www.instagram.com/raquelbarriosarenas/",
+      "sede": "Ala Rota"
+    },
+    {
+      "nombre": "Regina Rubio",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906328/cuartasilla/artistas/mgcor3x8rtys9nh01tmq.jpg",
+      "instagram": "https://www.instagram.com/ohcorazon/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Roberto Vázquez Hernández",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906406/cuartasilla/artistas/htxunou7bkd9czyjugwd.jpg",
+      "instagram": "https://www.instagram.com/xehan.art/",
+      "sede": "Estudio Arrechiga"
+    },
+    {
+      "nombre": "Rodrigo Cacho",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906884/cuartasilla/artistas/rodrigo-cacho/gh8jhgxmmophu4vf0vai.jpg",
+      "instagram": "https://www.instagram.com/rodrigo_cacho/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Rubi Zaira Flores Cruz",
+      "sede": "Estallido Art Project"
+    },
+    {
+      "nombre": "Ruby Jauregui",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906988/cuartasilla/artistas/iejxkwbiss03tjsrnv23.jpg",
+      "instagram": "https://www.instagram.com/rubygjauregui/",
+      "sede": "Staditche"
+    },
+    {
+      "nombre": "Samantha guerrero",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907035/cuartasilla/artistas/bgpet9pgljjl6im10mtc.jpg",
+      "instagram": "https://www.instagram.com/sguerrerooa/",
+      "sede": "Ala Rota"
+    },
+    {
+      "nombre": "Silvia Grace Donovan Galindo",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907082/cuartasilla/artistas/silvia-grace-donovan-galindo/xp7kbddeb7s5vzpgg81e.jpg",
+      "instagram": "https://www.instagram.com/silvia.donovann/",
+      "sede": "Estudio Arrechiga"
+    },
+    {
+      "nombre": "Sinuhe de Jesús Anica Saavedra",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907127/cuartasilla/artistas/mn01dnzqakpmiqlovjcw.jpg",
+      "instagram": "https://www.instagram.com/by.technicolor/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Sofia Orozco",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907159/cuartasilla/artistas/wawtqb17l1mcrjjlynef.jpg",
+      "instagram": "https://www.instagram.com/soforozco8/",
+      "sede": "Casa Feria"
+    },
+    {
+      "nombre": "Syndell Razo",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907215/cuartasilla/artistas/syndell-razo/x7qsd0y9w5o2azbiwvzx.jpg",
+      "instagram": "https://www.instagram.com/syndellrazoarchivo/",
+      "sede": "Estudio Arrechiga"
+    },
+    {
+      "nombre": "Valeria Luna",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907251/cuartasilla/artistas/valeria-luna/zyj3us9rujvz2scb7vuz.jpg",
+      "instagram": "https://www.instagram.com/luna_dual/",
+      "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Vania Negrete",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907284/cuartasilla/artistas/jta2iewu4os9wx10hjdj.jpg",
+      "instagram": "https://www.instagram.com/vania.negrete/",
+      "sede": "Foro AM"
+    },
+    {
+      "nombre": "Vico Valle",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907329/cuartasilla/artistas/ezxjqcnzs26gf37jzhpv.jpg",
+      "instagram": "https://www.instagram.com/vicovalle/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Yamile Moreno",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907369/cuartasilla/artistas/psfvt6bqnu2pcjopmoog.jpg",
+      "instagram": "https://www.instagram.com/maldita_sea__/",
+      "sede": "Estudio Arrechiga"
+    },
+    {
+      "nombre": "Yatini Domínguez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907456/cuartasilla/artistas/p6oh7wifmqpcdqnix04c.jpg",
+      "instagram": "https://www.instagram.com/yati_nii/",
+      "sede": "Staditche"
+    },
+    {
+      "nombre": "Zoeechy",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907495/cuartasilla/artistas/vsdqrtegybju7z6yjv7f.jpg",
+      "instagram": "https://www.instagram.com/zoeecchi/",
+      "sede": "Ex convento Santa Teresa"
+    },
+    {
+      "nombre": "Pblcsr",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907551/cuartasilla/artistas/eodd5jymis7gn8mefikp.jpg",
+      "instagram": "https://www.instagram.com/pblcsr_lines/",
+      "sede": "Foro AM"
+    },
+    {
+      "nombre": "Zahira Rico",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907600/cuartasilla/artistas/lipmzpqiumtfebj9nvse.jpg",
+      "instagram": "https://www.instagram.com/zahildur/",
+      "sede": "Salón Liminal"
     }
   ],
   "archivo": [],
