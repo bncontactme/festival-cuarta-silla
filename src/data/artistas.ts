@@ -29,6 +29,20 @@ export const artistas = {
     titulo: 'La selección se anuncia junto con el programa',
     nota: 'Se irá publicando también en la cuenta del festival.',
   },
+  /** Lo que se lee cuando el buscador no encuentra a nadie.
+   *
+   *  No es el mismo texto que `vacio` y no puede serlo: ahí no hay lista
+   *  todavía, y aquí hay dieciocho nombres y ninguno se llama así. Uno informa
+   *  de cuándo habrá algo; el otro tiene que decir qué hacer ahora, que es lo
+   *  único que le sirve a quien acaba de escribir mal un apellido.
+   *
+   *  El título se corta antes del término: lo que se buscó lo pone el script
+   *  detrás, en una chapa. Sin comillas — Anton no tiene « », y el navegador
+   *  las sustituía por dos signos de menor que. */
+  sinCoincidencias: {
+    titulo: 'Ningún nombre coincide con',
+    nota: 'Puede estar escrito de otra forma. Con menos letras suele salir.',
+  },
   acciones: {
     ver: 'Ver a todxs',
     instagram: 'IG',

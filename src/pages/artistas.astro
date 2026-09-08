@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
 import Encabezado from '../components/Encabezado.astro';
 import RejaArtistas from '../components/RejaArtistas.astro';
-import FichaArtista from '../components/FichaArtista.astro';
+import BuscadorArtistas from '../components/BuscadorArtistas.astro';
 import Estrella from '../components/Estrella.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import { artistas } from '../data/artistas';
@@ -20,18 +20,32 @@ const cuantos = artistas.lista.length;
       : `Artistas del ${festival.nombre} en ${festival.ciudad}. ${artistas.vacio.titulo}.`
   }
 >
-  {/* ── Móvil: una columna, la foto manda ──────────────────────────────── */}
-  {/* En un teléfono la reja de tres columnas son tres tarjetas de 120 px de
-      ancho: la foto deja de verse, que es lo único que se viene a ver. Aquí
-      va en una sola columna, a lo ancho de la pantalla, y se hace scroll.
-      Es la misma ficha, sin recortar nada. */}
+  {/* ── Móvil: la misma reja, en dos columnas ──────────────────────────── */}
+  {/* Estuvo en una sola columna, a lo ancho de la pantalla, para que la foto
+      se viera —que es lo único que se viene a ver—. Y se veía; lo que no se
+      veía era el grupo: una cara por pantalla son trece pantallas de scroll
+      para dieciocho nombres, y la primera pregunta de esta página es
+      «¿quiénes son?». A dos columnas la foto todavía se lee y el scroll baja
+      a menos de cuatro pantallas.
+
+      Ya no monta su propia lista: pinta el MISMO `RejaArtistas` que el
+      escritorio, y las columnas las decide `movil.css` preguntándole al ancho
+      del marco. Dos rejas distintas para la misma lista eran dos sitios donde
+      arreglar lo mismo. */}
   <Fragment slot="movil">
     <Pantalla
       titulo={artistas.titulo}
       indice="05"
       nota={cuantos ? `${cuantos} ${cuantos === 1 ? 'nombre' : 'nombres'}` : undefined}
       fondo="amarillo"
+      ancho="reja"
     >
+      {cuantos > 0 && (
+        <Fragment slot="fijo">
+          <BuscadorArtistas variante="movil" />
+        </Fragment>
+      )}
+
       {
         cuantos === 0 ? (
           <div class="p-4">
@@ -45,11 +59,7 @@ const cuantos = artistas.lista.length;
             </div>
           </div>
         ) : (
-          <ul class="grid">
-            {artistas.lista.map((artista, i) => (
-              <FichaArtista artista={artista} indice={i} />
-            ))}
-          </ul>
+          <RejaArtistas />
         )
       }
     </Pantalla>
@@ -71,6 +81,12 @@ const cuantos = artistas.lista.length;
   {/* El campo pasa a amarillo. El blanco no desaparece: se queda donde tiene
       oficio, que es el marco de las fotos de cada ficha. */}
   <section class="bg-amarillo">
+    {/* La banda de buscar, pegada debajo de la barra de navegación. Va aquí y
+        no dentro del `Encabezado`: ése es el cartel de la página —se va con el
+        scroll, como se va la portada de una revista— y esto es un mando, que
+        tiene que seguir a mano en la fila catorce. */}
+    {cuantos > 0 && <BuscadorArtistas variante="escritorio" />}
+
     <div class={cuantos ? '' : 'px-4 py-14 sm:px-6 lg:px-10 lg:py-16'}>
       {/* Sin `border-r` en el contenedor: los cantos derechos de la última
           columna son los de las fichas, y el de abajo cierra la reja. */}

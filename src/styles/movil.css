@@ -64,6 +64,17 @@
     container-type: inline-size;
   }
 
+  /* El tope de arriba vale para una COLUMNA de tarjetas, que es lo que son
+     todas las pantallas menos una: la de artistas, que es una reja de fotos.
+     Una reja no se ahoga con el ancho, se ahoga sin él — en una tablet de
+     768 px, dieciocho retratos en una tira de 512 dejaban hueco muerto a los
+     dos lados y dieciséis pantallas de scroll. Con 40rem caben tres columnas
+     y todavía sobra margen: se ensancha la reja, no se abandona la regla.
+     Lo pide `Pantalla.astro` con `ancho="reja"`, y hoy sólo `/artistas`. */
+  .movil-marco--reja {
+    max-width: 40rem;
+  }
+
   /* ── Cabecera ───────────────────────────────────────────────────────── */
   .movil-barra {
     flex: none;
@@ -664,6 +675,46 @@
 
   .plegable[open] .plegable-signo {
     rotate: 45deg;
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     LA REJA DE ARTISTAS
+     Era una columna: una cara por pantalla, y dieciocho caras son trece
+     pantallas de scroll con cero visión del conjunto. La foto se veía —que es
+     lo que se viene a ver— pero el grupo no, y la pregunta de esta página es
+     «¿quiénes son?» antes que «¿cómo es la número siete?».
+
+     ── Por qué `@container` y no una media query ──────────────────────
+     El sitio móvil vive dentro de `.movil-marco`, que está topado en ancho.
+     En una tablet de 820 px la VENTANA mide 820 y el marco 640, así que una
+     media query de ventana repartiría columnas para un ancho que la reja no
+     tiene. Se le pregunta al marco, que es el que manda. Es la misma razón
+     por la que los titulares de aquí se miden en `cqw` y no en `vw`.
+     ═════════════════════════════════════════════════════════════════════ */
+
+  /* Dos columnas en un teléfono: la ficha queda en unos 195 px, la foto se
+     sigue leyendo y el scroll baja de trece pantallas a menos de cuatro. */
+  @container (width < 34rem) {
+    [data-reja] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    [data-relleno='2'] {
+      display: flex;
+    }
+  }
+
+  /* De 34rem para arriba —tablet, y el marco ya topado en 40— entra una
+     tercera. Las fichas quedan en 213 px, casi lo mismo que en el teléfono:
+     un solo diseño de ficha sirve para todo el rango. */
+  @container (width >= 34rem) {
+    [data-reja] {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    [data-relleno='3'] {
+      display: flex;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

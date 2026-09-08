@@ -16,6 +16,22 @@ interface Props {
   /** Campo de la zona de contenido. Permite repetir en móvil la secuencia
    *  del escritorio: portada roja y cuerpo amarillo. */
   fondoCuerpo?: 'amarillo' | 'papel' | 'tinta' | 'rojo';
+  /**
+   * Hasta dónde se ensancha el marco en una pantalla grande.
+   *
+   * `pulgar` (por defecto) lo topa en 32rem, que es la regla de la casa: en
+   * tablet el diseño está pensado para una mano y se centra en vez de
+   * estirarse — una columna de tarjetas de 820 px de ancho no es el mismo
+   * diseño más grande, es otro peor.
+   *
+   * `reja` lo sube a 40rem, y existe para una pantalla: la de artistas. Ese
+   * tope está calibrado para una COLUMNA, y una reja de fotos no se ahoga con
+   * el ancho, se ahoga sin él — en una tablet de 768 px, dieciocho retratos en
+   * una tira de 512 dejaban hueco muerto a los dos lados y dieciséis
+   * pantallas de scroll. Con 40rem caben tres columnas y sigue habiendo
+   * márgenes: se ensancha la reja, no se abandona la regla.
+   */
+  ancho?: 'pulgar' | 'reja';
 }
 
 const {
@@ -24,6 +40,7 @@ const {
   nota,
   fondo = 'amarillo',
   fondoCuerpo = fondo,
+  ancho = 'pulgar',
 } = Astro.props;
 
 const paletas = {
@@ -43,7 +60,7 @@ const menudo = fondo === 'rojo' ? 'text-papel opacity-80' : 'opacity-55';
 const indicePiel = fondo === 'rojo' ? 'text-papel opacity-75' : 'opacity-45';
 ---
 
-<div class={`movil-marco ${paletaCuerpo}`}>
+<div class={`movil-marco movil-marco--${ancho} ${paletaCuerpo}`}>
   <header class={`movil-barra ${paletaCabecera}`}>
     <a href={conBase("/")} class="meta px-4 font-bold">
       <span aria-hidden="true">←</span>&nbsp; Portada
@@ -56,6 +73,14 @@ const indicePiel = fondo === 'rojo' ? 'text-papel opacity-75' : 'opacity-45';
       <h1 class="display text-[12cqw] leading-[0.92]">{titulo}</h1>
       {nota && <p class={`meta mt-2 text-[0.6rem] ${menudo}`}>{nota}</p>}
     </div>
+
+    {/* Lo que se queda arriba mientras el cuerpo hace scroll — hoy, la banda
+        del buscador de artistas. Va DENTRO del cuerpo y no en la barra de
+        arriba porque el que hace scroll es el cuerpo: pegado ahí, se queda
+        quieto justo debajo del título y el contenido corre por debajo. En la
+        barra de arriba le robaría sitio a la vuelta a la portada, que es la
+        única salida que tiene una pantalla del móvil. */}
+    <slot name="fijo" />
 
     <div class={`movil-contenido ${paletaCuerpo}`}>
       <slot />

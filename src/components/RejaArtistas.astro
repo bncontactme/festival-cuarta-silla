@@ -5,10 +5,11 @@ import { artistas } from '../data/artistas';
 /**
  * La reja de artistas, o el hueco cuando todavía no hay ninguno.
  *
- * Vive en un componente y no suelta en cada página porque la pintan dos: la
- * sección de la portada, recortada, y `/artistas` entera. Es la misma reja de
- * `sedes.astro` —tres columnas, cantos de 2 px, entrada escalonada por
- * filas—; lo único propio es el estado vacío.
+ * Vive en un componente y no suelta en cada página porque la pintan dos veces
+ * la misma página: `/artistas` en escritorio y `/artistas` en móvil, que en
+ * este sitio son dos sitios distintos. Es la reja de `sedes.astro` —cantos de
+ * 2 px, entrada escalonada por filas—; lo propio es el estado vacío y cuántas
+ * columnas.
  *
  * El vacío no es un error ni un cartel de obras: es la misma ficha de papel
  * con sombra dura que usa el resto del sitio, y dice lo único que no se ve
@@ -21,6 +22,17 @@ import { artistas } from '../data/artistas';
  * haya encima —el encabezado de la página, o la cabecera de la sección vía
  * `class`—. Poniéndolo aquí salían cuatro píxeles de raya en `/artistas`,
  * donde el `Encabezado` ya trae el suyo.
+ *
+ * ── Cuántas columnas, y por qué ────────────────────────────────────────
+ * Estaba topada en tres y no subía de ahí. En un monitor de 1920 eso son
+ * fichas de 640×929: una sola ficha más alta que la ventana, dieciocho
+ * nombres en 6 787 px de página, y nunca se ve el grupo — se ven dos caras y
+ * media cortadas. La reja ahora crece con la pantalla: 3 → 4 → 5.
+ *
+ * En móvil las columnas NO las pone Tailwind sino `@container` en
+ * `movil.css`: el sitio móvil vive dentro de `.movil-marco`, que está topado
+ * en ancho, así que lo que manda es el ancho del marco y no el de la ventana
+ * —una tablet de 820 px con un marco de 640 tiene que maquetar para 640—.
  */
 interface Props {
   /** Cuántas fichas como mucho. Sin él, todas. */
@@ -32,7 +44,7 @@ const { limite, class: clase = '' } = Astro.props;
 const lista = limite ? artistas.lista.slice(0, limite) : artistas.lista;
 
 /**
- * Cuántas celdas sobran en la última fila, en cada ancho.
+ * Cuántas celdas sobran en la última fila, por cada recuento de columnas.
  *
  * Las fichas se cargan de una en una, y con una sola la página era una tarjeta
  * a la izquierda y novecientos píxeles de amarillo vacío a su derecha: no se
@@ -41,11 +53,32 @@ const lista = limite ? artistas.lista.slice(0, limite) : artistas.lista;
  * cuanto las fichas la llenan. Muda a propósito: un letrero contando lo que
  * falta convierte el final de una fila en una disculpa.
  *
- * En una columna —el móvil— no se pinta: debajo de una ficha, a lo ancho de la
- * pantalla, deja de ser el final de una fila y pasa a ser una tarjeta más.
+ * Esto es el reparto ESTÁTICO, el que vale sin JS. Con JS manda
+ * `iniciarReja()` en `motion.ts`, que mide las columnas de verdad y rehace la
+ * cuenta en cada tecleo del buscador —donde el resto cambia constantemente— y
+ * en cada cambio de tamaño. Ahí estas celdas se retiran.
  */
-const resto2 = (2 - (lista.length % 2)) % 2;
-const resto3 = (3 - (lista.length % 3)) % 3;
+const COLUMNAS = [2, 3, 4, 5] as const;
+const restos = COLUMNAS.map((n) => ({
+  n,
+  sobran: (n - (lista.length % n)) % n,
+}));
+
+/**
+ * Dónde se enseña la celda de cada recuento.
+ *
+ * Sólo cubre el escritorio, que es el que reparte columnas por ancho de
+ * ventana. Las de 2 y 3 las enciende `movil.css` con `@container` cuando el
+ * marco del móvil está en dos o en tres columnas; aquí salen en `hidden` y
+ * allá se destapan, que es lo que puede hacer una media query de contenedor y
+ * no puede hacer una de ventana.
+ */
+const seEnsena: Record<number, string> = {
+  2: 'hidden',
+  3: 'hidden lg:flex xl:hidden',
+  4: 'hidden xl:flex 2xl:hidden',
+  5: 'hidden 2xl:flex',
+};
 ---
 
 {
@@ -59,23 +92,109 @@ const resto3 = (3 - (lista.length % 3)) % 3;
       </p>
     </div>
   ) : (
-    <ul class={`grid sm:grid-cols-2 lg:grid-cols-3 ${clase}`}>
+    <ul
+      class={`grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 ${clase}`}
+      data-reja
+    >
       {lista.map((artista, i) => (
-        <FichaArtista artista={artista} indice={i} retraso={(i % 3) * 90} />
+        <FichaArtista artista={artista} indice={i} />
       ))}
 
-      {(resto2 > 0 || resto3 > 0) && (
-        <li
-          class:list={[
-            'flex-col justify-end border-r-2 border-b-2 border-tinta p-6 lg:p-8',
-            /* Se enseña sólo en el ancho donde de verdad sobra hueco. */
-            resto2 > 0 ? 'hidden sm:flex' : 'hidden',
-            resto3 > 0 ? 'lg:flex' : 'lg:hidden',
-            resto3 === 2 && 'lg:col-span-2',
-          ]}
-          aria-hidden="true"
-        />
-      )}
+      {restos
+        .filter(({ sobran }) => sobran > 0)
+        .map(({ n, sobran }) => (
+          <li
+            class:list={[
+              'border-r-2 border-b-2 border-tinta',
+              seEnsena[n],
+            ]}
+            style={`--sobran: ${sobran}`}
+            data-relleno={n}
+            aria-hidden="true"
+          />
+        ))}
+
+      {/* La celda que maneja el script: una sola, con el largo que haga falta.
+          Arranca sin `--sobran` y escondida; en cuanto `iniciarReja()` mide
+          las columnas de verdad, retira las estáticas de arriba y se queda
+          con ésta. */}
+      <li
+        class="border-r-2 border-b-2 border-tinta"
+        data-relleno-vivo
+        aria-hidden="true"
+        hidden
+      />
+
+      {/* Cuando la búsqueda no encuentra a nadie. Va DENTRO de la reja y a
+          todo lo ancho porque es lo que ocupa el sitio de las fichas que no
+          están; puesta fuera, aparecía encima o debajo de una reja vacía y se
+          leía como un aviso del sitio y no como el resultado de lo que se
+          acababa de escribir.
+          Es la ficha de papel con sombra dura del estado vacío, la misma que
+          usa la lista cuando todavía no hay nombres. */}
+      <li class="reja-vacia" data-sin-resultados hidden>
+        <div class="ficha ficha--ancha max-w-2xl">
+          <p class="display text-3xl leading-[0.95] lg:text-4xl">
+            {artistas.sinCoincidencias.titulo}{' '}
+            {/* Lo que se buscó, en una chapa roja y no entre comillas: es el
+                idioma de esta casa —los rótulos van en cajas de color— y
+                encima esquiva que Anton no tenga « ». */}
+            <span class="reja-eco" data-eco />
+          </p>
+          <p class="mt-4 font-mono text-sm leading-relaxed text-tinta/70">
+            {artistas.sinCoincidencias.nota}
+          </p>
+        </div>
+      </li>
     </ul>
   )
 }
+
+<style>
+  /* La celda muda cubre TODO lo que sobra de la fila, no una casilla: con dos
+     huecos libres, una sola celda dejaba el filete cortado a mitad de camino,
+     que es el mismo defecto que venía a tapar. */
+  [data-relleno],
+  [data-relleno-vivo] {
+    grid-column: span var(--sobran);
+  }
+
+  /* Sin capa, para ganarle a las utilidades: ver el comentario de
+     `.ficha-artista[hidden]` en `FichaArtista.astro`. */
+  [data-relleno][hidden],
+  [data-relleno-vivo][hidden],
+  .reja-vacia[hidden] {
+    display: none;
+  }
+
+  /* La tarjeta de «nada coincide» cruza la reja entera, sea de dos columnas o
+     de cinco. Y no lleva los filetes de una ficha: no es una ficha, es lo que
+     dice la reja cuando no tiene ninguna que enseñar. */
+  .reja-vacia {
+    grid-column: 1 / -1;
+    padding: 2.5rem 1rem 3rem;
+  }
+
+  /* La chapa con lo que se buscó. `inline-block` para que no se parta a mitad
+     de palabra al final de un renglón, y `break-all` para que un término
+     larguísimo pegado a teclazos no desborde la ficha. */
+  .reja-eco {
+    display: inline-block;
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
+    padding: 0 0.35em 0.06em;
+    word-break: break-all;
+  }
+
+  @media (width >= 40rem) {
+    .reja-vacia {
+      padding: 3.5rem 1.5rem 4rem;
+    }
+  }
+
+  @media (width >= 64rem) {
+    .reja-vacia {
+      padding: 4rem 2.5rem 4.5rem;
+    }
+  }
+</style>

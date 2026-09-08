@@ -100,6 +100,49 @@ function partirLineas(el: HTMLElement) {
   el.dataset.partido = 'si';
 }
 
+/**
+ * El escalonado de una reja, fila por fila.
+ *
+ * La reja de artistas se lo traía puesto del servidor: `retraso={(i % 3) * 90}`
+ * —tres columnas, tres pasos—. En cuanto la reja pasó a repartir de dos a
+ * cinco columnas según la pantalla, ese resto dejó de coincidir con las filas y
+ * el escalonado se volvió ruido: fichas de la misma fila entrando en momentos
+ * distintos y sin patrón.
+ *
+ * En el servidor no se puede saber en qué fila cae una ficha —depende del ancho
+ * de la ventana, que ahí no existe—, así que se mide aquí. Agrupar por
+ * `offsetTop` es exactamente lo que ya hace `partirLineas()` para juntar
+ * palabras en líneas: mismo top, misma fila.
+ *
+ * Corre ANTES de `iniciarReveals()`, que es quien observa. Escribe `--retraso`
+ * directamente y no `data-retraso`, así que las dos no se pisan: `iniciarReveals`
+ * sólo toca la variable si el atributo trae un número, y aquí no se pone.
+ */
+function iniciarReja() {
+  const PASO = 80; // ms entre columna y columna
+
+  for (const reja of document.querySelectorAll<HTMLElement>('[data-reja]')) {
+    const celdas = [...reja.children].filter(
+      (c): c is HTMLElement =>
+        c instanceof HTMLElement && c.hasAttribute('data-reveal'),
+    );
+    if (!celdas.length) continue;
+
+    let top: number | null = null;
+    let columna = 0;
+    for (const celda of celdas) {
+      // El mismo margen de 2 px que el partidor de líneas: los redondeos de
+      // maquetación no tienen por qué dar el número exacto.
+      if (top === null || Math.abs(celda.offsetTop - top) > 2) {
+        top = celda.offsetTop;
+        columna = 0;
+      }
+      celda.style.setProperty('--retraso', `${columna * PASO}ms`);
+      columna++;
+    }
+  }
+}
+
 /** Reveals al entrar en pantalla. Se observa una vez y se olvida. */
 function iniciarReveals() {
   const objetivos = document.querySelectorAll<HTMLElement>('[data-reveal]');
@@ -512,6 +555,9 @@ function arrancar() {
     iniciarEntrada,
     iniciarScroll,
     iniciarTitulares,
+    // Antes de `iniciarReveals`: le pone el retraso a cada ficha, y el otro
+    // la observa. Al revés, la primera fila entraría sin escalonar.
+    iniciarReja,
     iniciarReveals,
     iniciarCuenta,
     iniciarMenu,

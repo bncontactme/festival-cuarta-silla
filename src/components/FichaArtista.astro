@@ -1,6 +1,7 @@
 ---
 import Silla from './Silla.astro';
 import { imagen, juegoDeImagenes } from '../lib/imagen';
+import { aplanar } from '../lib/texto';
 import { artistas, type Artista } from '../data/artistas';
 
 /**
@@ -16,21 +17,45 @@ import { artistas, type Artista } from '../data/artistas';
  *
  * Sin foto la caja no se encoge ni se salta: se pinta en amarillo con la silla
  * calada y el mismo 4:5. Un hueco honesto antes que una reja desalineada.
+ *
+ * ── Por qué la ficha se mide a sí misma ────────────────────────────────
+ * La misma ficha vive hoy en columnas de 195 px (teléfono, dos columnas) y de
+ * 512 px (monitor ancho, cinco columnas). Con el nombre clavado en 36 px,
+ * «ALFREDO ESPARZA CÁRDENAS» se partía en tres líneas y el pie acababa
+ * midiendo más que la foto; y los 24 px de relleno, que en una ficha grande
+ * son aire, en una de 195 se comían un cuarto del ancho.
+ *
+ * Así que la ficha es su propio contenedor de consulta y todo lo que ocupa
+ * sitio se mide en `cqw` —el ancho de la ficha— con topes por los dos lados.
+ * Es el mecanismo que ya usa `.portada-rotulo .display` en `movil.css`: se
+ * mide el hueco que hay, no la ventana que lo contiene.
  */
 interface Props {
   artista: Artista;
   indice: number;
-  retraso?: number;
 }
 
-const { artista, indice, retraso = 0 } = Astro.props;
+const { artista, indice } = Astro.props;
 const numero = String(indice + 1).padStart(2, '0');
+
+/* Con qué se compara al buscar. Se aplana aquí, al construir el sitio, para
+   que el navegador no tenga que normalizar cuarenta y siete nombres en cada
+   tecla.
+
+   Van los tres campos y no sólo el nombre, y con `sede` eso ya no es una
+   apuesta a futuro: la traen 45 de los 47, así que buscar «no museo» devuelve
+   a todos los que exponen ahí. `disciplina` sigue vacía en toda la lista —la
+   carga el festival desde `/admin`—, y el día que la llene empieza a
+   encontrarse sin tocar nada. */
+const busca = aplanar(
+  [artista.nombre, artista.disciplina, artista.sede].filter(Boolean).join(' '),
+);
 ---
 
 <li
-  class="group relative flex flex-col overflow-hidden border-r-2 border-b-2 border-tinta"
+  class="ficha-artista group relative flex flex-col overflow-hidden border-r-2 border-b-2 border-tinta"
   data-reveal="escala"
-  data-retraso={retraso}
+  data-busca={busca}
 >
   <div
     class="relative aspect-[4/5] overflow-hidden border-b-2 border-tinta bg-amarillo"
@@ -40,7 +65,16 @@ const numero = String(indice + 1).padStart(2, '0');
         <img
           src={imagen(artista.foto, 800)}
           srcset={juegoDeImagenes(artista.foto) || undefined}
-          sizes="(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"
+          /* Los cinco tramos son los cinco repartos de columnas que tiene la
+             reja, en orden descendente. Sin actualizarlos, el navegador se
+             bajaba retratos de 800 px para huecos de 195: en un teléfono eso
+             son diecisiete descargas de más.
+             Los dos últimos tramos son el sitio móvil, que vive dentro de un
+             marco topado en 40rem — por eso el de tres columnas va en píxeles
+             fijos y no en `vw`: por encima de 640 px de ventana el hueco ya no
+             crece. La escalera de `juegoDeImagenes()` (480/800/1200) cubre
+             todos estos anchos, incluida la pantalla del doble de densidad. */
+          sizes="(min-width: 96rem) 20vw, (min-width: 80rem) 25vw, (min-width: 64rem) 33vw, (min-width: 34rem) 214px, 50vw"
           alt={artista.nombre}
           width="1000"
           height="1250"
@@ -57,7 +91,9 @@ const numero = String(indice + 1).padStart(2, '0');
     }
 
     {/* El número va sobre la foto y no debajo del nombre: es el que ordena la
-        reja, y ahí arriba se lee de un golpe recorriéndola con la vista. */}
+        reja, y ahí arriba se lee de un golpe recorriéndola con la vista.
+        Sigue siendo el número de catálogo del artista y no el de la fila: con
+        el buscador puesto, ver «18» sola es correcto — es la ficha 18. */}
     <span class="meta absolute top-0 left-0 bg-tinta px-2.5 py-1.5 text-[0.55rem] text-amarillo">
       {numero}
     </span>
@@ -71,11 +107,9 @@ const numero = String(indice + 1).padStart(2, '0');
     />
 
     <div
-      class="relative p-5 transition-colors duration-500 group-hover:text-amarillo lg:p-6"
+      class="ficha-artista-pie relative transition-colors duration-500 group-hover:text-amarillo"
     >
-      <h3 class="display text-3xl leading-[0.95] lg:text-4xl">
-        {artista.nombre}
-      </h3>
+      <h3 class="display leading-[0.95]">{artista.nombre}</h3>
       {
         artista.disciplina && (
           <p class="meta mt-3 text-[0.6rem] opacity-60">{artista.disciplina}</p>
@@ -95,10 +129,46 @@ const numero = String(indice + 1).padStart(2, '0');
         href={artista.instagram}
         target="_blank"
         rel="noopener"
-        class="meta relative border-t-2 border-tinta bg-amarillo px-4 py-3.5 text-center font-bold transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
+        class="ficha-artista-ig meta relative border-t-2 border-tinta bg-amarillo text-center font-bold transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
       >
         {artistas.acciones.instagram} ↗
       </a>
     )
   }
 </li>
+
+<style>
+  .ficha-artista {
+    container-type: inline-size;
+  }
+
+  /* El buscador esconde fichas con el atributo `hidden`, que además de
+     ocultarlas las saca del árbol de accesibilidad. Hace falta decirlo aquí
+     porque la ficha lleva la utilidad `flex` de Tailwind, y una utilidad —que
+     va en su capa— le gana a la regla de `[hidden]` del preflight, que va en
+     la capa base. Sin esto, esconder una ficha no la escondía.
+     Es el mismo remiendo que ya lleva el globo de `Gantt.astro`. */
+  .ficha-artista[hidden] {
+    display: none;
+  }
+
+  /* El nombre: de 19 px en una ficha de teléfono a 40 en una de monitor.
+     Los topes no son adorno — son los dos casos que se rompían. Abajo, para
+     que «PAOLA ANAID RODRÍGUEZ ÁVILA» quepa en dos líneas y no en cuatro;
+     arriba, para que en una ficha de 512 px el nombre no se vuelva un cartel
+     que le gana a la foto. */
+  .ficha-artista-pie .display {
+    font-size: clamp(1.2rem, 8.5cqw, 2.5rem);
+  }
+
+  .ficha-artista-pie {
+    padding: clamp(0.75rem, 4.5cqw, 1.6rem);
+  }
+
+  /* La barra de Instagram se aprieta con la ficha, pero no por debajo de lo
+     que un pulgar puede apuntar: el tope de abajo deja la barra en unos 40 px
+     de alto en la ficha más chica. */
+  .ficha-artista-ig {
+    padding: clamp(0.85rem, 3.4cqw, 1.15rem) 1rem;
+  }
+</style>

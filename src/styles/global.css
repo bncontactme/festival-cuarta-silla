@@ -47,6 +47,19 @@
     --borde: 2px;
     color-scheme: light;
 
+    /* Alto de la barra de navegación, que va pegada arriba (`sticky top-0`).
+       Lo necesita cualquier cosa que también quiera quedarse pegada y no
+       meterse por debajo — hoy, la banda del buscador de `/artistas`.
+
+       El número está medido, no elegido: 66 px en todos los anchos de
+       escritorio, que es lo que suman el filete de 2 px y el contenido de la
+       barra. No se puede sacar de CSS porque el alto lo pone el contenido.
+       Si la barra cambiara de alto, esto queda corto o largo y la banda se
+       despega un par de píxeles: es cosmético, nada se rompe. Quien mide de
+       verdad es `techo()` en `Gantt.astro`, pero eso es JS y esto tiene que
+       valer sin JS. */
+    --alto-barra: 4.125rem;
+
     /* Color del anillo de foco. Antes era la pizarra fija, que sobre el negro
        del pie y sobre el rojo del cierre no se veía —1.5:1 en el peor caso—.
        Ahora cada superficie oscura lo vuelca a amarillo, y el anillo lo hereda

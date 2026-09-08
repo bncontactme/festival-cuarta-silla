@@ -1,0 +1,493 @@
+---
+/**
+ * La banda de buscar un nombre, pegada arriba de la reja de artistas.
+ *
+ * ── Por qué existe ─────────────────────────────────────────────────────
+ * Con dieciocho nombres, llegar a «Oro Radio» era pasar por los otros
+ * diecisiete: en un teléfono, trece pantallas de scroll. La reja ensanchada
+ * arregla lo de ver el grupo; esto arregla lo de encontrar a uno.
+ *
+ * ── Lo que NO es ───────────────────────────────────────────────────────
+ * No hay pestañas de filtro por disciplina, y no es un olvido: de los 47
+ * artistas que carga el festival, **ninguno tiene `disciplina`**. Un mando de
+ * filtros sobre un campo vacío es un mando de una sola posición.
+ *
+ * La sede sí la traen 45 de los 47, pero tampoco lleva pestañas: son catorce
+ * sedes, y catorce chapas encima de la reja pesarían más que la reja. El
+ * buscador compara los tres campos —ver `data-busca` en
+ * `FichaArtista.astro`—, así que «no museo» ya devuelve a todos los que
+ * exponen ahí, escrito en el mismo sitio donde se escribe un nombre.
+ *
+ * ── Sin JS no se pinta ─────────────────────────────────────────────────
+ * Arranca con `hidden` y lo quita el script. Un campo de búsqueda que no
+ * busca es peor que no tener campo: promete una salida que no existe. Sin JS
+ * se ven las dieciocho fichas, que es exactamente lo que había antes.
+ *
+ * ── Dos bandas, un solo estado ─────────────────────────────────────────
+ * El sitio móvil y el de escritorio son dos sitios, y los dos están en el DOM
+ * a la vez —sólo cambia cuál se ve—. Así que hay dos bandas y dos rejas, y el
+ * script las mueve TODAS a la vez con un solo término: teclear en una filtra
+ * las dos. No es trabajo de más, es lo que hace que girar el teléfono en
+ * mitad de una búsqueda no la pierda.
+ */
+interface Props {
+  /** `escritorio` se queda pegada bajo la barra de navegación; `movil`, arriba
+   *  del cuerpo de la pantalla, que es el que hace scroll. */
+  variante: 'escritorio' | 'movil';
+}
+
+const { variante } = Astro.props;
+const id = `buscar-artistas-${variante}`;
+---
+
+<div
+  class:list={['buscador', `buscador--${variante}`]}
+  data-buscador
+  hidden
+>
+  <div class="buscador-caja">
+    <label class="buscador-rotulo" for={id}>
+      Buscar <span aria-hidden="true">▸</span>
+    </label>
+
+    {/* `type="search"` y no `text`: en el teléfono trae el teclado con la
+        tecla de buscar, y en escritorio el navegador ya sabe qué es.
+        `enterkeyhint="search"` lo remata en Android.
+        Sin `<form>` alrededor a propósito — no hay nada que enviar; filtra al
+        teclear, y un Enter que recargara la página sería un paso atrás.
+
+        El `placeholder` dice qué se busca —un artista—, que es lo que la
+        chapa de al lado no dice: «BUSCAR» es el verbo, «ARTISTA» es el
+        objeto. En una banda pegada arriba de la página, leída sin contexto
+        de la reja que tiene debajo, el objeto no sobra.
+
+        Y va ADEMÁS del `<label for>`, no en su lugar: un `placeholder` no es
+        una etiqueta —no lo lee un lector de pantalla como nombre del campo y
+        se borra justo cuando escribes—. La etiqueta de verdad es la chapa,
+        que encima se puede pulsar para entrar al campo. */}
+    <input
+      id={id}
+      type="search"
+      class="buscador-campo"
+      placeholder="Artista"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      enterkeyhint="search"
+      aria-describedby={`${id}-cuenta`}
+      data-buscador-campo
+    />
+
+    {/* Aparece sólo cuando hay algo escrito: una ✕ permanente sobre un campo
+        vacío es un botón que no hace nada. */}
+    <button
+      type="button"
+      class="buscador-limpiar"
+      data-buscador-limpiar
+      hidden
+    >
+      <span class="sr-only">Limpiar la búsqueda</span>
+      <span aria-hidden="true">✕</span>
+    </button>
+  </div>
+
+  {/* El contador, y **vacío en reposo**: «18 DE 18» sobre un campo sin
+      escribir es aritmética que nadie pidió — y en móvil lo dice ya el
+      rótulo de la pantalla dos renglones más arriba. Aparece con la primera
+      tecla, junto con la ✕, y se va al limpiar: la banda gasta tinta sólo
+      mientras está haciendo algo.
+
+      `role="status"` es lo que le cuenta el resultado a quien no ve la reja:
+      sin él, teclear filtra dieciocho fichas en silencio. Un contenido que
+      llega después es exactamente lo que una región viva sabe anunciar, así
+      que arrancar vacío no le quita nada. */}
+  <p
+    class="buscador-cuenta"
+    id={`${id}-cuenta`}
+    role="status"
+    aria-live="polite"
+    data-buscador-cuenta
+  />
+</div>
+
+<style>
+  /* Sin capa gana a las utilidades; ver `FichaArtista.astro`. */
+  .buscador[hidden],
+  .buscador-limpiar[hidden] {
+    display: none;
+  }
+
+  .buscador {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem 1.25rem;
+    flex-wrap: wrap;
+    background-color: var(--color-amarillo);
+    border-bottom: var(--borde) solid var(--color-tinta);
+    padding: 0.7rem 1rem;
+  }
+
+  /* Opaca y pegada: la reja pasa por debajo. Con un fondo translúcido, los
+     retratos se veían a través del campo y el nombre que se está escribiendo
+     dejaba de leerse — es el único sitio del sitio donde el amarillo tiene que
+     ser una superficie y no un tinte. */
+  .buscador--escritorio {
+    position: sticky;
+    /* Debajo de la barra de navegación, que va pegada arriba y mide eso. */
+    top: var(--alto-barra);
+    /* Por debajo de la barra (z-50) y por encima de la reja. */
+    z-index: 30;
+    padding: 0.85rem 1rem;
+  }
+
+  @media (width >= 40rem) {
+    .buscador--escritorio {
+      padding: 0.85rem 1.5rem;
+    }
+  }
+
+  @media (width >= 64rem) {
+    .buscador--escritorio {
+      padding: 1rem 2.5rem;
+    }
+  }
+
+  /* En móvil el que hace scroll es `.movil-cuerpo`, no la página: pegarse a
+     `top: 0` la deja quieta arriba del cuerpo mientras la reja corre. */
+  .buscador--movil {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+  }
+
+  /* El tope de ancho no es cosmético: sin él la caja se estiraba a lo ancho de
+     la ventana y en un monitor quedaba un campo de 1 300 px para escribir un
+     nombre de veinte letras, con el contador exiliado al otro extremo. Con el
+     tope, la banda se lee como un mando puesto en la esquina —que es lo que
+     es— y el contador queda al lado de lo que cuenta. */
+  .buscador-caja {
+    display: flex;
+    align-items: stretch;
+    flex: 1 1 12rem;
+    max-width: 26rem;
+    min-width: 0;
+    border: var(--borde) solid var(--color-tinta);
+    background-color: var(--color-papel);
+  }
+
+  .buscador-rotulo {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0 0.7rem;
+    background-color: var(--color-tinta);
+    color: var(--color-amarillo);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* El campo va en display y no en mono: es lo único que se escribe en todo el
+     sitio, y en la tipografía de los nombres lo que se teclea se parece a lo
+     que se está buscando. */
+  .buscador-campo {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0.5rem 0.7rem;
+    border: 0;
+    background: transparent;
+    color: var(--color-tinta);
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    /* El cursor en rojo: sin texto fantasma es lo único que ocupa el campo
+       vacío, así que es lo que tiene que decir «aquí se escribe». Rojo porque
+       en este sitio el rojo es lo que reclama la vista. */
+    caret-color: var(--color-rojo);
+  }
+
+  /* El texto fantasma, apagado. Hace falta decirlo: a tinta plena y en la
+     display de los nombres, «ARTISTA» se lee como un nombre ya escrito en el
+     campo, no como la pista de qué escribir. Al 40 % se lee lo segundo. */
+  .buscador-campo::placeholder {
+    color: color-mix(in srgb, var(--color-tinta) 40%, transparent);
+    /* Safari le mete una opacidad propia encima y lo dejaba casi invisible. */
+    opacity: 1;
+  }
+
+  .buscador-campo:focus {
+    outline: none;
+  }
+
+  /* El foco se pinta en la caja entera y no en el `<input>`: el campo es sólo
+     una parte de un objeto con canto, y un anillo por dentro se leía como un
+     rectángulo suelto. */
+  .buscador-caja:focus-within {
+    outline: var(--borde) solid var(--anillo);
+    outline-offset: 3px;
+  }
+
+  /* La cruz de Safari sobra: ya hay una ✕ de la casa al lado, y la del
+     navegador se pinta con sus propios colores. */
+  .buscador-campo::-webkit-search-cancel-button {
+    appearance: none;
+  }
+
+  .buscador-limpiar {
+    flex: none;
+    padding: 0 0.8rem;
+    border-left: var(--borde) solid var(--color-tinta);
+    background-color: var(--color-papel);
+    color: var(--color-tinta);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s var(--ease-salida);
+  }
+
+  .buscador-limpiar:hover {
+    background-color: var(--color-rojo);
+    color: var(--color-papel);
+  }
+
+  .buscador-cuenta {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-tinta) 60%, transparent);
+    white-space: nowrap;
+  }
+
+  /* Cuando la búsqueda no encuentra nada, el contador es lo primero que lo
+     dice: pasa a rojo, que es el color de este sitio para lo que reclama la
+     vista. */
+  .buscador[data-sin-nada] .buscador-cuenta {
+    color: var(--color-rojo);
+    font-weight: 700;
+  }
+</style>
+
+<script>
+  import { aplanar } from '../lib/texto';
+
+  /**
+   * El buscador de la reja de artistas.
+   *
+   * Un solo término manda sobre TODAS las rejas de la página: en `/artistas`
+   * hay dos —la del sitio móvil y la del de escritorio— y las dos están en el
+   * DOM siempre, aunque sólo se vea una. Sincronizarlas cuesta un bucle y
+   * evita que cambiar de ancho en mitad de una búsqueda la pierda.
+   *
+   * Es el mismo caso que `iniciarCuenta()` en `motion.ts` resuelve con
+   * `querySelectorAll` en vez de `querySelector`.
+   */
+  const bandas = [
+    ...document.querySelectorAll<HTMLElement>('[data-buscador]'),
+  ];
+  const rejasDom = [...document.querySelectorAll<HTMLElement>('[data-reja]')];
+
+  if (bandas.length && rejasDom.length) {
+    const rejas = rejasDom.map((el) => {
+      /* Las celdas mudas que pintó Astro sólo valen para el caso sin JS: no
+         saben cuántas columnas hay de verdad ni se enteran de un filtro. Con
+         el script vivo se van, y manda la celda `[data-relleno-vivo]`. */
+      el.querySelectorAll('[data-relleno]').forEach((c) => c.remove());
+
+      return {
+        el,
+        fichas: [...el.querySelectorAll<HTMLElement>('[data-busca]')].map(
+          (ficha) => ({ ficha, busca: ficha.dataset.busca ?? '' }),
+        ),
+        relleno: el.querySelector<HTMLElement>('[data-relleno-vivo]'),
+        vacia: el.querySelector<HTMLElement>('[data-sin-resultados]'),
+        eco: el.querySelector<HTMLElement>('[data-eco]'),
+      };
+    });
+
+    const campos = bandas.map((b) =>
+      b.querySelector<HTMLInputElement>('[data-buscador-campo]'),
+    );
+    const cuentas = bandas.map((b) =>
+      b.querySelector<HTMLElement>('[data-buscador-cuenta]'),
+    );
+    const total = rejas[0].fichas.length;
+
+    /** Cuántas columnas tiene la reja AHORA. Se le pregunta al navegador en
+     *  vez de deducirlo del ancho: las columnas del móvil las decide una
+     *  media query de contenedor y las del escritorio una de ventana, y
+     *  `gridTemplateColumns` ya trae la respuesta de las dos. */
+    const columnas = (el: HTMLElement) => {
+      const cols = getComputedStyle(el).gridTemplateColumns;
+      return cols && cols !== 'none' ? cols.split(' ').length : 1;
+    };
+
+    /* Los reveals arrancan en `opacity: 0` y sólo el IntersectionObserver les
+       pone `.dentro`. Una ficha que estaba escondida cuando el observador
+       pasó, y que aparece después por un filtro, se quedaría invisible para
+       siempre. En cuanto se teclea algo se destapa la reja entera y el
+       problema deja de existir: la entrada escalonada ya cumplió su papel al
+       cargar la página. */
+    let destapada = false;
+    const destapar = () => {
+      if (destapada) return;
+      destapada = true;
+      for (const reja of rejas) {
+        for (const { ficha } of reja.fichas) ficha.classList.add('dentro');
+      }
+    };
+
+    /** Con qué se compara: aplanado, sin tildes ni mayúsculas. */
+    let termino = '';
+    /** Y lo que se escribió tal cual, que es lo que se le devuelve a la vista
+     *  —el eco de la ficha vacía— y lo que viaja en la URL. */
+    let crudo = '';
+
+    const pintar = () => {
+      let visibles = 0;
+
+      for (const reja of rejas) {
+        let n = 0;
+        for (const { ficha, busca } of reja.fichas) {
+          const cabe = !termino || busca.includes(termino);
+          ficha.hidden = !cabe;
+          if (cabe) n++;
+        }
+        visibles = n;
+
+        /* La celda muda cierra los filetes de la última fila. Con la reja
+           vacía no se pinta: no hay fila que cerrar, y un rectángulo con
+           cantos flotando sobre el amarillo se lee como una ficha que no
+           cargó. */
+        if (reja.relleno) {
+          const cols = columnas(reja.el);
+          const sobran = n === 0 ? 0 : (cols - (n % cols)) % cols;
+          reja.relleno.style.setProperty('--sobran', String(sobran));
+          reja.relleno.hidden = sobran === 0;
+        }
+
+        if (reja.vacia) reja.vacia.hidden = n > 0;
+      }
+
+      for (const [i, banda] of bandas.entries()) {
+        /* Vacío mientras no se haya escrito nada: ver el comentario del
+           contador en el marcado. */
+        const cuenta = cuentas[i];
+        if (cuenta) {
+          cuenta.textContent = termino ? `${visibles} de ${total}` : '';
+        }
+        banda.toggleAttribute('data-sin-nada', visibles === 0);
+        const limpiar = banda.querySelector<HTMLElement>(
+          '[data-buscador-limpiar]',
+        );
+        if (limpiar) limpiar.hidden = termino === '';
+      }
+    };
+
+    /** Lo escrito se guarda en la URL para poder pasar un resultado por
+     *  WhatsApp, que es como se coordina este festival.
+     *
+     *  Va el texto CRUDO y no el aplanado: quien comparte una búsqueda de
+     *  «Alí» tiene que ver «Alí» al abrir el enlace, no «ali». Buscar sigue
+     *  siendo insensible a la tilde — eso lo hace `aplanar()` sobre lo que
+     *  llegue—, así que un `?q=ali` escrito a mano encuentra lo mismo.
+     *
+     *  `replaceState` y no `pushState`: con un empujón por tecla, el botón
+     *  atrás se convertiría en «borrar una letra» veinte veces antes de poder
+     *  salir de la página. */
+    const guardarEnUrl = () => {
+      const url = new URL(location.href);
+      if (crudo) url.searchParams.set('q', crudo);
+      else url.searchParams.delete('q');
+      history.replaceState(null, '', url);
+    };
+
+    /**
+     * @param texto      Lo tecleado, tal cual.
+     * @param desdeCampo El campo que lo recibió, si vino de teclear en uno.
+     */
+    const escribir = (texto: string, desdeCampo?: HTMLInputElement) => {
+      crudo = texto.trim();
+      termino = aplanar(texto);
+      destapar();
+      pintar();
+      guardarEnUrl();
+
+      /* El eco de «ningún nombre coincide con …» va con el texto crudo: quien
+         buscó «Alí» tiene que leerse «Alí» de vuelta, no «ali». */
+      for (const reja of rejas) {
+        if (reja.eco) reja.eco.textContent = crudo;
+      }
+
+      /* Las dos bandas dicen lo mismo, menos la que se está usando: pisarle
+         el valor mientras se teclea le movería el cursor al final. */
+      for (const campo of campos) {
+        if (campo && campo !== desdeCampo && campo.value !== texto) {
+          campo.value = texto;
+        }
+      }
+    };
+
+    for (const banda of bandas) {
+      const campo = banda.querySelector<HTMLInputElement>(
+        '[data-buscador-campo]',
+      );
+
+      campo?.addEventListener('input', () => escribir(campo.value, campo));
+
+      /* Sin `<form>` no hay envío que frenar, pero el teclado del teléfono
+         trae la tecla de buscar: que cierre el teclado en vez de no hacer
+         nada. Y Escape vacía el campo sin salir de él, como en cualquier
+         buscador. */
+      campo?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          campo.blur();
+          return;
+        }
+        if (e.key === 'Escape' && campo.value) {
+          e.preventDefault();
+          escribir('', campo);
+          campo.value = '';
+        }
+      });
+
+      banda
+        .querySelector<HTMLElement>('[data-buscador-limpiar]')
+        ?.addEventListener('click', () => {
+          escribir('');
+          campo?.focus();
+        });
+
+      banda.hidden = false;
+    }
+
+    /* Un `?q=` de fuera: un enlace compartido, o volver atrás a la página. */
+    const inicial = new URL(location.href).searchParams.get('q') ?? '';
+    if (inicial) {
+      for (const campo of campos) if (campo) campo.value = inicial;
+      escribir(inicial);
+    } else {
+      pintar();
+    }
+
+    /* Al cambiar de ancho cambian las columnas, y con ellas cuánto sobra en la
+       última fila. Se vuelve a pintar sólo el relleno — las fichas visibles no
+       dependen del ancho. */
+    let pendiente = 0;
+    window.addEventListener(
+      'resize',
+      () => {
+        clearTimeout(pendiente);
+        pendiente = window.setTimeout(pintar, 120);
+      },
+      { passive: true },
+    );
+  }
+</script>
