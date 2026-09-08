@@ -1,6 +1,6 @@
 {
-  "version": 71,
-  "actualizado": "2026-09-06T01:14:50.695Z",
+  "version": 74,
+  "actualizado": "2026-09-08T03:03:20.703Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -140,6 +140,16 @@
     {
       "nombre": "Todas Las Sedes",
       "direccion": "Todas"
+    },
+    {
+      "nombre": "Castillo Interior",
+      "direccion": "C. Ignacio Ramírez 526, Santa Teresita, 44200 Guadalajara, Jal.",
+      "instagram": "https://www.instagram.com/castillointerior_/",
+      "mapa": "https://maps.app.goo.gl/A2nB3YVstezGr5FX8",
+      "coord": [
+        20.6844537,
+        -103.366086
+      ]
     }
   ],
   "programa": {
@@ -236,10 +246,10 @@
       },
       {
         "titulo": "Taller Performance “En la silla: acción conceptual”",
-        "dia": 1,
-        "inicio": "18:00",
-        "fin": "19:00",
-        "sede": "Salón Liminal",
+        "dia": 2,
+        "inicio": "11:00",
+        "fin": "12:30",
+        "sede": "Castillo Interior",
         "tipo": "taller",
         "artista": "Zahira Rico",
         "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
