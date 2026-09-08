@@ -1,6 +1,6 @@
 {
-  "version": 88,
-  "actualizado": "2026-09-08T23:10:32.567Z",
+  "version": 89,
+  "actualizado": "2026-09-08T23:17:42.856Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1335,6 +1335,12 @@
       "nombre": "Colectiva Hilos",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788908883/cuartasilla/artistas/aafuhohv3kcydklprwh4.jpg",
       "instagram": "https://www.instagram.com/colectivahilos/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Coro Inolvidable",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788909457/cuartasilla/artistas/coro-inolvidable/xgzai2otpt3ogivwhoyx.jpg",
+      "instagram": "https://www.instagram.com/coroinolvidable/",
       "sede": "No Museo"
     }
   ],
