@@ -1,6 +1,6 @@
 {
-  "version": 85,
-  "actualizado": "2026-09-08T23:08:18.592Z",
+  "version": 88,
+  "actualizado": "2026-09-08T23:10:32.567Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -680,7 +680,7 @@
       "sede": "Estudio Arrechiga"
     },
     {
-      "nombre": "Andrea Torres Alvarez",
+      "nombre": "Andrea Torrencial",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788655598/cuartasilla/artistas/andrea-torres-alvarez/c2sojp6kjjn46ttp6xif.jpg",
       "instagram": "https://www.instagram.com/torrencial.andrea/",
       "sede": "Taller Industria Gráfica"
@@ -1082,7 +1082,7 @@
       "sede": "Casa Feria"
     },
     {
-      "nombre": "Mar",
+      "nombre": "Mars",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788904621/cuartasilla/artistas/duebspjhntm1ilxnqifm.jpg",
       "instagram": "https://www.instagram.com/m.m.a.r.s/",
       "sede": "Ex convento Santa Teresa"
@@ -1094,7 +1094,7 @@
       "sede": "Foro AM"
     },
     {
-      "nombre": "Mia",
+      "nombre": "Bohemia",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905036/cuartasilla/artistas/mia/uyjjs1qj3uivcvfn0jyd.jpg",
       "instagram": "https://www.instagram.com/esabohemia/",
       "sede": "Estudio Arrechiga"
