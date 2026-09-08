@@ -1,6 +1,6 @@
 {
-  "version": 77,
-  "actualizado": "2026-09-08T04:42:41.590Z",
+  "version": 78,
+  "actualizado": "2026-09-08T21:01:05.776Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -256,10 +256,10 @@
       },
       {
         "titulo": "Taller Performance “En la silla: acción conceptual”",
-        "dia": 2,
-        "inicio": "11:00",
-        "fin": "12:30",
-        "sede": "Castillo Interior",
+        "dia": 1,
+        "inicio": "18:00",
+        "fin": "20:30",
+        "sede": "Salón Liminal",
         "tipo": "taller",
         "artista": "Zahira Rico",
         "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
