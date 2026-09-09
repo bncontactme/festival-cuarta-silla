@@ -1,6 +1,6 @@
 {
-  "version": 100,
-  "actualizado": "2026-09-09T03:32:42.498Z",
+  "version": 101,
+  "actualizado": "2026-09-09T04:05:38.136Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -140,16 +140,6 @@
     {
       "nombre": "Todas Las Sedes",
       "direccion": "Todas"
-    },
-    {
-      "nombre": "Castillo Interior",
-      "direccion": "C. Ignacio Ramírez 526, Santa Teresita, 44200 Guadalajara, Jal.",
-      "instagram": "https://www.instagram.com/castillointerior_/",
-      "mapa": "https://maps.app.goo.gl/A2nB3YVstezGr5FX8",
-      "coord": [
-        20.6844537,
-        -103.366086
-      ]
     },
     {
       "nombre": "Estampa Café",
