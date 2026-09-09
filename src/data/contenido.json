@@ -1,6 +1,6 @@
 {
-  "version": 93,
-  "actualizado": "2026-09-09T00:10:56.440Z",
+  "version": 94,
+  "actualizado": "2026-09-09T01:54:40.216Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -159,6 +159,16 @@
       "coord": [
         20.6778493,
         -103.3634779
+      ]
+    },
+    {
+      "nombre": "Casa ITESO Clavijero",
+      "direccion": "C. José Guadalupe Zuno Hernández 2083, Col Americana, Obrera, 44150 Guadalajara, Jal.",
+      "instagram": "https://www.instagram.com/casaitesoclavigero/",
+      "mapa": "https://maps.app.goo.gl/nA4oPAGvr9pRx7bC6",
+      "coord": [
+        20.670145,
+        -103.372631
       ]
     }
   ],
