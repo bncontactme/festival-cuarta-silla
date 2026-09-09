@@ -1,6 +1,6 @@
 {
-  "version": 92,
-  "actualizado": "2026-09-09T00:08:16.025Z",
+  "version": 93,
+  "actualizado": "2026-09-09T00:10:56.440Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -649,12 +649,6 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788401074/cuartasilla/artistas/wsnwhzjyrj8rdmhfiknt.jpg",
       "instagram": "https://www.instagram.com/oro_radio/",
       "sede": "No Museo"
-    },
-    {
-      "nombre": "Francisco Gaytan",
-      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788654764/cuartasilla/artistas/l8acn57zw5vphtyzaqef.jpg",
-      "instagram": "https://www.instagram.com/gcuadrada/",
-      "sede": "Ala Rota"
     },
     {
       "nombre": "Abril Hurtado González",
