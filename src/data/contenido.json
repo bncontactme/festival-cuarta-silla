@@ -1,6 +1,6 @@
 {
-  "version": 89,
-  "actualizado": "2026-09-08T23:17:42.856Z",
+  "version": 91,
+  "actualizado": "2026-09-09T00:06:41.359Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -531,6 +531,18 @@
   },
   "artistas": [
     {
+      "nombre": "Coro Inolvidable",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788909457/cuartasilla/artistas/coro-inolvidable/xgzai2otpt3ogivwhoyx.jpg",
+      "instagram": "https://www.instagram.com/coroinolvidable/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Colectiva Hilos",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788908883/cuartasilla/artistas/aafuhohv3kcydklprwh4.jpg",
+      "instagram": "https://www.instagram.com/colectivahilos/",
+      "sede": "No Museo"
+    },
+    {
       "nombre": "David Montes de Oca",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788374031/cuartasilla/artistas/gc2gh4ogywwloqire1s6.jpg",
       "instagram": "https://www.instagram.com/_d_m_o_n/",
@@ -980,7 +992,7 @@
       "sede": "Ala Rota"
     },
     {
-      "nombre": "Juan Jose Cordeña",
+      "nombre": "Juan J Cardeña",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903669/cuartasilla/artistas/i3sffzasxfr4mmdtgkpb.jpg",
       "instagram": "https://www.instagram.com/jhomtajhomta/",
       "sede": "No Museo"
@@ -1330,18 +1342,6 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907600/cuartasilla/artistas/lipmzpqiumtfebj9nvse.jpg",
       "instagram": "https://www.instagram.com/zahildur/",
       "sede": "Salón Liminal"
-    },
-    {
-      "nombre": "Colectiva Hilos",
-      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788908883/cuartasilla/artistas/aafuhohv3kcydklprwh4.jpg",
-      "instagram": "https://www.instagram.com/colectivahilos/",
-      "sede": "No Museo"
-    },
-    {
-      "nombre": "Coro Inolvidable",
-      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788909457/cuartasilla/artistas/coro-inolvidable/xgzai2otpt3ogivwhoyx.jpg",
-      "instagram": "https://www.instagram.com/coroinolvidable/",
-      "sede": "No Museo"
     }
   ],
   "archivo": [],
