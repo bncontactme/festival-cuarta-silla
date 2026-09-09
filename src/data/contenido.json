@@ -1,6 +1,6 @@
 {
-  "version": 106,
-  "actualizado": "2026-09-09T21:01:51.186Z",
+  "version": 107,
+  "actualizado": "2026-09-09T21:39:43.299Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -289,7 +289,7 @@
         "dia": 1,
         "inicio": "19:00",
         "fin": "20:15",
-        "sede": "Ex convento Santa Teresa",
+        "sede": "Días Feriados",
         "tipo": "muestra",
         "artista": "Visual Negativo, RE.CREA.LAB, Cerro de los espejos y RAD",
         "registro": "https://forms.gle/7QyDj9q2BsjHem9m8"
@@ -301,7 +301,7 @@
         "fin": "23:59",
         "sede": "Taller Industria Gráfica",
         "tipo": "muestra",
-        "artista": "Musica: MATERIA A-TEMPORAL",
+        "artista": "Música por: Lo.wickend & Dj Séneca CNK",
         "libre": true
       },
       {
