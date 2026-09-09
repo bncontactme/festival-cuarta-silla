@@ -1,6 +1,6 @@
 {
-  "version": 98,
-  "actualizado": "2026-09-09T03:05:11.075Z",
+  "version": 99,
+  "actualizado": "2026-09-09T03:31:20.638Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1364,6 +1364,30 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907600/cuartasilla/artistas/lipmzpqiumtfebj9nvse.jpg",
       "instagram": "https://www.instagram.com/zahildur/",
       "sede": "Salón Liminal"
+    },
+    {
+      "nombre": "Mevna Balaclava",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788924443/cuartasilla/artistas/fxlphxgi0plcuh3y8gov.jpg",
+      "instagram": "https://www.instagram.com/mevnabalaclava/",
+      "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "Surte Ramos",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788924561/cuartasilla/artistas/surte-ramos/tbvs8dvbtnjzqcnnpysr.jpg",
+      "instagram": "https://www.instagram.com/surteramos/",
+      "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "Emmanuel.vr",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788924600/cuartasilla/artistas/w2oyi0c2gtgbxzizn4hf.jpg",
+      "instagram": "https://www.instagram.com/emmanuel.vr/",
+      "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "Ricardo Baldío",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788924635/cuartasilla/artistas/lviqm9a4euvwyzcc5t3v.jpg",
+      "instagram": "https://www.instagram.com/ricardobaldio/",
+      "sede": "Ánima Galería"
     }
   ],
   "archivo": [],
