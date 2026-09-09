@@ -1,6 +1,6 @@
 {
-  "version": 91,
-  "actualizado": "2026-09-09T00:06:41.359Z",
+  "version": 92,
+  "actualizado": "2026-09-09T00:08:16.025Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1459,6 +1459,10 @@
       {
         "nombre": "Melé Miscelánea Sustentable",
         "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788657284/cuartasilla/marcas/mele-miscelanea-sustentable/j7kwl7otujeberdnpgse.jpg"
+      },
+      {
+        "nombre": "Clase 33",
+        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788912491/cuartasilla/marcas/tlmhyrnd6vx3zjopj0rn.jpg"
       }
     ]
   }
