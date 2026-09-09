@@ -1,6 +1,6 @@
 {
-  "version": 95,
-  "actualizado": "2026-09-09T01:57:50.863Z",
+  "version": 96,
+  "actualizado": "2026-09-09T01:58:29.150Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -539,6 +539,15 @@
       {
         "titulo": "Conversatorio \"Arte Conceptual Latinoamericano\"",
         "dia": 0,
+        "inicio": "11:00",
+        "fin": "12:30",
+        "sede": "Casa ITESO Clavijero",
+        "tipo": "charla",
+        "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
+      },
+      {
+        "titulo": "Conversatorio \"Curaduría Crítica\"",
+        "dia": 1,
         "inicio": "11:00",
         "fin": "12:30",
         "sede": "Casa ITESO Clavijero",
