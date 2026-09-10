@@ -1,6 +1,6 @@
 {
-  "version": 111,
-  "actualizado": "2026-09-10T22:57:25.610Z",
+  "version": 112,
+  "actualizado": "2026-09-10T23:20:11.128Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1418,6 +1418,12 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789000864/cuartasilla/artistas/fzvb54indykygbffrwif.jpg",
       "instagram": "https://www.instagram.com/pancholegaspi/",
       "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "R(A)D",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789082352/cuartasilla/artistas/r-a-d/hsbhuifv2rhfs3ammugy.jpg",
+      "instagram": "https://www.instagram.com/rad___co/",
+      "sede": "Días Feriados"
     }
   ],
   "archivo": [],
