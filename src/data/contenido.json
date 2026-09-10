@@ -1,6 +1,6 @@
 {
-  "version": 108,
-  "actualizado": "2026-09-10T00:24:57.412Z",
+  "version": 109,
+  "actualizado": "2026-09-10T00:41:15.955Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1377,6 +1377,46 @@
       "nombre": "Ricardo Baldío",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788924635/cuartasilla/artistas/lviqm9a4euvwyzcc5t3v.jpg",
       "instagram": "https://www.instagram.com/ricardobaldio/",
+      "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "Owen kaleb Muñoz Moreno",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789000498/cuartasilla/artistas/abb1owghds9znjkyi2fe.jpg",
+      "instagram": "https://www.instagram.com/likido.studio/",
+      "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "Germán Covarrubias Orozco",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789000674/cuartasilla/artistas/german-covarrubias-orozco/iwjpvjyrldkgqewftth0.jpg",
+      "instagram": "https://www.instagram.com/ge.bitacora/",
+      "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "Juan Diego Covarrubias Garcia",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789000727/cuartasilla/artistas/juan-diego-covarrubias-garcia/rcgyp1gntfaztwgnjxjb.jpg",
+      "instagram": "https://www.instagram.com/junciego/",
+      "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "Alfredo Garduño Hernández",
+      "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "Sadek Reynolds",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789000792/cuartasilla/artistas/sadek-reynolds/yhooaopcpi6hm7is4den.jpg",
+      "instagram": "https://www.instagram.com/sadek_reynolds/",
+      "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "Nicté Escalante",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789000832/cuartasilla/artistas/nicte-escalante/i0bkq9i99i7jnir2qf8c.jpg",
+      "instagram": "https://www.instagram.com/loverexplorer/",
+      "sede": "Ánima Galería"
+    },
+    {
+      "nombre": "Carlos Francisco Legaspi Jiménez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789000864/cuartasilla/artistas/fzvb54indykygbffrwif.jpg",
+      "instagram": "https://www.instagram.com/pancholegaspi/",
       "sede": "Ánima Galería"
     }
   ],
