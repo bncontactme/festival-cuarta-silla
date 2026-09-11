@@ -209,10 +209,18 @@ function pintarPestanas() {
 let nodoPrevia: HTMLElement | null = null;
 let previaPedida: ReturnType<typeof setTimeout> | null = null;
 
-/** Cuál de las dos lecturas del programa está puesta, y con qué filtros. Vive
- *  fuera de `pintarLienzo()` para que cambiar de pestaña y volver no te devuelva
- *  al jueves con la búsqueda borrada. */
-let vistaPrograma: 'rejilla' | 'lista' = 'rejilla';
+/**
+ * Qué se está mirando en la pestaña de Programa, y con qué filtros.
+ *
+ * **La lista es el programa y arranca puesta.** «Horarios» no es otra forma de
+ * ver el programa —para eso está la lista, y con todo dentro—: es la
+ * comprobación de qué se encima con qué, que es una pregunta distinta y se hace
+ * de vez en cuando, no siempre.
+ *
+ * Vive fuera de `pintarLienzo()` para que cambiar de pestaña y volver no te
+ * devuelva al jueves con la búsqueda borrada.
+ */
+let vistaPrograma: 'lista' | 'horarios' = 'lista';
 let diaPrevia = 0;
 let busquedaPrograma = '';
 let soloConSala = false;
@@ -237,11 +245,11 @@ function refrescarPrevia() {
   }, 120);
 }
 
-/** La vista que toque, ya montada. Las dos leen la misma lista. */
+/** Lo que toque: el programa, o la comprobación de horarios. */
 function vistaDelPrograma(): HTMLElement {
   const actos = estado.programa.actividades;
 
-  if (vistaPrograma === 'rejilla') {
+  if (vistaPrograma === 'horarios') {
     return pintarPrevia(actos, DIAS, diaPrevia, (d) => {
       diaPrevia = d;
       refrescarPrevia();
@@ -255,11 +263,11 @@ function vistaDelPrograma(): HTMLElement {
     soloConSala: () => soloConSala,
     alSala: (a) => abrirTextoDeSala(a),
     alEditar: (a) => {
-      // Los demás campos se tocan en la tabla, que vive en la otra vista. En
-      // vez de meter un segundo formulario aquí —dos sitios donde se edita lo
-      // mismo—, se cambia de vista y se abre esa fila.
+      // Los demás campos se tocan en la tabla, que está aquí mismo debajo. No
+      // hay a dónde ir: se marca la fila y `pintarTabla` la abre y se desplaza
+      // hasta ella.
       destacada = a;
-      ponerVista('rejilla');
+      pintarLienzo();
     },
     alImprimir: (a) => imprimirCartelas([a], DIAS, avisar, RAIZ),
   });
@@ -275,7 +283,7 @@ function abrirTextoDeSala(a: any) {
   }, () => pintarLienzo());
 }
 
-function ponerVista(v: 'rejilla' | 'lista') {
+function ponerVista(v: 'lista' | 'horarios') {
   if (vistaPrograma === v) return;
   vistaPrograma = v;
   pintarLienzo();
@@ -297,31 +305,40 @@ function pintarLienzo() {
     lienzo.append(pintarRegistro(estado, ctx, DIAS));
   }
   for (const t of p.tablas) {
-    // La tabla —donde se editan todos los campos— acompaña a la rejilla. En la
-    // vista de lista sobra: la lista YA es la lista, y tenerla dos veces en la
-    // misma pantalla sólo plantea la duda de cuál de las dos es la buena.
-    if (p.clave === 'programa' && vistaPrograma !== 'rejilla') continue;
+    // La tabla —donde se editan todos los campos— va debajo de la LISTA, que es
+    // donde está el programa. Debajo del cuadro de horarios no pinta nada: ahí
+    // se va a comprobar si algo se encima, no a escribir.
+    if (p.clave === 'programa' && vistaPrograma !== 'lista') continue;
     const tabla = TABLAS[t];
     lienzo.append(pintarTabla(tabla, estado, ctx, erroresPorColeccion[tabla.coleccion] ?? []));
   }
 }
 
 /**
- * La barra de mandos del programa: qué lectura, y sobre qué.
+ * La barra de mandos del programa.
  *
  * El conmutador es el mismo de `/programa` en el sitio —burbuja que se desliza,
- * no dos botones que se encienden— y está aquí a propósito: son la misma idea
- * (dos lecturas de una sola lista) y tienen que reconocerse como la misma cosa.
+ * no dos botones que se encienden—, pero aquí no separa dos lecturas del
+ * programa: separa **el programa** de **una comprobación sobre el programa**.
+ * Por eso la lista va primero y arranca puesta, y por eso lo de al lado se
+ * llama «Horarios» y no «Rejilla»: una rejilla sería otra forma de enseñar lo
+ * mismo, y eso es justo lo que ya no hay.
  */
 function mandosPrograma(): HTMLElement {
   const conmutador = el('div', {
-    class: 'conmutador', role: 'tablist', 'aria-label': 'Cómo ver el programa',
-    style: `--celdas:2;--activa:${vistaPrograma === 'rejilla' ? 0 : 1}`,
+    class: 'conmutador', role: 'tablist', 'aria-label': 'Qué mirar del programa',
+    style: `--celdas:2;--activa:${vistaPrograma === 'lista' ? 0 : 1}`,
   }, el('span', { class: 'burbuja', 'aria-hidden': 'true' }));
 
-  for (const [clave, texto] of [['rejilla', 'Rejilla'], ['lista', 'Lista']] as const) {
+  const rotulos = [
+    ['lista', 'Programa', 'Las actividades, por días'],
+    ['horarios', 'Horarios', 'Qué se encima con qué, sede por sede'],
+  ] as const;
+
+  for (const [clave, texto, ayuda] of rotulos) {
     conmutador.append(el('button', {
-      type: 'button', role: 'tab', 'aria-selected': String(vistaPrograma === clave),
+      type: 'button', role: 'tab', title: ayuda,
+      'aria-selected': String(vistaPrograma === clave),
       onclick: () => ponerVista(clave),
     }, texto));
   }

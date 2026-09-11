@@ -424,14 +424,22 @@ naipe con un QR que la abre. Treinta y dos actividades son **ocho hojas** de
 etiquetas en vez del taco de trescientas páginas que nadie iba a pagar, ni a
 pegar, ni a reimprimir cuando cambiara una línea.
 
-**Dónde se hace.** Pestaña Programa → vista **Lista**. El conmutador de arriba
-tiene las dos lecturas de la misma lista, igual que `/programa` en el sitio:
+**Dónde se hace.** Pestaña Programa, que arranca en **Programa** y tiene al
+lado **Horarios**. Ojo: no son dos lecturas del programa, como en `/programa`
+del sitio. Aquí no se lee, se trabaja, y el programa está en un solo sitio:
 
-- **Rejilla** — un día a la vez, una sede por carril. Contesta «qué se pisa con
-  qué». Debajo va la tabla de siempre, con todos los campos.
-- **Lista** — por días, en bloques, con el texto de sala de cada actividad a la
-  derecha y la cuenta en la cabecera de cada día. Contesta «qué le falta a
-  ésta», que es la pregunta de la semana antes del festival.
+- **Programa** — la lista, por días y en bloques. Es *el* programa: hora de
+  entrada y de salida, tipo, quién la da, sede, con qué se encima, y el texto
+  de sala de cada una a la derecha. Debajo va la tabla de siempre, con todos
+  los campos. Todo lo que hay que hacer se hace aquí.
+- **Horarios** — el cuadro de un día, una sede por carril. No enseña el
+  programa: enseña **qué hay a la vez**, que es lo único que una lista no puede
+  dibujar. Es una comprobación, no una vista.
+
+Se llamaba «Rejilla» y era un mal nombre: prometía otra forma de ver el
+programa, y el programa ya no está ahí. Los choques que detecta ese cuadro los
+dice también la lista, con palabras y con el nombre de la otra actividad
+delante — allí se ven, aquí se leen.
 
 **Borrador y publicado son cosas distintas.** En borrador no existe la página y
 **no se puede imprimir la cartela**. Es a propósito: un QR impreso que lleva a

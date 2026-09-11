@@ -1,13 +1,18 @@
 /**
- * La rejilla del programa, en chiquito. Una de las dos vistas de la pestaña.
+ * **Horarios**: qué hay a la vez y en qué sede, un día por vez.
  *
- * Es lo que una tabla no te dice: si dos cosas se encimaron en la misma sede, o
- * si un día quedó vacío. No pretende parecerse a la rejilla del sitio —esa la
- * pinta `Gantt.astro` y son 1791 líneas—: es un boceto para mirar de un golpe
- * antes de guardar.
+ * Se llamaba «Rejilla» y era un mal nombre, porque prometía lo que no es. Esto
+ * no es el programa —el programa es la lista, y la pestaña ya se llama
+ * Programa—: es el cuadro de horarios, y sirve para una pregunta que una lista
+ * no contesta nunca por muy ordenada que esté: **qué se encima con qué**. Cada
+ * sede es un carril, el tiempo corre de izquierda a derecha, y dos cosas en la
+ * misma sede a la misma hora se ven pisándose.
+ *
+ * Lo que ve aquí no es exclusivo suyo: los choques que detecta se los pasa
+ * también a la lista, que los dice con palabras. Aquí se ven; allá se leen.
  *
  * **Un día a la vez.** Antes se pintaban los cuatro apilados. Con catorce
- * actividades eso cabía; con treinta y dos son ocho carriles por día y la
+ * actividades eso cabía; con treinta y nueve son ocho carriles por día y la
  * pestaña se convirtió en metro y medio de scroll donde lo que se quería ver
  * —si el viernes a las siete hay tres cosas en la misma sede— quedaba a la
  * altura de la rodilla. Las pestañas de día son las mismas que ya tiene la
@@ -22,21 +27,32 @@ const LARGO = CIERRA - ABRE;
 
 const min = (h: string) => Number(h.slice(0, 2)) * 60 + Number(h.slice(3));
 
-/** Las que se pisan: misma sede, mismo día y horas que se solapan. Se calcula
- *  sobre TODO el programa y no sobre el día que se está viendo, porque el
- *  rótulo de abajo cuenta las de los cuatro días: cambiar de pestaña no puede
- *  hacer que un choque deje de existir. */
-function choques(actividades: any[]): Set<any> {
+/**
+ * Las que se pisan: misma sede, mismo día y horas que se solapan.
+ *
+ * Devuelve **con quién** choca cada una y no sólo cuáles chocan, porque las dos
+ * vistas lo necesitan distinto: aquí basta con saber a cuál ponerle el marco
+ * rojo, pero la lista lo tiene que decir con palabras —«se encima con “X”»— y
+ * para eso hace falta el nombre del otro.
+ *
+ * Se calcula sobre TODO el programa y no sobre el día que se esté mirando:
+ * cambiar de pestaña no puede hacer que un choque deje de existir.
+ */
+export function cruces(actividades: any[]): Map<any, any[]> {
   const validas = actividades.filter((a) => a.inicio && a.fin && a.sede);
-  const choca = new Set<any>();
+  const mapa = new Map<any, any[]>();
+  const anota = (a: any, b: any) => {
+    const ya = mapa.get(a);
+    if (ya) ya.push(b); else mapa.set(a, [b]);
+  };
   for (let i = 0; i < validas.length; i++) {
     for (let j = i + 1; j < validas.length; j++) {
       const a = validas[i], b = validas[j];
       if (a.sede !== b.sede || Number(a.dia) !== Number(b.dia)) continue;
-      if (min(a.inicio) < min(b.fin) && min(b.inicio) < min(a.fin)) { choca.add(a); choca.add(b); }
+      if (min(a.inicio) < min(b.fin) && min(b.inicio) < min(a.fin)) { anota(a, b); anota(b, a); }
     }
   }
-  return choca;
+  return mapa;
 }
 
 export function pintarPrevia(
@@ -52,7 +68,7 @@ export function pintarPrevia(
   const mando = el('div', {
     class: 'conmutador conmutador--dias',
     role: 'tablist',
-    'aria-label': 'Qué día de la rejilla',
+    'aria-label': 'Qué día de los horarios',
     style: `--celdas:${dias.length};--activa:${diaActivo}`,
   }, el('span', { class: 'burbuja', 'aria-hidden': 'true' }));
 
@@ -68,11 +84,11 @@ export function pintarPrevia(
   });
 
   caja.append(el('div', { class: 'previa-cabeza' },
-    el('span', { class: 'rotulo' }, 'Dónde y cuándo'),
+    el('span', { class: 'rotulo' }, 'Qué hay a la vez'),
     mando,
   ));
 
-  const choca = choques(actividades);
+  const choca = new Set(cruces(actividades).keys());
   const validas = actividades.filter((a) => a.inicio && a.fin && a.sede);
 
   if (!validas.length) {
@@ -99,9 +115,9 @@ export function pintarPrevia(
         const i = Math.max(ABRE, min(a.inicio));
         const f = Math.min(CIERRA, Math.max(min(a.fin), i + 15));
         const color = COLOR_TIPO[a.tipo] ?? { fondo: '#ddd', texto: '#1e1e1e' };
-        // Una barra que abre su propio texto de sala: en la rejilla es donde se
-        // ve «esta pieza está sola toda la tarde», que es justo cuando alguien
-        // se acuerda de que le falta la cartela.
+        // Una barra que abre su propio texto de sala: aquí es donde se ve «esta
+        // pieza está sola toda la tarde», que es justo cuando alguien se
+        // acuerda de que le falta la cartela.
         carril.append(el('button', {
           type: 'button',
           class: 'bloque' + (choca.has(a) ? ' choca' : ''),
