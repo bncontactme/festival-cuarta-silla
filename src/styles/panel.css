@@ -40,7 +40,15 @@ body {
 }
 
 button, input, select, textarea { font: inherit; color: inherit; }
-button { cursor: pointer; }
+
+/* Un botón sin vestir se pinta solo, y no como uno quiere: el navegador le pone
+   su gris de siempre y un borde `outset`. Mientras todos los botones del panel
+   fueron `.boton` eso no se notaba, porque `.boton` los tapa los dos. El
+   conmutador de vistas lo sacó a la luz — sus celdas son transparentes a
+   propósito, para que se vea deslizarse la burbuja por debajo, y con el gris
+   del navegador encima la celda activa salía en amarillo sobre gris claro:
+   ilegible, y sin burbuja que se viera. Se apaga aquí, una vez. */
+button { cursor: pointer; background: none; border: 0; }
 
 /* Un solo anillo de foco para todo, y que se vea sobre negro y sobre amarillo. */
 :focus-visible { outline: 3px solid var(--rojo); outline-offset: 1px; }
