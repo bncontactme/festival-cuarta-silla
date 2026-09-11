@@ -20,8 +20,9 @@ import type { Edicion, Foto } from './tipos';
  *
  * Puede estar vacía y no pasa nada: el hueco está diseñado. Lo que se pinta
  * mientras tanto no cuenta cuántas ediciones hubo ni de cuándo —eso no nos lo
- * han dado y no se deduce del nombre—: dice que no hay fotos y pide las que
- * haya. Con la primera edición cargada, `/galeria` se llena sola.
+ * han dado y no se deduce del nombre— ni pide fotos a nadie: dice que no hay y
+ * para qué es el sitio. Con la primera edición cargada, `/galeria` se llena
+ * sola.
  */
 
 export type { Foto, Edicion };
@@ -29,10 +30,13 @@ export type { Foto, Edicion };
 export const archivo = {
   titulo: 'Galería',
   estado: 'En construcción',
-  /** Lo que se lee en el hueco mientras no haya ediciones cargadas. Sin contar
-   *  ediciones: decía «las tres ediciones anteriores» y ese tres no lo sabe
-   *  nadie aquí. Que no hay fotos, y que se agradecen. */
-  vacio: 'Si tienes fotos del festival, escríbenos.',
+  /** Lo que se lee en el hueco mientras no haya ediciones cargadas.
+   *
+   *  Ni cuenta ni pide. Decía «las tres ediciones anteriores» —ese tres no lo
+   *  sabe nadie aquí, se dedujo del nombre— y después pedía material, que
+   *  tampoco: el festival no está juntando fotos de nadie. Dice para qué es la
+   *  sección y ya. */
+  vacio: 'Aquí va a quedar el registro del festival.',
   acciones: {
     ver: 'Ver la galería',
     sedes: 'sedes',
