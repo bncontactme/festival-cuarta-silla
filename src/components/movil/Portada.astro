@@ -116,7 +116,7 @@ const indice = [
       ]
     : []),
   { label: 'Manifiesto', href: '#manifiesto' },
-].map((entrada, i) => ({ ...entrada, n: String(i + 1).padStart(2, '0') }));
+];
 
 /* ── La cinta de marcas ──────────────────────────────────────────────────
    La misma tira del escritorio a escala de teléfono: la ficha mide 5.5rem
@@ -293,13 +293,15 @@ const duracionCinta = ((tira.length * PASO) / VELOCIDAD).toFixed(1);
                 target={e.externa ? '_blank' : undefined}
                 rel={e.externa ? 'noopener' : undefined}
               >
-                <span class="indice-numero meta">{e.n}</span>
-                {/* Nombre y nota en una sola columna, apilados: puestos en la
-                    misma fila que el número compiten por el ancho y un
-                    nombre largo —«Registro a eventos»— y una nota larga
-                    —«33 actividades · 4 días»— se parten cada uno en dos
-                    líneas y chocan entre sí. Apilados, cada uno tiene la
-                    columna entera para él solo. */}
+                {/* Sin numerar, como los días. El 01 de esta lista además
+                    contradecía al de la pantalla que abría —aquí «Registro a
+                    eventos» era 01 y en su propia esquina es 04—, así que no
+                    sólo no ordenaba nada: ordenaba distinto dos veces.
+
+                    Nombre y nota apilados en una columna: en la misma fila
+                    compiten por el ancho y un nombre largo —«Registro a
+                    eventos»— con una nota larga —«33 actividades · 4 días»—
+                    se parten cada uno en dos líneas y chocan entre sí. */}
                 <span class="indice-cuerpo">
                   <span class="indice-nombre display">{e.label}</span>
                   {e.nota && <span class="indice-nota meta">{e.nota}</span>}

@@ -574,14 +574,6 @@
     transition: background-color 0.25s var(--ease-salida);
   }
 
-  .indice-numero {
-    flex: 0 0 1.5rem;
-    align-self: flex-start;
-    padding-top: 0.3rem;
-    color: var(--color-papel);
-    opacity: 0.85;
-  }
-
   /* Nombre y nota apilados, con la columna entera para ellos: es lo que
      evita que un nombre largo y una nota larga se partan en dos líneas y
      choquen entre sí compitiendo por el mismo ancho. */
@@ -614,7 +606,6 @@
     color: var(--color-tinta);
   }
 
-  .indice-fila:active .indice-numero,
   .indice-fila:active .indice-nota {
     color: var(--color-tinta);
     opacity: 0.6;

@@ -24,12 +24,12 @@ import { sedes, festival, enlaceMapa } from '../data/site';
       fondoCuerpo="amarillo"
     >
       {
-        sedes.lista.map((sede, i) => (
+        sedes.lista.map((sede) => (
           <details class="plegable">
             <summary>
-              <span class="meta bg-amarillo px-1.5 py-0.5 text-[0.6rem] text-tinta">
-                {String(i + 1).padStart(2, '0')}
-              </span>
+              {/* Sin numerar, como los días del programa: aquí no hay plano al
+                  lado al que remita el número —ése es el del escritorio— y
+                  cuántas son ya lo dice la nota del titular. */}
               <span class="display text-2xl leading-none">{sede.nombre}</span>
               <span class="plegable-signo" aria-hidden="true">
                 +
