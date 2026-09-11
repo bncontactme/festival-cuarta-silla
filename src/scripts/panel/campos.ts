@@ -21,10 +21,19 @@ export type Ctx = {
   /** Cambiar de pestaña desde dentro de una vista. Lo usa Registro para mandar
    *  al Programa cuando todavía no hay ni una actividad que registrar. */
   irA?: (pestana: string) => void;
-  /** La fila que la tabla tiene que abrir y enseñar al pintarse. La pone el
-   *  botón «Campos» de la vista de lista, que manda aquí desde la otra vista.
-   *  Se consume al preguntar: es un encargo, no un estado. */
+  /** La fila que la tabla tiene que abrir y enseñar al pintarse. La pone quien
+   *  llega pidiendo una en concreto. Se consume al preguntar: es un encargo, no
+   *  un estado. */
   destacada?: () => any;
+  /** Un filtro de fuera de la tabla, si hay alguno puesto. Hoy lo pone el botón
+   *  «Sólo con texto de sala» de la barra del programa. */
+  filtro?: () => ((fila: any) => boolean) | null;
+  /** Lo que necesitan los mandos de texto de sala del renglón del programa. */
+  sala?: {
+    raiz: () => string;
+    alSala: (fila: any) => void;
+    alImprimir: (fila: any) => void;
+  };
 };
 
 /**

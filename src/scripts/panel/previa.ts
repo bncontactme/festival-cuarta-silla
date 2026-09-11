@@ -20,6 +20,7 @@
  */
 import { COLOR_TIPO } from './esquema';
 import { el } from './dom';
+import { cruces } from './choques';
 
 const ABRE = 10 * 60;   // 10:00 — el recorrido de los fines de semana empieza aquí
 const CIERRA = 24 * 60; // 24:00
@@ -27,33 +28,6 @@ const LARGO = CIERRA - ABRE;
 
 const min = (h: string) => Number(h.slice(0, 2)) * 60 + Number(h.slice(3));
 
-/**
- * Las que se pisan: misma sede, mismo día y horas que se solapan.
- *
- * Devuelve **con quién** choca cada una y no sólo cuáles chocan, porque las dos
- * vistas lo necesitan distinto: aquí basta con saber a cuál ponerle el marco
- * rojo, pero la lista lo tiene que decir con palabras —«se encima con “X”»— y
- * para eso hace falta el nombre del otro.
- *
- * Se calcula sobre TODO el programa y no sobre el día que se esté mirando:
- * cambiar de pestaña no puede hacer que un choque deje de existir.
- */
-export function cruces(actividades: any[]): Map<any, any[]> {
-  const validas = actividades.filter((a) => a.inicio && a.fin && a.sede);
-  const mapa = new Map<any, any[]>();
-  const anota = (a: any, b: any) => {
-    const ya = mapa.get(a);
-    if (ya) ya.push(b); else mapa.set(a, [b]);
-  };
-  for (let i = 0; i < validas.length; i++) {
-    for (let j = i + 1; j < validas.length; j++) {
-      const a = validas[i], b = validas[j];
-      if (a.sede !== b.sede || Number(a.dia) !== Number(b.dia)) continue;
-      if (min(a.inicio) < min(b.fin) && min(b.inicio) < min(a.fin)) { anota(a, b); anota(b, a); }
-    }
-  }
-  return mapa;
-}
 
 export function pintarPrevia(
   actividades: any[],

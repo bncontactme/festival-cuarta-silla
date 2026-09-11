@@ -428,13 +428,25 @@ pegar, ni a reimprimir cuando cambiara una línea.
 lado **Horarios**. Ojo: no son dos lecturas del programa, como en `/programa`
 del sitio. Aquí no se lee, se trabaja, y el programa está en un solo sitio:
 
-- **Programa** — la lista, por días y en bloques. Es *el* programa: hora de
-  entrada y de salida, tipo, quién la da, sede, con qué se encima, y el texto
-  de sala de cada una a la derecha. Debajo va la tabla de siempre, con todos
-  los campos. Todo lo que hay que hacer se hace aquí.
+- **Programa** — la lista, por días. **Es una sola lista**, no dos: cada
+  actividad es un bloque —hora de entrada y de salida, tipo, quién la da,
+  sede, con qué se encima, y su texto de sala a la derecha— y ese bloque *es*
+  el renglón plegado de la tabla de siempre. Se pulsa y se abren debajo todos
+  los campos, con Duplicar y Borrar. Todo lo que hay que hacer se hace aquí.
 - **Horarios** — el cuadro de un día, una sede por carril. No enseña el
   programa: enseña **qué hay a la vez**, que es lo único que una lista no puede
   dibujar. Es una comprobación, no una vista.
+
+Hubo una versión con el programa dos veces en la misma pantalla: una lista de
+bloques bonita de sólo mirar, y debajo la tabla con las mismas treinta y nueve
+otra vez —la que de verdad servía—. Son la misma cosa y ahora lo son de verdad:
+el bloque no era una vista, era un renglón mejor.
+
+Lo único que el programa pierde respecto a las otras cuatro colecciones es
+arrastrar para reordenar, y no se pierde nada: el sitio ordena el programa por
+día y hora (`agendaPorDia`), así que el orden en que estén guardadas no viaja a
+ninguna parte. Donde el orden sí es el que se pinta —sedes, archivo, marcas—
+se sigue arrastrando.
 
 Se llamaba «Rejilla» y era un mal nombre: prometía otra forma de ver el
 programa, y el programa ya no está ahí. Los choques que detecta ese cuadro los

@@ -13,6 +13,9 @@
  * formulario.
  */
 
+import { bloqueActividad, mandoSala } from './bloque';
+import { cruces } from './choques';
+
 export type TipoCampo =
   | 'texto' | 'area' | 'url' | 'imagen' | 'sede'
   | 'dia' | 'hora' | 'tipoActividad' | 'numero' | 'coord' | 'fotos' | 'sino';
@@ -49,6 +52,38 @@ export type Esquema = {
   /** Qué texto se busca al filtrar. Por defecto, lo que devuelven las dos de
    *  arriba. */
   busca?(fila: any): string;
+
+  // ── Lo que hace falta cuando una lista no es una lista de nombres ────────
+  //
+  // Estos tres los usa sólo el programa, y están aquí y no dentro de
+  // `pintarTabla` para que la tabla siga sin saber nada de actividades. Con
+  // treinta y nueve filas que tienen día, hora, sede y cartela, el renglón de
+  // «título · nota» se quedó corto — pero la tabla es la misma para las cinco
+  // colecciones y no puede llenarse de casos especiales.
+
+  /** Agrupar las filas por día, con su cabecera y su cuenta. */
+  porDia?: boolean;
+
+  /** Trabajo que sirve para todas las filas y se hace una vez por repintado.
+   *  El programa calcula aquí qué se encima con qué: hacerlo fila por fila
+   *  sería recorrer la lista entera treinta y nueve veces. */
+  preparar?(lista: any[]): any;
+
+  /** El renglón plegado, cuando una línea de texto no basta. Lo que devuelve
+   *  va DENTRO del botón que pliega, así que no puede llevar nada que se pulse. */
+  bloque?(fila: any, previo: any): HTMLElement[];
+
+  /** Mandos propios, a la derecha del renglón y FUERA del botón — que es donde
+   *  tienen que estar para poder pulsarse. */
+  extras?(fila: any, ctx: any): HTMLElement | null;
+
+  /** Lo que dice la cabecera de un grupo además de cuántos hay. */
+  notaGrupo?(filas: any[], previo: any): string;
+
+  /** Clases sueltas para la fila entera, cuando el estado tiñe todo el renglón
+   *  y no una esquina: el campo crema de las que ya tienen cartela, el filete
+   *  rojo de las que se enciman. */
+  clase?(fila: any, previo: any): string;
 };
 
 export type Coleccion = 'sedes' | 'programa' | 'artistas' | 'archivo' | 'marcas';
@@ -103,18 +138,37 @@ const actividades: Esquema = {
   ],
   nuevo: () => ({ titulo: '', dia: 0, inicio: '10:00', fin: '12:00', sede: '', tipo: 'taller' }),
   titula: (a) => a.titulo || 'Sin título',
+  /** Con `bloque` puesto, esto ya no se pinta: lo que se ve es el bloque. Sigue
+   *  haciendo falta porque es la mitad de lo que se busca al filtrar, y porque
+   *  es como se nombra una actividad en los avisos y en el «¿Borrar…?». */
   resume: (a, dias) => [
     dias?.[a.dia]?.split(' ')[0] ?? `Día ${Number(a.dia) + 1}`,
     a.inicio && a.fin ? `${a.inicio}–${a.fin}` : null,
     a.sede || null,
     a.tipo || null,
-    // El texto de sala no es un campo de esta tabla —se escribe en su propia
-    // ventana, desde la vista de lista— pero sí tiene que verse desde aquí:
-    // si no, la única forma de saber cuáles lo llevan es cambiar de vista.
     a.sala ? (a.sala.publicado ? '▣ texto de sala' : '▢ texto en borrador') : null,
   ].filter(Boolean).join(' · '),
   // Para que «sala», «burdo» o «borrador» encuentren lo que se está buscando.
   busca: (a) => a.sala ? `sala ${a.sala.id} ${a.sala.publicado ? 'publicado' : 'borrador'}` : '',
+
+  // El programa es la única lista que se agrupa y la única cuyo renglón es un
+  // bloque: es la única con cuarenta filas que tienen día, hora y sede.
+  porDia: true,
+  preparar: (lista) => cruces(lista),
+  bloque: (a, choques) => bloqueActividad(a, choques?.get(a)),
+  extras: (a, ctx) => ctx.sala ? mandoSala(a, ctx.sala) : null,
+  clase: (a, choques) => [
+    a.sala?.publicado ? 'fila--sala' : '',
+    choques?.has(a) ? 'fila--choca' : '',
+  ].filter(Boolean).join(' '),
+  notaGrupo: (filas, choques) => {
+    const conSala = filas.filter((a) => a.sala).length;
+    const chocan = filas.filter((a) => choques?.has(a)).length;
+    return [
+      conSala ? `${conSala} con texto de sala` : null,
+      chocan ? `⚠ ${chocan} se enciman` : null,
+    ].filter(Boolean).join(' · ');
+  },
 };
 
 const sedes: Esquema = {

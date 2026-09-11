@@ -9,7 +9,6 @@
 import { PESTANAS, TABLAS } from './esquema';
 import { pintarTabla } from './tabla';
 import { pintarPrevia } from './previa';
-import { pintarLista } from './lista';
 import { abrirSala, imprimirCartelas } from './sala';
 import { pintarRegistro } from './registro';
 import { el, vaciar, cuando } from './dom';
@@ -167,6 +166,15 @@ const ctx = {
    *  preguntar: es un encargo de una sola vez —«ábreme ésta»— y no un estado
    *  que haya que apagar después. */
   destacada: () => { const d = destacada; destacada = null; return d; },
+  /** «Sólo con texto de sala», que vive en la barra del programa y no en la
+   *  cabecera de la tabla. Devuelve null cuando no hay nada filtrando. */
+  filtro: () => (soloConSala && pestanaActiva === 'programa' ? (a: any) => Boolean(a.sala) : null),
+  /** Lo que el renglón del programa necesita para sus mandos de texto de sala. */
+  sala: {
+    raiz: () => RAIZ,
+    alSala: (a: any) => abrirTextoDeSala(a),
+    alImprimir: (a: any) => imprimirCartelas([a], DIAS, avisar, RAIZ),
+  },
 };
 
 /** Qué colecciones toca una pestaña, para el punto de «sin guardar». */
@@ -222,14 +230,16 @@ let previaPedida: ReturnType<typeof setTimeout> | null = null;
  */
 let vistaPrograma: 'lista' | 'horarios' = 'lista';
 let diaPrevia = 0;
-let busquedaPrograma = '';
 let soloConSala = false;
 /** La fila que hay que abrir y enseñar en la tabla, puesta por «Campos» desde
  *  la vista de lista. La consume `pintarTabla` una sola vez. */
 let destacada: any = null;
 
 function refrescarPrevia() {
-  if (!nodoPrevia || pestanaActiva !== 'programa') return;
+  // Sólo hay algo que refrescar mientras el cuadro de horarios esté puesto. Con
+  // la lista, quien se mantiene al día es el renglón de cada fila, que se
+  // rehace solo — ver `refrescarResumen()` en `tabla.ts`.
+  if (!nodoPrevia || pestanaActiva !== 'programa' || vistaPrograma !== 'horarios') return;
   // Se llama en cada tecla. Rehacer cuarenta barras por letra escrita es
   // trabajo tirado, así que se juntan las que caigan seguidas.
   //
@@ -240,37 +250,28 @@ function refrescarPrevia() {
     previaPedida = null;
     if (!nodoPrevia || pestanaActiva !== 'programa') return;
     const nueva = vistaDelPrograma();
+    if (!nueva) return;
     nodoPrevia.replaceWith(nueva);
     nodoPrevia = nueva;
   }, 120);
 }
 
-/** Lo que toque: el programa, o la comprobación de horarios. */
-function vistaDelPrograma(): HTMLElement {
-  const actos = estado.programa.actividades;
-
-  if (vistaPrograma === 'horarios') {
-    return pintarPrevia(actos, DIAS, diaPrevia, (d) => {
-      diaPrevia = d;
-      refrescarPrevia();
-    }, (a) => abrirTextoDeSala(a));
-  }
-
-  return pintarLista(actos, {
-    dias: () => DIAS,
-    raiz: () => RAIZ,
-    busqueda: () => busquedaPrograma,
-    soloConSala: () => soloConSala,
-    alSala: (a) => abrirTextoDeSala(a),
-    alEditar: (a) => {
-      // Los demás campos se tocan en la tabla, que está aquí mismo debajo. No
-      // hay a dónde ir: se marca la fila y `pintarTabla` la abre y se desplaza
-      // hasta ella.
-      destacada = a;
-      pintarLienzo();
-    },
-    alImprimir: (a) => imprimirCartelas([a], DIAS, avisar, RAIZ),
-  });
+/**
+ * El cuadro de horarios, cuando está puesto.
+ *
+ * **La lista ya no se pinta aquí.** Hubo una versión en la que sí, y el
+ * programa acababa dos veces en la misma pantalla: una lista de bloques de sólo
+ * mirar, y debajo la tabla con las mismas treinta y nueve otra vez —la que de
+ * verdad sirve, porque es donde se editan los campos, se duplica, se borra y se
+ * añade—. Ahora son la misma: la tabla usa el bloque como renglón plegado. Ver
+ * `bloque.ts` y el `porDia` de `esquema.ts`.
+ */
+function vistaDelPrograma(): HTMLElement | null {
+  if (vistaPrograma !== 'horarios') return null;
+  return pintarPrevia(estado.programa.actividades, DIAS, diaPrevia, (d) => {
+    diaPrevia = d;
+    refrescarPrevia();
+  }, (a) => abrirTextoDeSala(a));
 }
 
 function abrirTextoDeSala(a: any) {
@@ -299,7 +300,7 @@ function pintarLienzo() {
     lienzo.append(interruptorEjemplo());
     lienzo.append(mandosPrograma());
     nodoPrevia = vistaDelPrograma();
-    lienzo.append(nodoPrevia);
+    if (nodoPrevia) lienzo.append(nodoPrevia);
   }
   if (p.clave === 'registro') {
     lienzo.append(pintarRegistro(estado, ctx, DIAS));
@@ -345,19 +346,17 @@ function mandosPrograma(): HTMLElement {
 
   const barra = el('div', { class: 'mandos' }, conmutador);
 
-  // Buscar y filtrar sólo tienen sentido sobre la lista, que es la vista que
-  // enseña las treinta y dos de una. En la rejilla no se pintan en vez de
-  // pintarse apagados: un control muerto es una pregunta, no una respuesta.
+  // Los mandos de cartelas sólo tienen sentido sobre el programa. En horarios
+  // no se pintan, en vez de pintarse apagados: un control muerto es una
+  // pregunta, no una respuesta.
+  //
+  // Aquí NO hay buscador: la tabla trae el suyo, y dos cajas de buscar en la
+  // misma pantalla es la clase de duda que no se resuelve probando.
   if (vistaPrograma === 'lista') {
     const conSala = estado.programa.actividades.filter((a: any) => a.sala).length;
     const publicadas = estado.programa.actividades.filter((a: any) => a.sala?.publicado).length;
 
     barra.append(
-      el('input', {
-        type: 'search', class: 'buscador', placeholder: 'Buscar actividad…', spellcheck: false,
-        value: busquedaPrograma, 'aria-label': 'Buscar actividad',
-        oninput: (e: any) => { busquedaPrograma = e.target.value; refrescarPrevia(); },
-      }),
       el('button', {
         type: 'button', class: 'mini', 'aria-pressed': String(soloConSala),
         onclick: () => { soloConSala = !soloConSala; pintarLienzo(); },

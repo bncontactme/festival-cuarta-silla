@@ -542,18 +542,36 @@ select {
 .dia-cabeza .f { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.55; }
 .dia-cabeza .cuenta { margin-left: auto; font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--amarillo); }
 
-.actos { display: grid; gap: 2px; background: var(--tinta); border: 2px solid var(--tinta); border-top: 0; }
-.acto {
+/* Las filas de un día, pegadas entre sí con el filete de tinta de la lista.
+   Son `.fila` de la tabla de siempre: se pliegan, se abren y por dentro traen
+   los campos. Lo único suyo es que van agrupadas. */
+.filas-dia { display: grid; gap: 2px; background: var(--tinta); border: 2px solid var(--tinta); border-top: 0; }
+.filas-dia .fila { border: 0; }
+
+/* Sin asa: el programa no se reordena a mano —el sitio lo ordena por día y
+   hora— así que la columna del asa no existe y la fila ocupa todo el ancho. */
+.fila--sin-asa { grid-template-columns: 1fr; }
+
+/* El renglón y sus mandos, uno al lado del otro. El botón que pliega se lleva
+   todo el ancho que sobre; los mandos del texto de sala se quedan a la derecha
+   y FUERA de él, que es lo que les deja ser botones. */
+.resumen-linea { display: flex; align-items: stretch; gap: 0.4rem; min-width: 0; }
+.resumen-linea > .resumen { flex: 1 1 auto; min-width: 0; }
+.resumen-linea > .acto-fin { flex: 0 0 auto; padding: 0.5rem 0.7rem 0.5rem 0; }
+
+/* El renglón cuando es un bloque y no una línea de texto. */
+.resumen.resumen--bloque {
   display: grid;
-  grid-template-columns: 5rem 1fr auto;
-  gap: 0.7rem;
-  background: var(--papel);
-  padding: 0.55rem 0.7rem;
+  grid-template-columns: 0.8rem 5rem 1fr;
   align-items: start;
+  gap: 0.6rem;
+  padding: 0.55rem 0.7rem;
 }
+.resumen--bloque .resumen-signo { align-self: center; }
+
 /* Un fondo de papel cálido en las que ya tienen texto publicado: en una lista
-   de treinta y dos, contar pastillas es más lento que ver el bloque. */
-.acto[data-sala='publicado'] { background: #fffef0; }
+   de cuarenta, contar pastillas es más lento que ver el bloque. */
+.fila--sala { background: #fffef0; }
 .acto-hora { font-family: var(--mono); font-weight: 700; font-size: 0.8rem; color: var(--rojo); font-variant-numeric: tabular-nums; line-height: 1.25; }
 /* La hora de salida, más callada que la de entrada: se busca por cuándo empieza
    algo, y el fin se consulta. Mismo renglón para que las dos se lean de un tirón. */
@@ -584,7 +602,7 @@ select {
    pasa— así que no se pinta como una queja de validación: se pinta como un dato
    que hay que ver. Un filete rojo en el canto marca la fila entera sin moverla
    de sitio, que es lo que hace falta para contarlas de un vistazo. */
-.acto--choca { box-shadow: inset 3px 0 0 var(--rojo); }
+.fila--choca { box-shadow: inset 3px 0 0 var(--rojo); }
 .acto-choque {
   font-family: var(--mono);
   font-size: 0.6rem;
@@ -594,7 +612,7 @@ select {
   padding-top: 0.3rem;
   border-top: 1px dotted var(--rojo);
 }
-.dia-cabeza .dia-choques {
+.dia-cabeza .dia-nota {
   font-family: var(--mono);
   font-weight: 700;
   font-size: 0.56rem;
@@ -605,7 +623,7 @@ select {
   padding: 0.08rem 0.35rem;
   white-space: nowrap;
 }
-.acto-fin { display: flex; flex-direction: column; align-items: flex-end; gap: 0.35rem; min-width: 9rem; }
+.acto-fin { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 0.35rem; min-width: 9rem; }
 .lista-vacia { background: var(--papel); border: 2px solid var(--tinta); border-top: 0; padding: 0.7rem; font-family: var(--mono); font-size: 0.65rem; opacity: 0.6; }
 
 /* ── El control de texto de sala ────────────────────────────────────────── */
