@@ -1,6 +1,6 @@
 {
-  "version": 112,
-  "actualizado": "2026-09-10T23:20:11.128Z",
+  "version": 113,
+  "actualizado": "2026-09-11T00:54:59.001Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -543,6 +543,15 @@
         "sede": "Casa ITESO Clavijero",
         "tipo": "charla",
         "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
+      },
+      {
+        "titulo": "Proyección documental Toshkua",
+        "dia": 2,
+        "inicio": "19:00",
+        "fin": "22:00",
+        "sede": "No Museo",
+        "tipo": "muestra",
+        "artista": "DocualParque"
       }
     ],
     "esEjemplo": false
