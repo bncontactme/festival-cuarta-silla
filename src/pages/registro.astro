@@ -89,11 +89,12 @@ const descripcion = registroAbierto
               <summary>
                 {/* Sin numerar. El 01 junto a JUEVES se leía como fecha
                     —«jueves 01, viernes 02»— y varios se apuntaron al día
-                    equivocado. Los días ya vienen en orden: contarlos no
-                    aporta nada y numerarlos miente. */}
+                    equivocado. Donde estaba el número va ahora la fecha de
+                    verdad, que es lo que buscaba quien leía mal el número. */}
                 <span>
                   <span class="display block text-2xl leading-none">{dia.dia}</span>
                   <span class="plegable-nota meta mt-1 block text-[0.5rem] opacity-50">
+                    {dia.fecha} ·{' '}
                     {dia.actividades.length === 1
                       ? '1 actividad'
                       : `${dia.actividades.length} actividades`}
