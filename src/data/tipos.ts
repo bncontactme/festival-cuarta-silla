@@ -84,6 +84,49 @@ export type ActividadGantt = {
    * cómo entro?», y que el panel deje de contarla como pendiente.
    */
   libre?: boolean;
+  /**
+   * El texto de sala: lo que estaría impreso en la pared, si se imprimiera.
+   *
+   * No se imprime. El festival son 32 actividades y las cartelas de todas son
+   * un taco de trescientas hojas que nadie va a pagar ni a pegar; lo que se
+   * imprime es una etiqueta con un QR, y el texto vive en `/sala/<id>`.
+   *
+   * Cuelga de la actividad y no de una lista aparte, por la misma razón que
+   * `registro`: dos listas de lo mismo se separan el primer día que alguien
+   * cambia una hora en una sola de las dos.
+   */
+  sala?: TextoDeSala;
+};
+
+/**
+ * Un texto de sala.
+ *
+ * Lo que hay que entender de esto es el `id`, y por qué no se deduce del
+ * título: **el QR se imprime**. Una vez que la etiqueta está cortada y pegada a
+ * la pared, esa dirección ya no es un detalle de implementación, es un objeto
+ * físico que hay en una sala. Si la ruta saliera del título en cada build,
+ * corregirle una tilde el sábado por la tarde dejaría muertos todos los códigos
+ * impresos de esa pieza, y nadie se enteraría hasta ver a alguien mirando su
+ * teléfono sin entender.
+ *
+ * Así que el `id` se acuña UNA vez, al activar el texto, y a partir de ahí es
+ * del papel y no del título.
+ */
+export type TextoDeSala = {
+  /** El trozo final de `/sala/<id>`. Minúsculas, números y guiones. */
+  id: string;
+  /** El texto. Los párrafos se separan con una línea en blanco. */
+  cuerpo: string;
+  /** Quién lo firma. Va al pie, en pequeño. */
+  firma?: string;
+  /**
+   * Si ya se enseña en el sitio.
+   *
+   * En borrador no existe la página y el panel no deja imprimir su cartela: un
+   * QR impreso que lleva a un 404 es peor que no tener QR — el segundo no
+   * promete nada y el primero promete y falla, delante de la obra.
+   */
+  publicado?: boolean;
 };
 
 /**

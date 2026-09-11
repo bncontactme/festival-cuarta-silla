@@ -108,7 +108,13 @@ const actividades: Esquema = {
     a.inicio && a.fin ? `${a.inicio}–${a.fin}` : null,
     a.sede || null,
     a.tipo || null,
+    // El texto de sala no es un campo de esta tabla —se escribe en su propia
+    // ventana, desde la vista de lista— pero sí tiene que verse desde aquí:
+    // si no, la única forma de saber cuáles lo llevan es cambiar de vista.
+    a.sala ? (a.sala.publicado ? '▣ texto de sala' : '▢ texto en borrador') : null,
   ].filter(Boolean).join(' · '),
+  // Para que «sala», «burdo» o «borrador» encuentren lo que se está buscando.
+  busca: (a) => a.sala ? `sala ${a.sala.id} ${a.sala.publicado ? 'publicado' : 'borrador'}` : '',
 };
 
 const sedes: Esquema = {

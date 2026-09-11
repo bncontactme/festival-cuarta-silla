@@ -210,6 +210,29 @@ async function guardar(cuerpo, env, ctx, cors) {
     }
   }
 
+  // Un texto de sala publicado tiene una dirección impresa dentro de un QR que
+  // está pegado a una pared. Si al guardar desaparece —se borró la actividad,
+  // se quitó el texto, se volvió a borrador— ese papel se queda apuntando a una
+  // página que el próximo build ya no va a construir.
+  //
+  // No se bloquea, porque las tres cosas son legítimas. Se dice, con la ruta
+  // delante, que es lo único que hace falta para saber qué papel hay que ir a
+  // despegar. El validador no puede dar este aviso: sólo ve lo que llega, y
+  // esto es la diferencia entre lo que llega y lo que había.
+  if (nombre === 'programa') {
+    const antes = (await leerColeccion(env, 'programa')).actividades || [];
+    const vivos = new Set(
+      (datos.actividades || []).filter(a => a.sala && a.sala.publicado).map(a => a.sala.id),
+    );
+    for (const a of antes) {
+      if (!a.sala || !a.sala.publicado || vivos.has(a.sala.id)) continue;
+      avisos.push(
+        'programa: /sala/' + a.sala.id + ' («' + a.titulo + '») estaba publicado y ya no lo está. ' +
+        'Si su cartela está impresa, ese QR se queda sin página.',
+      );
+    }
+  }
+
   const meta = await guardarColeccion(env, nombre, datos);
   ctx.waitUntil(podarHistorial(env).catch(e => console.error('podar historial:', e)));
 

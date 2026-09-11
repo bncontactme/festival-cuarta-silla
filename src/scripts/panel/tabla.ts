@@ -42,6 +42,12 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
   const abiertas = new Set<any>();
   if (lista().length < PLIEGA_DESDE) lista().forEach((d) => abiertas.add(d));
 
+  /** «Campos», desde la vista de lista del programa, pide una fila concreta.
+   *  Sin esto, cambiar de vista te deja arriba del todo con treinta y dos filas
+   *  plegadas y la que ibas a tocar perdida en mitad de la pila. */
+  const pedida = ctx.destacada?.();
+  if (pedida && lista().includes(pedida)) abiertas.add(pedida);
+
   let busqueda = '';
 
   // ── Cabecera ──────────────────────────────────────────────────────────────
@@ -322,5 +328,17 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
   seccion.append(anadirBoton);
 
   repintar();
+
+  // La fila pedida se enseña cuando ya está en la página. `pintarLienzo()`
+  // engancha esto al DOM justo después de volver de aquí, así que el turno
+  // siguiente del bucle de eventos es el primer momento en que se puede medir.
+  if (pedida) {
+    setTimeout(() => {
+      const i = lista().indexOf(pedida);
+      cuerpo.querySelector(`.fila[data-i="${i}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 0);
+  }
+
   return seccion;
 }

@@ -406,19 +406,283 @@ select {
 
 /* ── Rejilla de vista previa (programa) ─────────────────────────────────── */
 
-.previa { background: var(--papel); border: 2px solid var(--tinta); padding: 0.7rem; margin-bottom: 0.9rem; overflow-x: auto; }
-.previa .dia { margin-top: 0.7rem; }
-.previa .dia:first-of-type { margin-top: 0; }
-.previa .dia > h4 { font-family: var(--mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--raya); padding-bottom: 0.15rem; }
-.previa .carril { display: grid; grid-template-columns: 8.5rem 1fr; gap: 0.4rem; align-items: center; margin-top: 0.2rem; }
+.previa { background: var(--papel); border: 2px solid var(--tinta); padding: 0.7rem; margin-bottom: 0.9rem; }
+.previa-cabeza { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+.previa-cabeza .rotulo { opacity: 0.55; }
+.previa-cabeza .conmutador { margin-left: auto; }
+.previa-cuerpo { overflow-x: auto; }
+.previa-vacia { font-size: 0.8rem; opacity: 0.55; padding: 0.4rem 0; }
+.previa .carril { display: grid; grid-template-columns: 8.5rem 1fr; gap: 0.4rem; align-items: center; margin-top: 0.22rem; min-width: 34rem; }
 .previa .carril > span { font-family: var(--mono); font-size: 0.62rem; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.previa .pista { position: relative; height: 1.15rem; background: var(--humo); border-left: 1px solid var(--raya); }
-.previa .bloque { position: absolute; top: 1px; bottom: 1px; border: 1px solid var(--tinta); font-family: var(--mono); font-size: 0.58rem; line-height: 1.05rem; padding: 0 3px; overflow: hidden; white-space: nowrap; }
+.previa .pista { position: relative; height: 1.35rem; background: var(--humo); border-left: 1px solid var(--raya); }
+.previa .bloque { position: absolute; top: 1px; bottom: 1px; border: 1px solid var(--tinta); font-family: var(--mono); font-size: 0.58rem; line-height: 1.2rem; padding: 0 3px; overflow: hidden; white-space: nowrap; text-align: left; cursor: pointer; }
+.previa .bloque:hover { outline: 2px solid var(--rojo); outline-offset: 1px; z-index: 3; }
 .previa .bloque.choca { outline: 2px solid var(--rojo); outline-offset: 1px; z-index: 2; }
-.previa .horas { display: grid; grid-template-columns: 8.5rem 1fr; gap: 0.4rem; }
+.previa .horas { display: grid; grid-template-columns: 8.5rem 1fr; gap: 0.4rem; min-width: 34rem; }
 .previa .horas > div:last-child { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.55rem; opacity: 0.5; }
-.previa .leyenda { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.6rem; font-family: var(--mono); font-size: 0.62rem; }
+.previa .leyenda { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.6rem; font-family: var(--mono); font-size: 0.62rem; align-items: center; }
 .previa .leyenda i { display: inline-block; width: 0.7rem; height: 0.7rem; border: 1px solid var(--tinta); margin-right: 0.25rem; vertical-align: -1px; }
+.previa .leyenda-sala { margin-left: auto; opacity: 0.6; }
+
+/* ── El conmutador de vistas ────────────────────────────────────────────────
+   Traído de `/programa` del sitio, con la misma mecánica: las celdas son todas
+   del mismo ancho, así que la burbuja no se mide — se le dice en cuál está y
+   CSS la desliza. Son la misma idea a los dos lados del panel (dos lecturas de
+   una sola lista) y tienen que reconocerse como la misma cosa. */
+.conmutador {
+  --celdas: 2;
+  --activa: 0;
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  border: 2px solid var(--tinta);
+  background: var(--papel);
+}
+.conmutador .burbuja {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(100% / var(--celdas));
+  background: var(--tinta);
+  translate: calc(var(--activa) * 100%) 0;
+  transition: translate 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.conmutador button {
+  position: relative;
+  z-index: 1;
+  padding: 0.45rem 1rem;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.66rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--tinta);
+  transition: color 0.25s;
+  line-height: 1.15;
+}
+.conmutador button[aria-selected='true'] { color: var(--amarillo); }
+.conmutador--dias .conmutador-relleno,
+.conmutador--dias button { padding: 0.35rem 0.7rem; }
+.conmutador--dias .dia { display: block; font-family: var(--display); font-size: 0.9rem; letter-spacing: 0; }
+.conmutador--dias .nota { display: block; font-size: 0.5rem; opacity: 0.6; letter-spacing: 0.06em; }
+@media (prefers-reduced-motion: reduce) { .conmutador .burbuja { transition: none; } }
+
+/* ── Mandos del programa ────────────────────────────────────────────────── */
+
+.mandos {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  background: var(--papel);
+  border: 2px solid var(--tinta);
+  padding: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+.mandos .empuje { margin-left: auto; }
+.mandos .buscador { flex: 1 1 10rem; width: auto; min-width: 9rem; }
+.mini {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 2px solid var(--tinta);
+  background: var(--papel);
+  padding: 0.38rem 0.65rem;
+  white-space: nowrap;
+}
+.mini:hover { background: var(--amarillo); }
+.mini[aria-pressed='true'] { background: var(--amarillo); }
+.mini.fuerte { background: var(--tinta); color: var(--amarillo); }
+.mini.fuerte:hover { background: var(--rojo); color: var(--papel); }
+
+/* La pastilla que sustituye al cartel cuando el programa ya está publicado y
+   no hay nada que decidir. Ver `interruptorEjemplo()`. */
+.publicado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 2px solid var(--tinta);
+  background: var(--amarillo);
+  padding: 0.33rem 0.6rem;
+  margin-bottom: 0.8rem;
+}
+.publicado .punto { width: 0.5rem; height: 0.5rem; background: var(--rojo); flex: 0 0 auto; }
+.publicado button { font: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.publicado button:hover { color: var(--rojo); }
+
+/* ── El programa por bloques ────────────────────────────────────────────── */
+
+.dia-bloque + .dia-bloque { margin-top: 1rem; }
+.dia-cabeza {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  background: var(--tinta);
+  color: var(--humo);
+  padding: 0.4rem 0.7rem;
+  border: 2px solid var(--tinta);
+}
+.dia-cabeza .n { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; color: var(--rojo); }
+.dia-cabeza h4 { font-family: var(--display); font-size: 1.2rem; text-transform: uppercase; }
+.dia-cabeza .f { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.55; }
+.dia-cabeza .cuenta { margin-left: auto; font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--amarillo); }
+
+.actos { display: grid; gap: 2px; background: var(--tinta); border: 2px solid var(--tinta); border-top: 0; }
+.acto {
+  display: grid;
+  grid-template-columns: 5rem 1fr auto;
+  gap: 0.7rem;
+  background: var(--papel);
+  padding: 0.55rem 0.7rem;
+  align-items: start;
+}
+/* Un fondo de papel cálido en las que ya tienen texto publicado: en una lista
+   de treinta y dos, contar pastillas es más lento que ver el bloque. */
+.acto[data-sala='publicado'] { background: #fffef0; }
+.acto-hora { font-family: var(--mono); font-weight: 700; font-size: 0.8rem; color: var(--rojo); font-variant-numeric: tabular-nums; line-height: 1.25; }
+.acto-hora small { display: block; font-weight: 400; font-size: 0.56rem; color: var(--tinta); opacity: 0.55; letter-spacing: 0.05em; }
+.acto-med { min-width: 0; }
+.acto-tipo {
+  display: inline-block;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.53rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  border: 1px solid var(--tinta);
+  padding: 0.03rem 0.3rem;
+  vertical-align: 2px;
+  margin-right: 0.4rem;
+}
+.acto-tipo[data-tipo='taller'] { background: var(--rojo); color: var(--amarillo); }
+.acto-tipo[data-tipo='charla'] { background: var(--amarillo); }
+.acto-tipo[data-tipo='muestra'] { background: var(--papel); }
+.acto-tipo[data-tipo='escena'] { background: var(--ladrillo); color: var(--amarillo); }
+.acto-med h5 { font-size: 0.88rem; font-weight: 700; line-height: 1.3; display: inline; }
+.acto-quien { font-size: 0.76rem; opacity: 0.75; margin-top: 0.15rem; }
+.acto-donde { font-family: var(--mono); font-size: 0.57rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.55; margin-top: 0.2rem; }
+.acto-fin { display: flex; flex-direction: column; align-items: flex-end; gap: 0.35rem; min-width: 9rem; }
+.lista-vacia { background: var(--papel); border: 2px solid var(--tinta); border-top: 0; padding: 0.7rem; font-family: var(--mono); font-size: 0.65rem; opacity: 0.6; }
+
+/* ── El control de texto de sala ────────────────────────────────────────── */
+
+.sala-off {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  border: 2px dashed var(--raya);
+  color: var(--tinta);
+  opacity: 0.7;
+  padding: 0.3rem 0.55rem;
+  white-space: nowrap;
+}
+.sala-off:hover { border-style: solid; border-color: var(--rojo); color: var(--rojo); opacity: 1; }
+.sala-on { display: flex; align-items: flex-start; gap: 0.5rem; }
+.sala-datos { display: grid; gap: 0.18rem; justify-items: end; }
+.estado {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.55rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  padding: 0.08rem 0.35rem;
+  border: 1px solid;
+}
+.estado--pub { background: var(--amarillo); border-color: var(--tinta); color: var(--tinta); }
+.estado--bor { background: var(--papel); border-color: #7a5e00; color: #7a5e00; }
+.ruta { font-family: var(--mono); font-size: 0.55rem; opacity: 0.6; word-break: break-all; text-align: right; }
+.acto-acciones { display: flex; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end; }
+.acto-acciones button, .acto-mini {
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--tinta);
+  background: var(--papel);
+  padding: 0.12rem 0.35rem;
+}
+.acto-acciones button:hover, .acto-mini:hover { background: var(--amarillo); }
+
+/* ── El QR ──────────────────────────────────────────────────────────────── */
+
+.qr { background: var(--papel); border: 2px solid var(--tinta); padding: 2px; flex: 0 0 auto; display: block; }
+.qr svg { display: block; width: 100%; height: 100%; }
+.qr--chico { width: 3.2rem; height: 3.2rem; }
+.qr--falla { font-family: var(--mono); font-size: 0.4rem; word-break: break-all; line-height: 1.15; padding: 2px; }
+
+/* ── La ventana del texto de sala ───────────────────────────────────────── */
+
+.dialogo { border: 0; padding: 0; background: transparent; max-width: min(46rem, 94vw); width: 100%; }
+.dialogo::backdrop { background: rgba(20, 20, 18, 0.75); }
+.modal { border: 2px solid var(--tinta); background: var(--papel); box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.35); }
+.modal-cabeza { background: var(--amarillo); border-bottom: 2px solid var(--tinta); padding: 0.7rem 0.85rem; display: flex; align-items: flex-start; gap: 0.7rem; }
+.modal-cabeza .rojo { color: var(--rojo); }
+.modal-cabeza h3 { font-family: var(--display); font-size: 1.25rem; text-transform: uppercase; line-height: 1.05; margin-top: 0.15rem; }
+.modal-donde { font-family: var(--mono); font-size: 0.63rem; opacity: 0.65; margin-top: 0.2rem; }
+.modal-cerrar { margin-left: auto; font-family: var(--mono); font-size: 0.85rem; line-height: 1; border: 2px solid var(--tinta); background: var(--papel); padding: 0.15rem 0.4rem; flex: 0 0 auto; }
+.modal-cerrar:hover { background: var(--rojo); color: var(--papel); }
+.modal-cuerpo { padding: 0.85rem; display: grid; gap: 0.85rem; max-height: min(62vh, 34rem); overflow-y: auto; }
+.modal-cuerpo textarea { min-height: 11rem; resize: vertical; line-height: 1.6; }
+.cuentaletras { font-family: var(--mono); font-size: 0.6rem; opacity: 0.6; text-align: right; }
+.cuentaletras.pasado { color: var(--rojo); opacity: 1; font-weight: 700; }
+.direccion { border: 2px solid var(--tinta); background: var(--humo); padding: 0.45rem 0.55rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.direccion code { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; word-break: break-all; }
+.candado { font-family: var(--mono); font-size: 0.53rem; letter-spacing: 0.1em; text-transform: uppercase; background: var(--tinta); color: var(--amarillo); padding: 0.1rem 0.35rem; margin-left: auto; white-space: nowrap; }
+.modal-pie { border-top: 2px solid var(--tinta); padding: 0.7rem 0.85rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; background: var(--humo); }
+.modal-pie .empuje { margin-left: auto; }
+.boton.peligro { border-color: var(--rojo); color: var(--rojo); }
+.boton.peligro:hover { background: var(--rojo); color: var(--papel); }
+
+/* ── Las cartelas ───────────────────────────────────────────────────────────
+   Sólo existen mientras dura el diálogo de impresión: `imprimirCartelas()` las
+   cuelga del <body> y las tira al volver. En pantalla no se ven nunca. */
+
+.pliego { display: none; }
+.cartela { position: relative; border: 2px solid var(--tinta); background: var(--papel); padding: 0.85rem; display: grid; gap: 0.5rem; break-inside: avoid; }
+.cartela .mc { position: absolute; width: 9px; height: 9px; }
+.cartela .mc1 { top: -2px; left: -2px; border-top: 2px solid var(--rojo); border-left: 2px solid var(--rojo); }
+.cartela .mc2 { top: -2px; right: -2px; border-top: 2px solid var(--rojo); border-right: 2px solid var(--rojo); }
+.cartela .mc3 { bottom: -2px; left: -2px; border-bottom: 2px solid var(--rojo); border-left: 2px solid var(--rojo); }
+.cartela .mc4 { bottom: -2px; right: -2px; border-bottom: 2px solid var(--rojo); border-right: 2px solid var(--rojo); }
+.cartela-cab { font-family: var(--mono); font-weight: 700; font-size: 0.5rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--rojo); display: flex; justify-content: space-between; gap: 0.4rem; }
+.cartela h6 { font-family: var(--display); font-size: 1.1rem; text-transform: uppercase; line-height: 0.98; font-weight: 400; }
+.cartela-aut { font-size: 0.74rem; font-weight: 600; line-height: 1.25; }
+.cartela-filete { height: 2px; background: var(--tinta); }
+.cartela-pie { display: flex; align-items: flex-end; gap: 0.7rem; justify-content: space-between; }
+.cartela-meta { font-family: var(--mono); font-size: 0.55rem; line-height: 1.5; text-transform: uppercase; letter-spacing: 0.04em; }
+.cartela-meta b { display: block; font-size: 0.47rem; letter-spacing: 0.13em; opacity: 0.55; font-weight: 700; margin-top: 0.3rem; }
+.cartela-meta b:first-child { margin-top: 0; }
+.cartela .qr { width: 4.4rem; height: 4.4rem; }
+.cartela-lee { font-family: var(--mono); font-size: 0.45rem; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; margin-top: 0.2rem; }
+
+/* Imprimir es imprimir LAS CARTELAS. El panel entero no se imprime nunca —no
+   hay nada en él que quepa en una hoja— así que se esconde todo y se saca sólo
+   el pliego. `visibility` y no `display`: así el pliego conserva su caja y se
+   puede colocar arriba del todo sin pelearse con el resto del documento. */
+@page { margin: 12mm; }
+@media print {
+  body { background: var(--papel); }
+  body * { visibility: hidden; }
+  #pliego, #pliego * { visibility: visible; }
+  #pliego {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8mm;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  .cartela { page-break-inside: avoid; box-shadow: none; }
+}
 
 /* ── Registro ───────────────────────────────────────────────────────────── */
 /*

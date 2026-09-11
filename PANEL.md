@@ -153,8 +153,8 @@ inventa un esquema nuevo: `Sede`, `ActividadGantt`, `Artista`, `Edicion`,
 comentados campo por campo. Esa documentación se convierte, casi literal, en la
 ayuda que sale al lado de cada campo del panel.
 
-**El registro no tiene clave propia, ni ajustes, ni nada suyo.** Son dos campos
-de la actividad y ya:
+**Ni el registro ni el texto de sala tienen clave propia, ni ajustes, ni nada
+suyo.** Son campos de la actividad y ya:
 
 ```
 ActividadGantt      … + registro?: url  ·  libre?: true
@@ -413,6 +413,60 @@ interruptor de la rejilla de ejemplo. Una decisión, un sitio.
 
 **Barra de estado permanente**: versión, cuándo se guardó por última vez, si
 hay un rebuild en curso y un enlace a ver el sitio.
+
+### Los textos de sala
+
+La cartela de museo, sin la cartela.
+
+Cada actividad puede llevar el texto que estaría impreso en la pared. El sitio
+le da su página —`/sala/<id>`— y el panel imprime una etiqueta del tamaño de un
+naipe con un QR que la abre. Treinta y dos actividades son **ocho hojas** de
+etiquetas en vez del taco de trescientas páginas que nadie iba a pagar, ni a
+pegar, ni a reimprimir cuando cambiara una línea.
+
+**Dónde se hace.** Pestaña Programa → vista **Lista**. El conmutador de arriba
+tiene las dos lecturas de la misma lista, igual que `/programa` en el sitio:
+
+- **Rejilla** — un día a la vez, una sede por carril. Contesta «qué se pisa con
+  qué». Debajo va la tabla de siempre, con todos los campos.
+- **Lista** — por días, en bloques, con el texto de sala de cada actividad a la
+  derecha y la cuenta en la cabecera de cada día. Contesta «qué le falta a
+  ésta», que es la pregunta de la semana antes del festival.
+
+**Borrador y publicado son cosas distintas.** En borrador no existe la página y
+**no se puede imprimir la cartela**. Es a propósito: un QR impreso que lleva a
+un 404 no se descubre en la pantalla, se descubre delante de la obra, con
+alguien mirando su teléfono sin entender. Publicar aquí tampoco basta — la
+página aparece cuando el sitio se reconstruye, minuto y medio después de
+guardar. **No imprimas antes de eso.**
+
+**La dirección se acuña una vez y no se mueve.** Sale del título del momento en
+que se activa el texto, y a partir de ahí es del papel y no del título: se puede
+reescribir el texto entero, corregir el título, cambiar la hora, y
+`/sala/burdo` sigue siendo `/sala/burdo`. Sin esa regla, corregir una tilde el
+sábado por la tarde mataría todos los códigos ya pegados de esa pieza.
+
+Lo que el Worker puede y no puede prometer:
+
+- **Puede** rechazar dos textos con la misma dirección —serían dos obras
+  compartiendo página— y una dirección con mayúsculas, espacios o acentos. Ahí
+  no normaliza: normalizar en silencio dejaría al panel dibujando el QR de
+  `/sala/Burdo` mientras el sitio construye `/sala/burdo`.
+- **No puede** saber si un `id` *cambió*, porque las actividades son una lista
+  sin identidad propia y reordenar dos se ve igual que borrar y añadir. Lo que
+  sí hace es **avisar cuando una dirección publicada desaparece**, con la ruta
+  delante: es lo único que hace falta para saber qué papel hay que ir a
+  despegar.
+
+**El QR se dibuja aquí**, en `src/scripts/panel/qr.ts`, sin ninguna dependencia.
+No es capricho: el sitio se construye con `npm ci`, y un paquete añadido a
+medias no rompe el QR — rompe el despliegue entero. Está comprobado módulo a
+módulo contra otra implementación; el encabezado de ese archivo cuenta qué se
+comparó y qué dos fallos cazó la comparación antes de que nada se imprimiera.
+
+Y del lado del público son dos cosas y nada más: un botón de más en la ficha de
+la rejilla y un renglón subrayado en las listas de `/programa`, **sólo cuando
+hay texto publicado**. Nunca apagado — la misma regla que el registro.
 
 ### Que no se pisen dos personas
 
