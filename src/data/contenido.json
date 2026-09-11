@@ -1,6 +1,6 @@
 {
-  "version": 113,
-  "actualizado": "2026-09-11T00:54:59.001Z",
+  "version": 114,
+  "actualizado": "2026-09-11T21:26:51.653Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1432,6 +1432,90 @@
       "nombre": "R(A)D",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789082352/cuartasilla/artistas/r-a-d/hsbhuifv2rhfs3ammugy.jpg",
       "instagram": "https://www.instagram.com/rad___co/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Lila Mendez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789160896/cuartasilla/artistas/wzp131cp7lhsh6tevwmd.jpg",
+      "instagram": "https://www.instagram.com/lilight.lila/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Circe Romero Rivera",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789160956/cuartasilla/artistas/wivxzx6f74f4lx0hlvzr.jpg",
+      "instagram": "https://www.instagram.com/circerr/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Paola Salzman",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789160996/cuartasilla/artistas/z12ex231ou5iv5tlyno0.jpg",
+      "instagram": "https://www.instagram.com/paolasalzman/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Bruno Aguilar Chávez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161035/cuartasilla/artistas/grnd5klxggluk0b3xrlo.jpg",
+      "instagram": "https://www.instagram.com/cadenas.de.crescencia/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Omar Natanael Duran Felipe",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161082/cuartasilla/artistas/pccx7tahjtyv9vvoipcb.jpg",
+      "instagram": "https://www.instagram.com/ratanael66/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Alexa Natalia Villaseñor Castillo",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161119/cuartasilla/artistas/jl9akulvctsghifufqvc.jpg",
+      "instagram": "https://www.instagram.com/alexxvilla_/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Karen Serrato Trejo",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161191/cuartasilla/artistas/xm6o7hxb7dzgf7pyuhz4.jpg",
+      "instagram": "https://www.instagram.com/h4da_caid4/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Lázaro Sierra de la Torre",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161246/cuartasilla/artistas/hhnv0rbxufx5drblnaxv.jpg",
+      "instagram": "https://www.instagram.com/eel_lazarus/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Cruz",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161346/cuartasilla/artistas/piqnllin22ylfr06qu2g.jpg",
+      "instagram": "https://www.instagram.com/lacrucecita/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Barakel Castillejos Linarte",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161675/cuartasilla/artistas/tpblaqapoqbaiz111h4b.jpg",
+      "instagram": "https://www.instagram.com/cast_0104/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Mariluz Robles Farias",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161885/cuartasilla/artistas/mammypdlduiuqpfinn2r.jpg",
+      "instagram": "https://www.instagram.com/roblesmariluz/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Fernanda Elizabeth Morales Campos",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161923/cuartasilla/artistas/m8t23w1jvy3t7v2xooge.jpg",
+      "instagram": "https://www.instagram.com/gruporefammomaquinaria/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Yanely Aguilar García",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161955/cuartasilla/artistas/kaa1kgkljutdr3gsow2l.jpg",
+      "instagram": "https://www.instagram.com/r.yanely.a/",
+      "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Jimena Cruz y Sahori Sánchez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161994/cuartasilla/artistas/peb9pysxbzt7yy4jcd9q.jpg",
+      "instagram": "https://www.instagram.com/llantoraiz/",
       "sede": "Días Feriados"
     }
   ],
