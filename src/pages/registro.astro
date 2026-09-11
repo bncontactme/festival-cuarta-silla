@@ -87,9 +87,10 @@ const descripcion = registroAbierto
           registroPorDia.map((dia) => (
             <details class="plegable">
               <summary>
-                <span class="meta bg-amarillo px-1.5 py-0.5 text-[0.6rem] text-tinta">
-                  {String(dia.indice + 1).padStart(2, '0')}
-                </span>
+                {/* Sin numerar. El 01 junto a JUEVES se leía como fecha
+                    —«jueves 01, viernes 02»— y varios se apuntaron al día
+                    equivocado. Los días ya vienen en orden: contarlos no
+                    aporta nada y numerarlos miente. */}
                 <span>
                   <span class="display block text-2xl leading-none">{dia.dia}</span>
                   <span class="plegable-nota meta mt-1 block text-[0.5rem] opacity-50">
@@ -189,9 +190,6 @@ const descripcion = registroAbierto
             {registroPorDia.map((dia) => (
               <section data-reveal="arriba">
                 <header class="flex flex-wrap items-baseline gap-x-5 gap-y-1 border-b-2 border-tinta pb-3">
-                  <p class="meta text-rojo">
-                    {String(dia.indice + 1).padStart(2, '0')}
-                  </p>
                   <h2 class="display text-4xl leading-none lg:text-5xl">{dia.dia}</h2>
                   <p class="meta text-tinta/50">{dia.fecha}</p>
                   <p class="meta ml-auto text-tinta/50">
