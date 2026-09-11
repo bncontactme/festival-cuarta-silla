@@ -41,9 +41,9 @@ import {
           agendaPorDia.map((dia, i) => (
             <details class="plegable">
               <summary>
-                <span class="plegable-indice meta text-[0.6rem] text-rojo">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
+                {/* Sin numerar, como en `/registro`: el 01 junto a JUEVES se
+                    leía como fecha —«jueves 01, viernes 02»— y hubo quien se
+                    apuntó al día equivocado. La fecha de verdad va debajo. */}
                 <span>
                   <span class="display block text-3xl leading-none">
                     {dia.dia}
@@ -235,8 +235,7 @@ import {
                 agendaPorDia.map((dia, i) => (
                   <article class="lg:px-5 lg:first:pl-0 lg:last:pr-0">
                     <header class="border-b-2 border-rojo pb-4">
-                      <p class="meta text-rojo">{String(i + 1).padStart(2, '0')}</p>
-                      <h2 class="display mt-2 text-4xl leading-none">{dia.dia}</h2>
+                      <h2 class="display text-4xl leading-none">{dia.dia}</h2>
                       <p class="meta mt-2 text-tinta/45">
                         {dia.fecha}
                         {dia.actividades.length > 0 && (

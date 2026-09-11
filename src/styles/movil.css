@@ -667,7 +667,6 @@
 
   /* La letra chica sobre rojo necesita papel; el titular y el signo sí
      conservan el amarillo porque trabajan a cuerpo grande. */
-  .plegable[open] > summary .plegable-indice,
   .plegable[open] > summary .plegable-nota {
     color: var(--color-papel);
     opacity: 0.85;
