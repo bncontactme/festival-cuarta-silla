@@ -33,7 +33,6 @@ import {
   registro,
   registroEventos,
   sedes,
-  convocatoriaVoluntarixs,
   estadoPrograma,
 } from '../../data/site';
 import { artistas } from '../../data/artistas';
@@ -105,12 +104,6 @@ const indice = [
     label: patrocinadores.titulo,
     href: '#patrocinadores',
     nota: `${patrocinadores.lista.length} marcas`,
-  },
-  {
-    label: 'Voluntarixs',
-    href: convocatoriaVoluntarixs.href,
-    nota: 'Convocatoria',
-    externa: true,
   },
   ...(festival.donaciones.paypal
     ? [

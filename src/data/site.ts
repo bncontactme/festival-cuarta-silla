@@ -65,8 +65,13 @@ export const registroEventos = {
   href: '/registro',
 };
 
-/** Convocatoria externa para sumarse al festival como voluntarix. Vive en el
- *  CTA de la portada de escritorio y en los accesos secundarios de móvil. */
+/** Convocatoria externa para sumarse al festival como voluntarix.
+ *
+ *  **Cerrada: hoy no la pinta nadie.** Estaba en el CTA de la portada de
+ *  escritorio y en los accesos secundarios del teléfono, y se quitó de los dos.
+ *  El enlace se queda aquí y no en el historial de git porque el formulario es
+ *  el mismo cada año: volver a abrirla es devolver el botón, no ir a buscar la
+ *  URL. */
 export const convocatoriaVoluntarixs = {
   label: 'Convocatoria voluntarixs',
   href: 'https://docs.google.com/forms/d/e/1FAIpQLSc1mk-gt7o50qyvpBsFJqBphMQeWPKlJj9Ok7HYvex9FAn9dQ/viewform',
