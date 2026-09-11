@@ -18,11 +18,10 @@ import type { Edicion, Foto } from './tipos';
  * la sección. Los tipos `Edicion` y `Foto` viven en `tipos.ts`, con qué hace
  * falta por edición.
  *
- * Puede estar vacía y no pasa nada: ésta es la cuarta edición, así que hubo
- * tres antes, pero de ninguna teníamos ni el año confirmado ni una sola foto.
- * Inventarlos sería peor que el hueco, y el hueco está diseñado. Con la primera
- * edición cargada, la banda de la portada pasa de la línea de «en construcción»
- * al índice y `/galeria` se llena sola.
+ * Puede estar vacía y no pasa nada: el hueco está diseñado. Lo que se pinta
+ * mientras tanto no cuenta cuántas ediciones hubo ni de cuándo —eso no nos lo
+ * han dado y no se deduce del nombre—: dice que no hay fotos y pide las que
+ * haya. Con la primera edición cargada, `/galeria` se llena sola.
  */
 
 export type { Foto, Edicion };
@@ -30,9 +29,10 @@ export type { Foto, Edicion };
 export const archivo = {
   titulo: 'Galería',
   estado: 'En construcción',
-  /** Lo que se lee en el hueco mientras no haya ediciones cargadas. */
-  vacio:
-    'Estamos juntando las fotos de las tres ediciones anteriores. Si tienes material de alguna, escríbenos.',
+  /** Lo que se lee en el hueco mientras no haya ediciones cargadas. Sin contar
+   *  ediciones: decía «las tres ediciones anteriores» y ese tres no lo sabe
+   *  nadie aquí. Que no hay fotos, y que se agradecen. */
+  vacio: 'Si tienes fotos del festival, escríbenos.',
   acciones: {
     ver: 'Ver la galería',
     sedes: 'sedes',
