@@ -89,12 +89,16 @@ const indice = [
       ? `${artistas.lista.length} ${artistas.lista.length === 1 ? 'nombre' : 'nombres'}`
       : '',
   },
+  /* Y sin fotos, lo mismo que artistas: la entrada va sin nota. «En
+     construcción» colgado de GALERÍA anunciaba una sección a medio hacer —y
+     la sección está hecha: lo que no hay todavía son fotos, que es lo que
+     dice la pantalla al abrirla. */
   {
     label: archivo.titulo,
     href: '/galeria',
     nota: archivo.lista.length
       ? `${archivo.lista.length} ${archivo.lista.length === 1 ? 'edición' : 'ediciones'}`
-      : archivo.estado,
+      : '',
   },
   /* Patrocinadores no tiene página propia —en escritorio es una banda de la
      home— así que aquí abre su pantalla `:target`, como el manifiesto. La

@@ -20,22 +20,20 @@ const ediciones = archivo.lista;
     <Pantalla
       titulo={archivo.titulo}
       indice="06"
-      nota={
-        ediciones.length
-          ? `${ediciones.length} ediciones`
-          : archivo.estado
-      }
+      nota={ediciones.length ? `${ediciones.length} ediciones` : undefined}
       fondo="amarillo"
     >
       {
         ediciones.length === 0 ? (
           <div class="p-4">
+            {/* Sin el rótulo de «En construcción». La galería no está a medio
+                hacer: está hecha y vacía, que no es lo mismo — y lo segundo lo
+                dice mejor la propia ficha, con lo que falta y cómo ayudar a
+                llenarlo. En escritorio el rótulo sigue: allí la banda es una
+                sección de una página larga y sin él la ficha aparece sin
+                presentación. */}
             <div class="ficha">
-              <p class="meta flex items-center gap-3 text-tinta">
-                <span class="inline-block h-[2px] w-8 bg-rojo" />
-                {archivo.estado}
-              </p>
-              <p class="display mt-3 text-3xl leading-[0.95]">
+              <p class="display text-3xl leading-[0.95]">
                 Todavía no hay fotos
               </p>
               <p class="mt-4 font-mono text-[0.8rem] leading-relaxed text-tinta/70">
