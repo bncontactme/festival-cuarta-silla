@@ -1,6 +1,6 @@
 {
-  "version": 119,
-  "actualizado": "2026-09-12T17:55:22.596Z",
+  "version": 120,
+  "actualizado": "2026-09-12T18:16:39.368Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1519,6 +1519,12 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161994/cuartasilla/artistas/peb9pysxbzt7yy4jcd9q.jpg",
       "instagram": "https://www.instagram.com/llantoraiz/",
       "sede": "Días Feriados"
+    },
+    {
+      "nombre": "MESTIZOS collective",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789236989/cuartasilla/artistas/mestizos-collective/ielqupmdzrayokyfp9cy.jpg",
+      "instagram": "https://www.instagram.com/mestizos.collective/",
+      "sede": "Cuerpos Parlantes"
     }
   ],
   "archivo": [],
