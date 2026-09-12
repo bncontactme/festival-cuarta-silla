@@ -1,6 +1,6 @@
 {
-  "version": 118,
-  "actualizado": "2026-09-12T17:52:17.290Z",
+  "version": 119,
+  "actualizado": "2026-09-12T17:55:22.596Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -812,7 +812,7 @@
       "nombre": "David Camargo",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788656426/cuartasilla/artistas/yjxk77wo5627okudk3pv.jpg",
       "instagram": "https://www.instagram.com/camargo03/",
-      "sede": "Ala Rota"
+      "sede": "No Museo"
     },
     {
       "nombre": "David Rocha",
