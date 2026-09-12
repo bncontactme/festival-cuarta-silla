@@ -1,6 +1,6 @@
 {
-  "version": 124,
-  "actualizado": "2026-09-12T19:15:25.285Z",
+  "version": 126,
+  "actualizado": "2026-09-12T19:19:27.593Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -692,7 +692,8 @@
     {
       "nombre": "Alberto Peredo Pozos",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788655419/cuartasilla/artistas/alberto-peredo-pozos/x0l9okvnlqex7hxwzjsn.jpg",
-      "instagram": "https://www.instagram.com/alberto_peredo_pozos_/"
+      "instagram": "https://www.instagram.com/alberto_peredo_pozos_/",
+      "sede": "Días Feriados"
     },
     {
       "nombre": "Alejandro Sánchez Rivera",
@@ -1525,6 +1526,12 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789238065/cuartasilla/artistas/mimi-valdivia/ahyew517x16xihhy9hcr.jpg",
       "instagram": "https://www.instagram.com/mimi_._miim/",
       "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Luna Bowling",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789240729/cuartasilla/artistas/luna-bowling/azbwr4nyni2h9xxc1eod.jpg",
+      "instagram": "https://www.instagram.com/lunabowlinggg/",
+      "sede": "Cuerpos Parlantes"
     }
   ],
   "archivo": [],
