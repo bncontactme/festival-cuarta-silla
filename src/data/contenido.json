@@ -1,6 +1,6 @@
 {
-  "version": 123,
-  "actualizado": "2026-09-12T18:56:02.841Z",
+  "version": 124,
+  "actualizado": "2026-09-12T19:15:25.285Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -663,7 +663,7 @@
       "nombre": "Andrea Arroniz",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788383562/cuartasilla/artistas/x8qbh7nqtfdoowjjy8hn.jpg",
       "instagram": "https://www.instagram.com/andreaesgenial/",
-      "sede": "Taller Industria Gráfica"
+      "sede": "Días Feriados"
     },
     {
       "nombre": "Enrique Chiu",
@@ -806,7 +806,7 @@
       "nombre": "David Alejandro Zamora Hernandez",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788656370/cuartasilla/artistas/david-alejandro-zamora-hernandez/lljet3subzg8iibye14t.jpg",
       "instagram": "https://www.instagram.com/david.z.hernandez/",
-      "sede": "Taller Industria Gráfica"
+      "sede": "Días Feriados"
     },
     {
       "nombre": "David Camargo",
