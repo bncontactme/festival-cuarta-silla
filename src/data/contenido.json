@@ -1,6 +1,6 @@
 {
-  "version": 120,
-  "actualizado": "2026-09-12T18:16:39.368Z",
+  "version": 121,
+  "actualizado": "2026-09-12T18:34:32.417Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -923,12 +923,6 @@
       "sede": "Días Feriados"
     },
     {
-      "nombre": "Iosune Salaya",
-      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902614/cuartasilla/artistas/easitiz3hr9fshcw5lxq.jpg",
-      "instagram": "https://www.instagram.com/azulultraamar/",
-      "sede": "Cuerpos Parlantes"
-    },
-    {
       "nombre": "Iskar",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902869/cuartasilla/artistas/uuanemjxz2yu1hofiqno.jpg",
       "instagram": "https://www.instagram.com/iskar.art/",
@@ -1525,6 +1519,12 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789236989/cuartasilla/artistas/mestizos-collective/ielqupmdzrayokyfp9cy.jpg",
       "instagram": "https://www.instagram.com/mestizos.collective/",
       "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Mimi Valdivia",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789238065/cuartasilla/artistas/mimi-valdivia/ahyew517x16xihhy9hcr.jpg",
+      "instagram": "https://www.instagram.com/mimi_._miim/",
+      "sede": "Días Feriados"
     }
   ],
   "archivo": [],
