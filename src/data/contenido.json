@@ -1,6 +1,6 @@
 {
-  "version": 117,
-  "actualizado": "2026-09-12T17:50:12.803Z",
+  "version": 118,
+  "actualizado": "2026-09-12T17:52:17.290Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1278,6 +1278,8 @@
     },
     {
       "nombre": "Rubi Zaira Flores Cruz",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789235533/cuartasilla/artistas/rubi-zaira-flores-cruz/dvpxehnwibdfiex1eix0.jpg",
+      "instagram": "https://www.instagram.com/rozen.zaii/",
       "sede": "Estallido Art Project"
     },
     {
