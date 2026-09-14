@@ -17,17 +17,19 @@
  *   · el tipo con su tinta, que es como se lee la rejilla del sitio;
  *   · **con qué se encima**, por su nombre — lo que sólo decía el cuadro de
  *     horarios, y que en una lista hay que escribir porque no se ve;
- *   · el texto de sala: su estado, su dirección, su QR y sus botones.
+ *   · la descripción: su estado, su dirección, su QR y sus botones.
  */
 import { el } from './dom';
 import { qrChico, rutaDe } from './sala';
 
 export type MandosSala = {
   raiz: () => string;
-  /** Abrir el texto de sala de esta actividad. */
+  /** Abrir la descripción de esta actividad. */
   alSala: (a: any) => void;
   /** Mandar esta cartela a la impresora. */
   alImprimir: (a: any) => void;
+  /** Mandar la hoja de QR de esta actividad —una hoja entera, para colgar—. */
+  alImprimirQR: (a: any) => void;
 };
 
 /** Cuánto dura, dicho como lo diría una persona. */
@@ -80,7 +82,7 @@ export function bloqueActividad(a: any, choca?: any[]): HTMLElement[] {
 }
 
 /**
- * Los mandos del texto de sala, a la derecha del renglón.
+ * Los mandos de la descripción, a la derecha del renglón.
  *
  * Tres estados y ninguno es un botón apagado: lo que no tiene texto enseña la
  * puerta de crearlo, no la de que no hay.
@@ -91,22 +93,40 @@ export function mandoSala(a: any, mandos: MandosSala): HTMLElement {
       el('button', {
         type: 'button', class: 'sala-off',
         onclick: () => mandos.alSala(a),
-      }, '+ Texto de sala'),
+      }, '+ Descripción'),
     );
   }
 
   const publicado = Boolean(a.sala.publicado);
   const url = rutaDe(mandos.raiz(), a.sala.id);
 
+  // Las dos salidas, y son dos cosas distintas: la cartela se pega al lado de
+  // la obra, la hoja de QR se cuelga en la entrada de la sala. Las dos van
+  // aquí, en el renglón, porque de una en una es como se usan — el pliego
+  // entero se manda desde la barra. Y los dos botones dicen QUÉ sale, no
+  // «imprimir»: a estas alturas del montaje lo que se duda no es si se imprime.
+  //
+  // El título va en el `title` de los tres: cuarenta renglones con un botón
+  // llamado «Texto» son cuarenta botones que se llaman igual, y eso es lo que
+  // oye quien no está mirando la pantalla.
+  const que = a.titulo || 'esta actividad';
   const datos = el('div', { class: 'sala-datos' },
     el('span', { class: 'estado ' + (publicado ? 'estado--pub' : 'estado--bor') },
       publicado ? '▣ Publicado' : '▢ Borrador'),
     el('span', { class: 'ruta', title: url }, '/sala/' + a.sala.id),
     el('span', { class: 'acto-acciones' },
-      el('button', { type: 'button', onclick: () => mandos.alSala(a) }, 'Texto'),
-      publicado
-        ? el('button', { type: 'button', onclick: () => mandos.alImprimir(a) }, 'Cartela')
-        : null,
+      el('button', {
+        type: 'button', title: `Escribir la descripción de «${que}»`,
+        onclick: () => mandos.alSala(a),
+      }, 'Descripción'),
+      publicado ? el('button', {
+        type: 'button', title: `Imprimir la cartela de «${que}» — etiqueta de un tercio de hoja`,
+        onclick: () => mandos.alImprimir(a),
+      }, 'Cartela') : null,
+      publicado ? el('button', {
+        type: 'button', title: `Imprimir la hoja de QR de «${que}» — una hoja entera, para colgar`,
+        onclick: () => mandos.alImprimirQR(a),
+      }, 'QR') : null,
     ),
   );
 

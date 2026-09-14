@@ -459,10 +459,10 @@
     color: var(--texto);
   }
 
-  /* ── La segunda puerta: leer el texto de sala ────────────────────────────
+  /* ── La segunda puerta: leer la descripción ────────────────────────────
      Subrayado y sin caja, a propósito. En estas listas la puerta con borde es
      «Registrarme», que es la que tiene prisa —los cupos se acaban— y la que
-     hay que ver desde lejos. El texto de sala se lee estando ya dentro, así
+     hay que ver desde lejos. La descripción se lee estando ya dentro, así
      que no compite: pesa lo que pesa una nota al margen.
 
      El color lo pone el contexto. Estas listas alternan campo rojo y campo

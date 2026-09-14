@@ -146,7 +146,7 @@ const actividades: Esquema = {
     a.inicio && a.fin ? `${a.inicio}–${a.fin}` : null,
     a.sede || null,
     a.tipo || null,
-    a.sala ? (a.sala.publicado ? '▣ texto de sala' : '▢ texto en borrador') : null,
+    a.sala ? (a.sala.publicado ? '▣ descripción' : '▢ descripción en borrador') : null,
   ].filter(Boolean).join(' · '),
   // Para que «sala», «burdo» o «borrador» encuentren lo que se está buscando.
   busca: (a) => a.sala ? `sala ${a.sala.id} ${a.sala.publicado ? 'publicado' : 'borrador'}` : '',
@@ -165,7 +165,7 @@ const actividades: Esquema = {
     const conSala = filas.filter((a) => a.sala).length;
     const chocan = filas.filter((a) => choques?.has(a)).length;
     return [
-      conSala ? `${conSala} con texto de sala` : null,
+      conSala ? `${conSala} con descripción` : null,
       chocan ? `⚠ ${chocan} se enciman` : null,
     ].filter(Boolean).join(' · ');
   },

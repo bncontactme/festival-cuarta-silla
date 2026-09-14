@@ -89,7 +89,7 @@ export function pintarPrevia(
         const i = Math.max(ABRE, min(a.inicio));
         const f = Math.min(CIERRA, Math.max(min(a.fin), i + 15));
         const color = COLOR_TIPO[a.tipo] ?? { fondo: '#ddd', texto: '#1e1e1e' };
-        // Una barra que abre su propio texto de sala: aquí es donde se ve «esta
+        // Una barra que abre su propio descripción: aquí es donde se ve «esta
         // pieza está sola toda la tarde», que es justo cuando alguien se
         // acuerda de que le falta la cartela.
         carril.append(el('button', {
@@ -111,7 +111,7 @@ export function pintarPrevia(
   for (const [tipo, color] of Object.entries(COLOR_TIPO)) {
     leyenda.append(el('span', {}, el('i', { style: `background:${color.fondo}` }), tipo));
   }
-  leyenda.append(el('span', { class: 'leyenda-sala' }, '▣ con texto de sala'));
+  leyenda.append(el('span', { class: 'leyenda-sala' }, '▣ con descripción'));
   if (choca.size) {
     leyenda.append(el('span', { style: 'color:#ff0100' },
       `⚠ ${choca.size} actividades se enciman en su sede`));

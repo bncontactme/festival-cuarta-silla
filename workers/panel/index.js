@@ -70,7 +70,7 @@ const CUERPO_MAX = 1_000_000;
  * aprende un campo nuevo.**
  *
  * Existe por una tarde concreta. El 14/09, con el festival a diez días, se
- * escribió un texto de sala en el panel, se guardó, la versión subió, el sitio
+ * escribió una descripción en el panel, se guardó, la versión subió, el sitio
  * se reconstruyó en verde — y el texto no estaba en ninguna parte. El sitio se
  * había actualizado al mezclar el PR; el Worker no, porque vive en Cloudflare y
  * entonces sólo se desplegaba a mano. Y el Worker es la puerta: `validar.js`
@@ -86,7 +86,7 @@ const CUERPO_MAX = 1_000_000;
  * `src/scripts/panel/panel.ts`.
  *
  *   1 → sedes, programa, artistas, archivo, marcas
- *   2 → + `sala` en las actividades (textos de sala)
+ *   2 → + `sala` en las actividades (descripciones)
  */
 const CONTRATO = 2;
 
@@ -238,7 +238,7 @@ async function guardar(cuerpo, env, ctx, cors) {
     }
   }
 
-  // Un texto de sala publicado tiene una dirección impresa dentro de un QR que
+  // Una descripción publicada tiene una dirección impresa dentro de un QR que
   // está pegado a una pared. Si al guardar desaparece —se borró la actividad,
   // se quitó el texto, se volvió a borrador— ese papel se queda apuntando a una
   // página que el próximo build ya no va a construir.

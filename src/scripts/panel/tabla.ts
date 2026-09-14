@@ -100,7 +100,7 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
   }
 
   function visibles(): { dato: any; i: number }[] {
-    // El filtro de la barra de arriba —hoy «sólo con texto de sala»— se aplica
+    // El filtro de la barra de arriba —hoy «sólo con descripción»— se aplica
     // antes que la búsqueda: es del tipo «enséñame sólo estas», no del tipo
     // «busca esto». Vive fuera de la tabla porque lo manda un botón que no es
     // suyo, y entra por `ctx` para que esto no sepa de qué va.
@@ -304,7 +304,7 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
       dentro.append(rejilla, acciones);
     }
 
-    // Los mandos propios de la fila —hoy sólo el texto de sala del programa—
+    // Los mandos propios de la fila —hoy sólo la descripción del programa—
     // van al lado del botón y no dentro: un botón dentro de otro botón no es
     // HTML, y además pulsar «Cartela» no puede plegar la fila de paso.
     const extras = tabla.esquema.extras?.(dato, ctx) ?? null;
@@ -418,7 +418,7 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
     abiertas.add(nueva);
     // Una fila nueva que sale filtrada es una fila que no aparece: se quitan
     // los dos filtros antes de añadirla, que es menos raro que buscarla. El de
-    // fuera también —«Sólo con texto de sala» esconde a la recién nacida por
+    // fuera también —«Sólo con descripción» esconde a la recién nacida por
     // definición, porque todavía no tiene texto ninguno—.
     busqueda = ''; buscador.value = '';
     ctx.limpiarFiltro?.();

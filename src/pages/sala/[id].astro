@@ -1,6 +1,6 @@
 ---
 /**
- * El texto de sala de una actividad. Lo que abre el QR de la cartela.
+ * La descripción de una actividad. Lo que abre el QR de la cartela.
  *
  * **No usa `Base.astro`, y es la segunda página del sitio que no lo usa.**
  * Piensa en dónde se lee esto: de pie, dentro de una sala, con el teléfono en
@@ -46,8 +46,8 @@ const dia = programa.dias[a.dia];
 const sede = enTodasLasSedes(a.sede) ? undefined : sedeDe(a.sede);
 const parrafos = parrafosDe(a.sala);
 
-const titulo = `${a.titulo} — Texto de sala — ${festival.nombreCompleto}`;
-const descripcion = parrafos[0]?.slice(0, 180) ?? `Texto de sala de «${a.titulo}».`;
+const titulo = `${a.titulo} — Descripción — ${festival.nombreCompleto}`;
+const descripcion = parrafos[0]?.slice(0, 180) ?? `Descripción de «${a.titulo}».`;
 const canonica = new URL(Astro.url.pathname, Astro.site);
 ---
 
@@ -63,7 +63,7 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
     <meta name="theme-color" content="#fffd00" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content={festival.nombreCompleto} />
-    <meta property="og:title" content={`${a.titulo} — Texto de sala`} />
+    <meta property="og:title" content={`${a.titulo} — Descripción`} />
     <meta property="og:description" content={descripcion} />
     <meta property="og:url" content={canonica} />
     <meta property="og:locale" content="es_MX" />
@@ -75,7 +75,7 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
         escritorio impide que el texto cruce mil píxeles de pared a pared. */}
     <main class="mx-auto w-full max-w-[42rem] px-5 py-10 sm:px-8 sm:py-14">
       <p class="meta text-[0.6rem] text-rojo">
-        Texto de sala · {festival.edicion} {festival.anio}
+        Descripción · {festival.edicion} {festival.anio}
       </p>
 
       <h1 class="display mt-3 text-4xl leading-[0.92] sm:text-6xl">{a.titulo}</h1>
