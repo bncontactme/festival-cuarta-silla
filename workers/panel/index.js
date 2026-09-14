@@ -374,8 +374,21 @@ async function estadoBuild(env, cors) {
 
   let runs;
   try {
+    // **Sólo los de `publicar.yml`**, y esto es el arreglo de un susto de
+    // verdad. Antes se pedían los runs de TODOS los workflows y se cogía el
+    // más reciente. Mientras sólo hubo uno eso era lo mismo; desde que existe
+    // `worker.yml` ya no, porque los dos se disparan con el mismo push y el del
+    // Worker termina antes. El 14/09 el del Worker falló —le faltaba el
+    // secreto— y el panel anunció «La publicación falló: el sitio no está
+    // enseñando lo que guardaste» con el sitio publicado y en verde.
+    //
+    // Decirle a alguien que su trabajo no salió cuando sí salió es peor que no
+    // decir nada: manda a revisar lo que está bien, y a la tercera vez ya nadie
+    // lee el aviso. Se pregunta por el workflow que de verdad publica el sitio y
+    // por ninguno más. Si se renombra el archivo, esto contesta 404 y el panel
+    // dice «desconocido», que es el fallo honesto de siempre.
     const res = await fetch(
-      `https://api.github.com/repos/${env.GITHUB_REPO}/actions/runs?per_page=10`,
+      `https://api.github.com/repos/${env.GITHUB_REPO}/actions/workflows/publicar.yml/runs?per_page=10`,
       { headers: cabeceras },
     );
     if (!res.ok) return json({ ok: true, estado: 'desconocido', motivo: 'github-' + res.status }, 200, cors);
