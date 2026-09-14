@@ -245,6 +245,21 @@ Y el bloque de `site.ts` se queda, pero cuando el dato llega del panel **avisa
 en vez de reventar**: si algo se coló, la actividad sale sin dirección —que es
 feo— en lugar de tumbar el despliegue —que es peor.
 
+**Lo que el validador NO avisa, y por qué.** Había un aviso por cada par de
+actividades encimadas en su sede. Encimarse no es un error —una sede puede tener
+dos cosas a la vez— pero el programa de verdad son ocho pares, así que cada
+Guardar sacaba ocho renglones de lo mismo, y debajo, en la misma caja y el mismo
+tono, el que sí hay que leer: «/sala/… estaba publicado y ya no lo está. Si su
+cartela está impresa, ese QR se queda sin página».
+
+Una caja que sale siempre y siempre dice lo mismo se aprende a despachar sin
+leerla, y el día que trae algo se despacha igual. Se quitó el aviso de choques y
+no se perdió nada: el panel ya lo dice tres veces y en el sitio donde se puede
+hacer algo al respecto —en el renglón con el nombre de la otra actividad
+delante, en la cabecera del día, y en Horarios, que es el cuadro que existe
+justo para eso—. Allí se ve al mirar; aquí se veía al guardar, que es cuando ya
+no estás mirando eso.
+
 ### Seguridad
 
 Se copia tal cual lo que ya funciona en GDN, que es lo sensato:
@@ -424,6 +439,20 @@ abre: **tres por hoja**, cruzadas de canto a canto y todas del mismo alto, así
 que el taco se corta de una vez. Treinta y dos actividades son **once hojas** de
 etiquetas en vez del taco de trescientas páginas que nadie iba a pagar, ni a
 pegar, ni a reimprimir cuando cambiara una línea.
+
+**Y salen en dos formas, porque son dos cosas.** La **cartela** es esa etiqueta:
+se pega al lado de la obra y se lee a dos palmos. La **hoja de QR** es una hoja
+entera con el código a quince centímetros y el título encima — el cartel de la
+entrada de una sala, o el que va al lado de una pieza que ocupa una pared, el
+que alguien escanea desde donde está sin acercarse. Una por hoja, y no es un
+descuido: dos no caben siendo un cartel, y hacerlas caber sería devolverlas al
+tamaño de la cartela, que ya existe.
+
+Se elige en los dos momentos en que se usa: en el renglón —«Texto · Cartela ·
+QR»— para la de una en una, y en el diálogo de elegir con un conmutador que
+**cambia la cuenta de hojas del pie**. Eso último es el punto: con «Sólo QR»,
+siete textos son siete hojas y no dos, y delante de una impresora compartida eso
+se ve antes de darle y no después.
 
 **Dónde se hace.** Pestaña Programa, que arranca en **Programa** y tiene al
 lado **Horarios**. Ojo: no son dos lecturas del programa, como en `/programa`
