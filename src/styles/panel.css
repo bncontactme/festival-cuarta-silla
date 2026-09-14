@@ -554,10 +554,22 @@ select {
 
 /* El renglón y sus mandos, uno al lado del otro. El botón que pliega se lleva
    todo el ancho que sobre; los mandos del texto de sala se quedan a la derecha
-   y FUERA de él, que es lo que les deja ser botones. */
+   y FUERA de él, que es lo que les deja ser botones.
+
+   La columna de los mandos mide SIEMPRE lo mismo, y eso es el arreglo. Era
+   `flex: 0 0 auto`, o sea, del ancho de su contenido, y su contenido más ancho
+   es la ruta —que se pinta entera y de una línea porque nada la estrecha—. El
+   resultado: la columna medía 144, 172, 234, 249 o 271 píxeles según lo largo
+   que fuera el slug de cada actividad, así que bajando la lista nada estaba
+   donde estaba en el renglón anterior. Y `word-break: break-all` en `.ruta` no
+   servía de nada, porque una caja que se dimensiona a su contenido nunca
+   obliga a partir nada.
+
+   Con el ancho fijo la ruta se parte cuando toca y las cuarenta filas se leen
+   en columna. */
 .resumen-linea { display: flex; align-items: stretch; gap: 0.4rem; min-width: 0; }
 .resumen-linea > .resumen { flex: 1 1 auto; min-width: 0; }
-.resumen-linea > .acto-fin { flex: 0 0 auto; padding: 0.5rem 0.7rem 0.5rem 0; }
+.resumen-linea > .acto-fin { flex: 0 0 14rem; padding: 0.5rem 0.7rem 0.5rem 0; }
 
 /* El renglón cuando es un bloque y no una línea de texto. */
 .resumen.resumen--bloque {
@@ -623,7 +635,7 @@ select {
   padding: 0.08rem 0.35rem;
   white-space: nowrap;
 }
-.acto-fin { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 0.35rem; min-width: 9rem; }
+.acto-fin { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 0.35rem; min-width: 0; }
 .lista-vacia { background: var(--papel); border: 2px solid var(--tinta); border-top: 0; padding: 0.7rem; font-family: var(--mono); font-size: 0.65rem; opacity: 0.6; }
 
 /* ── El control de texto de sala ────────────────────────────────────────── */
@@ -640,8 +652,12 @@ select {
   white-space: nowrap;
 }
 .sala-off:hover { border-style: solid; border-color: var(--rojo); color: var(--rojo); opacity: 1; }
-.sala-on { display: flex; align-items: flex-start; gap: 0.5rem; }
-.sala-datos { display: grid; gap: 0.18rem; justify-items: end; }
+.sala-on { display: flex; align-items: flex-start; gap: 0.5rem; min-width: 0; }
+/* `min-width: 0` en los dos: sin él, la pista de la rejilla se dimensiona a la
+   ruta entera y la columna vuelve a crecer por detrás del ancho fijo de
+   `.acto-fin`. Con esto la ruta se parte, que es lo que `break-all` quería
+   hacer desde el principio. */
+.sala-datos { display: grid; gap: 0.18rem; justify-items: end; min-width: 0; }
 .estado {
   font-family: var(--mono);
   font-weight: 700;
@@ -653,8 +669,12 @@ select {
 }
 .estado--pub { background: var(--amarillo); border-color: var(--tinta); color: var(--tinta); }
 .estado--bor { background: var(--papel); border-color: #7a5e00; color: #7a5e00; }
-.ruta { font-family: var(--mono); font-size: 0.55rem; opacity: 0.6; word-break: break-all; text-align: right; }
+.ruta { font-family: var(--mono); font-size: 0.55rem; opacity: 0.6; word-break: break-all; text-align: right; max-width: 100%; }
 .acto-acciones { display: flex; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end; }
+/* Medían 43×16 píxeles. El mínimo para acertarle con un dedo son 24 (WCAG
+   2.5.8) y este panel se usa desde un teléfono, de pie en una sede y a las
+   once de la noche — es la pantalla para la que está escrito. Sube el alto y
+   nada más: siguen siendo mandos de renglón y no botones de barra. */
 .acto-acciones button, .acto-mini {
   font-family: var(--mono);
   font-size: 0.55rem;
@@ -662,7 +682,8 @@ select {
   text-transform: uppercase;
   border: 1px solid var(--tinta);
   background: var(--papel);
-  padding: 0.12rem 0.35rem;
+  padding: 0.2rem 0.5rem;
+  min-height: 1.5rem;
 }
 .acto-acciones button:hover, .acto-mini:hover { background: var(--amarillo); }
 
@@ -821,24 +842,71 @@ select {
 .cartela .qr { width: 7rem; height: 7rem; }
 .cartela-lee { font-family: var(--mono); font-size: 0.54rem; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; margin-top: 0.2rem; }
 
-/* Imprimir es imprimir LAS CARTELAS. El panel entero no se imprime nunca —no
-   hay nada en él que quepa en una hoja— así que se esconde todo y se saca sólo
-   el pliego. `visibility` y no `display`: así el pliego conserva su caja y se
-   puede colocar arriba del todo sin pelearse con el resto del documento. */
+/* ── La hoja de QR ──────────────────────────────────────────────────────────
+   La otra salida, y es otra cosa: la cartela se pega al lado de la obra y se
+   lee a dos palmos; esto es el cartel de la entrada de la sala, el que se
+   escanea desde donde uno está. Por eso el código mide quince centímetros, y
+   por eso va uno por hoja — dos no caben siendo un cartel, y hacerlos caber
+   sería devolverlos al tamaño de la cartela, que ya existe.
+
+   El alto es el mismo presupuesto que el taco de cartelas (248mm), que es lo
+   que cabe en Carta y en A4 con los márgenes de `@page`. El salto de página lo
+   escribe `break-after`, no el alto: así una hoja corta tampoco se cuela con la
+   siguiente. */
+.pliego--qr { --qr-lado: 150mm; }
+.hoja-qr {
+  height: 248mm;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  break-after: page;
+  break-inside: avoid;
+}
+/* Sin esto la última hoja arrastra una en blanco detrás. */
+.hoja-qr:last-child { break-after: auto; }
+.hoja-qr .cartela-cab { flex: 0 0 auto; }
+/* El medio se come el hueco que sobre y centra lo suyo, así que el cabecero se
+   queda arriba y el QR en mitad de la hoja, mire donde mire la impresora. */
+.hoja-qr-medio {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  min-height: 0;
+}
+.hoja-qr h6 { font-family: var(--display); font-size: 2.6rem; text-transform: uppercase; line-height: 1.08; font-weight: 400; text-align: center; max-width: 24ch; }
+.hoja-qr .qr { width: var(--qr-lado); height: var(--qr-lado); }
+.hoja-qr .cartela-lee { font-size: 0.85rem; letter-spacing: 0.18em; }
+
+/* Imprimir es imprimir EL PLIEGO. El panel entero no se imprime nunca —no hay
+   nada en él que quepa en una hoja— así que se esconde todo y se saca sólo el
+   pliego.
+
+   `display: none` y no `visibility: hidden`, que es lo que había aquí. Un nodo
+   escondido con `visibility` CONSERVA SU CAJA, y la caja del panel son cuarenta
+   filas de alto: seguía generando páginas detrás del pliego, vacías porque todo
+   lo suyo era invisible. Medido con Chrome imprimiendo a PDF: diez cartelas
+   —cuatro hojas— salían en doce páginas, ocho de ellas en blanco, y el número
+   crecía con lo larga que fuera la lista, no con lo que se imprimía. En una
+   impresora compartida y a diez días del festival, eso es justo el taco de
+   papel del que iba huyendo todo esto.
+
+   Con `none` el documento se acaba donde se acaba el pliego, y el pliego ya no
+   necesita flotar absoluto por encima de nada: vuelve al flujo normal. */
 @page { margin: 12mm; }
 @media print {
   body { background: var(--papel); }
-  body * { visibility: hidden; }
-  #pliego, #pliego * { visibility: visible; }
+  body > *:not(#pliego) { display: none; }
   #pliego {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--cartela-aire);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
   }
+  /* El aire entre cartelas es el margen de corte. Entre hojas de QR no hay nada
+     que cortar: cada una es la hoja entera. */
+  #pliego.pliego--qr { gap: 0; }
   .cartela { page-break-inside: avoid; box-shadow: none; }
   /* Tres y salto. El alto ya las hace caber de tres en tres, pero quien parte
      la rejilla en hojas es el navegador y cada uno redondea a su manera: con
@@ -950,6 +1018,21 @@ select {
 .panelillo td, .panelillo th { border-bottom: 1px solid var(--raya); padding: 0.35rem 0.3rem; text-align: left; }
 
 @media (max-width: 640px) {
+  /*
+   * Los mandos del texto de sala, DEBAJO del bloque y no al lado.
+   *
+   * Al lado no caben, y no «no caben bien»: en 375px la columna de los mandos
+   * se llevaba 234 y al renglón le quedaban 107. Con 107 ya no caben las dos
+   * columnas fijas del bloque —el signo y la hora—, así que la tercera, la del
+   * título, se resolvía a CERO píxeles de ancho, y el título se pintaba fuera
+   * de su propio botón y encima del QR. Eso es lo que se veía roto.
+   *
+   * Debajo, el bloque recupera la pantalla entera y los mandos se quedan
+   * alineados a la derecha, que es donde el ojo ya los busca.
+   */
+  .resumen-linea { flex-direction: column; }
+  .resumen-linea > .acto-fin { flex: none; padding: 0 0.7rem 0.5rem; }
+
   .fila .rejilla { grid-template-columns: 1fr; }
   /* El ancho se lo pide la rejilla de arriba, y en un teléfono un `span 3`
      dentro de una sola columna se sale de la pantalla. */

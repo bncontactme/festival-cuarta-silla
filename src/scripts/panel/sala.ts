@@ -17,10 +17,23 @@ import { qr } from './qr';
  *  uno, cambia en el otro — aquí sólo sirve para avisar antes de mandarlo. */
 export const TOPE_CUERPO = 6000;
 
-/** Cuántas etiquetas caben en una hoja. Aquí sólo sirve para decir cuántas
- *  hojas van a salir antes de mandarlas; quien de verdad lo decide es el alto
- *  fijo de `.cartela` en `panel.css`. Si cambia allí, cambia aquí. */
-const POR_HOJA = 3;
+/**
+ * Las dos cosas que salen por la impresora, y cuántas caben en una hoja.
+ *
+ * **Cartela**: la etiqueta de un tercio de hoja que se pega al lado de la obra.
+ * Tres por hoja, que es de lo que va todo esto.
+ *
+ * **QR**: la hoja entera con un solo código, para colgar en la entrada de una
+ * sala o al lado de una pieza grande — lo que se escanea a dos metros y no a
+ * dos palmos. Una por hoja, y eso no es un descuido: es un cartel, no una
+ * etiqueta, y no hay forma de que dos quepan en una hoja siendo un cartel.
+ *
+ * Los números sólo sirven para decir cuántas hojas van a salir antes de
+ * mandarlas. Quien de verdad lo decide es el CSS —el alto fijo de `.cartela`,
+ * el salto de página de `.hoja-qr`—. Si cambia allí, cambia aquí.
+ */
+const POR_HOJA = { cartela: 3, qr: 1 } as const;
+export type Formato = keyof typeof POR_HOJA;
 
 /**
  * De un título a una dirección.
@@ -307,17 +320,54 @@ export function elegirCartelas(actividades: any[], dias: string[], avisar: Ctx['
   const imprimir = el('button', { type: 'button', class: 'boton fuerte' });
   const todasNinguna = el('button', { type: 'button', class: 'boton' });
 
+  /** Qué se va a imprimir. Empieza en cartela: es lo que se hace treinta veces
+   *  y la hoja de QR es el caso suelto. */
+  let formato: Formato = 'cartela';
+
+  /* El mismo conmutador de Programa/Horarios —burbuja que se desliza, no dos
+     botones que se encienden—, y por la misma razón: no son dos ajustes que se
+     pueden dar los dos a la vez, es una cosa o la otra. Va en el pie y no en la
+     cabecera porque lo que cambia está en el pie: cuántas hojas salen y qué
+     dice el botón. */
+  const conmutador = el('div', {
+    class: 'conmutador', role: 'tablist', 'aria-label': 'Qué se imprime',
+    style: '--celdas:2;--activa:0',
+  }, el('span', { class: 'burbuja', 'aria-hidden': 'true' }));
+
+  const FORMATOS = [
+    ['cartela', 'Cartela', 'La etiqueta de un tercio de hoja, para pegar al lado de la obra'],
+    ['qr', 'Sólo QR', 'Una hoja entera con el código, para colgar en la entrada de la sala'],
+  ] as const;
+
+  FORMATOS.forEach(([clave, texto, ayuda], i) => {
+    conmutador.append(el('button', {
+      type: 'button', role: 'tab', title: ayuda,
+      'aria-selected': String(formato === clave),
+      onclick: () => {
+        formato = clave;
+        conmutador.style.setProperty('--activa', String(i));
+        conmutador.querySelectorAll('button').forEach((b, j) =>
+          b.setAttribute('aria-selected', String(i === j)));
+        estado();
+      },
+    }, texto));
+  });
+
   function estado() {
     const n = elegidas.size;
+    const cosa = formato === 'cartela'
+      ? (n === 1 ? 'cartela' : 'cartelas')
+      : (n === 1 ? 'hoja de QR' : 'hojas de QR');
     contador.textContent = `${n} de ${publicadas.length}`;
-    imprimir.textContent = n === 1 ? 'Imprimir 1 cartela' : `Imprimir ${n} cartelas`;
+    imprimir.textContent = `Imprimir ${n} ${cosa}`;
     imprimir.toggleAttribute('disabled', n === 0);
     // El botón dice lo que va a hacer, no las dos cosas que podría hacer.
     todasNinguna.textContent = n === publicadas.length ? 'Ninguna' : 'Todas';
     // Cuántas hojas van a salir, que es lo que de verdad se pregunta quien está
-    // delante de una impresora compartida. Tres por hoja —lo decide el alto
-    // fijo de `.cartela` en `panel.css`; si cambia allí, cambia aquí—.
-    hojas.textContent = n ? `${Math.ceil(n / POR_HOJA)} ${Math.ceil(n / POR_HOJA) === 1 ? 'hoja' : 'hojas'}` : '';
+    // delante de una impresora compartida — y con «Sólo QR» es justo lo que hay
+    // que ver antes de darle: siete textos son siete hojas y no dos.
+    const h = Math.ceil(n / POR_HOJA[formato]);
+    hojas.textContent = n ? `${h} ${h === 1 ? 'hoja' : 'hojas'}` : '';
   }
 
   const hojas = el('span', { class: 'rotulo', style: 'opacity:.55' });
@@ -336,7 +386,8 @@ export function elegirCartelas(actividades: any[], dias: string[], avisar: Ctx['
     // tandas impresas en momentos distintos se apilan igual.
     const salida = publicadas.filter((a) => elegidas.has(a));
     dialogo.close();
-    imprimirCartelas(salida, dias, avisar, raiz);
+    if (formato === 'qr') imprimirQR(salida, avisar, raiz);
+    else imprimirCartelas(salida, dias, avisar, raiz);
   });
 
   const lista = el('div', { class: 'elegir' });
@@ -379,10 +430,11 @@ export function elegirCartelas(actividades: any[], dias: string[], avisar: Ctx['
     el('div', { class: 'modal' },
       el('div', { class: 'modal-cabeza' },
         el('div', {},
-          el('p', { class: 'rotulo rojo' }, 'Imprimir cartelas'),
+          el('p', { class: 'rotulo rojo' }, 'Imprimir'),
           el('h3', {}, 'Cuáles'),
           el('p', { class: 'modal-donde' },
-            'Una etiqueta por texto, tres por hoja. Las marcas rojas de las esquinas son por dónde se corta.'),
+            'La cartela es una etiqueta de un tercio de hoja, tres por hoja, y las marcas rojas de ' +
+            'las esquinas son por dónde se corta. La hoja de QR es una hoja entera por texto, para colgar.'),
         ),
         el('button', {
           type: 'button', class: 'modal-cerrar', 'aria-label': 'Cerrar',
@@ -391,6 +443,7 @@ export function elegirCartelas(actividades: any[], dias: string[], avisar: Ctx['
       ),
       el('div', { class: 'modal-cuerpo' }, lista),
       el('div', { class: 'modal-pie' },
+        conmutador,
         todasNinguna,
         contador,
         hojas,
@@ -406,25 +459,49 @@ export function elegirCartelas(actividades: any[], dias: string[], avisar: Ctx['
 }
 
 /**
- * El pliego para imprimir: una etiqueta por texto publicado, tres por hoja.
+ * Las que se pueden imprimir, que son sólo las publicadas.
  *
- * **Sólo las publicadas.** Un borrador no tiene página, así que su QR llevaría
- * a un 404 — y eso no se descubre en la pantalla, se descubre delante de la
- * obra, con alguien mirando el teléfono. Es la misma regla que sostiene
- * `actividadesConSala` en el sitio.
+ * Un borrador no tiene página, así que su QR llevaría a un 404 — y eso no se
+ * descubre en la pantalla, se descubre delante de la obra, con alguien mirando
+ * el teléfono. Es la misma regla que sostiene `actividadesConSala` en el sitio.
+ */
+const paraImprimir = (actividades: any[]) =>
+  actividades.filter((a) => a.sala?.publicado && a.sala.cuerpo);
+
+const SIN_NADA =
+  'Todavía no hay ningún texto de sala publicado. Lo que se imprime sale de los publicados: ' +
+  'un QR impreso que lleva a un 404 es peor que no tener QR.';
+
+/**
+ * Mandar un pliego a la impresora y no dejarlo tirado en el DOM.
  *
- * El pliego se cuelga del `<body>` y se tira al terminar: `@media print` en
- * `panel.css` esconde todo lo demás, así que mientras existe es literalmente lo
+ * Lo comparten las dos salidas —la cartela y la hoja de QR— porque el baile es
+ * el mismo y las dos veces tiene truco: `@media print` en `panel.css` esconde
+ * todo lo que no sea `#pliego`, así que mientras existe es literalmente lo
  * único que hay en la hoja.
  */
-export function imprimirCartelas(actividades: any[], dias: string[], avisar: Ctx['avisar'], raiz: string) {
-  const publicadas = actividades.filter((a) => a.sala?.publicado && a.sala.cuerpo);
-  if (!publicadas.length) {
-    avisar('Todavía no hay ningún texto de sala publicado. Las cartelas salen de los publicados: un QR impreso que lleva a un 404 es peor que no tener QR.', 'ojo');
-    return;
-  }
-
+function mandarAImprimir(pliego: HTMLElement) {
   document.getElementById('pliego')?.remove();
+  document.body.append(pliego);
+
+  // El diálogo del navegador es síncrono, así que al volver ya se imprimió (o
+  // se canceló, que da igual): en los dos casos el pliego sobra.
+  const limpiar = () => pliego.remove();
+  window.addEventListener('afterprint', limpiar, { once: true });
+  window.print();
+  // Respaldo: hay navegadores que no disparan `afterprint`. Un pliego olvidado
+  // en el DOM no se ve —sólo existe al imprimir— pero volvería a salir pegado
+  // al siguiente, duplicado.
+  setTimeout(() => { if (document.getElementById('pliego') === pliego) limpiar(); }, 1000);
+}
+
+/**
+ * El pliego de cartelas: una etiqueta por texto publicado, tres por hoja.
+ */
+export function imprimirCartelas(actividades: any[], dias: string[], avisar: Ctx['avisar'], raiz: string) {
+  const publicadas = paraImprimir(actividades);
+  if (!publicadas.length) return avisar(SIN_NADA, 'ojo');
+
   const pliego = el('div', { id: 'pliego', class: 'pliego' });
 
   for (const a of publicadas) {
@@ -463,15 +540,43 @@ export function imprimirCartelas(actividades: any[], dias: string[], avisar: Ctx
     ));
   }
 
-  document.body.append(pliego);
+  mandarAImprimir(pliego);
+}
 
-  // El diálogo del navegador es síncrono, así que al volver ya se imprimió (o
-  // se canceló, que da igual): en los dos casos el pliego sobra.
-  const limpiar = () => pliego.remove();
-  window.addEventListener('afterprint', limpiar, { once: true });
-  window.print();
-  // Respaldo: hay navegadores que no disparan `afterprint`. Un pliego olvidado
-  // en el DOM no se ve —sólo existe al imprimir— pero volvería a salir pegado
-  // al siguiente, duplicado.
-  setTimeout(() => { if (document.getElementById('pliego') === pliego) limpiar(); }, 1000);
+/**
+ * La otra salida: una hoja entera por texto, con el QR grande y nada más.
+ *
+ * La cartela se pega al lado de la obra y se lee a dos palmos. Esto es otra
+ * cosa: el cartel de la entrada de una sala, o el que va al lado de una pieza
+ * que ocupa una pared — el que alguien escanea desde donde está, sin acercarse.
+ * Por eso el código mide quince centímetros y por eso va uno por hoja: dos no
+ * caben siendo un cartel, y hacerlos caber sería devolverlos al tamaño de la
+ * cartela, que ya existe.
+ *
+ * **Lleva el título**, aunque sea una hoja entera para un cuadro negro. Treinta
+ * y dos hojas sin una letra no se pueden repartir por cinco sedes: hay que
+ * saber cuál es cuál sin escanearlas una por una.
+ */
+export function imprimirQR(actividades: any[], avisar: Ctx['avisar'], raiz: string) {
+  const publicadas = paraImprimir(actividades);
+  if (!publicadas.length) return avisar(SIN_NADA, 'ojo');
+
+  const pliego = el('div', { id: 'pliego', class: 'pliego pliego--qr' });
+
+  for (const a of publicadas) {
+    const caja = el('div', { class: 'qr' });
+    ponQR(caja, rutaDe(raiz, a.sala.id));
+
+    pliego.append(el('article', { class: 'hoja-qr' },
+      el('p', { class: 'cartela-cab' },
+        el('span', {}, 'Cuarta Silla'), el('span', {}, 'Texto de sala')),
+      el('div', { class: 'hoja-qr-medio' },
+        el('h6', {}, a.titulo || 'Sin título'),
+        caja,
+        el('p', { class: 'cartela-lee' }, 'Escanea y lee'),
+      ),
+    ));
+  }
+
+  mandarAImprimir(pliego);
 }

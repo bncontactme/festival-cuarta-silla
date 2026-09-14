@@ -9,7 +9,7 @@
 import { PESTANAS, TABLAS } from './esquema';
 import { pintarTabla } from './tabla';
 import { pintarPrevia } from './previa';
-import { abrirSala, imprimirCartelas, elegirCartelas } from './sala';
+import { abrirSala, imprimirCartelas, imprimirQR, elegirCartelas } from './sala';
 import { pintarRegistro } from './registro';
 import { el, vaciar, cuando } from './dom';
 import {
@@ -224,6 +224,7 @@ const ctx = {
     raiz: () => RAIZ,
     alSala: (a: any) => abrirTextoDeSala(a),
     alImprimir: (a: any) => imprimirCartelas([a], DIAS, avisar, RAIZ),
+    alImprimirQR: (a: any) => imprimirQR([a], avisar, RAIZ),
   },
 };
 
@@ -416,11 +417,13 @@ function mandosPrograma(): HTMLElement {
         onclick: () => { soloConSala = !soloConSala; pintarLienzo(); },
       }, `Sólo con texto de sala (${conSala})`),
       el('span', { class: 'empuje' }),
+      // Ya no dice «cartelas»: dentro se elige entre la cartela y la hoja de
+      // QR, y un botón que promete una de las dos hace que la otra no exista.
       el('button', {
         type: 'button', class: 'mini fuerte',
-        title: 'Elegir cuáles y mandarlas a la impresora',
+        title: 'Elegir cuáles, en cartela o en hoja de QR, y mandarlas a la impresora',
         onclick: () => elegirCartelas(estado.programa.actividades, DIAS, avisar, RAIZ),
-      }, `Imprimir cartelas (${publicadas})`),
+      }, `Imprimir textos de sala (${publicadas})`),
     );
   }
 
