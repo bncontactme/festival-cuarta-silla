@@ -1,7 +1,7 @@
 {
   "contrato": 2,
-  "version": 134,
-  "actualizado": "2026-09-14T20:06:03.888Z",
+  "version": 135,
+  "actualizado": "2026-09-14T20:08:13.041Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -212,7 +212,7 @@
         "fin": "23:59",
         "sede": "Staditche",
         "tipo": "escena",
-        "artista": "dsgstng677, Kalbox y (sorpresa)",
+        "artista": "Territorio hostil, dsgstng677, Kalbox",
         "libre": true
       },
       {
