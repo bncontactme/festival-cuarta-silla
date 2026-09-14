@@ -3,7 +3,7 @@
  *
  * El trato con el equipo es éste: el texto que iría impreso en la pared se
  * escribe aquí, el sitio le da una página, y lo que se imprime y se pega es una
- * etiqueta del tamaño de un naipe con un QR. Treinta y dos actividades son ocho
+ * etiqueta de un tercio de hoja con un QR. Treinta y dos actividades son once
  * hojas en vez del taco de trescientas que nadie iba a pagar ni a pegar ni a
  * corregir cuando cambiara algo.
  *
@@ -16,6 +16,11 @@ import { qr } from './qr';
 /** Hasta dónde llega el texto. Mismo número que en `validar.js`; si cambia en
  *  uno, cambia en el otro — aquí sólo sirve para avisar antes de mandarlo. */
 export const TOPE_CUERPO = 6000;
+
+/** Cuántas etiquetas caben en una hoja. Aquí sólo sirve para decir cuántas
+ *  hojas van a salir antes de mandarlas; quien de verdad lo decide es el alto
+ *  fijo de `.cartela` en `panel.css`. Si cambia allí, cambia aquí. */
+const POR_HOJA = 3;
 
 /**
  * De un título a una dirección.
@@ -310,8 +315,9 @@ export function elegirCartelas(actividades: any[], dias: string[], avisar: Ctx['
     // El botón dice lo que va a hacer, no las dos cosas que podría hacer.
     todasNinguna.textContent = n === publicadas.length ? 'Ninguna' : 'Todas';
     // Cuántas hojas van a salir, que es lo que de verdad se pregunta quien está
-    // delante de una impresora compartida. Cuatro por hoja.
-    hojas.textContent = n ? `${Math.ceil(n / 4)} ${Math.ceil(n / 4) === 1 ? 'hoja' : 'hojas'}` : '';
+    // delante de una impresora compartida. Tres por hoja —lo decide el alto
+    // fijo de `.cartela` en `panel.css`; si cambia allí, cambia aquí—.
+    hojas.textContent = n ? `${Math.ceil(n / POR_HOJA)} ${Math.ceil(n / POR_HOJA) === 1 ? 'hoja' : 'hojas'}` : '';
   }
 
   const hojas = el('span', { class: 'rotulo', style: 'opacity:.55' });
@@ -376,7 +382,7 @@ export function elegirCartelas(actividades: any[], dias: string[], avisar: Ctx['
           el('p', { class: 'rotulo rojo' }, 'Imprimir cartelas'),
           el('h3', {}, 'Cuáles'),
           el('p', { class: 'modal-donde' },
-            'Una etiqueta por texto, cuatro por hoja. Las marcas rojas de las esquinas son por dónde se corta.'),
+            'Una etiqueta por texto, tres por hoja. Las marcas rojas de las esquinas son por dónde se corta.'),
         ),
         el('button', {
           type: 'button', class: 'modal-cerrar', 'aria-label': 'Cerrar',
@@ -400,7 +406,7 @@ export function elegirCartelas(actividades: any[], dias: string[], avisar: Ctx['
 }
 
 /**
- * El pliego para imprimir: una etiqueta por texto publicado, cuatro por hoja.
+ * El pliego para imprimir: una etiqueta por texto publicado, tres por hoja.
  *
  * **Sólo las publicadas.** Un borrador no tiene página, así que su QR llevaría
  * a un 404 — y eso no se descubre en la pantalla, se descubre delante de la
@@ -427,21 +433,27 @@ export function imprimirCartelas(actividades: any[], dias: string[], avisar: Ctx
     ponQR(caja, rutaDe(raiz, a.sala.id));
 
     pliego.append(el('article', { class: 'cartela' },
-      // Las marcas de las esquinas son por dónde se corta. Cuatro etiquetas por
-      // hoja y unas tijeras: no hay troquel ni hay presupuesto para uno.
+      // Las marcas de las esquinas son por dónde se corta. Tres etiquetas por
+      // hoja, todas del mismo alto, y unas tijeras: no hay troquel ni hay
+      // presupuesto para uno. Como miden lo mismo, el taco se corta de una vez
+      // en vez de hoja por hoja.
       el('i', { class: 'mc mc1' }), el('i', { class: 'mc mc2' }),
       el('i', { class: 'mc mc3' }), el('i', { class: 'mc mc4' }),
-      el('p', { class: 'cartela-cab' },
-        el('span', {}, 'Cuarta Silla'), el('span', {}, 'Texto de sala')),
-      el('h6', {}, a.titulo || 'Sin título'),
-      a.artista && el('p', { class: 'cartela-aut' }, a.artista),
-      el('div', { class: 'cartela-filete' }),
-      el('div', { class: 'cartela-pie' },
+      // Dos columnas y no una pila: la etiqueta es apaisada —un tercio de hoja
+      // de canto a canto— y en una pila el QR se iba a una esquina con un
+      // palmo de blanco encima. El texto a la izquierda, el QR a la derecha a
+      // media altura, y los dos centrados: así no hay hueco que explicar.
+      el('div', { class: 'cartela-texto' },
+        el('p', { class: 'cartela-cab' },
+          el('span', {}, 'Cuarta Silla'), el('span', {}, 'Texto de sala')),
+        el('h6', {}, a.titulo || 'Sin título'),
+        a.artista && el('p', { class: 'cartela-aut' }, a.artista),
+        el('div', { class: 'cartela-filete' }),
         el('p', { class: 'cartela-meta' },
           el('b', {}, 'Dónde'), a.sede || '—',
           el('b', {}, 'Cuándo'), `${dia} · ${a.inicio}–${a.fin}`),
-        el('div', {}, caja, el('p', { class: 'cartela-lee' }, 'Escanea y lee')),
       ),
+      el('div', { class: 'cartela-qr' }, caja, el('p', { class: 'cartela-lee' }, 'Escanea y lee')),
     ));
   }
 

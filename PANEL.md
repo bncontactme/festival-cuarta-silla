@@ -419,8 +419,9 @@ hay un rebuild en curso y un enlace a ver el sitio.
 La cartela de museo, sin la cartela.
 
 Cada actividad puede llevar el texto que estaría impreso en la pared. El sitio
-le da su página —`/sala/<id>`— y el panel imprime una etiqueta del tamaño de un
-naipe con un QR que la abre. Treinta y dos actividades son **ocho hojas** de
+le da su página —`/sala/<id>`— y el panel imprime una etiqueta con un QR que la
+abre: **tres por hoja**, cruzadas de canto a canto y todas del mismo alto, así
+que el taco se corta de una vez. Treinta y dos actividades son **once hojas** de
 etiquetas en vez del taco de trescientas páginas que nadie iba a pagar, ni a
 pegar, ni a reimprimir cuando cambiara una línea.
 
