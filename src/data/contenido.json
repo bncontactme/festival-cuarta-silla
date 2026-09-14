@@ -1,7 +1,7 @@
 {
   "contrato": 2,
-  "version": 127,
-  "actualizado": "2026-09-14T01:30:35.675Z",
+  "version": 128,
+  "actualizado": "2026-09-14T14:22:33.387Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -453,7 +453,12 @@
         "sede": "Staditche",
         "tipo": "muestra",
         "artista": "Perro.sin.luz",
-        "libre": true
+        "libre": true,
+        "sala": {
+          "id": "performance-con-mariachi",
+          "cuerpo": "TEST",
+          "publicado": true
+        }
       },
       {
         "titulo": "Introducción al arte conceptual latinoamericano",
