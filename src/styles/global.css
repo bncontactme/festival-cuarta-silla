@@ -459,6 +459,38 @@
     color: var(--texto);
   }
 
+  /* ── La segunda puerta: leer el texto de sala ────────────────────────────
+     Subrayado y sin caja, a propósito. En estas listas la puerta con borde es
+     «Registrarme», que es la que tiene prisa —los cupos se acaban— y la que
+     hay que ver desde lejos. El texto de sala se lee estando ya dentro, así
+     que no compite: pesa lo que pesa una nota al margen.
+
+     El color lo pone el contexto. Estas listas alternan campo rojo y campo
+     amarillo, y `currentColor` es lo que hace que la misma clase se lea bien
+     sobre los dos sin escribir dos reglas. */
+  .evento-lectura {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    margin-top: 0.5rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.5rem;
+    line-height: 1;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  .evento-puerta + .evento-lectura {
+    margin-left: 0.7rem;
+  }
+  .evento-lectura:hover,
+  .evento-lectura:focus-visible {
+    text-decoration-thickness: 2px;
+  }
+
   /* ── Enlace subrayado que se dibuja ─────────────────────────────────── */
   .enlace {
     position: relative;

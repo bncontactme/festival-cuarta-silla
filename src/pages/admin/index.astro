@@ -23,6 +23,15 @@ import { festival, programa } from '../../data/site';
 const config = {
   dias: programa.dias.map((d) => `${d.dia} ${d.fecha}`),
   sitio: conBase('/'),
+  /**
+   * La raíz del sitio, absoluta, para los QR de las cartelas.
+   *
+   * Sale de `Astro.site` y no de `location.origin` porque lo que se calcula con
+   * esto se IMPRIME: el panel se abre desde la vista previa de Pages y desde
+   * localhost, y un código pegado a una pared que apunte a `localhost:4399` es
+   * papel tirado. Aquí manda el dominio con el que se construyó el sitio.
+   */
+  raiz: Astro.site ? new URL(conBase('/'), Astro.site).toString() : conBase('/'),
 };
 ---
 

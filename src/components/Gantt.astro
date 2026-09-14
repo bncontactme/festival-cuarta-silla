@@ -8,6 +8,7 @@ import {
   sedeDe,
   enlaceMapa,
   enTodasLasSedes,
+  rutaSala,
 } from '../data/site';
 
 /**
@@ -432,6 +433,9 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
                   data-mapa={a.sedeInfo ? enlaceMapa(a.sedeInfo) : ''}
                   data-registro={a.registro ?? ''}
                   data-libre={a.libre ? 'si' : ''}
+                  {/* Sólo si está publicado. Un borrador no tiene página, y un
+                      botón que lleva a un 404 es peor que no tener botón. */}
+                  data-sala={a.sala?.publicado ? conBase(rutaSala(a.sala)) : ''}
                   data-color={coloresGantt[a.tipo].fondo}
                 >
                   <span class="gantt-barra-titulo">{a.titulo}</span>
@@ -563,6 +567,13 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
             a otra pestaña y sí. */}
         <a class="gantt-ficha-boton" target="_blank" rel="noopener" data-f-registro>
           Registrarme
+        </a>
+        {/* El texto de sala. Va en la misma pila que «Registrarme» y por las
+            mismas reglas: aparece sólo cuando hay algo detrás, nunca apagado.
+            Sin `target`: es una página del propio sitio, y quien lo abre está
+            de pie en la sala — sacarlo a otra pestaña le complica la vuelta. */}
+        <a class="gantt-ficha-boton gantt-ficha-boton--sala" data-f-sala hidden>
+          Leer el texto de sala
         </a>
         <a
           class="gantt-ficha-boton gantt-ficha-boton--suave"
@@ -1152,6 +1163,14 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
     background-color: transparent;
     color: var(--color-tinta);
   }
+  /* El texto de sala en amarillo: es la tercera puerta de la ficha y no puede
+     competir con «Registrarme» —que es la que tiene prisa, porque los cupos se
+     acaban— ni perderse como el enlace al mapa. El amarillo sobre tinta la deja
+     en medio, que es exactamente dónde va. */
+  .gantt-ficha-boton--sala {
+    background-color: var(--color-amarillo);
+    color: var(--color-tinta);
+  }
   .gantt-ficha-boton[hidden] {
     display: none;
   }
@@ -1673,6 +1692,20 @@ const densidad = (filas: number) => (filas > 12 ? 'mucho' : filas > 6 ? 'si' : u
       // La etiqueta de tipo se pinta del color de la barra: es lo que ata la
       // ficha a la barra que la abrió cuando hay varias abiertas seguidas.
       ficha.style.setProperty('--color-acento', d.color ?? '');
+
+      // El texto de sala. Es un enlace del propio sitio, así que no hay nada
+      // que decidir: o hay página o no se enseña el botón.
+      const sala = ficha.querySelector<HTMLAnchorElement>('[data-f-sala]');
+      if (sala) {
+        if (d.sala) {
+          sala.href = d.sala;
+          sala.setAttribute('aria-label', `Leer el texto de sala de ${d.titulo ?? ''}`.trim());
+          sala.hidden = false;
+        } else {
+          sala.removeAttribute('href');
+          sala.hidden = true;
+        }
+      }
 
       const registro = ficha.querySelector<HTMLAnchorElement>('[data-f-registro]');
       const sin = ficha.querySelector<HTMLElement>('[data-f-sin]');

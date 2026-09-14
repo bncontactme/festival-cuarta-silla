@@ -21,6 +21,26 @@ export type Ctx = {
   /** Cambiar de pestaña desde dentro de una vista. Lo usa Registro para mandar
    *  al Programa cuando todavía no hay ni una actividad que registrar. */
   irA?: (pestana: string) => void;
+  /** La fila que la tabla tiene que abrir y enseñar al pintarse. La pone quien
+   *  llega pidiendo una en concreto. Se consume al preguntar: es un encargo, no
+   *  un estado. */
+  destacada?: () => any;
+  /** Un filtro de fuera de la tabla, si hay alguno puesto. Hoy lo pone el botón
+   *  «Sólo con texto de sala» de la barra del programa. */
+  filtro?: () => ((fila: any) => boolean) | null;
+  /** Cómo se llama lo que está filtrando, para poder decirlo y para poder
+   *  ofrecer quitarlo. Sin esto, la tabla sabe que algo esconde filas pero no
+   *  qué, y el «Ver todas» deja el filtro puesto y parece que no hace nada. */
+  filtroNombre?: () => string;
+  /** Quitar ese filtro. Lo llama «Ver todas», y también «Añadir» — una fila
+   *  recién creada que nace filtrada es una fila que no aparece. */
+  limpiarFiltro?: () => void;
+  /** Lo que necesitan los mandos de texto de sala del renglón del programa. */
+  sala?: {
+    raiz: () => string;
+    alSala: (fila: any) => void;
+    alImprimir: (fila: any) => void;
+  };
 };
 
 /**

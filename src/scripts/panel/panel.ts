@@ -9,6 +9,7 @@
 import { PESTANAS, TABLAS } from './esquema';
 import { pintarTabla } from './tabla';
 import { pintarPrevia } from './previa';
+import { abrirSala, imprimirCartelas, elegirCartelas } from './sala';
 import { pintarRegistro } from './registro';
 import { el, vaciar, cuando } from './dom';
 import {
@@ -21,6 +22,12 @@ import {
 // en vez de estar escritos otra vez aquí.
 const config = JSON.parse(document.getElementById('panel-config')!.textContent || '{}');
 const DIAS: string[] = config.dias ?? ['Día 1', 'Día 2', 'Día 3', 'Día 4'];
+
+/** La raíz del sitio, absoluta. Es lo que se imprime dentro de los QR de las
+ *  cartelas, así que sale de `Astro.site` y no de `location`: el panel se abre
+ *  desde la vista previa de Pages y desde localhost, y un código pegado a una
+ *  pared tiene que apuntar al dominio de verdad. */
+const RAIZ: string = config.raiz || location.origin + '/';
 
 const COLECCIONES = ['sedes', 'programa', 'artistas', 'archivo', 'marcas'] as const;
 type Coleccion = (typeof COLECCIONES)[number];
@@ -155,6 +162,31 @@ const ctx = {
   cambiado: () => { estadoBarras(); refrescarPrevia(); },
   avisar: (m: string, c?: 'error' | 'ojo' | 'bien') => avisar(m, c ?? 'ojo'),
   irA: (clave: string) => { pestanaActiva = clave; pintar(); window.scrollTo({ top: 0 }); },
+  /** Qué fila tiene que abrir la tabla al pintarse, si alguna. Se consume al
+   *  preguntar: es un encargo de una sola vez —«ábreme ésta»— y no un estado
+   *  que haya que apagar después. */
+  destacada: () => { const d = destacada; destacada = null; return d; },
+  /** «Sólo con texto de sala», que vive en la barra del programa y no en la
+   *  cabecera de la tabla. Devuelve null cuando no hay nada filtrando. */
+  filtro: () => (soloConSala && pestanaActiva === 'programa' ? (a: any) => Boolean(a.sala) : null),
+  filtroNombre: () => '«sólo con texto de sala»',
+  /** Lo llama la tabla desde dentro de su propio repintado, así que aquí NO se
+   *  puede rehacer el lienzo: sería tirar la tabla que está ejecutando esto y
+   *  dejar a su `repintar()` hablándole a un nodo que ya no está en la página.
+   *  Se apaga la bandera y se cambia sólo la barra; la tabla se repinta sola. */
+  limpiarFiltro: () => {
+    soloConSala = false;
+    if (!nodoMandos) return;
+    const nuevo = mandosPrograma();
+    nodoMandos.replaceWith(nuevo);
+    nodoMandos = nuevo;
+  },
+  /** Lo que el renglón del programa necesita para sus mandos de texto de sala. */
+  sala: {
+    raiz: () => RAIZ,
+    alSala: (a: any) => abrirTextoDeSala(a),
+    alImprimir: (a: any) => imprimirCartelas([a], DIAS, avisar, RAIZ),
+  },
 };
 
 /** Qué colecciones toca una pestaña, para el punto de «sin guardar». */
@@ -197,8 +229,32 @@ function pintarPestanas() {
 let nodoPrevia: HTMLElement | null = null;
 let previaPedida: ReturnType<typeof setTimeout> | null = null;
 
+/**
+ * Qué se está mirando en la pestaña de Programa, y con qué filtros.
+ *
+ * **La lista es el programa y arranca puesta.** «Horarios» no es otra forma de
+ * ver el programa —para eso está la lista, y con todo dentro—: es la
+ * comprobación de qué se encima con qué, que es una pregunta distinta y se hace
+ * de vez en cuando, no siempre.
+ *
+ * Vive fuera de `pintarLienzo()` para que cambiar de pestaña y volver no te
+ * devuelva al jueves con la búsqueda borrada.
+ */
+let vistaPrograma: 'lista' | 'horarios' = 'lista';
+let diaPrevia = 0;
+let soloConSala = false;
+/** La barra de mandos del programa, para poder cambiarla sola sin rehacer el
+ *  lienzo entero. Ver `ctx.limpiarFiltro`. */
+let nodoMandos: HTMLElement | null = null;
+/** La fila que hay que abrir y enseñar en la tabla, puesta por «Campos» desde
+ *  la vista de lista. La consume `pintarTabla` una sola vez. */
+let destacada: any = null;
+
 function refrescarPrevia() {
-  if (!nodoPrevia || pestanaActiva !== 'programa') return;
+  // Sólo hay algo que refrescar mientras el cuadro de horarios esté puesto. Con
+  // la lista, quien se mantiene al día es el renglón de cada fila, que se
+  // rehace solo — ver `refrescarResumen()` en `tabla.ts`.
+  if (!nodoPrevia || pestanaActiva !== 'programa' || vistaPrograma !== 'horarios') return;
   // Se llama en cada tecla. Rehacer cuarenta barras por letra escrita es
   // trabajo tirado, así que se juntan las que caigan seguidas.
   //
@@ -208,10 +264,45 @@ function refrescarPrevia() {
   previaPedida = setTimeout(() => {
     previaPedida = null;
     if (!nodoPrevia || pestanaActiva !== 'programa') return;
-    const nueva = pintarPrevia(estado.programa.actividades, DIAS);
+    const nueva = vistaDelPrograma();
+    if (!nueva) return;
     nodoPrevia.replaceWith(nueva);
     nodoPrevia = nueva;
   }, 120);
+}
+
+/**
+ * El cuadro de horarios, cuando está puesto.
+ *
+ * **La lista ya no se pinta aquí.** Hubo una versión en la que sí, y el
+ * programa acababa dos veces en la misma pantalla: una lista de bloques de sólo
+ * mirar, y debajo la tabla con las mismas treinta y nueve otra vez —la que de
+ * verdad sirve, porque es donde se editan los campos, se duplica, se borra y se
+ * añade—. Ahora son la misma: la tabla usa el bloque como renglón plegado. Ver
+ * `bloque.ts` y el `porDia` de `esquema.ts`.
+ */
+function vistaDelPrograma(): HTMLElement | null {
+  if (vistaPrograma !== 'horarios') return null;
+  return pintarPrevia(estado.programa.actividades, DIAS, diaPrevia, (d) => {
+    diaPrevia = d;
+    refrescarPrevia();
+  }, (a) => abrirTextoDeSala(a));
+}
+
+function abrirTextoDeSala(a: any) {
+  abrirSala(a, {
+    dias: () => DIAS,
+    raiz: () => RAIZ,
+    actividades: () => estado.programa.actividades,
+    cambiado: () => estadoBarras(),
+    avisar: (m, c) => avisar(m, c ?? 'ojo'),
+  }, () => pintarLienzo());
+}
+
+function ponerVista(v: 'lista' | 'horarios') {
+  if (vistaPrograma === v) return;
+  vistaPrograma = v;
+  pintarLienzo();
 }
 
 function pintarLienzo() {
@@ -222,16 +313,80 @@ function pintarLienzo() {
 
   if (p.clave === 'programa') {
     lienzo.append(interruptorEjemplo());
-    nodoPrevia = pintarPrevia(estado.programa.actividades, DIAS);
-    lienzo.append(nodoPrevia);
+    nodoMandos = mandosPrograma();
+    lienzo.append(nodoMandos);
+    nodoPrevia = vistaDelPrograma();
+    if (nodoPrevia) lienzo.append(nodoPrevia);
   }
   if (p.clave === 'registro') {
     lienzo.append(pintarRegistro(estado, ctx, DIAS));
   }
   for (const t of p.tablas) {
+    // La tabla —donde se editan todos los campos— va debajo de la LISTA, que es
+    // donde está el programa. Debajo del cuadro de horarios no pinta nada: ahí
+    // se va a comprobar si algo se encima, no a escribir.
+    if (p.clave === 'programa' && vistaPrograma !== 'lista') continue;
     const tabla = TABLAS[t];
     lienzo.append(pintarTabla(tabla, estado, ctx, erroresPorColeccion[tabla.coleccion] ?? []));
   }
+}
+
+/**
+ * La barra de mandos del programa.
+ *
+ * El conmutador es el mismo de `/programa` en el sitio —burbuja que se desliza,
+ * no dos botones que se encienden—, pero aquí no separa dos lecturas del
+ * programa: separa **el programa** de **una comprobación sobre el programa**.
+ * Por eso la lista va primero y arranca puesta, y por eso lo de al lado se
+ * llama «Horarios» y no «Rejilla»: una rejilla sería otra forma de enseñar lo
+ * mismo, y eso es justo lo que ya no hay.
+ */
+function mandosPrograma(): HTMLElement {
+  const conmutador = el('div', {
+    class: 'conmutador', role: 'tablist', 'aria-label': 'Qué mirar del programa',
+    style: `--celdas:2;--activa:${vistaPrograma === 'lista' ? 0 : 1}`,
+  }, el('span', { class: 'burbuja', 'aria-hidden': 'true' }));
+
+  const rotulos = [
+    ['lista', 'Programa', 'Las actividades, por días'],
+    ['horarios', 'Horarios', 'Qué se encima con qué, sede por sede'],
+  ] as const;
+
+  for (const [clave, texto, ayuda] of rotulos) {
+    conmutador.append(el('button', {
+      type: 'button', role: 'tab', title: ayuda,
+      'aria-selected': String(vistaPrograma === clave),
+      onclick: () => ponerVista(clave),
+    }, texto));
+  }
+
+  const barra = el('div', { class: 'mandos' }, conmutador);
+
+  // Los mandos de cartelas sólo tienen sentido sobre el programa. En horarios
+  // no se pintan, en vez de pintarse apagados: un control muerto es una
+  // pregunta, no una respuesta.
+  //
+  // Aquí NO hay buscador: la tabla trae el suyo, y dos cajas de buscar en la
+  // misma pantalla es la clase de duda que no se resuelve probando.
+  if (vistaPrograma === 'lista') {
+    const conSala = estado.programa.actividades.filter((a: any) => a.sala).length;
+    const publicadas = estado.programa.actividades.filter((a: any) => a.sala?.publicado).length;
+
+    barra.append(
+      el('button', {
+        type: 'button', class: 'mini', 'aria-pressed': String(soloConSala),
+        onclick: () => { soloConSala = !soloConSala; pintarLienzo(); },
+      }, `Sólo con texto de sala (${conSala})`),
+      el('span', { class: 'empuje' }),
+      el('button', {
+        type: 'button', class: 'mini fuerte',
+        title: 'Elegir cuáles y mandarlas a la impresora',
+        onclick: () => elegirCartelas(estado.programa.actividades, DIAS, avisar, RAIZ),
+      }, `Imprimir cartelas (${publicadas})`),
+    );
+  }
+
+  return barra;
 }
 
 /**
@@ -245,26 +400,51 @@ function pintarLienzo() {
  * Es lo único del panel que no es contenido sino una declaración, y por eso se
  * pregunta en vez de deducirse: quien está mirando la rejilla es el único que
  * sabe si eso de ahí ya es el programa.
+ *
+ * **Habla según lo que tenga que decir**, y ésa es la corrección de esta vuelta.
+ * Eran siempre cuatro renglones sobre campo amarillo a todo lo ancho de la
+ * pantalla, también —y sobre todo— cuando el programa ya llevaba semanas
+ * publicado y no había nada que decidir. Un cartel que sale siempre no se lee
+ * nunca: se aprende a saltarlo, y el día que avise de algo se salta igual. Con
+ * el programa publicado y lleno queda una pastilla; el cartel entero vuelve en
+ * los dos casos en que de verdad hay algo que mirar.
  */
 function interruptorEjemplo() {
   const marcado = estado.programa.esEjemplo !== false;
-  const casilla = el('input', {
-    type: 'checkbox', checked: marcado, id: 'es-ejemplo',
-    style: 'width:auto;margin-right:.5rem',
-    onchange: (e: any) => {
-      estado.programa.esEjemplo = e.target.checked;
-      pintarLienzo();
-      estadoBarras();
-    },
-  });
+  const vacio = !estado.programa.actividades.length;
   // Desmarcado y sin una sola actividad es la combinación que no quiere nadie:
   // el sitio publica el conmutador de vistas sobre una rejilla vacía. Pasa al
   // vaciar el programa para meter el de verdad, que es un momento normal — por
   // eso se avisa fuerte en vez de prohibirlo.
-  const vacio = !estado.programa.actividades.length;
   const peligro = !marcado && vacio;
 
-  return el('div', { class: 'aviso ' + (peligro ? 'error' : marcado ? 'ojo' : 'bien') },
+  const poner = (v: boolean) => {
+    estado.programa.esEjemplo = v;
+    pintarLienzo();
+    estadoBarras();
+  };
+
+  // ── Publicado y con programa: una pastilla y a otra cosa ──────────────────
+  if (!marcado && !peligro) {
+    return el('div', { class: 'publicado' },
+      el('i', { class: 'punto', 'aria-hidden': 'true' }),
+      'Programa publicado',
+      el('button', {
+        type: 'button',
+        title: 'Vuelve a esconder el programa del sitio y deja el cartel de «Próximamente»',
+        onclick: () => poner(true),
+      }, 'Esconder'),
+    );
+  }
+
+  // ── Todo lo demás: el cartel, porque hay una decisión delante ─────────────
+  const casilla = el('input', {
+    type: 'checkbox', checked: marcado, id: 'es-ejemplo',
+    style: 'width:auto;margin-right:.5rem',
+    onchange: (e: any) => poner(e.target.checked),
+  });
+
+  return el('div', { class: 'aviso ' + (peligro ? 'error' : 'ojo') },
     el('label', { for: 'es-ejemplo', style: 'display:flex;align-items:flex-start;cursor:pointer' },
       casilla,
       el('span', {},
@@ -272,9 +452,7 @@ function interruptorEjemplo() {
         ' ',
         marcado
           ? 'Mientras esté marcado, el sitio no enseña el programa: ni aquí, ni en la portada, ni en /registro —que son estos mismos eventos—. En su lugar sale el cartel de «Próximamente». Desmárcalo cuando la rejilla ya sea la buena: eso la publica, y deja que el registro se pueda abrir.'
-          : peligro
-            ? 'Está desmarcado y no hay ni una actividad: si guardas así, el sitio publica el programa VACÍO — la rejilla sin nada dentro. Vuelve a marcarlo mientras cargas el programa de verdad; con él marcado sale el cartel de «Próximamente».'
-            : 'El programa está publicado: el sitio lo enseña entero. Vuelve a marcarlo si todavía es un andamio y prefieres esconderlo.',
+          : 'Está desmarcado y no hay ni una actividad: si guardas así, el sitio publica el programa VACÍO — la rejilla sin nada dentro. Vuelve a marcarlo mientras cargas el programa de verdad; con él marcado sale el cartel de «Próximamente».',
       ),
     ),
   );

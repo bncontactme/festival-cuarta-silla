@@ -42,7 +42,15 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
   const abiertas = new Set<any>();
   if (lista().length < PLIEGA_DESDE) lista().forEach((d) => abiertas.add(d));
 
+  /** «Campos», desde la vista de lista del programa, pide una fila concreta.
+   *  Sin esto, cambiar de vista te deja arriba del todo con treinta y dos filas
+   *  plegadas y la que ibas a tocar perdida en mitad de la pila. */
+  const pedida = ctx.destacada?.();
+  if (pedida && lista().includes(pedida)) abiertas.add(pedida);
+
   let busqueda = '';
+  /** Lo que devuelve `preparar()`, vigente durante un repintado. */
+  let preparado: any = null;
 
   // ── Cabecera ──────────────────────────────────────────────────────────────
 
@@ -92,13 +100,45 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
   }
 
   function visibles(): { dato: any; i: number }[] {
-    const todas = lista().map((dato, i) => ({ dato, i }));
+    // El filtro de la barra de arriba —hoy «sólo con texto de sala»— se aplica
+    // antes que la búsqueda: es del tipo «enséñame sólo estas», no del tipo
+    // «busca esto». Vive fuera de la tabla porque lo manda un botón que no es
+    // suyo, y entra por `ctx` para que esto no sepa de qué va.
+    const extra = ctx.filtro?.();
+    const todas = lista()
+      .map((dato, i) => ({ dato, i }))
+      .filter(({ dato }) => !extra || extra(dato));
     const q = busqueda.trim().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
     if (!q) return todas;
     return todas.filter(({ dato, i }) => texto(dato, i).includes(q));
   }
 
-  const filtrando = () => busqueda.trim().length > 0;
+  const filtrando = () => busqueda.trim().length > 0 || Boolean(ctx.filtro?.());
+
+  /**
+   * Por qué no se ve nada, dicho como toca.
+   *
+   * Hay dos formas de esconder filas y antes sólo se contaba una: el mensaje era
+   * siempre «ninguna dice “tal”», así que con el botón de «Sólo con texto de
+   * sala» puesto y la búsqueda vacía salía **«Ninguna de las 39 actividades dice
+   * “”»**. Un hueco entre comillas explicando por qué está vacío.
+   */
+  function porQueNoSeVe(): string {
+    const q = busqueda.trim();
+    const nombre = ctx.filtro?.() ? (ctx.filtroNombre?.() ?? 'el filtro de arriba') : null;
+    if (q && nombre) return `dice «${q}» y pasa ${nombre}`;
+    if (q) return `dice «${q}»`;
+    return `pasa ${nombre ?? 'el filtro'}`;
+  }
+
+  /** Quita las dos cosas que esconden filas, no sólo la búsqueda: si el botón
+   *  dice «Ver todas», lo que tiene que pasar al pulsarlo es que se vean todas. */
+  function verTodas() {
+    busqueda = '';
+    buscador.value = '';
+    ctx.limpiarFiltro?.();
+    repintar();
+  }
 
   // ── Reordenar ─────────────────────────────────────────────────────────────
   let arrastrando: number | null = null;
@@ -114,14 +154,30 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
 
   function fila(dato: any, i: number) {
     const abierta = abiertas.has(dato);
-    const nodo = el('article', { class: 'fila' + (abierta ? ' abierta' : ''), 'data-i': String(i) });
+
+    /* Las listas que se agrupan no se reordenan a mano, y no es una limitación:
+       el sitio pinta el programa por día y hora, así que el orden del array no
+       llega a ninguna parte. Un asa con las dos flechas apagadas y un número de
+       posición que va saltando —03, 17, 22 dentro del mismo jueves— sería
+       ofrecer algo que no hace nada y encima leerse como un error. */
+    const sinAsa = Boolean(tabla.esquema.porDia);
+
+    const propias = tabla.esquema.clase?.(dato, preparado) ?? '';
+    const nodo = el('article', {
+      class: ['fila', abierta ? 'abierta' : '', sinAsa ? 'fila--sin-asa' : '', propias]
+        .filter(Boolean).join(' '),
+      'data-i': String(i),
+    });
 
     // Filtrando, el orden de la pantalla no es el de la lista: arrastrar la
     // tercera de cuatro resultados movería la fila 17 al sitio de la 3. Se
     // apaga y se dice, en vez de dejar que reordene mal.
-    const bloqueado = filtrando();
+    const bloqueado = filtrando() || sinAsa;
 
-    const asa = el('div', { class: 'asa', title: bloqueado ? 'Para reordenar, vacía la búsqueda' : 'Arrastra para reordenar' },
+    const asa = sinAsa ? null : el('div', {
+      class: 'asa',
+      title: bloqueado ? 'Para reordenar, vacía la búsqueda' : 'Arrastra para reordenar',
+    },
       el('button', { type: 'button', class: 'mover', title: 'Subir', disabled: bloqueado || i === 0,
         onclick: () => mover(i, i - 1) }, '▲'),
       el('span', { class: 'puntos' }, '⠿'),
@@ -130,7 +186,7 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
         onclick: () => mover(i, i + 1) }, '▼'),
     );
 
-    if (!bloqueado) {
+    if (!bloqueado && asa) {
       // El truco de siempre: la fila sólo se vuelve arrastrable mientras el dedo
       // está en el asa. Si no, arrastrar para seleccionar texto dentro de un
       // campo se lleva la fila por delante.
@@ -157,8 +213,27 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
     }
 
     // ── El renglón plegado ───────────────────────────────────────────────
+    //
+    // Dos formas. Casi todas las colecciones son listas de nombres y les basta
+    // «título · nota». El programa no: cuarenta actividades con día, hora,
+    // sede, tipo, con qué se encima y si llevan cartela no caben en un renglón
+    // de texto, así que su esquema trae un `bloque()`. Lo que no cambia es que
+    // esto ES el botón que pliega y despliega — por eso el bloque no puede
+    // traer nada que se pulse, y los mandos van fuera, en `extras()`.
+    const contenido = (): (Node | string)[] =>
+      tabla.esquema.bloque
+        ? tabla.esquema.bloque(dato, preparado)
+        : [el('span', { class: 'resumen-texto' },
+            el('strong', {}, tabla.esquema.titula(dato, i)),
+            el('span', { class: 'resumen-nota' }, tabla.esquema.resume?.(dato, ctx.dias()) ?? ''),
+          )];
+
+    const signo = el('span', { class: 'resumen-signo', 'aria-hidden': 'true' }, abierta ? '−' : '+');
     const resumen = el('button', {
-      type: 'button', class: 'resumen', 'aria-expanded': String(abierta),
+      type: 'button',
+      class: 'resumen' + (tabla.esquema.bloque ? ' resumen--bloque' : ''),
+      'aria-expanded': String(abierta),
+      'aria-label': tabla.esquema.titula(dato, i),
       onclick: () => {
         if (abiertas.has(dato)) abiertas.delete(dato);
         else abiertas.add(dato);
@@ -170,23 +245,41 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
             ?.scrollIntoView({ block: 'nearest' });
         }
       },
-    },
-      el('span', { class: 'resumen-signo', 'aria-hidden': 'true' }, abierta ? '−' : '+'),
-      el('span', { class: 'resumen-texto' },
-        el('strong', {}, tabla.esquema.titula(dato, i)),
-        el('span', { class: 'resumen-nota' }, tabla.esquema.resume?.(dato, ctx.dias()) ?? ''),
-      ),
-    );
+    }, signo, ...contenido());
 
     /** El renglón plegado es el nombre de la fila: si dice «Sin título»
      *  mientras escribes el título dos centímetros más abajo, deja de ser el
-     *  nombre de nada. Se refresca al vuelo. */
+     *  nombre de nada. Se refresca al vuelo.
+     *
+     *  El bloque se rehace entero en vez de retocar dos nodos: es hora, tipo,
+     *  sede y choques, y cualquiera de ellos puede haber cambiado con la tecla
+     *  que se acaba de pulsar. */
     const refrescarResumen = () => {
-      (resumen.querySelector('strong') as HTMLElement).textContent = tabla.esquema.titula(dato, i);
-      (resumen.querySelector('.resumen-nota') as HTMLElement).textContent =
-        tabla.esquema.resume?.(dato, ctx.dias()) ?? '';
+      // Se recalcula lo de `preparar()` antes de repintar el renglón. Sin esto,
+      // cambiar la hora de algo se miraba contra los choques de hace un rato:
+      // corriges un solape y el aviso rojo sigue ahí, o te lo creas y no está.
+      // Y justo al tocar una hora es cuando hay que mirarlo.
+      preparado = tabla.esquema.preparar?.(lista());
+      vaciar(resumen);
+      resumen.setAttribute('aria-label', tabla.esquema.titula(dato, i));
+      resumen.append(signo, ...contenido());
+      nodo.className = ['fila', abiertas.has(dato) ? 'abierta' : '', sinAsa ? 'fila--sin-asa' : '',
+        tabla.esquema.clase?.(dato, preparado) ?? ''].filter(Boolean).join(' ');
     };
-    const ctxFila: Ctx = { ...ctx, cambiado: () => { refrescarResumen(); ctx.cambiado(); } };
+
+    /** Cambiar el día de una actividad la manda a otro grupo, y hasta que no se
+     *  repinta se queda debajo de la cabecera equivocada — diciendo «Viernes»
+     *  dentro del jueves. Se repinta entero sólo en ese caso: es un
+     *  desplegable, así que nadie está a media palabra cuando pasa. */
+    const diaPintado = dato.dia;
+    const ctxFila: Ctx = {
+      ...ctx,
+      cambiado: () => {
+        if (tabla.esquema.porDia && dato.dia !== diaPintado) { repintar(); ctx.cambiado(); return; }
+        refrescarResumen();
+        ctx.cambiado();
+      },
+    };
 
     const dentro = el('div', { class: 'cuerpo', hidden: !abierta });
     if (abierta) {
@@ -211,7 +304,16 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
       dentro.append(rejilla, acciones);
     }
 
-    nodo.append(asa, el('div', { class: 'columna' }, resumen, dentro));
+    // Los mandos propios de la fila —hoy sólo el texto de sala del programa—
+    // van al lado del botón y no dentro: un botón dentro de otro botón no es
+    // HTML, y además pulsar «Cartela» no puede plegar la fila de paso.
+    const extras = tabla.esquema.extras?.(dato, ctx) ?? null;
+    const linea = extras
+      ? el('div', { class: 'resumen-linea' }, resumen, extras)
+      : resumen;
+
+    if (asa) nodo.append(asa);
+    nodo.append(el('div', { class: 'columna' }, linea, dentro));
     return nodo;
   }
 
@@ -219,10 +321,66 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
     cuerpo.querySelectorAll('.destino').forEach((n) => n.classList.remove('destino'));
   }
 
+  /**
+   * Las filas repartidas en los cuatro días, y dentro de cada día por la hora.
+   *
+   * **Aquí el orden de la pantalla no es el del array, y da igual**: el sitio
+   * ordena el programa por día y hora —`agendaPorDia` en `site.ts`— así que el
+   * orden en que estén guardadas las actividades no viaja a ningún sitio. Por
+   * eso esta tabla no deja arrastrar (ver `bloqueado`): no habría nada que
+   * reordenar, sólo una forma de creer que sí.
+   *
+   * En las otras cuatro colecciones el orden SÍ es el que se pinta —las sedes
+   * como nos las pasaron, el archivo de lo más reciente a lo más viejo— y por
+   * eso allí se arrastra y aquí no.
+   */
+  function porDias(aLaVista: { dato: any; i: number }[], todas: any[]) {
+    const dias = ctx.dias();
+    const hora = (x: any) => String(x?.inicio ?? '');
+
+    dias.forEach((nombre, d) => {
+      const delDia = aLaVista
+        .filter(({ dato }) => Number(dato.dia) === d)
+        .sort((x, y) => hora(x.dato).localeCompare(hora(y.dato)));
+      const todasDelDia = todas.filter((x: any) => Number(x.dia) === d);
+
+      const nota = tabla.esquema.notaGrupo?.(todasDelDia, preparado) ?? '';
+      const seccion = el('section', { class: 'dia-bloque' });
+
+      seccion.append(el('header', { class: 'dia-cabeza' },
+        el('span', { class: 'n' }, String(d + 1).padStart(2, '0')),
+        el('h4', {}, nombre.split(' ')[0]),
+        el('span', { class: 'f' }, nombre.split(' ').slice(1).join(' ')),
+        el('span', { class: 'cuenta' },
+          todasDelDia.length === 0
+            ? 'sin actividades'
+            : `${todasDelDia.length} ${todasDelDia.length === 1 ? 'actividad' : 'actividades'}`),
+        nota ? el('span', { class: 'dia-nota' }, nota) : null,
+      ));
+
+      if (!delDia.length) {
+        seccion.append(el('p', { class: 'lista-vacia' },
+          todasDelDia.length
+            ? `Ninguna de las ${todasDelDia.length} de este día ${porQueNoSeVe()}.`
+            : 'Este día está vacío.'));
+      } else {
+        const caja = el('div', { class: 'filas-dia' });
+        for (const { dato, i } of delDia) caja.append(fila(dato, i));
+        seccion.append(caja);
+      }
+
+      cuerpo.append(seccion);
+    });
+  }
+
   function repintar() {
     vaciar(cuerpo);
     const l = lista();
     const aLaVista = visibles();
+    // Lo que sirve para todas las filas, calculado una vez. El programa mira
+    // aquí qué se encima con qué: hacerlo fila por fila sería recorrer las
+    // treinta y nueve, treinta y nueve veces.
+    preparado = tabla.esquema.preparar?.(l);
 
     if (!l.length) {
       // Un solo botón de añadir y no dos: el estado vacío tenía el suyo y
@@ -233,11 +391,11 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
       ));
     } else if (!aLaVista.length) {
       cuerpo.append(el('div', { class: 'vacio' },
-        el('p', {}, `Ninguna de las ${l.length} ${tabla.esquema.plural} dice «${busqueda.trim()}».`),
-        el('button', { type: 'button', class: 'boton', onclick: () => {
-          busqueda = ''; buscador.value = ''; repintar();
-        } }, 'Ver todas'),
+        el('p', {}, `Ninguna de las ${l.length} ${tabla.esquema.plural} ${porQueNoSeVe()}.`),
+        el('button', { type: 'button', class: 'boton', onclick: verTodas }, 'Ver todas'),
       ));
+    } else if (tabla.esquema.porDia) {
+      porDias(aLaVista, l);
     } else {
       aLaVista.forEach(({ dato, i }) => cuerpo.append(fila(dato, i)));
     }
@@ -258,16 +416,22 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
     const nueva = tabla.esquema.nuevo();
     l.push(nueva);
     abiertas.add(nueva);
-    // Una fila nueva que sale filtrada es una fila que no aparece: se limpia la
-    // búsqueda antes de añadirla, que es menos raro que buscarla.
+    // Una fila nueva que sale filtrada es una fila que no aparece: se quitan
+    // los dos filtros antes de añadirla, que es menos raro que buscarla. El de
+    // fuera también —«Sólo con texto de sala» esconde a la recién nacida por
+    // definición, porque todavía no tiene texto ninguno—.
     busqueda = ''; buscador.value = '';
+    ctx.limpiarFiltro?.();
     tabla.escribir(estado, l);
     repintar();
     ctx.cambiado();
-    // La nueva va al final: llevar la vista hasta ella evita el «no pasó nada»
-    // cuando la lista es larga.
-    cuerpo.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    (cuerpo.lastElementChild?.querySelector('input, select, textarea') as HTMLElement)?.focus();
+    // Llevar la vista hasta ella evita el «no pasó nada» cuando la lista es
+    // larga. Se busca por su índice y no por «el último hijo del cuerpo»: con
+    // las filas agrupadas por día, el último hijo es la sección del domingo y
+    // la actividad nueva nace en el jueves.
+    const nodo = cuerpo.querySelector(`.fila[data-i="${l.length - 1}"]`);
+    nodo?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    (nodo?.querySelector('input, select, textarea') as HTMLElement)?.focus();
   }
 
   /**
@@ -322,5 +486,17 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
   seccion.append(anadirBoton);
 
   repintar();
+
+  // La fila pedida se enseña cuando ya está en la página. `pintarLienzo()`
+  // engancha esto al DOM justo después de volver de aquí, así que el turno
+  // siguiente del bucle de eventos es el primer momento en que se puede medir.
+  if (pedida) {
+    setTimeout(() => {
+      const i = lista().indexOf(pedida);
+      cuerpo.querySelector(`.fila[data-i="${i}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 0);
+  }
+
   return seccion;
 }

@@ -1,0 +1,132 @@
+---
+/**
+ * El texto de sala de una actividad. Lo que abre el QR de la cartela.
+ *
+ * **No usa `Base.astro`, y es la segunda página del sitio que no lo usa.**
+ * Piensa en dónde se lee esto: de pie, dentro de una sala, con el teléfono en
+ * una mano, delante de la obra de la que habla. Ahí no hace falta la barra de
+ * navegación, ni el pie, ni las cortinas, ni el sitio móvil paralelo, ni Lenis
+ * secuestrando el scroll — y sobre todo no hace falta el cargador, que en una
+ * sede con dos rayas de señal es una pantalla amarilla tapando justo el texto
+ * que alguien acaba de escanear para leer.
+ *
+ * Lo que sí comparte con el sitio es `global.css`: la paleta y las tipografías,
+ * porque esto es del festival y tiene que verse del festival.
+ *
+ * Cero JavaScript. La página es HTML y una hoja de estilos, y eso es todo lo
+ * que tiene que llegar por una red de sala de concreto.
+ */
+import '../../styles/global.css';
+import { conBase } from '../../lib/base';
+import {
+  actividadesConSala,
+  parrafosDe,
+  festival,
+  programa,
+  sedeDe,
+  enlaceMapa,
+  enTodasLasSedes,
+  type ConSala,
+} from '../../data/site';
+
+/**
+ * Una página por texto publicado, y ni una más.
+ *
+ * Los borradores no entran: si entraran, se podría imprimir el QR de una
+ * página a medio escribir, y el papel ya no se recoge. Ver `actividadesConSala`.
+ */
+export function getStaticPaths() {
+  return actividadesConSala.map((a) => ({ params: { id: a.sala.id }, props: { a } }));
+}
+
+interface Props { a: ConSala }
+const { a } = Astro.props;
+
+const dia = programa.dias[a.dia];
+const sede = enTodasLasSedes(a.sede) ? undefined : sedeDe(a.sede);
+const parrafos = parrafosDe(a.sala);
+
+const titulo = `${a.titulo} — Texto de sala — ${festival.nombreCompleto}`;
+const descripcion = parrafos[0]?.slice(0, 180) ?? `Texto de sala de «${a.titulo}».`;
+const canonica = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titulo}</title>
+    <meta name="description" content={descripcion} />
+    <link rel="canonical" href={canonica} />
+    <link rel="icon" href={conBase('/logos/silla-roja.svg')} type="image/svg+xml" />
+    <meta name="theme-color" content="#fffd00" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content={festival.nombreCompleto} />
+    <meta property="og:title" content={`${a.titulo} — Texto de sala`} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:url" content={canonica} />
+    <meta property="og:locale" content="es_MX" />
+  </head>
+
+  <body class="bg-amarillo text-tinta">
+    {/* Un ancho de lectura y nada más. `65ch` es el renglón que se lee sin
+        perder la línea al volver; en un teléfono no llega a aplicar, y en el
+        escritorio impide que el texto cruce mil píxeles de pared a pared. */}
+    <main class="mx-auto w-full max-w-[42rem] px-5 py-10 sm:px-8 sm:py-14">
+      <p class="meta text-[0.6rem] text-rojo">
+        Texto de sala · {festival.edicion} {festival.anio}
+      </p>
+
+      <h1 class="display mt-3 text-4xl leading-[0.92] sm:text-6xl">{a.titulo}</h1>
+
+      {a.artista && <p class="mt-3 text-base font-semibold sm:text-lg">{a.artista}</p>}
+
+      {/* Dónde y cuándo, encima del texto: quien escanea esto ya está dentro,
+          pero el mismo enlace se comparte por WhatsApp y ahí sí hace falta. */}
+      <dl class="meta mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 border-y-2 border-tinta py-3 text-[0.6rem]">
+        <dt class="text-tinta/50">Dónde</dt>
+        <dd>
+          {a.sede}
+          {sede?.direccion && (
+            <span class="block normal-case tracking-normal opacity-60">{sede.direccion}</span>
+          )}
+        </dd>
+        <dt class="text-tinta/50">Cuándo</dt>
+        <dd>{dia.dia} {dia.fecha} · {a.inicio}–{a.fin}</dd>
+      </dl>
+
+      {/* El texto sobre papel y no sobre el campo amarillo: son varios párrafos
+          seguidos y el amarillo a plancha cansa la vista antes del tercero. El
+          resto de la página se queda en amarillo, que es lo que la ata al
+          sitio. */}
+      <article class="mt-7 border-2 border-tinta bg-papel p-5 text-[0.95rem] leading-[1.7] sm:p-7 sm:text-base">
+        {parrafos.map((p) => <p class="mt-4 first:mt-0">{p}</p>)}
+      </article>
+
+      {a.sala.firma && (
+        <p class="meta mt-4 text-right text-[0.6rem] normal-case tracking-normal text-tinta/60">
+          {a.sala.firma}
+        </p>
+      )}
+
+      {/* Las dos puertas de vuelta. La del programa lleva al día de esta
+          actividad, no al principio: quien acaba de leer esto está en esa sala,
+          ese día, y lo siguiente que quiere saber es qué más hay. */}
+      <nav class="mt-9 grid gap-3 sm:grid-cols-2">
+        <a class="boton" href={conBase(`/programa#dia-${a.dia}`)}>
+          ★ Qué más hay el {dia.dia.toLowerCase()} ★
+        </a>
+        {sede && (
+          <a class="boton boton--papel" href={enlaceMapa(sede)} target="_blank" rel="noopener">
+            Cómo llegar a {a.sede} ↗
+          </a>
+        )}
+      </nav>
+
+      <p class="meta mt-10 text-[0.55rem] text-tinta/45">
+        {festival.nombreCompleto} · {festival.fechas} · {festival.ciudad}
+      </p>
+    </main>
+  </body>
+</html>

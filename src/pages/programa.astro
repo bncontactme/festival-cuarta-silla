@@ -17,6 +17,7 @@ import {
   registroAbierto,
   actividadesConRegistro,
   agendaPorDia,
+  rutaSala,
 } from '../data/site';
 ---
 
@@ -97,6 +98,19 @@ import {
                           aria-label={`Registrarme en ${a.titulo}`}
                         >
                           Registrarme <span aria-hidden="true">↗</span>
+                        </a>
+                      )}
+
+                      {/* La segunda puerta, y sólo si hay texto publicado.
+                          Misma regla que el registro: nunca un botón apagado.
+                          Sin flecha porque no sale del sitio. */}
+                      {a.sala?.publicado && (
+                        <a
+                          href={conBase(rutaSala(a.sala))}
+                          class="evento-lectura"
+                          aria-label={`Leer el texto de sala de ${a.titulo}`}
+                        >
+                          Texto de sala
                         </a>
                       )}
                     </div>
@@ -282,6 +296,15 @@ import {
                                 aria-label={`Registrarme en ${a.titulo}`}
                               >
                                 Registrarme <span aria-hidden="true">↗</span>
+                              </a>
+                            )}
+                            {a.sala?.publicado && (
+                              <a
+                                href={conBase(rutaSala(a.sala))}
+                                class="evento-lectura block"
+                                aria-label={`Leer el texto de sala de ${a.titulo}`}
+                              >
+                                Texto de sala
                               </a>
                             )}
                           </span>

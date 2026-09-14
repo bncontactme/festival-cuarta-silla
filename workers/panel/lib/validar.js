@@ -167,6 +167,79 @@ class Verificador {
     return valor === true ? true : undefined;
   }
 
+  /**
+   * Texto largo, de varios párrafos. Es `texto()` con dos diferencias que
+   * importan: aguanta miles de caracteres y **conserva los saltos de línea**,
+   * porque son los párrafos.
+   *
+   * `texto()` aplasta todo espacio en blanco a uno solo, que es justo lo que
+   * hay que hacer con un título y justo lo que no hay que hacer con esto: un
+   * texto de sala pasado por ahí llega al muro como un ladrillo de trescientas
+   * palabras sin un solo punto y aparte.
+   *
+   * Lo que sí se limpia: los retornos de Windows, los espacios al final de cada
+   * renglón —invisibles y eternos en el diff— y las tandas de tres o más líneas
+   * en blanco, que se quedan en una.
+   */
+  parrafo(valor, donde, { max = 6000 } = {}) {
+    const s = String(valor ?? '')
+      .replace(/\r\n?/g, '\n')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    if (!s) return undefined;
+    if (s.length > max) {
+      this.error(donde, 'son ' + s.length + ' caracteres y caben ' + max);
+      return undefined;
+    }
+    return s;
+  }
+
+  /**
+   * El texto de sala de una actividad.
+   *
+   * El `id` es lo delicado: es la dirección que va impresa dentro de un QR
+   * pegado a una pared. Aquí se comprueba la forma —minúsculas, números y
+   * guiones— y arriba, en `programa()`, que no se repita entre actividades.
+   *
+   * Lo que este validador **no puede** comprobar es que no haya cambiado. Las
+   * actividades son una lista sin identidad propia: si alguien reordena dos y
+   * cambia un `id`, desde aquí eso se ve exactamente igual que borrar una
+   * actividad y añadir otra, que es una cosa legítima. Quien acuña el `id` una
+   * sola vez es el panel; lo que hace el Worker cuando un `id` publicado
+   * desaparece es **decirlo** —ver el aviso de `index.js`—, que es la parte que
+   * de verdad hace falta: significa que hay un papel en una pared apuntando a
+   * una página que ya no existe.
+   */
+  sala(valor, donde) {
+    if (!valor || typeof valor !== 'object') return undefined;
+
+    // Se rechaza, no se arregla. Es lo contrario de lo que hace el resto de
+    // este archivo —que recorta, aplasta espacios y ordena claves— y es a
+    // propósito: un `id` en mayúsculas bajado a minúsculas en silencio deja al
+    // panel dibujando el QR de `/sala/Burdo` mientras el sitio construye
+    // `/sala/burdo`. Rutas distintas, el código ya impreso, y un 404 que sólo
+    // se descubre delante de la obra. Aquí normalizar es mentir.
+    const id = String(valor.id ?? '').trim();
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id) || id.length > 48) {
+      this.error(donde + '.sala.id', 'la dirección sólo lleva minúsculas, números y guiones sueltos, y no pasa de 48: «' + id + '»');
+      return undefined;
+    }
+
+    const cuerpo = this.parrafo(valor.cuerpo, donde + '.sala.cuerpo');
+    const publicado = this.bandera(valor.publicado);
+
+    // Publicado y en blanco es la única combinación que no puede pasar: el
+    // sitio construiría una página vacía con un QR apuntándole.
+    if (publicado && !cuerpo) {
+      this.error(donde + '.sala', 'está marcado como publicado y no tiene texto');
+      return undefined;
+    }
+    if (!cuerpo) return undefined;
+
+    return podar({ id, cuerpo, firma: this.texto(valor.firma, donde + '.sala.firma', { max: 160 }), publicado });
+  }
+
   lista(datos, donde, tope) {
     if (!Array.isArray(datos)) {
       this.error(donde, 'esperaba una lista');
@@ -249,6 +322,7 @@ class Verificador {
         artista:  this.texto(a.artista, d + '.artista', { max: 120 }),
         registro: this.enlace(a.registro, d + '.registro'),
         libre:    this.bandera(a.libre),
+        sala:     this.sala(a.sala, d),
       };
       // Las dos a la vez no significan nada: o se apunta uno o se entra y ya.
       // Casi siempre es que se marcó «entrada libre» y después llegó el
@@ -280,6 +354,25 @@ class Verificador {
         }
       }
     }
+
+    // Dos textos de sala no pueden compartir dirección: `/sala/<id>` es una
+    // página y sólo puede enseñar una cosa. Esto sí es un error y no un aviso —
+    // con dos iguales, uno de los dos QR impresos lleva a la obra del otro, y
+    // no hay forma de saber cuál desde fuera.
+    const vistos = new Map();
+    actividades.forEach((a, i) => {
+      if (!a.sala) return;
+      const antes = vistos.get(a.sala.id);
+      if (antes !== undefined) {
+        this.error(
+          'programa[' + i + '].sala.id',
+          '«' + a.sala.id + '» ya es la dirección de «' + (actividades[antes].titulo || 'sin título') +
+            '». Dos textos de sala no pueden compartir página.',
+        );
+        return;
+      }
+      vistos.set(a.sala.id, i);
+    });
 
     // Sin la clave, se asume que SÍ es ejemplo. Errar hacia decir «esto todavía
     // no es la programación» es barato; lo caro es pasar por buena una rejilla

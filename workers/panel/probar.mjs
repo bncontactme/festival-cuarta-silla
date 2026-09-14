@@ -106,5 +106,75 @@ ok('logo del repo pasa', r.errores.length === 0 && r.datos.patrocinadores[0].log
 r = validar('marcas', { patrocinadores: [{ nombre: 'X' }], colaboradores: [{ nombre: 'Y' }] }, {});
 ok('colaboradores ya no se guarda', r.errores.length === 0 && !('colaboradores' in r.datos));
 
+// ── Textos de sala ───────────────────────────────────────────────────────────
+//
+// Lo que se prueba aquí es lo que acaba impreso en un papel pegado a una pared.
+// Un `id` que no cuadra o un publicado sin texto no se descubren en la pantalla:
+// se descubren delante de la obra, con alguien mirando su teléfono.
+
+console.log('\nprograma › textos de sala');
+
+const conSala = (sala, extra = {}) => base({ sala, ...extra });
+
+r = validar('programa', { actividades: [conSala({ id: 'burdo', cuerpo: 'Uno.\n\nDos.', publicado: true })] }, { sedes: SEDES });
+ok('un texto publicado se guarda entero',
+   r.errores.length === 0 && r.datos.actividades[0].sala.id === 'burdo' &&
+   r.datos.actividades[0].sala.publicado === true, JSON.stringify(r.errores));
+
+ok('los párrafos sobreviven al guardado',
+   r.datos.actividades[0].sala.cuerpo === 'Uno.\n\nDos.',
+   JSON.stringify(r.datos.actividades[0].sala.cuerpo));
+
+r = validar('programa', { actividades: [conSala({ id: 'x', cuerpo: 'Hola.' })] }, { sedes: SEDES });
+ok('sin publicar no se inventa un publicado:true', !('publicado' in r.datos.actividades[0].sala));
+
+r = validar('programa', { actividades: [conSala({ id: 'x', cuerpo: '', publicado: true })] }, { sedes: SEDES });
+ok('publicado y vacío se rechaza',
+   r.errores.some((e) => e.includes('publicado y no tiene texto')), JSON.stringify(r.errores));
+
+r = validar('programa', { actividades: [conSala({ id: 'x', cuerpo: '   \n\n  ' })] }, { sedes: SEDES });
+ok('un cuerpo en blanco no deja una sala fantasma', !('sala' in r.datos.actividades[0]));
+
+for (const malo of ['Burdo', 'con espacio', 'acción', '-empieza', 'termina-', 'doble--guion', '']) {
+  r = validar('programa', { actividades: [conSala({ id: malo, cuerpo: 'Hola.' })] }, { sedes: SEDES });
+  ok(`id «${malo}» se rechaza`, r.errores.some((e) => e.includes('.sala.id')), JSON.stringify(r.errores));
+}
+
+// Dos páginas no pueden compartir dirección: uno de los dos QR impresos llevaría
+// a la obra del otro, y desde fuera no hay forma de saber cuál.
+r = validar('programa', {
+  actividades: [
+    conSala({ id: 'recorrido', cuerpo: 'A.' }, { titulo: 'Recorrido sábado' }),
+    conSala({ id: 'recorrido', cuerpo: 'B.' }, { titulo: 'Recorrido domingo' }),
+  ],
+}, { sedes: SEDES });
+ok('dos salas con el mismo id se rechazan',
+   r.errores.some((e) => e.includes('no pueden compartir página')), JSON.stringify(r.errores));
+
+r = validar('programa', {
+  actividades: [
+    conSala({ id: 'recorrido', cuerpo: 'A.' }),
+    conSala({ id: 'recorrido-2', cuerpo: 'B.' }),
+  ],
+}, { sedes: SEDES });
+ok('dos salas distintas conviven', r.errores.length === 0, JSON.stringify(r.errores));
+
+r = validar('programa', { actividades: [conSala({ id: 'x', cuerpo: 'a'.repeat(6001) })] }, { sedes: SEDES });
+ok('un texto pasado de largo se rechaza',
+   r.errores.some((e) => e.includes('caben 6000')), JSON.stringify(r.errores));
+
+// Los saltos de línea SON los párrafos, así que `parrafo()` no los aplasta como
+// hace `texto()`; lo que sí limpia son los excesos.
+r = validar('programa', {
+  actividades: [conSala({ id: 'x', cuerpo: 'Uno.   \r\n\n\n\n\nDos.' })],
+}, { sedes: SEDES });
+ok('se normalizan retornos y líneas de más',
+   r.datos.actividades[0].sala.cuerpo === 'Uno.\n\nDos.',
+   JSON.stringify(r.datos.actividades[0].sala.cuerpo));
+
+r = validar('programa', { actividades: [base()] }, { sedes: SEDES });
+ok('una actividad sin sala sigue siendo válida',
+   r.errores.length === 0 && !('sala' in r.datos.actividades[0]), JSON.stringify(r.errores));
+
 console.log(fallos ? `\n${fallos} fallo(s)\n` : '\nTodo bien\n');
 process.exit(fallos ? 1 : 0);
