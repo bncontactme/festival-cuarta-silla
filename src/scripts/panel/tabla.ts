@@ -115,6 +115,31 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
 
   const filtrando = () => busqueda.trim().length > 0 || Boolean(ctx.filtro?.());
 
+  /**
+   * Por qué no se ve nada, dicho como toca.
+   *
+   * Hay dos formas de esconder filas y antes sólo se contaba una: el mensaje era
+   * siempre «ninguna dice “tal”», así que con el botón de «Sólo con texto de
+   * sala» puesto y la búsqueda vacía salía **«Ninguna de las 39 actividades dice
+   * “”»**. Un hueco entre comillas explicando por qué está vacío.
+   */
+  function porQueNoSeVe(): string {
+    const q = busqueda.trim();
+    const nombre = ctx.filtro?.() ? (ctx.filtroNombre?.() ?? 'el filtro de arriba') : null;
+    if (q && nombre) return `dice «${q}» y pasa ${nombre}`;
+    if (q) return `dice «${q}»`;
+    return `pasa ${nombre ?? 'el filtro'}`;
+  }
+
+  /** Quita las dos cosas que esconden filas, no sólo la búsqueda: si el botón
+   *  dice «Ver todas», lo que tiene que pasar al pulsarlo es que se vean todas. */
+  function verTodas() {
+    busqueda = '';
+    buscador.value = '';
+    ctx.limpiarFiltro?.();
+    repintar();
+  }
+
   // ── Reordenar ─────────────────────────────────────────────────────────────
   let arrastrando: number | null = null;
 
@@ -230,9 +255,16 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
      *  sede y choques, y cualquiera de ellos puede haber cambiado con la tecla
      *  que se acaba de pulsar. */
     const refrescarResumen = () => {
+      // Se recalcula lo de `preparar()` antes de repintar el renglón. Sin esto,
+      // cambiar la hora de algo se miraba contra los choques de hace un rato:
+      // corriges un solape y el aviso rojo sigue ahí, o te lo creas y no está.
+      // Y justo al tocar una hora es cuando hay que mirarlo.
+      preparado = tabla.esquema.preparar?.(lista());
       vaciar(resumen);
       resumen.setAttribute('aria-label', tabla.esquema.titula(dato, i));
       resumen.append(signo, ...contenido());
+      nodo.className = ['fila', abiertas.has(dato) ? 'abierta' : '', sinAsa ? 'fila--sin-asa' : '',
+        tabla.esquema.clase?.(dato, preparado) ?? ''].filter(Boolean).join(' ');
     };
 
     /** Cambiar el día de una actividad la manda a otro grupo, y hasta que no se
@@ -329,7 +361,7 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
       if (!delDia.length) {
         seccion.append(el('p', { class: 'lista-vacia' },
           todasDelDia.length
-            ? `Ninguna de las ${todasDelDia.length} de este día dice «${busqueda.trim()}».`
+            ? `Ninguna de las ${todasDelDia.length} de este día ${porQueNoSeVe()}.`
             : 'Este día está vacío.'));
       } else {
         const caja = el('div', { class: 'filas-dia' });
@@ -359,10 +391,8 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
       ));
     } else if (!aLaVista.length) {
       cuerpo.append(el('div', { class: 'vacio' },
-        el('p', {}, `Ninguna de las ${l.length} ${tabla.esquema.plural} dice «${busqueda.trim()}».`),
-        el('button', { type: 'button', class: 'boton', onclick: () => {
-          busqueda = ''; buscador.value = ''; repintar();
-        } }, 'Ver todas'),
+        el('p', {}, `Ninguna de las ${l.length} ${tabla.esquema.plural} ${porQueNoSeVe()}.`),
+        el('button', { type: 'button', class: 'boton', onclick: verTodas }, 'Ver todas'),
       ));
     } else if (tabla.esquema.porDia) {
       porDias(aLaVista, l);
@@ -386,9 +416,12 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
     const nueva = tabla.esquema.nuevo();
     l.push(nueva);
     abiertas.add(nueva);
-    // Una fila nueva que sale filtrada es una fila que no aparece: se limpia la
-    // búsqueda antes de añadirla, que es menos raro que buscarla.
+    // Una fila nueva que sale filtrada es una fila que no aparece: se quitan
+    // los dos filtros antes de añadirla, que es menos raro que buscarla. El de
+    // fuera también —«Sólo con texto de sala» esconde a la recién nacida por
+    // definición, porque todavía no tiene texto ninguno—.
     busqueda = ''; buscador.value = '';
+    ctx.limpiarFiltro?.();
     tabla.escribir(estado, l);
     repintar();
     ctx.cambiado();

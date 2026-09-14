@@ -169,6 +169,18 @@ const ctx = {
   /** «Sólo con texto de sala», que vive en la barra del programa y no en la
    *  cabecera de la tabla. Devuelve null cuando no hay nada filtrando. */
   filtro: () => (soloConSala && pestanaActiva === 'programa' ? (a: any) => Boolean(a.sala) : null),
+  filtroNombre: () => '«sólo con texto de sala»',
+  /** Lo llama la tabla desde dentro de su propio repintado, así que aquí NO se
+   *  puede rehacer el lienzo: sería tirar la tabla que está ejecutando esto y
+   *  dejar a su `repintar()` hablándole a un nodo que ya no está en la página.
+   *  Se apaga la bandera y se cambia sólo la barra; la tabla se repinta sola. */
+  limpiarFiltro: () => {
+    soloConSala = false;
+    if (!nodoMandos) return;
+    const nuevo = mandosPrograma();
+    nodoMandos.replaceWith(nuevo);
+    nodoMandos = nuevo;
+  },
   /** Lo que el renglón del programa necesita para sus mandos de texto de sala. */
   sala: {
     raiz: () => RAIZ,
@@ -231,6 +243,9 @@ let previaPedida: ReturnType<typeof setTimeout> | null = null;
 let vistaPrograma: 'lista' | 'horarios' = 'lista';
 let diaPrevia = 0;
 let soloConSala = false;
+/** La barra de mandos del programa, para poder cambiarla sola sin rehacer el
+ *  lienzo entero. Ver `ctx.limpiarFiltro`. */
+let nodoMandos: HTMLElement | null = null;
 /** La fila que hay que abrir y enseñar en la tabla, puesta por «Campos» desde
  *  la vista de lista. La consume `pintarTabla` una sola vez. */
 let destacada: any = null;
@@ -298,7 +313,8 @@ function pintarLienzo() {
 
   if (p.clave === 'programa') {
     lienzo.append(interruptorEjemplo());
-    lienzo.append(mandosPrograma());
+    nodoMandos = mandosPrograma();
+    lienzo.append(nodoMandos);
     nodoPrevia = vistaDelPrograma();
     if (nodoPrevia) lienzo.append(nodoPrevia);
   }

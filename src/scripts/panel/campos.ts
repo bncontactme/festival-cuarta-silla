@@ -28,6 +28,13 @@ export type Ctx = {
   /** Un filtro de fuera de la tabla, si hay alguno puesto. Hoy lo pone el botón
    *  «Sólo con texto de sala» de la barra del programa. */
   filtro?: () => ((fila: any) => boolean) | null;
+  /** Cómo se llama lo que está filtrando, para poder decirlo y para poder
+   *  ofrecer quitarlo. Sin esto, la tabla sabe que algo esconde filas pero no
+   *  qué, y el «Ver todas» deja el filtro puesto y parece que no hace nada. */
+  filtroNombre?: () => string;
+  /** Quitar ese filtro. Lo llama «Ver todas», y también «Añadir» — una fila
+   *  recién creada que nace filtrada es una fila que no aparece. */
+  limpiarFiltro?: () => void;
   /** Lo que necesitan los mandos de texto de sala del renglón del programa. */
   sala?: {
     raiz: () => string;
