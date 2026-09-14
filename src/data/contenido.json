@@ -1,7 +1,7 @@
 {
   "contrato": 2,
-  "version": 132,
-  "actualizado": "2026-09-14T19:58:33.875Z",
+  "version": 133,
+  "actualizado": "2026-09-14T20:02:46.362Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1533,6 +1533,12 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789240729/cuartasilla/artistas/luna-bowling/azbwr4nyni2h9xxc1eod.jpg",
       "instagram": "https://www.instagram.com/lunabowlinggg/",
       "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Docualparque",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789416157/cuartasilla/artistas/docualparque/kzlbmsbwqtc0872kslui.jpg",
+      "instagram": "https://www.instagram.com/docualparque/",
+      "sede": "No Museo"
     }
   ],
   "archivo": [],
