@@ -1,7 +1,7 @@
 {
   "contrato": 2,
-  "version": 131,
-  "actualizado": "2026-09-14T15:18:55.236Z",
+  "version": 132,
+  "actualizado": "2026-09-14T19:58:33.875Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -646,7 +646,7 @@
       "nombre": "Arhat Alejandro.",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788376709/cuartasilla/artistas/arhat-alejandro/qla04exj4cufarzjpt65.jpg",
       "instagram": "https://www.instagram.com/arhat.alejandro/",
-      "sede": "Casa Dos Guayabos"
+      "sede": "Estudio Arrechiga"
     },
     {
       "nombre": "Alejandra Muñoz",
@@ -670,7 +670,7 @@
       "nombre": "Enrique Chiu",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788389212/cuartasilla/artistas/n2jc6sq0e4nepmwk5kas.jpg",
       "instagram": "https://www.instagram.com/enriquechiuarte/",
-      "sede": "Casa Dos Guayabos"
+      "sede": "Estudio Arrechiga"
     },
     {
       "nombre": "Oro Radio",
@@ -736,7 +736,7 @@
       "nombre": "Aranzazú Ramos",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788655719/cuartasilla/artistas/aranzazu-ramos/zjywbpe64yaufhfgf0wi.jpg",
       "instagram": "https://www.instagram.com/aranzazuram/",
-      "sede": "Casa Dos Guayabos"
+      "sede": "Estudio Arrechiga"
     },
     {
       "nombre": "Ari Garcia",
@@ -838,7 +838,7 @@
       "nombre": "Diego Ortiz S.",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788656620/cuartasilla/artistas/diego-ortiz-s/ikyfrcpizdxlikemaj82.jpg",
       "instagram": "https://www.instagram.com/medias.rasgadas/",
-      "sede": "Casa Dos Guayabos"
+      "sede": "Estudio Arrechiga"
     },
     {
       "nombre": "Orizaba 24",
@@ -928,7 +928,7 @@
       "nombre": "Iskar",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902869/cuartasilla/artistas/uuanemjxz2yu1hofiqno.jpg",
       "instagram": "https://www.instagram.com/iskar.art/",
-      "sede": "Casa Dos Guayabos"
+      "sede": "Estudio Arrechiga"
     },
     {
       "nombre": "Iván García",
@@ -1174,7 +1174,7 @@
       "nombre": "Natalia Robles",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905448/cuartasilla/artistas/dxudbdenrmnbsdfi2xv4.jpg",
       "instagram": "https://www.instagram.com/roblerojo_/",
-      "sede": "Casa Dos Guayabos"
+      "sede": "Estudio Arrechiga"
     },
     {
       "nombre": "Oliver O Casillas",
