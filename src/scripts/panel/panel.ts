@@ -9,7 +9,7 @@
 import { PESTANAS, TABLAS } from './esquema';
 import { pintarTabla } from './tabla';
 import { pintarPrevia } from './previa';
-import { abrirSala, imprimirCartelas } from './sala';
+import { abrirSala, imprimirCartelas, elegirCartelas } from './sala';
 import { pintarRegistro } from './registro';
 import { el, vaciar, cuando } from './dom';
 import {
@@ -380,8 +380,8 @@ function mandosPrograma(): HTMLElement {
       el('span', { class: 'empuje' }),
       el('button', {
         type: 'button', class: 'mini fuerte',
-        title: 'Una etiqueta por texto publicado, cuatro por hoja',
-        onclick: () => imprimirCartelas(estado.programa.actividades, DIAS, avisar, RAIZ),
+        title: 'Elegir cuáles y mandarlas a la impresora',
+        onclick: () => elegirCartelas(estado.programa.actividades, DIAS, avisar, RAIZ),
       }, `Imprimir cartelas (${publicadas})`),
     );
   }

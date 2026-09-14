@@ -78,6 +78,22 @@ export function qrChico(url: string): HTMLElement {
  *  modal no choquen con los del anterior mientras se solapan. */
 let abiertos = 0;
 
+/**
+ * Un `<dialog>` del panel, listo para llenar.
+ *
+ * Dos cosas, y las dos por lo mismo: `close` tira el nodo en el turno siguiente
+ * del bucle de eventos, así que cerrar uno y abrir otro en el mismo gesto los
+ * deja solapados un instante. Se barre lo que haya quedado antes de montar, y
+ * el nodo nuevo se apunta a tirarse solo — se cierre como se cierre, por el
+ * botón, por Escape o por donde sea.
+ */
+function nuevoDialogo(): HTMLDialogElement {
+  document.querySelectorAll('dialog.dialogo').forEach((d) => d.remove());
+  const dialogo = el('dialog', { class: 'dialogo' });
+  dialogo.addEventListener('close', () => dialogo.remove());
+  return dialogo;
+}
+
 type Ctx = {
   dias: () => string[];
   raiz: () => string;
@@ -99,13 +115,7 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
   const publicado = Boolean(a.sala?.publicado);
   const url = rutaDe(ctx.raiz(), id);
 
-  // `close` tira el nodo, pero lo hace en el turno siguiente del bucle de
-  // eventos: cerrar uno y abrir otro en el mismo gesto deja los dos en la
-  // página un instante. Con `id` fijos, el `for` del segundo apuntaría al campo
-  // del primero. Se barre lo que quede antes de montar nada.
-  document.querySelectorAll('dialog.dialogo').forEach((d) => d.remove());
-
-  const dialogo = el('dialog', { class: 'dialogo' });
+  const dialogo = nuevoDialogo();
 
   // Y los `id` son únicos por si acaso: es una etiqueta que tiene que llevar a
   // SU campo, y eso no puede depender de que el barrido de arriba llegue antes.
@@ -253,12 +263,6 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
   document.body.append(dialogo);
   dialogo.showModal();
 
-  // El nodo se tira aquí y en ningún otro sitio. Antes se tiraba en cada camino
-  // que cerraba —y el camino que no lo hacía, el envío implícito, dejaba un
-  // `<dialog>` muerto en la página con su `id="sala-cuerpo"` duplicado para el
-  // siguiente que se abriera—. Con esto da igual cómo se cierre.
-  dialogo.addEventListener('close', () => dialogo.remove());
-
   // Escape también es cerrar sin guardar, así que también pregunta.
   dialogo.addEventListener('cancel', (e) => {
     if (!hayCambios()) return;
@@ -270,6 +274,130 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
 }
 
 // ── Las cartelas ─────────────────────────────────────────────────────────────
+
+/**
+ * Elegir qué cartelas se imprimen antes de mandarlas.
+ *
+ * Antes el botón mandaba las treinta y nueve a la impresora de un tirón, y eso
+ * sólo sirve el primer día. Después lo normal es lo contrario: corriges un
+ * texto y quieres **esa** etiqueta, o vas a montar una sede y quieres las
+ * cuatro de esa sede. Reimprimir el pliego entero para recortar una etiqueta es
+ * justo el taco de papel del que veníamos huyendo.
+ *
+ * Empiezan todas marcadas, que es como estaba: quien quiera el pliego completo
+ * le da a Imprimir y ya. Quien quiera tres, desmarca.
+ */
+export function elegirCartelas(actividades: any[], dias: string[], avisar: Ctx['avisar'], raiz: string) {
+  const publicadas = actividades.filter((a) => a.sala?.publicado && a.sala.cuerpo);
+  if (!publicadas.length) {
+    avisar('Todavía no hay ningún texto de sala publicado. Las cartelas salen de los publicados: un QR impreso que lleva a un 404 es peor que no tener QR.', 'ojo');
+    return;
+  }
+
+  const elegidas = new Set<any>(publicadas);
+  const dialogo = nuevoDialogo();
+  const marca = 'cartelas-' + (++abiertos);
+
+  const contador = el('span', { class: 'rotulo' });
+  const imprimir = el('button', { type: 'button', class: 'boton fuerte' });
+  const todasNinguna = el('button', { type: 'button', class: 'boton' });
+
+  function estado() {
+    const n = elegidas.size;
+    contador.textContent = `${n} de ${publicadas.length}`;
+    imprimir.textContent = n === 1 ? 'Imprimir 1 cartela' : `Imprimir ${n} cartelas`;
+    imprimir.toggleAttribute('disabled', n === 0);
+    // El botón dice lo que va a hacer, no las dos cosas que podría hacer.
+    todasNinguna.textContent = n === publicadas.length ? 'Ninguna' : 'Todas';
+    // Cuántas hojas van a salir, que es lo que de verdad se pregunta quien está
+    // delante de una impresora compartida. Cuatro por hoja.
+    hojas.textContent = n ? `${Math.ceil(n / 4)} ${Math.ceil(n / 4) === 1 ? 'hoja' : 'hojas'}` : '';
+  }
+
+  const hojas = el('span', { class: 'rotulo', style: 'opacity:.55' });
+
+  todasNinguna.addEventListener('click', () => {
+    if (elegidas.size === publicadas.length) elegidas.clear();
+    else publicadas.forEach((a) => elegidas.add(a));
+    lista.querySelectorAll('input[type=checkbox]').forEach((c: any) => {
+      c.checked = elegidas.has(publicadas[Number(c.dataset.n)]);
+    });
+    estado();
+  });
+
+  imprimir.addEventListener('click', () => {
+    // El orden del pliego es el del programa, no el de lo que marcaste: así dos
+    // tandas impresas en momentos distintos se apilan igual.
+    const salida = publicadas.filter((a) => elegidas.has(a));
+    dialogo.close();
+    imprimirCartelas(salida, dias, avisar, raiz);
+  });
+
+  const lista = el('div', { class: 'elegir' });
+
+  dias.forEach((nombre, d) => {
+    const delDia = publicadas
+      .filter((a) => Number(a.dia) === d)
+      .sort((x, y) => String(x.inicio ?? '').localeCompare(String(y.inicio ?? '')));
+    if (!delDia.length) return;
+
+    lista.append(el('p', { class: 'elegir-dia' },
+      el('span', {}, nombre.split(' ')[0]),
+      el('span', { class: 'elegir-dia-nota' },
+        `${delDia.length} ${delDia.length === 1 ? 'cartela' : 'cartelas'}`)));
+
+    for (const a of delDia) {
+      const n = publicadas.indexOf(a);
+      const casilla = el('input', {
+        type: 'checkbox', checked: true, 'data-n': String(n),
+        id: `${marca}-${n}`,
+        onchange: (e: any) => {
+          if (e.target.checked) elegidas.add(a); else elegidas.delete(a);
+          estado();
+        },
+      });
+      lista.append(el('label', { class: 'elegir-fila', for: `${marca}-${n}` },
+        casilla,
+        el('span', { class: 'elegir-hora' }, a.inicio || '—'),
+        el('span', { class: 'elegir-que' },
+          el('strong', {}, a.titulo || 'Sin título'),
+          el('span', { class: 'elegir-donde' },
+            [a.sede, a.artista].filter(Boolean).join(' · ')),
+        ),
+        el('span', { class: 'ruta' }, '/sala/' + a.sala.id),
+      ));
+    }
+  });
+
+  dialogo.append(
+    el('div', { class: 'modal' },
+      el('div', { class: 'modal-cabeza' },
+        el('div', {},
+          el('p', { class: 'rotulo rojo' }, 'Imprimir cartelas'),
+          el('h3', {}, 'Cuáles'),
+          el('p', { class: 'modal-donde' },
+            'Una etiqueta por texto, cuatro por hoja. Las marcas rojas de las esquinas son por dónde se corta.'),
+        ),
+        el('button', {
+          type: 'button', class: 'modal-cerrar', 'aria-label': 'Cerrar',
+          onclick: () => dialogo.close(),
+        }, '✕'),
+      ),
+      el('div', { class: 'modal-cuerpo' }, lista),
+      el('div', { class: 'modal-pie' },
+        todasNinguna,
+        contador,
+        hojas,
+        el('span', { class: 'empuje' }),
+        imprimir,
+      ),
+    ),
+  );
+
+  estado();
+  document.body.append(dialogo);
+  dialogo.showModal();
+}
 
 /**
  * El pliego para imprimir: una etiqueta por texto publicado, cuatro por hoja.

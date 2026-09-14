@@ -708,6 +708,62 @@ select {
 .direccion { border: 2px solid var(--tinta); background: var(--humo); padding: 0.45rem 0.55rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .direccion code { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; word-break: break-all; }
 .candado { font-family: var(--mono); font-size: 0.53rem; letter-spacing: 0.1em; text-transform: uppercase; background: var(--tinta); color: var(--amarillo); padding: 0.1rem 0.35rem; margin-left: auto; white-space: nowrap; }
+/* ── Elegir qué cartelas se imprimen ─────────────────────────────────────────
+   Una lista de casillas por día. Es de marcar y desmarcar deprisa, así que la
+   fila entera es la etiqueta: se pulsa donde sea y cambia. */
+.elegir { display: grid; gap: 2px; }
+.elegir-dia {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--display);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--tinta);
+  padding-bottom: 0.15rem;
+  margin-top: 0.7rem;
+}
+.elegir-dia:first-child { margin-top: 0; }
+.elegir-dia-nota {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  opacity: 0.55;
+}
+.elegir-fila {
+  display: grid;
+  grid-template-columns: auto 3rem 1fr auto;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.4rem 0.3rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--raya);
+}
+.elegir-fila:hover { background: var(--amarillo); }
+.elegir-fila input { width: auto; }
+.elegir-hora {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.72rem;
+  color: var(--rojo);
+  font-variant-numeric: tabular-nums;
+}
+.elegir-que { min-width: 0; }
+.elegir-que strong { display: block; font-size: 0.82rem; line-height: 1.25; }
+.elegir-donde {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.57rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-top: 0.1rem;
+}
+/* Al desmarcar, la fila se apaga: de un vistazo se ve qué va a salir y qué no,
+   sin tener que leer casilla por casilla. */
+.elegir-fila:has(input:not(:checked)) { opacity: 0.4; }
+
 .modal-pie { border-top: 2px solid var(--tinta); padding: 0.7rem 0.85rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; background: var(--humo); }
 .modal-pie .empuje { margin-left: auto; }
 .boton.peligro { border-color: var(--rojo); color: var(--rojo); }
