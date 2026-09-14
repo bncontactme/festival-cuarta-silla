@@ -786,9 +786,20 @@ select {
    248 mm, y la caja útil de Carta con los márgenes de `@page` es 255. */
 
 .pliego { display: none; --cartela-alto: 78mm; --cartela-aire: 7mm; }
-.cartela { position: relative; height: var(--cartela-alto); border: 2px solid var(--tinta); background: var(--papel); padding: 1rem 1.3rem; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.4rem; break-inside: avoid; }
-.cartela-texto { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
-.cartela-qr { display: flex; flex-direction: column; align-items: center; }
+/* Dos columnas y dos filas: arriba el cabecero cruzando las dos, y debajo el
+   texto y el QR. El cabecero estaba dentro de `.cartela-texto` —o sea, dentro
+   de la columna estrecha— y «Texto de sala», alineado a la derecha, acababa a
+   1.4rem del QR y a cuatro centímetros del canto del papel. Se leía como un
+   cabecero a medio hacer. Cruzando las dos columnas, sus dos extremos caen
+   donde tienen que caer: en los dos cantos de la etiqueta.
+
+   El `align-items: center` se baja de la caja a la fila del medio. En la caja
+   centraba también el cabecero, que es justo lo que no se quiere: el cabecero
+   arriba, y el texto y el QR centrados el uno con el otro. */
+.cartela { position: relative; height: var(--cartela-alto); border: 2px solid var(--tinta); background: var(--papel); padding: 1rem 1.3rem; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto 1fr; gap: 0.6rem 1.4rem; break-inside: avoid; }
+.cartela-cab { grid-column: 1 / -1; }
+.cartela-texto { grid-row: 2; display: flex; flex-direction: column; justify-content: center; gap: 0.5rem; min-width: 0; }
+.cartela-qr { grid-row: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .cartela .mc { position: absolute; width: 9px; height: 9px; }
 .cartela .mc1 { top: -2px; left: -2px; border-top: 2px solid var(--rojo); border-left: 2px solid var(--rojo); }
 .cartela .mc2 { top: -2px; right: -2px; border-top: 2px solid var(--rojo); border-right: 2px solid var(--rojo); }

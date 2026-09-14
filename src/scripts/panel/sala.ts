@@ -439,13 +439,19 @@ export function imprimirCartelas(actividades: any[], dias: string[], avisar: Ctx
       // en vez de hoja por hoja.
       el('i', { class: 'mc mc1' }), el('i', { class: 'mc mc2' }),
       el('i', { class: 'mc mc3' }), el('i', { class: 'mc mc4' }),
+      // El cabecero va SUELTO y no dentro de `.cartela-texto`, que es la
+      // columna estrecha. Dentro, «Texto de sala» se alineaba a la derecha de
+      // esa columna: acababa a un dedo del QR y a cuatro centímetros del canto
+      // del papel, en mitad de la nada. Un cabecero se alinea con el papel o no
+      // es un cabecero — así que cruza las dos columnas y sus dos extremos caen
+      // en los dos cantos.
+      el('p', { class: 'cartela-cab' },
+        el('span', {}, 'Cuarta Silla'), el('span', {}, 'Texto de sala')),
       // Dos columnas y no una pila: la etiqueta es apaisada —un tercio de hoja
       // de canto a canto— y en una pila el QR se iba a una esquina con un
       // palmo de blanco encima. El texto a la izquierda, el QR a la derecha a
       // media altura, y los dos centrados: así no hay hueco que explicar.
       el('div', { class: 'cartela-texto' },
-        el('p', { class: 'cartela-cab' },
-          el('span', {}, 'Cuarta Silla'), el('span', {}, 'Texto de sala')),
         el('h6', {}, a.titulo || 'Sin título'),
         a.artista && el('p', { class: 'cartela-aut' }, a.artista),
         el('div', { class: 'cartela-filete' }),
