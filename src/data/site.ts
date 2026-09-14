@@ -10,10 +10,10 @@
 
 import { contenido, delPanel } from './contenido';
 import type { Sede, Marca, ActividadGantt, TextoDeSala } from './tipos';
-import { SEDE_TODAS } from './tipos';
+import { SEDE_TODAS, SALA_FESTIVAL } from './tipos';
 
 export type { Sede, Marca, ActividadGantt, TextoDeSala };
-export { SEDE_TODAS };
+export { SEDE_TODAS, SALA_FESTIVAL };
 
 export const festival = {
   nombre: 'Festival de Arte Conceptual',
@@ -95,7 +95,21 @@ export const nav = [
  *  artistas, que es lo que hay que enseñar. */
 export const accionPrincipal = { label: 'Artistas', href: '/artistas' };
 
-/** Manifiesto — home. Texto íntegro del original. */
+/**
+ * Manifiesto — el texto íntegro del original.
+ *
+ * **Hay dos, y el día que no haga falta habrá uno.** Éste es el que está
+ * escrito aquí, migrado literal del Wix, y es el que pinta la portada: la banda
+ * roja, su modal y la pantalla del móvil. Abajo, `manifiestoDeSala` es el mismo
+ * texto pero pudiendo venir del panel, y es el que se lee en la página que abre
+ * el QR del festival.
+ *
+ * Que la portada NO lea el del panel es una decisión, no un olvido: ahí el
+ * título va a `9vw` de Anton sobre una estrella y el cierre hace de subtítulo:
+ * un texto tres veces más largo escrito desde el teléfono, una noche, no
+ * rompería el sitio pero sí esa banda. Cuando se quiera, es una línea — abajo
+ * está dicho dónde.
+ */
 export const manifiesto = {
   titulo: '¿Qué entendemos por arte conceptual?',
   parrafos: [
@@ -106,6 +120,55 @@ export const manifiesto = {
   cierre:
     'El arte conceptual propone preguntas capaces de alterar nuestra manera de mirar y habitar la realidad.',
 };
+
+/**
+ * El manifiesto que se lee en `/sala/festival`: el del panel si lo han escrito,
+ * y si no, el de aquí arriba.
+ *
+ * `parrafos` sale de partir el cuerpo por las líneas en blanco, que es como se
+ * escribe y como se guarda — la misma `parrafosDe()` que usan las descripciones.
+ *
+ * **Para que la portada lea también el del panel** basta con que `manifiesto`
+ * sea esto en vez del literal. Una línea, y `index.astro` y `movil/Portada`
+ * no se enteran: la forma es la misma, `{ titulo, parrafos, cierre }`.
+ */
+export const manifiestoDeSala: { titulo: string; parrafos: string[]; cierre?: string } =
+  (() => {
+    const m = contenido.festival?.manifiesto;
+    if (!m?.cuerpo) return manifiesto;
+    return {
+      titulo: m.titulo || manifiesto.titulo,
+      parrafos: m.cuerpo.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean),
+      cierre: m.cierre,
+    };
+  })();
+
+/**
+ * El texto de sala del festival: el que iría en la pared de la entrada.
+ *
+ * `undefined` hasta que esté **publicado y con texto**, igual que las
+ * descripciones de las actividades. La diferencia es qué pasa mientras tanto:
+ * una actividad sin texto publicado no tiene página, y ésta sí —`/sala/festival`
+ * se construye siempre, porque también es la casa del manifiesto—. Así que sin
+ * publicar no hay un 404, hay una página que enseña el manifiesto y ya.
+ *
+ * Eso es lo que hace que el QR de la puerta no pueda llevar nunca a una página
+ * muerta, ni siquiera el día que alguien lo pase a borrador con el papel ya
+ * colgado. Lo que se pierde es el texto de sala, no la página.
+ */
+export const salaFestival = (() => {
+  const s = contenido.festival?.sala;
+  if (!s?.publicado || !s.cuerpo) return undefined;
+  return {
+    titulo: s.titulo,
+    parrafos: s.cuerpo.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean),
+    firma: s.firma,
+  };
+})();
+
+/** La dirección de esa página. Fija y acuñada una sola vez: va dentro de un QR
+ *  que se cuelga en la puerta. Ver `SALA_FESTIVAL` en `tipos.ts`. */
+export const rutaSalaFestival = `/sala/${SALA_FESTIVAL}`;
 
 export type Dia = { dia: string; fecha: string };
 
@@ -268,6 +331,26 @@ export const privacidad = {
   subtitulo: 'Aviso legal',
   cuerpo:
     'Todo lo antes expuesto en esta pagina es responsabilidad del Festival de Arte Conceptual La Cuarta Silla',
+  /**
+   * Lo que hace el sitio con los datos de quien lo visita, que es casi nada.
+   *
+   * **Se pinta sólo cuando el faro está encendido** (ver `src/lib/analitica.ts`
+   * y `privacidad.astro`): sin token no se mide nada, y entonces este párrafo
+   * sería un aviso de algo que no pasa. Una política que promete de más se
+   * parece mucho a una que promete de menos — las dos mienten.
+   *
+   * Y dice exactamente lo que hace el faro de Cloudflare, ni más ni menos: no
+   * hay cookie, no hay identificador, no se sigue a nadie de una página a otra.
+   * Por eso este sitio no tiene banner de consentimiento, y no por olvido.
+   */
+  datos: {
+    titulo: 'Sobre las visitas',
+    cuerpo:
+      'Contamos cuántas personas entran a cada página con Cloudflare Web Analytics. No usamos cookies, ' +
+      'no guardamos tu dirección IP y no hay ningún identificador que te siga de una página a otra ni ' +
+      'de un día para otro: cada visita se cuenta y se olvida. Lo que vemos es un número por página, ' +
+      'el país y el tipo de aparato, y nos sirve para saber si los códigos QR de las sedes se usan.',
+  },
 };
 
 /** ── Rejilla del programa (Gantt) ─────────────────────────────────────────
@@ -477,6 +560,15 @@ export type ConSala = ActividadGantt & { sala: TextoDeSala };
  */
 export const actividadesConSala: ConSala[] = actividades
   .filter((a): a is ConSala => Boolean(a.sala?.publicado && a.sala.cuerpo))
+  /* Y nunca la dirección del festival. El validador del panel ya no deja
+     acuñarla —ver `SALA_FESTIVAL`— pero sólo mira lo que se guarda: una que
+     hubiera entrado antes de esa regla sigue en KV, y aquí generaría
+     `/sala/festival` a la vez que la página fija del festival. Astro no se
+     cae: da prioridad a la estática, deja un WARN en el log del build que no
+     lee nadie, y esa descripción se queda sin página —con su QR impreso
+     apuntando a ella—. Así que se descarta aquí y se dice abajo, en la red de
+     seguridad, con el título delante. */
+  .filter((a) => a.sala.id !== SALA_FESTIVAL)
   .sort((a, b) => a.dia - b.dia || a.inicio.localeCompare(b.inicio));
 
 /** La ruta de una descripción. Una sola función para las cuatro cosas que la
@@ -532,6 +624,23 @@ export const parrafosDe = (sala: TextoDeSala) =>
         parecida ? ` — ¿querías decir «${parecida}»?` : ''
       }`;
     });
+
+  /* La otra cosa que este bloque vigila: una descripción que se llame como la
+     página del festival. Se filtró arriba para que no rompa el sitio; aquí se
+     dice, que es la parte que hace falta — alguien tiene que ir a cambiarle la
+     dirección desde el panel. */
+  const chocanConElFestival = actividades.filter((a) => a.sala?.id === SALA_FESTIVAL);
+  if (chocanConElFestival.length) {
+    const cuales = chocanConElFestival.map((a) => `  · «${a.titulo}»`).join('\n');
+    const parte =
+      `hay ${chocanConElFestival.length} descripción(es) con la dirección ` +
+      `«${SALA_FESTIVAL}», que es la del texto de sala del festival. No se ` +
+      `construye su página: la del festival gana.\n${cuales}\n\n` +
+      `Se arregla desde /admin: quítale la descripción y vuelve a crearla, que ` +
+      `acuña otra dirección.`;
+    if (delPanel) console.warn(`\n⚠️  Contenido del panel: ${parte}\n`);
+    else throw new Error(`site.ts: ${parte}`);
+  }
 
   if (sueltas.length) {
     const parte =

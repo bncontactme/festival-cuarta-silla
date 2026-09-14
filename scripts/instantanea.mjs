@@ -29,6 +29,20 @@ const DESTINO = fileURLToPath(new URL('../src/data/contenido.json', import.meta.
 /** Si el Worker tarda más que esto, no vale la pena esperarlo: hay copia. */
 const ESPERA_MS = 10_000;
 
+/**
+ * Las que TIENEN que venir. `festival` no está en la lista a propósito.
+ *
+ * Una respuesta a la que le falta una de éstas está rota y se descarta entera
+ * —ver `bajar()`—, y eso es lo que hay que hacer con las cinco listas que el
+ * sitio necesita para existir. Con `festival` no: es la colección nueva, y
+ * durante el rato que va entre mezclar el PR y que Cloudflare tenga el Worker
+ * desplegado, el Worker de allá contesta sin ella. Exigirla haría que ese rato
+ * se construyera con la copia del repo entera —programa viejo incluido— por
+ * culpa de una clave que ni siquiera se pinta todavía.
+ *
+ * Así que si no viene se conserva la que haya en el repo, y se dice. Ver más
+ * abajo, justo antes de escribir.
+ */
 const COLECCIONES = ['sedes', 'programa', 'artistas', 'archivo', 'marcas'];
 
 const log = (icono, msg) => console.log(`${icono}  contenido: ${msg}`);
@@ -106,6 +120,27 @@ if (reciennacido(datos, guardado)) {
   log('  ', 'no se pisa la copia buena. Siémbralo y esto deja de salir:');
   log('  ', "CLAVE='…' node workers/panel/semilla.mjs");
   process.exit(0);
+}
+
+/**
+ * `festival` sin escribir no pisa la copia del repo.
+ *
+ * Dos cosas distintas se ven igual desde aquí y las dos significan lo mismo:
+ * un Worker viejo que contesta SIN la clave, y uno nuevo que contesta con ella
+ * VACÍA porque nadie la ha tocado todavía. En los dos casos lo que hay en el
+ * repo es la semilla —el manifiesto que hoy está publicado— y borrarla porque
+ * el panel aún no la tiene sería tirar el único sitio donde está escrita.
+ *
+ * Es la misma regla de `reciennacido()` de aquí arriba, aplicada a una sola
+ * clave: vacío no quiere decir «lo han borrado», quiere decir «todavía no lo han
+ * tocado». En cuanto se guarde algo desde /admin manda el panel, para siempre —
+ * y vaciar el manifiesto desde ahí no se puede, que eso lo rechaza el validador.
+ */
+const sinNada = (x) => !x || Object.keys(x).length === 0;
+if (sinNada(datos.festival) && !sinNada(guardado?.festival)) {
+  datos.festival = guardado.festival;
+  log('⚠️ ', 'el panel no tiene nada escrito en «festival»: se conserva lo que hay en el repo.');
+  log('  ', 'deja de salir en cuanto se guarde esa pestaña desde /admin.');
 }
 
 const nuevo = JSON.stringify(datos, null, 2) + '\n';

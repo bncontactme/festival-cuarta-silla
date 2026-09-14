@@ -87,8 +87,9 @@ const CUERPO_MAX = 1_000_000;
  *
  *   1 → sedes, programa, artistas, archivo, marcas
  *   2 → + `sala` en las actividades (descripciones)
+ *   3 → + `festival`: el texto de sala del festival y el manifiesto
  */
-const CONTRATO = 2;
+const CONTRATO = 3;
 
 export default {
   async fetch(request, env, ctx) {
@@ -257,6 +258,20 @@ async function guardar(cuerpo, env, ctx, cors) {
       avisos.push(
         'programa: /sala/' + a.sala.id + ' («' + a.titulo + '») estaba publicado y ya no lo está. ' +
         'Si su cartela está impresa, ese QR se queda sin página.',
+      );
+    }
+  }
+
+  // Lo mismo, con el texto de sala del festival. Sólo hay uno y su dirección es
+  // fija, así que no hace falta comparar listas: o estaba publicado y ya no, o
+  // no. Y si estaba, su hoja de QR no está en una pared cualquiera — está en la
+  // puerta de entrada, que es la única que ve todo el mundo.
+  if (nombre === 'festival') {
+    const antes = (await leerColeccion(env, 'festival')).sala;
+    if (antes && antes.publicado && !(datos.sala && datos.sala.publicado)) {
+      avisos.push(
+        'festival: /sala/festival estaba publicado y ya no lo está. ' +
+        'Si la hoja de QR está colgada, ese código se queda sin página.',
       );
     }
   }

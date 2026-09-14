@@ -130,6 +130,71 @@ export type TextoDeSala = {
 };
 
 /**
+ * La dirección del texto de sala del festival: `/sala/festival`.
+ *
+ * No se acuña como las de las actividades —ver `TextoDeSala`— porque aquí no
+ * hay nada de donde acuñarla: el festival es uno, su texto es uno, y su página
+ * existe antes de que nadie escriba el título. Es fija desde el primer día y no
+ * se puede mover después, por la misma razón de siempre: su QR se cuelga en la
+ * puerta de entrada, y una puerta no se puede renombrar desde un teclado.
+ *
+ * `workers/panel/lib/validar.js` la reserva: ninguna actividad puede acuñar
+ * este `id`. Si pudiera, habría dos páginas peleándose por la misma ruta y
+ * ganaría la estática de Astro, o sea la del festival — dejando sin página a la
+ * actividad, que es la que nadie estaría mirando.
+ */
+export const SALA_FESTIVAL = 'festival';
+
+/**
+ * Los dos textos que son del festival entero y no de ninguna actividad.
+ *
+ * Viven juntos porque se escriben juntos —una pestaña, un conmutador— y porque
+ * los dos contestan a la misma pregunta desde sitios distintos: qué es esto.
+ * Lo que los separa es dónde se pintan, y de ahí sale todo lo demás.
+ */
+export type Festival = {
+  sala?: SalaFestival;
+  manifiesto?: Manifiesto;
+};
+
+/**
+ * El texto de sala del festival: lo que iría en la pared de la entrada.
+ *
+ * Es un `TextoDeSala` sin `id` —la dirección es `SALA_FESTIVAL` y no se mueve—
+ * y con `titulo`, que en una actividad lo pone la actividad y aquí no lo pone
+ * nadie. `publicado` significa lo mismo que allí y por lo mismo: en borrador no
+ * hay página, y sin página no se imprime la hoja de QR.
+ */
+export type SalaFestival = {
+  /** Lo que va en grande arriba de la página. Vacío, sale el nombre del festival. */
+  titulo?: string;
+  /** El texto. Los párrafos se separan con una línea en blanco. */
+  cuerpo: string;
+  /** Quién lo firma. Va al pie, en pequeño. */
+  firma?: string;
+  /** Si ya se enseña en el sitio. Sin esto no hay página que abrir. */
+  publicado?: boolean;
+};
+
+/**
+ * El manifiesto de la portada.
+ *
+ * No lleva `publicado` y no es un descuido: no tiene página propia que aparezca
+ * o desaparezca — es una sección de la portada que lleva ahí desde el primer
+ * día. Lo que se puede hacer con él es escribirlo mejor, no apagarlo; por eso
+ * el validador rechaza dejarlo en blanco.
+ *
+ * `cierre` es la frase que se lee dos veces —de subtítulo en la banda roja y de
+ * remate al final del modal— así que es una línea, no un párrafo.
+ */
+export type Manifiesto = {
+  titulo: string;
+  /** Los párrafos, separados por una línea en blanco. `parrafosDe()` los parte. */
+  cuerpo: string;
+  cierre?: string;
+};
+
+/**
  * Quién expone.
  *
  * Qué hace falta por artista, en orden de importancia:
@@ -202,6 +267,12 @@ export type Contenido = {
   };
   artistas: Artista[];
   archivo: Edicion[];
+  /**
+   * Los dos textos del festival entero. Opcional a propósito: un Worker que
+   * todavía no conoce la colección contesta sin ella, y el sitio tiene que
+   * construir igual —tirando del texto que trae de fábrica— en vez de caerse.
+   */
+  festival?: Festival;
   /** Una sola lista. El Worker todavía guarda un `colaboradores` al lado
    *  —vacío, y ahí se queda hasta que toque limpiar KV—: el sitio ya no lo
    *  lee y el panel ya no lo enseña. */

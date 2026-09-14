@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import {
   nav, inicio, accionPrincipal, privacidad, actividadesConSala, rutaSala,
+  rutaSalaFestival,
 } from '../data/site';
 
 /**
@@ -14,7 +15,8 @@ import {
  * `site.ts` en la mano.
  *
  * Las páginas de sala van con `priority` más baja y `changefreq` mensual: son
- * hojas, se escriben una vez y se leen desde un QR, no desde Google.
+ * hojas, se escriben una vez y se leen desde un QR, no desde Google. La del
+ * festival —`/sala/festival`, la de la puerta— va con ellas por lo mismo.
  *
  * Las redirecciones de las URLs viejas de Wix se quedan fuera a propósito: son
  * 301 y lo que tiene que indexarse es el destino, no el atajo.
@@ -27,7 +29,13 @@ export const GET: APIRoute = ({ site }) => {
     { label: privacidad.titulo, href: '/privacidad' },
   ];
 
-  const salas = actividadesConSala.map((a) => ({ label: a.titulo, href: rutaSala(a.sala) }));
+  /* La del festival va con ellas y va SIEMPRE, tenga o no texto de sala
+     publicado: esa página se construye igual —debajo está el manifiesto— y su
+     dirección es la que anda impresa en la puerta. */
+  const salas = [
+    { label: 'Texto de sala del festival', href: rutaSalaFestival },
+    ...actividadesConSala.map((a) => ({ label: a.titulo, href: rutaSala(a.sala) })),
+  ];
 
   // `site` sale de `astro.config.mjs`; en la vista previa de GitHub Pages ya
   // trae el subdirectorio, así que `new URL` compone bien en los dos sitios.

@@ -11,6 +11,7 @@ import { pintarTabla } from './tabla';
 import { pintarPrevia } from './previa';
 import { abrirSala, imprimirCartelas, imprimirQR, elegirCartelas } from './sala';
 import { pintarRegistro } from './registro';
+import { pintarFestival } from './festival';
 import { el, vaciar, cuando } from './dom';
 import {
   pedir, leerContenido, ponerClave, olvidarClave, recordada, ErrorPanel,
@@ -29,7 +30,19 @@ const DIAS: string[] = config.dias ?? ['Día 1', 'Día 2', 'Día 3', 'Día 4'];
  *  pared tiene que apuntar al dominio de verdad. */
 const RAIZ: string = config.raiz || location.origin + '/';
 
-const COLECCIONES = ['sedes', 'programa', 'artistas', 'archivo', 'marcas'] as const;
+/**
+ * El manifiesto que hoy está publicado, tal cual está escrito en `site.ts`.
+ *
+ * Viaja en el `<script>` de la página como los días, y por lo mismo: el panel no
+ * puede importar el sitio. Sirve para una sola cosa —ofrecerlo en la pestaña de
+ * Texto de sala / Manifiesto cuando ahí todavía no hay nada escrito— y esa cosa
+ * importa: el manifiesto ya existe y está a la vista en la portada, así que una
+ * caja en blanco invitaría a reescribir desde cero un texto que ya está hecho.
+ */
+const MANIFIESTO_DEL_SITIO: { titulo: string; cuerpo: string; cierre: string } =
+  config.manifiesto ?? { titulo: '', cuerpo: '', cierre: '' };
+
+const COLECCIONES = ['sedes', 'programa', 'artistas', 'archivo', 'marcas', 'festival'] as const;
 type Coleccion = (typeof COLECCIONES)[number];
 
 /**
@@ -45,8 +58,13 @@ type Coleccion = (typeof COLECCIONES)[number];
  * Ahora se pregunta al entrar. Si va por detrás, el panel **no deja guardar** —
  * porque guardar contra un Worker viejo no es arriesgado, es perder el trabajo
  * con un «guardado» en pantalla.
+ *
+ * Va por el 3 desde que existe la colección `festival` —el texto de sala del
+ * festival y el manifiesto—. Un Worker en el 2 ni siquiera sabe que esa
+ * colección existe, así que contestaría 400 y al menos se vería; el cartel sale
+ * igual, porque enterarse al entrar es mejor que enterarse al guardar.
  */
-const CONTRATO_NECESARIO = 2;
+const CONTRATO_NECESARIO = 3;
 /** Lo que contestó el Worker. `0` = uno tan viejo que ni sabe de esto. */
 let contratoDelWorker = 0;
 const workerAtrasado = () => contratoDelWorker < CONTRATO_NECESARIO;
@@ -117,7 +135,7 @@ async function entrar(pass: string) {
     if (workerAtrasado()) {
       avisar(
         'El panel de esta página sabe de campos que el Worker todavía no conoce, y el Worker es quien guarda. ' +
-        'Si guardas así, esos campos —hoy las descripciones— se tiran al guardar y no te avisa nadie: ' +
+        'Si guardas así, esos campos —hoy los textos del festival y las descripciones— se tiran al guardar y no te avisa nadie: ' +
         'la versión sube, el sitio se reconstruye en verde, y el texto no está. ' +
         'Por eso el botón de Guardar está apagado. Avisa a quien lleva el sitio: hay que desplegar el Worker.',
         'error',
@@ -144,6 +162,11 @@ async function entrar(pass: string) {
 async function cargar() {
   try {
     const datos = await leerContenido();
+    // Un Worker que todavía no conoce la colección —o uno recién sembrado—
+    // contesta sin `festival`. Se pone la caja vacía AQUÍ, antes de tomar la
+    // copia limpia de abajo: puesta después, el panel arrancaría diciendo que
+    // hay algo sin guardar sin que nadie hubiera tocado nada.
+    datos.festival ??= {};
     estado = datos;
     meta = { version: datos.version, actualizado: datos.actualizado, ultimoDeploy: meta.ultimoDeploy };
     for (const c of COLECCIONES) limpio[c] = JSON.stringify(datos[c]);
@@ -360,6 +383,14 @@ function pintarLienzo() {
   if (p.clave === 'registro') {
     lienzo.append(pintarRegistro(estado, ctx, DIAS));
   }
+  if (p.clave === 'festival') {
+    lienzo.append(pintarFestival(estado, {
+      raiz: () => RAIZ,
+      cambiado: () => estadoBarras(),
+      avisar: (m, c) => avisar(m, c ?? 'ojo'),
+      manifiestoDelSitio: () => MANIFIESTO_DEL_SITIO,
+    }));
+  }
   for (const t of p.tablas) {
     // La tabla —donde se editan todos los campos— va debajo de la LISTA, que es
     // donde está el programa. Debajo del cuadro de horarios no pinta nada: ahí
@@ -544,7 +575,13 @@ function estadoBarras() {
  * que para el programa la buena es siempre Programa.
  */
 function pestanaDe(coleccion: string, clave = false): string {
-  const p = PESTANAS.find((x) => x.tablas.some((t) => TABLAS[t].coleccion === coleccion));
+  const p =
+    PESTANAS.find((x) => x.tablas.some((t) => TABLAS[t].coleccion === coleccion)) ??
+    // Y si no la pinta ninguna tabla, la que la declara suya. Es el caso de
+    // Texto de sala / Manifiesto, que no es una lista: sin esto, el aviso de un
+    // guardado fallido decía «No se guardó «festival»» y mandaba a una pestaña
+    // llamada «festival», que no es como se llama en la barra.
+    PESTANAS.find((x) => x.colecciones?.includes(coleccion as any));
   return p ? (clave ? p.clave : p.titulo) : coleccion;
 }
 
@@ -613,9 +650,18 @@ async function guardar() {
       }
 
       erroresPorColeccion[c] = err.errores ?? [];
+      /* «Marcado en rojo» sólo es verdad donde hay tabla: las marcas de campo
+         las pinta `pintarTabla` sobre las filas. En Texto de sala / Manifiesto
+         no hay filas que marcar, así que mandar a buscar un rojo que no existe
+         es peor que no decir nada — lo que hay que leer está en la lista de
+         quejas que va justo debajo de este aviso. */
+      const conTabla = Boolean(
+        PESTANAS.find((p) => p.clave === pestanaDe(c, true))?.tablas.length,
+      );
       avisar(
         err.errores?.length
-          ? `Nada de esta sección se guardó. Te dejo en «${pestanaDe(c)}» con lo que falta marcado en rojo.`
+          ? `Nada de esta sección se guardó. Te dejo en «${pestanaDe(c)}»` +
+            (conTabla ? ' con lo que falta marcado en rojo.' : ': lo que falta está aquí abajo.')
           : err.message,
         'error',
         `No se guardó «${c}»`,

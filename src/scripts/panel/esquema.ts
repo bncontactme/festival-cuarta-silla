@@ -86,7 +86,7 @@ export type Esquema = {
   clase?(fila: any, previo: any): string;
 };
 
-export type Coleccion = 'sedes' | 'programa' | 'artistas' | 'archivo' | 'marcas';
+export type Coleccion = 'sedes' | 'programa' | 'artistas' | 'archivo' | 'marcas' | 'festival';
 
 export type Tabla = {
   clave: string;
@@ -327,4 +327,24 @@ export const PESTANAS: Pestana[] = [
   { clave: 'artistas', titulo: 'Artistas', tablas: ['artistas'] },
   { clave: 'archivo', titulo: 'Galería', tablas: ['archivo'] },
   { clave: 'marcas', titulo: 'Marcas', tablas: ['patrocinadores'] },
+  {
+    /**
+     * Los dos textos del festival entero. No tiene tablas: no es una lista, son
+     * dos textos y uno de cada, y se cambia de uno a otro con el conmutador de
+     * dentro. Ver `festival.ts`.
+     *
+     * Va la última porque es la que menos se toca —un manifiesto se escribe una
+     * vez— y porque la primera es la que abre el panel, y ésa tiene que seguir
+     * siendo Programa.
+     */
+    clave: 'festival',
+    titulo: 'Texto de sala / Manifiesto',
+    tablas: [],
+    colecciones: ['festival'],
+    /* Un estado y no una cuenta. Contar aquí sería decir «2» siempre —hay dos
+       textos y va a haber dos textos— y un número que nunca cambia no es
+       información. Lo único que de esta pestaña puede estar a medias es si el
+       texto de sala ya se enseña o todavía no, así que es eso lo que se dice. */
+    cuenta: (e) => (e?.festival?.sala?.publicado ? '▣' : '▢'),
+  },
 ];

@@ -572,21 +572,42 @@ export function imprimirCartelas(actividades: any[], dias: string[], avisar: Ctx
  * y dos hojas sin una letra no se pueden repartir por cinco sedes: hay que
  * saber cuál es cuál sin escanearlas una por una.
  */
-export function imprimirQR(actividades: any[], avisar: Ctx['avisar'], raiz: string) {
-  const publicadas = paraImprimir(actividades);
-  if (!publicadas.length) return avisar(SIN_NADA, 'ojo');
+
+/**
+ * Lo que hace falta para una hoja, y nada más.
+ *
+ * La función de abajo pedía actividades —y con ellas su `sala.id`, su título y
+ * la raíz del sitio para componer la ruta—. Eso dejaba fuera al único texto que
+ * no es de ninguna actividad, que es justo el que va en la puerta del festival.
+ *
+ * Así que la hoja ya no sabe de dónde sale lo que imprime: un título, una
+ * dirección, y qué pone en el cabecero. Quien tiene una actividad la traduce en
+ * `imprimirQR()`, tres líneas más abajo.
+ */
+export type HojaQR = {
+  titulo: string;
+  /** La dirección entera, la que va dentro del código. */
+  url: string;
+  /** La derecha del cabecero: «Descripción» para una actividad, «Texto de
+   *  sala» para el del festival. La izquierda es siempre el festival. */
+  cab?: string;
+};
+
+/** El pliego de hojas de QR, una por texto. */
+export function imprimirHojasQR(hojas: HojaQR[], avisar: Ctx['avisar']) {
+  if (!hojas.length) return avisar(SIN_NADA, 'ojo');
 
   const pliego = el('div', { id: 'pliego', class: 'pliego pliego--qr' });
 
-  for (const a of publicadas) {
+  for (const h of hojas) {
     const caja = el('div', { class: 'qr' });
-    ponQR(caja, rutaDe(raiz, a.sala.id));
+    ponQR(caja, h.url);
 
     pliego.append(el('article', { class: 'hoja-qr' },
       el('p', { class: 'cartela-cab' },
-        el('span', {}, 'Cuarta Silla'), el('span', {}, 'Descripción')),
+        el('span', {}, 'Cuarta Silla'), el('span', {}, h.cab ?? 'Descripción')),
       el('div', { class: 'hoja-qr-medio' },
-        el('h6', {}, a.titulo || 'Sin título'),
+        el('h6', {}, h.titulo || 'Sin título'),
         caja,
         el('p', { class: 'cartela-lee' }, 'Escanea y lee'),
       ),
@@ -594,4 +615,15 @@ export function imprimirQR(actividades: any[], avisar: Ctx['avisar'], raiz: stri
   }
 
   mandarAImprimir(pliego);
+}
+
+/** Las hojas de unas actividades: se traducen y se manda. */
+export function imprimirQR(actividades: any[], avisar: Ctx['avisar'], raiz: string) {
+  imprimirHojasQR(
+    paraImprimir(actividades).map((a) => ({
+      titulo: a.titulo,
+      url: rutaDe(raiz, a.sala.id),
+    })),
+    avisar,
+  );
 }

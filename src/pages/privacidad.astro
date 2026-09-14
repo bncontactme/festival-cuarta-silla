@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Encabezado from '../components/Encabezado.astro';
 import { privacidad, festival } from '../data/site';
+import { hayFaro } from '../lib/analitica';
 ---
 
 <Base titulo={privacidad.titulo} descripcion={privacidad.cuerpo}>
@@ -26,6 +27,18 @@ import { privacidad, festival } from '../data/site';
       >
         {privacidad.cuerpo}
       </p>
+      {/* Sólo si de verdad se está midiendo algo. Ver `privacidad.datos`. */}
+      {hayFaro && (
+        <div class="mt-14 border-t-2 border-tinta/20 pt-10" data-reveal="arriba">
+          <h3 class="display text-2xl leading-none text-rojo lg:text-3xl">
+            {privacidad.datos.titulo}
+          </h3>
+          <p class="mt-5 max-w-[65ch] leading-relaxed text-tinta/85">
+            {privacidad.datos.cuerpo}
+          </p>
+        </div>
+      )}
+
       <p class="meta mt-16 border-t-2 border-tinta/20 pt-6 text-tinta/50">
         {festival.creditoFooter}
       </p>

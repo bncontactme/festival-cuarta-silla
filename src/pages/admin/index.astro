@@ -16,7 +16,7 @@
  */
 import '../../styles/panel.css';
 import { conBase } from '../../lib/base';
-import { festival, programa } from '../../data/site';
+import { festival, programa, manifiesto } from '../../data/site';
 
 /** Los cuatro días con su fecha. Son texto del sitio, no contenido del panel,
  *  así que viajan de aquí al script en vez de estar escritos dos veces. */
@@ -32,6 +32,24 @@ const config = {
    * papel tirado. Aquí manda el dominio con el que se construyó el sitio.
    */
   raiz: Astro.site ? new URL(conBase('/'), Astro.site).toString() : conBase('/'),
+  /**
+   * El manifiesto que hoy está publicado, tal cual está escrito en `site.ts`.
+   *
+   * Viaja por la misma razón que los días —el panel no puede importar el
+   * sitio— y sirve para una sola cosa: cuando en la pestaña de Texto de sala /
+   * Manifiesto todavía no hay nada escrito, se ofrece traer éste en vez de
+   * enseñar una caja en blanco. El manifiesto ya existe y está a la vista en la
+   * portada; una caja vacía invitaría a reescribir desde cero algo que ya está
+   * hecho, y encima haría pensar que se ha perdido.
+   *
+   * Los párrafos se juntan con una línea en blanco entre medias, que es como se
+   * escriben y se guardan: `parrafosDe()` los vuelve a partir al pintarlos.
+   */
+  manifiesto: {
+    titulo: manifiesto.titulo,
+    cuerpo: manifiesto.parrafos.join('\n\n'),
+    cierre: manifiesto.cierre,
+  },
 };
 ---
 
@@ -55,8 +73,8 @@ const config = {
         <h1>Panel</h1>
         <p>
           Desde aquí se cargan el programa, el registro a eventos, las sedes,
-          lxs artistas, el archivo y las marcas. Lo que se guarda aquí es lo que
-          sale en el sitio.
+          lxs artistas, el archivo, las marcas y los textos del festival. Lo que
+          se guarda aquí es lo que sale en el sitio.
         </p>
 
         <label>

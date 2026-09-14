@@ -1,0 +1,35 @@
+---
+/**
+ * El faro de visitas. Una etiqueta, o ninguna.
+ *
+ * Va en las tres plantillas que sirven páginas públicas —`Base.astro`, la
+ * descripción de una actividad y el texto de sala del festival— y en ninguna
+ * más. **`/admin` se queda fuera a propósito**: es una herramienta de cuatro
+ * personas, no una página del festival, y contar sus visitas sólo serviría para
+ * ensuciar el número que sí importa.
+ *
+ * Sin token no se escribe nada. Ver `src/lib/analitica.ts`.
+ *
+ * `is:inline` porque esto no es código nuestro que Astro tenga que procesar:
+ * es una etiqueta que apunta a un archivo de Cloudflare y tiene que salir en el
+ * HTML tal cual está escrita.
+ *
+ * **`type="module"` y no `defer`**, que es lo que había: son equivalentes para
+ * lo que aquí importa —un módulo tampoco bloquea el pintado— pero el snippet
+ * que reparte Cloudflare hoy dice `module`, y esta etiqueta se copia de ahí sin
+ * mejorarla. El día que ellos cambien algo, lo que hay que hacer es volver a
+ * copiar, no acordarse de qué le habíamos tocado nosotros.
+ */
+import { FARO, hayFaro } from '../lib/analitica';
+---
+
+{
+  hayFaro && (
+    <script
+      is:inline
+      type="module"
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={JSON.stringify({ token: FARO })}
+    />
+  )
+}

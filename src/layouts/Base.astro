@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { conBase } from '../lib/base';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import Analitica from '../components/Analitica.astro';
 import { festival } from '../data/site';
 
 interface Props {
@@ -277,5 +278,9 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
     <script>
       import '../scripts/motion.ts';
     </script>
+
+    {/* Lo último de la página, y de módulo —o sea, no bloquea—: contar visitas
+        no puede retrasar ni un píxel de lo que se está mirando. */}
+    <Analitica />
   </body>
 </html>

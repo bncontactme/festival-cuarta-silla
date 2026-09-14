@@ -176,5 +176,62 @@ r = validar('programa', { actividades: [base()] }, { sedes: SEDES });
 ok('una actividad sin sala sigue siendo válida',
    r.errores.length === 0 && !('sala' in r.datos.actividades[0]), JSON.stringify(r.errores));
 
+// ── Los textos del festival ─────────────────────────────────────────────────
+//
+// Dos textos y uno de cada, así que aquí no hay índices que probar: lo que se
+// prueba es qué pasa cuando cada uno se queda en blanco, que es lo único que
+// los separa. El de sala tiene página y QR colgado; el manifiesto es una banda
+// de la portada que lleva ahí desde el primer día.
+
+console.log('\nfestival › los dos textos');
+
+const MANI = { titulo: '¿Qué entendemos por arte conceptual?', cuerpo: 'Uno.\n\nDos.', cierre: 'Preguntas.' };
+
+r = validar('festival', {
+  sala: { titulo: 'La Cuarta Silla', cuerpo: 'Uno.\n\nDos.', publicado: true },
+  manifiesto: MANI,
+}, {});
+ok('los dos textos se guardan enteros',
+   r.errores.length === 0 && r.datos.sala.publicado === true &&
+   r.datos.sala.cuerpo === 'Uno.\n\nDos.' && r.datos.manifiesto.cierre === 'Preguntas.',
+   JSON.stringify(r.errores));
+
+r = validar('festival', { sala: { cuerpo: '', publicado: true }, manifiesto: MANI }, {});
+ok('sala publicada y vacía se rechaza',
+   r.errores.some((e) => e.includes('publicado y no tiene texto')), JSON.stringify(r.errores));
+
+r = validar('festival', { sala: { titulo: 'Sólo el título' }, manifiesto: MANI }, {});
+ok('sin cuerpo no queda una sala fantasma', r.errores.length === 0 && !('sala' in r.datos),
+   JSON.stringify(r.datos));
+
+r = validar('festival', { manifiesto: MANI }, {});
+ok('el manifiesto solo vale: la sala llega después', r.errores.length === 0 && !('sala' in r.datos),
+   JSON.stringify(r.errores));
+
+r = validar('festival', { manifiesto: { titulo: 'Algo', cuerpo: '   \n\n ' } }, {});
+ok('vaciar el manifiesto se rechaza',
+   r.errores.some((e) => e.includes('no puede quedarse en blanco')), JSON.stringify(r.errores));
+
+r = validar('festival', { manifiesto: { cuerpo: 'Uno.' } }, {});
+ok('el manifiesto sin título se rechaza',
+   r.errores.some((e) => e.includes('manifiesto.titulo')), JSON.stringify(r.errores));
+
+r = validar('festival', {}, {});
+ok('sin sembrar no se queja de nada', r.errores.length === 0 && Object.keys(r.datos).length === 0,
+   JSON.stringify(r.datos));
+
+r = validar('festival', { sala: { cuerpo: 'Uno.   \r\n\n\n\n\nDos.' }, manifiesto: MANI }, {});
+ok('también aquí se normalizan los saltos', r.datos.sala.cuerpo === 'Uno.\n\nDos.',
+   JSON.stringify(r.datos.sala.cuerpo));
+
+// `/sala/festival` es del festival. Una actividad titulada «Festival» acuñaría
+// ese mismo id sin querer, y la página que ganaría es la estática: el que se
+// queda sin página es el que nadie está mirando.
+r = validar('programa', {
+  actividades: [conSala({ id: 'festival', cuerpo: 'Hola.' }, { titulo: 'Festival' })],
+}, { sedes: SEDES });
+ok('una actividad no puede acuñar /sala/festival',
+   r.errores.some((e) => e.includes('texto de sala del festival')), JSON.stringify(r.errores));
+
 console.log(fallos ? `\n${fallos} fallo(s)\n` : '\nTodo bien\n');
 process.exit(fallos ? 1 : 0);

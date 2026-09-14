@@ -1,0 +1,152 @@
+---
+/**
+ * El texto de sala del festival. Lo que abre el QR de la puerta.
+ *
+ * Es la hermana de `[id].astro` —la misma página pelada, por las mismas
+ * razones: se lee de pie, dentro de una sede, con el teléfono en una mano— y
+ * tiene con ella tres diferencias que vienen todas de lo mismo, que esto no es
+ * de una actividad sino del festival entero:
+ *
+ *   · **No sale de `getStaticPaths`, es una ruta fija.** Hay un festival y hay
+ *     una página. Astro da prioridad a las rutas estáticas sobre las dinámicas,
+ *     así que ésta gana a `/sala/<id>` — y para que ninguna actividad pueda
+ *     acuñar `festival` y quedarse sin página sin que nadie se entere, el
+ *     validador del panel reserva ese nombre. Ver `SALA_FESTIVAL`.
+ *
+ *   · **Se construye siempre, haya texto de sala o no.** Y eso es lo que hace
+ *     que el código de la puerta no pueda llevar nunca a una página muerta: si
+ *     alguien lo pasa a borrador con el papel ya colgado, lo que se pierde es
+ *     el texto, no la página. Debajo sigue estando el manifiesto, que es lo que
+ *     esta página tiene de suyo.
+ *
+ *   · **Lleva los dos textos.** Primero el de sala —quien acaba de escanear
+ *     está de pie en la puerta y lo que pregunta es «qué es esto»— y debajo el
+ *     manifiesto entero, para quien quiera seguir leyendo. Los dos se escriben
+ *     en la misma pestaña del panel y aquí se leen del tirón.
+ *
+ * Cero JavaScript propio, como la otra: esto tiene que llegar por la red de una
+ * sede de concreto. Lo único que baja es el faro de visitas, `defer` y al final
+ * del `<body>` — que en esta página es medio motivo de que exista: dice cuánta
+ * gente escaneó el código de la puerta.
+ */
+import '../../styles/global.css';
+import { conBase } from '../../lib/base';
+import Analitica from '../../components/Analitica.astro';
+import { festival, salaFestival, manifiestoDeSala, sedes } from '../../data/site';
+
+const sala = salaFestival;
+const manifiesto = manifiestoDeSala;
+
+/* El título de pestaña dice QUÉ es esta página, no cómo se llama el festival
+   otra vez: con el `titulo` del panel puesto en «La Cuarta Silla», lo de antes
+   salía «La Cuarta Silla — Cuarta Silla». El nombre propio ya lo lleva el h1. */
+const titulo = `${sala ? 'Texto de sala' : 'Manifiesto'} — ${festival.nombreCompleto}`;
+const descripcion =
+  sala?.parrafos[0]?.slice(0, 180) ?? manifiesto.parrafos[0]?.slice(0, 180) ?? festival.nombreCompleto;
+const canonica = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titulo}</title>
+    <meta name="description" content={descripcion} />
+    <link rel="canonical" href={canonica} />
+    <link rel="icon" href={conBase('/logos/silla-roja.svg')} type="image/svg+xml" />
+    <meta name="theme-color" content="#fffd00" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content={festival.nombreCompleto} />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:url" content={canonica} />
+    <meta property="og:locale" content="es_MX" />
+  </head>
+
+  <body class="bg-amarillo text-tinta">
+    <main class="mx-auto w-full max-w-[42rem] px-5 py-10 sm:px-8 sm:py-14">
+      <p class="meta text-[0.6rem] text-rojo">
+        {sala ? 'Texto de sala' : 'Manifiesto'} · {festival.edicion} {festival.anio}
+      </p>
+
+      <h1 class="display mt-3 text-4xl leading-[0.92] sm:text-6xl">
+        {sala?.titulo ?? festival.nombre}
+      </h1>
+
+      {/* Cuándo y dónde, arriba: quien escanea esto en la puerta ya está dentro,
+          pero el mismo enlace se comparte por WhatsApp y ahí sí hace falta. La
+          sede no es una, son todas, así que se cuentan. */}
+      <dl class="meta mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 border-y-2 border-tinta py-3 text-[0.6rem]">
+        <dt class="text-tinta/50">Cuándo</dt>
+        <dd>{festival.fechas}</dd>
+        <dt class="text-tinta/50">Dónde</dt>
+        <dd>
+          {festival.ciudad}
+          {sedes.lista.length > 0 && (
+            <span class="block normal-case tracking-normal opacity-60">
+              {sedes.lista.length} sedes
+            </span>
+          )}
+        </dd>
+      </dl>
+
+      {/* El texto sobre papel y no sobre el campo amarillo: son varios párrafos
+          seguidos y el amarillo a plancha cansa la vista antes del tercero. */}
+      {sala && (
+        <article class="mt-7 border-2 border-tinta bg-papel p-5 text-[0.95rem] leading-[1.7] sm:p-7 sm:text-base">
+          {sala.parrafos.map((p) => <p class="mt-4 first:mt-0">{p}</p>)}
+        </article>
+      )}
+
+      {sala?.firma && (
+        <p class="meta mt-4 text-right text-[0.6rem] normal-case tracking-normal text-tinta/60">
+          {sala.firma}
+        </p>
+      )}
+
+      {/* El manifiesto, debajo y en el campo amarillo: es el segundo texto, no
+          el mismo. Separado por el filete de 2 px que separa las secciones del
+          resto del sitio, y en cuerpo algo menor — quien llegó hasta aquí ya
+          leyó lo de arriba. */}
+      <section class:list={['border-t-2 border-tinta', sala ? 'mt-10 pt-8' : 'mt-8 pt-7']}>
+        {/* El rótulo sólo cuando hay algo encima de lo que separarse. Sin texto
+            de sala, la página YA es el manifiesto y lo dice arriba del todo:
+            ponerlo otra vez aquí es decir «Manifiesto» dos veces en tres
+            centímetros. */}
+        {sala && <p class="meta text-[0.6rem] text-rojo">Manifiesto</p>}
+
+        <h2 class:list={['display text-2xl leading-[0.95] sm:text-3xl', sala && 'mt-2']}>
+          {manifiesto.titulo}
+        </h2>
+
+        <div class="mt-4 text-[0.9rem] leading-[1.7] sm:text-[0.95rem]">
+          {manifiesto.parrafos.map((p) => <p class="mt-4 first:mt-0">{p}</p>)}
+        </div>
+
+        {manifiesto.cierre && (
+          <blockquote class="mt-6 border-l-2 border-rojo pl-4 font-mono text-[0.85rem] leading-relaxed">
+            {manifiesto.cierre}
+          </blockquote>
+        )}
+      </section>
+
+      {/* Las dos puertas de vuelta, en una columna y no en dos: es lo que se
+          aprendió en la página de al lado — a dos columnas el rótulo se parte y
+          el adorno del final se va solo al segundo renglón. */}
+      <nav class="mt-9 grid gap-3">
+        <a class="boton" href={conBase('/programa')}>★ Qué hay estos cuatro días ★</a>
+        <a class="boton boton--papel" href={conBase('/sedes')}>Dónde es cada cosa →</a>
+      </nav>
+
+      <p class="meta mt-10 text-[0.55rem] text-tinta/45">
+        {festival.nombreCompleto} · {festival.fechas} · {festival.ciudad}
+      </p>
+    </main>
+
+    {/* El faro de visitas, al final y sin bloquear. Aquí es donde más se
+        quiere: es el código de la puerta, y su cuenta es cuánta gente lo
+        escaneó. */}
+    <Analitica />
+  </body>
+</html>

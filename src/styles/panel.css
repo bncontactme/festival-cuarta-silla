@@ -733,6 +733,88 @@ select {
 .direccion { border: 2px solid var(--tinta); background: var(--humo); padding: 0.45rem 0.55rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .direccion code { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; word-break: break-all; }
 .candado { font-family: var(--mono); font-size: 0.53rem; letter-spacing: 0.1em; text-transform: uppercase; background: var(--tinta); color: var(--amarillo); padding: 0.1rem 0.35rem; margin-left: auto; white-space: nowrap; }
+/* ── Texto de sala / Manifiesto ─────────────────────────────────────────────
+   Los dos textos del festival. No hay filas ni rejilla de campos: hay un
+   formulario largo y, al lado, lo que no se puede comprobar escribiendo — la
+   dirección con su QR, o la banda de la portada tal y como va a quedar.
+
+   Dos columnas mientras quepan las dos. Por debajo de 60rem se apilan y el lado
+   derecho pasa DEBAJO del formulario, que es el orden en que se necesita: se
+   escribe primero y se comprueba después. */
+.festival-dos { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 0.8rem; align-items: start; }
+.festival-lado { display: grid; gap: 0.8rem; align-content: start; min-width: 0; }
+.festival-caja {
+  background: var(--papel);
+  border: 2px solid var(--tinta);
+  padding: 0.8rem;
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+}
+.festival-caja .estado { justify-self: start; }
+/* `.ayuda` está escrita para vivir dentro de un `.campo`, y aquí hay dos que
+   cuelgan de la caja: la de la dirección y la de la banda. */
+.festival-caja .ayuda { font-size: 0.68rem; opacity: 0.55; line-height: 1.3; }
+.festival-caja .qr, .festival-caja .qr-hueco { justify-self: center; }
+.festival-caja .aviso { margin-bottom: 0; }
+/* El cuerpo largo se escribe mirando el renglón entero: 3.5rem es el alto de
+   una nota, no el de un texto de pared. */
+.festival-caja textarea.alto { min-height: 13rem; line-height: 1.6; }
+.festival-lado .aviso { margin-bottom: 0; }
+.cabecera .rojo { color: var(--rojo); }
+/* La nota del conmutador, al lado y no debajo: es el pie de lo que se acaba de
+   elegir, y debajo empezaría a competir con la cabecera de la vista. */
+.mandos-nota { font-size: 0.78rem; opacity: 0.6; line-height: 1.35; flex: 1 1 16rem; min-width: 0; }
+
+/* Donde iría el QR mientras no haya página que abrir. Un hueco dibujado y no un
+   cuadro en blanco: así se ve que ahí va algo y que todavía no está, en vez de
+   parecer que la tarjeta se rompió. */
+.qr-hueco {
+  border: 2px dashed var(--tinta);
+  background: var(--humo);
+  aspect-ratio: 1;
+  width: 8rem;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.45;
+}
+
+/* La banda roja de la portada, en chiquito. No pretende ser fiel al píxel —la
+   del sitio es `9vw` de Anton sobre una estrella— pretende contestar la única
+   pregunta que una caja de texto no contesta: en cuántas líneas se parte el
+   título. Por eso el ancho manda y el tamaño es el que cabe. */
+.mani-banda { background: var(--rojo); padding: 0.7rem 0.8rem; overflow: hidden; }
+.mani-banda-rotulo {
+  display: inline-block;
+  background: var(--amarillo);
+  color: var(--tinta);
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.12rem 0.4rem;
+}
+.mani-banda-titulo {
+  font-family: var(--display);
+  color: var(--amarillo);
+  font-size: 1.5rem;
+  line-height: 0.95;
+  text-transform: uppercase;
+  margin: 0.45rem 0 0.4rem;
+  max-width: 20ch;
+}
+.mani-banda-cierre { font-family: var(--mono); color: var(--papel); font-size: 0.6rem; line-height: 1.45; }
+
+@media (max-width: 60rem) {
+  .festival-dos { grid-template-columns: 1fr; }
+  .qr-hueco { width: 7rem; }
+}
+
 /* ── Elegir qué cartelas se imprimen ─────────────────────────────────────────
    Una lista de casillas por día. Es de marcar y desmarcar deprisa, así que la
    fila entera es la etiqueta: se pulsa donde sea y cambia. */
