@@ -675,7 +675,24 @@ select {
 
 /* ── La ventana del texto de sala ───────────────────────────────────────── */
 
-.dialogo { border: 0; padding: 0; background: transparent; max-width: min(46rem, 94vw); width: 100%; }
+/* El `margin: auto` no es decorativo: es lo ÚNICO que centra un <dialog> modal.
+   El navegador se lo pone en su hoja de estilos, y el `* { margin: 0 }` de la
+   primera línea de este archivo se lo quitaba — así que el modal del texto de
+   sala salía pegado a la esquina de arriba a la izquierda en vez de en medio.
+   Se le devuelve aquí, que es donde se ve por qué.
+
+   El alto se topa al de la ventana: el cuerpo del modal ya tiene su propio
+   scroll, y sin esto un texto largo empujaba el diálogo fuera de la pantalla
+   por abajo, con los botones de guardar donde no se llega. */
+.dialogo {
+  margin: auto;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  width: 100%;
+  max-width: min(46rem, 94vw);
+  max-height: calc(100dvh - 2rem);
+}
 .dialogo::backdrop { background: rgba(20, 20, 18, 0.75); }
 .modal { border: 2px solid var(--tinta); background: var(--papel); box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.35); }
 .modal-cabeza { background: var(--amarillo); border-bottom: 2px solid var(--tinta); padding: 0.7rem 0.85rem; display: flex; align-items: flex-start; gap: 0.7rem; }

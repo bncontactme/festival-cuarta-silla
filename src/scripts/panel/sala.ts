@@ -74,6 +74,10 @@ export function qrChico(url: string): HTMLElement {
 
 // ── El formulario ────────────────────────────────────────────────────────────
 
+/** Cuántos se han abierto en esta sesión. Sólo sirve para que los `id` de un
+ *  modal no choquen con los del anterior mientras se solapan. */
+let abiertos = 0;
+
 type Ctx = {
   dias: () => string[];
   raiz: () => string;
@@ -95,16 +99,26 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
   const publicado = Boolean(a.sala?.publicado);
   const url = rutaDe(ctx.raiz(), id);
 
+  // `close` tira el nodo, pero lo hace en el turno siguiente del bucle de
+  // eventos: cerrar uno y abrir otro en el mismo gesto deja los dos en la
+  // página un instante. Con `id` fijos, el `for` del segundo apuntaría al campo
+  // del primero. Se barre lo que quede antes de montar nada.
+  document.querySelectorAll('dialog.dialogo').forEach((d) => d.remove());
+
   const dialogo = el('dialog', { class: 'dialogo' });
 
+  // Y los `id` son únicos por si acaso: es una etiqueta que tiene que llevar a
+  // SU campo, y eso no puede depender de que el barrido de arriba llegue antes.
+  const marca = 'sala-' + (++abiertos);
+
   const cuerpo = el('textarea', {
-    id: 'sala-cuerpo',
+    id: marca + '-cuerpo',
     value: a.sala?.cuerpo ?? '',
     placeholder: 'De qué va esta pieza, qué hay que mirar, qué no es evidente…',
     oninput: () => contar(),
   });
   const firma = el('input', {
-    type: 'text', id: 'sala-firma', value: a.sala?.firma ?? '',
+    type: 'text', id: marca + '-firma', value: a.sala?.firma ?? '',
     placeholder: 'Texto: nombre de quien lo firma',
   });
   const cuenta = el('p', { class: 'cuentaletras' });
@@ -116,7 +130,28 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
   }
   contar();
 
-  const cerrar = () => { dialogo.close(); dialogo.remove(); };
+  /** Lo que había al abrir, para saber si hay algo que perder al cerrar. */
+  const inicial = { cuerpo: a.sala?.cuerpo ?? '', firma: a.sala?.firma ?? '' };
+  const hayCambios = () =>
+    cuerpo.value.trim() !== inicial.cuerpo.trim() || firma.value.trim() !== inicial.firma.trim();
+
+  /** Cerrar de verdad. El nodo se tira en el `close`, pase lo que pase. */
+  const cerrar = () => dialogo.close();
+
+  /**
+   * Cerrar sin guardar, que es lo que hacen la ✕ y el Escape.
+   *
+   * Un texto de sala son diez minutos de escribir mirando la obra. Perderlo por
+   * rozar Escape es de las cosas que no se perdonan a un panel, así que se
+   * pregunta — pero sólo cuando hay algo escrito que no se ha guardado: un
+   * «¿seguro?» que sale siempre se aprende a despachar sin leerlo.
+   */
+  const cerrarSinGuardar = () => {
+    if (hayCambios() && !confirm(
+      'Lo que escribiste en este texto de sala no se ha guardado y se va a perder.\n\n¿Cerrar igual?',
+    )) return;
+    cerrar();
+  };
 
   function guardar(publicar: boolean) {
     const texto = cuerpo.value.trim();
@@ -155,8 +190,17 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
     alGuardar();
   }
 
+  // Un `<div>` y no un `<form method="dialog">`, que es lo que había.
+  //
+  // Aquí no hay nada que enviar —los tres botones son `type="button"` y el
+  // guardado lo hace `guardar()` a mano— pero el navegador no lo sabía: un
+  // formulario sin botón de envío y con EXACTAMENTE un campo de texto que
+  // bloquea el envío implícito —«Firma»— se manda solo al pulsar Enter. Y
+  // mandarlo, con `method="dialog"`, cerraba el diálogo. Es decir: escribías el
+  // texto de sala, pasabas a la firma, dabas Enter por costumbre y se cerraba
+  // todo sin guardar nada. Sin formulario no hay envío implícito que valga.
   dialogo.append(
-    el('form', { method: 'dialog', class: 'modal' },
+    el('div', { class: 'modal' },
       el('div', { class: 'modal-cabeza' },
         el('div', {},
           el('p', { class: 'rotulo rojo' }, nuevo ? 'Nuevo texto de sala' : 'Texto de sala'),
@@ -165,12 +209,12 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
             [a.sede, ctx.dias()[a.dia], a.inicio && a.fin ? `${a.inicio}–${a.fin}` : null]
               .filter(Boolean).join(' · ')),
         ),
-        el('button', { type: 'button', class: 'modal-cerrar', 'aria-label': 'Cerrar', onclick: cerrar }, '✕'),
+        el('button', { type: 'button', class: 'modal-cerrar', 'aria-label': 'Cerrar', onclick: cerrarSinGuardar }, '✕'),
       ),
 
       el('div', { class: 'modal-cuerpo' },
         el('div', { class: 'campo' },
-          el('label', { for: 'sala-cuerpo' }, 'El texto'),
+          el('label', { for: marca + '-cuerpo' }, 'El texto'),
           el('span', { class: 'ayuda' },
             'Lo que estaría impreso en la pared. Deja una línea en blanco entre párrafos. ' +
             'Se lee de pie y en un teléfono: tres o cuatro párrafos cortos se leen enteros, dos mil palabras no.'),
@@ -178,7 +222,7 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
           cuenta,
         ),
         el('div', { class: 'campo' },
-          el('label', { for: 'sala-firma' }, 'Firma'),
+          el('label', { for: marca + '-firma' }, 'Firma'),
           el('span', { class: 'ayuda' }, 'Quién lo escribe. Va al pie de la página, en pequeño. Puede quedarse vacío.'),
           firma,
         ),
@@ -208,7 +252,20 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
 
   document.body.append(dialogo);
   dialogo.showModal();
-  dialogo.addEventListener('cancel', () => dialogo.remove());
+
+  // El nodo se tira aquí y en ningún otro sitio. Antes se tiraba en cada camino
+  // que cerraba —y el camino que no lo hacía, el envío implícito, dejaba un
+  // `<dialog>` muerto en la página con su `id="sala-cuerpo"` duplicado para el
+  // siguiente que se abriera—. Con esto da igual cómo se cierre.
+  dialogo.addEventListener('close', () => dialogo.remove());
+
+  // Escape también es cerrar sin guardar, así que también pregunta.
+  dialogo.addEventListener('cancel', (e) => {
+    if (!hayCambios()) return;
+    e.preventDefault();
+    cerrarSinGuardar();
+  });
+
   cuerpo.focus();
 }
 
