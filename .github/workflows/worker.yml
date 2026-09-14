@@ -1,0 +1,92 @@
+# Despliega el Worker del panel a Cloudflare.
+#
+# **Por qué existe este archivo.** El 14/09, con el festival a diez días, se
+# escribió un texto de sala en el panel, se guardó, el build salió verde y el
+# texto no estaba en ninguna parte. Nada falló: el sitio se había actualizado al
+# mezclar el PR —eso lo hace `publicar.yml`— pero el Worker seguía siendo el de
+# antes, porque el Worker no vive en GitHub, vive en Cloudflare, y hasta ese día
+# sólo se desplegaba escribiendo `npx wrangler deploy` a mano.
+#
+# Y el Worker es la puerta: valida lo que le llega y construye un objeto limpio
+# con los campos que conoce. Uno viejo no conoce `sala`, así que lo tiraba por el
+# desagüe sin quejarse. Guardar decía que sí, la versión subía, el sitio se
+# reconstruía, y el texto desaparecía en silencio.
+#
+# Un paso manual que nadie recuerda no es un paso: es una trampa con retardo. Así
+# que se automatiza, y además el panel avisa a gritos si el Worker se queda atrás
+# —ver `CONTRATO` en `workers/panel/index.js`—, porque un despliegue también
+# puede fallar.
+#
+# ── Lo único que hay que hacer una vez ───────────────────────────────────────
+#
+#   1. En Cloudflare: My Profile → API Tokens → Create Token → plantilla
+#      «Edit Cloudflare Workers». Acotarla a la cuenta del festival.
+#   2. En GitHub: Settings → Secrets and variables → Actions → New repository
+#      secret, con nombre CLOUDFLARE_API_TOKEN.
+#
+# Sin ese secreto esto falla a propósito y en rojo. Saltárselo en silencio sería
+# repetir exactamente el fallo que vino a arreglar.
+
+name: Desplegar el Worker
+
+on:
+  push:
+    branches: [main]
+    # Sólo cuando cambia el Worker. `publicar.yml` se dispara también con cada
+    # guardado del panel —decenas al día durante el festival— y redesplegar el
+    # Worker en cada uno sería gastar por gastar.
+    paths:
+      - 'workers/panel/**'
+      - '.github/workflows/worker.yml'
+  # Para poder forzarlo desde la pestaña de Actions el día que haga falta.
+  workflow_dispatch:
+
+# Dos despliegues a la vez sobre el mismo Worker es pedir que gane el que no
+# toca. Sin `cancel-in-progress`: un despliegue a medias no se interrumpe.
+concurrency:
+  group: worker
+  cancel-in-progress: false
+
+jobs:
+  desplegar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Se comprueba antes de intentarlo para que el error diga qué falta, en
+      # vez de un fallo de autenticación de wrangler que no explica nada.
+      - name: Comprobar que hay token
+        run: |
+          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+            echo "::error::Falta el secreto CLOUDFLARE_API_TOKEN, así que el Worker NO se ha desplegado."
+            echo "::error::Mientras no esté, todo lo que se guarde en /admin con campos nuevos se pierde en silencio."
+            echo "::error::Cómo ponerlo: la cabecera de .github/workflows/worker.yml lo explica en dos pasos."
+            exit 1
+          fi
+
+      - name: Desplegar
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: workers/panel
+
+      # Se le pregunta al Worker ya desplegado en qué contrato está. Si no
+      # contesta el número que espera el panel, el despliegue salió bien pero
+      # sirvió de poco, y más vale enterarse aquí que delante de alguien
+      # guardando un texto.
+      - name: Comprobar que contesta el contrato nuevo
+        run: |
+          esperado=$(grep -oP 'const CONTRATO = \K[0-9]+' workers/panel/index.js)
+          echo "El repositorio va por el contrato $esperado."
+          real=$(curl -fsS https://cuartasilla-panel.guadalajaradenoxe.workers.dev/contenido \
+                 | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).contrato ?? 0")
+          echo "El Worker contesta el contrato $real."
+          if [ "$real" != "$esperado" ]; then
+            echo "::error::El Worker sigue contestando el contrato $real y debería ser $esperado."
+            exit 1
+          fi
+          echo "Cuadran."
