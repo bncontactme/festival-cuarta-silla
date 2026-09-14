@@ -36,7 +36,7 @@ type Coleccion = (typeof COLECCIONES)[number];
  * Qué versión del Worker hace falta para que lo que se guarde llegue entero.
  *
  * Tiene que coincidir con `CONTRATO` en `workers/panel/index.js`, y es la misma
- * historia contada desde este lado: el 14/09 se escribió un texto de sala, se
+ * historia contada desde este lado: el 14/09 se escribió una descripción, se
  * guardó, la versión subió, el sitio se reconstruyó en verde y el texto no
  * estaba. El sitio se había actualizado al mezclar el PR; el Worker no, porque
  * vive en Cloudflare. Y el Worker construye un objeto limpio con los campos que
@@ -117,7 +117,7 @@ async function entrar(pass: string) {
     if (workerAtrasado()) {
       avisar(
         'El panel de esta página sabe de campos que el Worker todavía no conoce, y el Worker es quien guarda. ' +
-        'Si guardas así, esos campos —hoy los textos de sala— se tiran al guardar y no te avisa nadie: ' +
+        'Si guardas así, esos campos —hoy las descripciones— se tiran al guardar y no te avisa nadie: ' +
         'la versión sube, el sitio se reconstruye en verde, y el texto no está. ' +
         'Por eso el botón de Guardar está apagado. Avisa a quien lleva el sitio: hay que desplegar el Worker.',
         'error',
@@ -204,10 +204,10 @@ const ctx = {
    *  preguntar: es un encargo de una sola vez —«ábreme ésta»— y no un estado
    *  que haya que apagar después. */
   destacada: () => { const d = destacada; destacada = null; return d; },
-  /** «Sólo con texto de sala», que vive en la barra del programa y no en la
+  /** «Sólo con descripción», que vive en la barra del programa y no en la
    *  cabecera de la tabla. Devuelve null cuando no hay nada filtrando. */
   filtro: () => (soloConSala && pestanaActiva === 'programa' ? (a: any) => Boolean(a.sala) : null),
-  filtroNombre: () => '«sólo con texto de sala»',
+  filtroNombre: () => '«sólo con descripción»',
   /** Lo llama la tabla desde dentro de su propio repintado, así que aquí NO se
    *  puede rehacer el lienzo: sería tirar la tabla que está ejecutando esto y
    *  dejar a su `repintar()` hablándole a un nodo que ya no está en la página.
@@ -219,7 +219,7 @@ const ctx = {
     nodoMandos.replaceWith(nuevo);
     nodoMandos = nuevo;
   },
-  /** Lo que el renglón del programa necesita para sus mandos de texto de sala. */
+  /** Lo que el renglón del programa necesita para sus mandos de descripción. */
   sala: {
     raiz: () => RAIZ,
     alSala: (a: any) => abrirTextoDeSala(a),
@@ -415,7 +415,7 @@ function mandosPrograma(): HTMLElement {
       el('button', {
         type: 'button', class: 'mini', 'aria-pressed': String(soloConSala),
         onclick: () => { soloConSala = !soloConSala; pintarLienzo(); },
-      }, `Sólo con texto de sala (${conSala})`),
+      }, `Sólo con descripción (${conSala})`),
       el('span', { class: 'empuje' }),
       // Ya no dice «cartelas»: dentro se elige entre la cartela y la hoja de
       // QR, y un botón que promete una de las dos hace que la otra no exista.
@@ -423,7 +423,7 @@ function mandosPrograma(): HTMLElement {
         type: 'button', class: 'mini fuerte',
         title: 'Elegir cuáles, en cartela o en hoja de QR, y mandarlas a la impresora',
         onclick: () => elegirCartelas(estado.programa.actividades, DIAS, avisar, RAIZ),
-      }, `Imprimir textos de sala (${publicadas})`),
+      }, `Imprimir descripciones (${publicadas})`),
     );
   }
 

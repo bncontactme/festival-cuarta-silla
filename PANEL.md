@@ -153,7 +153,7 @@ inventa un esquema nuevo: `Sede`, `ActividadGantt`, `Artista`, `Edicion`,
 comentados campo por campo. Esa documentación se convierte, casi literal, en la
 ayuda que sale al lado de cada campo del panel.
 
-**Ni el registro ni el texto de sala tienen clave propia, ni ajustes, ni nada
+**Ni el registro ni la descripción tienen clave propia, ni ajustes, ni nada
 suyo.** Son campos de la actividad y ya:
 
 ```
@@ -429,9 +429,20 @@ interruptor de la rejilla de ejemplo. Una decisión, un sitio.
 **Barra de estado permanente**: versión, cuándo se guardó por última vez, si
 hay un rebuild en curso y un enlace a ver el sitio.
 
-### Los textos de sala
+### Las descripciones
 
 La cartela de museo, sin la cartela.
+
+**Se llamaban «textos de sala».** El rótulo cambió y cambió sólo ahí: el campo
+sigue siendo `sala`, la página sigue siendo `/sala/<id>` y los archivos siguen
+llamándose `sala.ts`. No es pereza, son las dos mismas razones de siempre — la
+dirección es papel y el campo es un almacén. `/sala/<id>` es lo que va dentro de
+un QR impreso y pegado a una pared: moverlo por un cambio de nombre deja sin
+página todo lo que ya esté pegado, que es justo la regla que sostiene el resto
+de esta sección. Y renombrar la clave de KV es una migración de datos y un
+`CONTRATO` nuevo a cambio de nada. Es exactamente lo que ya se decidió con
+`archivo`, que se rotula «Galería» desde hace meses y sigue diciendo `archivo`
+en el almacén.
 
 Cada actividad puede llevar el texto que estaría impreso en la pared. El sitio
 le da su página —`/sala/<id>`— y el panel imprime una etiqueta con un QR que la
@@ -460,7 +471,7 @@ del sitio. Aquí no se lee, se trabaja, y el programa está en un solo sitio:
 
 - **Programa** — la lista, por días. **Es una sola lista**, no dos: cada
   actividad es un bloque —hora de entrada y de salida, tipo, quién la da,
-  sede, con qué se encima, y su texto de sala a la derecha— y ese bloque *es*
+  sede, con qué se encima, y su descripción a la derecha— y ese bloque *es*
   el renglón plegado de la tabla de siempre. Se pulsa y se abren debajo todos
   los campos, con Duplicar y Borrar. Todo lo que hay que hacer se hace aquí.
 - **Horarios** — el cuadro de un día, una sede por carril. No enseña el

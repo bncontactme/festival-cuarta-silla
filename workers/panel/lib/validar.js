@@ -174,7 +174,7 @@ class Verificador {
    *
    * `texto()` aplasta todo espacio en blanco a uno solo, que es justo lo que
    * hay que hacer con un título y justo lo que no hay que hacer con esto: un
-   * texto de sala pasado por ahí llega al muro como un ladrillo de trescientas
+   * descripción pasada por ahí llega al muro como un ladrillo de trescientas
    * palabras sin un solo punto y aparte.
    *
    * Lo que sí se limpia: los retornos de Windows, los espacios al final de cada
@@ -196,7 +196,7 @@ class Verificador {
   }
 
   /**
-   * El texto de sala de una actividad.
+   * La descripción de una actividad.
    *
    * El `id` es lo delicado: es la dirección que va impresa dentro de un QR
    * pegado a una pared. Aquí se comprueba la forma —minúsculas, números y
@@ -358,7 +358,7 @@ class Verificador {
     // (`esquema.ts`), y en Horarios, que es el cuadro que existe justo para
     // eso (`previa.ts`). Aquí se veía al guardar; allí se ve al mirar.
 
-    // Dos textos de sala no pueden compartir dirección: `/sala/<id>` es una
+    // Dos descripciones no pueden compartir dirección: `/sala/<id>` es una
     // página y sólo puede enseñar una cosa. Esto sí es un error y no un aviso —
     // con dos iguales, uno de los dos QR impresos lleva a la obra del otro, y
     // no hay forma de saber cuál desde fuera.
@@ -370,7 +370,7 @@ class Verificador {
         this.error(
           'programa[' + i + '].sala.id',
           '«' + a.sala.id + '» ya es la dirección de «' + (actividades[antes].titulo || 'sin título') +
-            '». Dos textos de sala no pueden compartir página.',
+            '». Dos descripciones no pueden compartir página.',
         );
         return;
       }

@@ -106,13 +106,13 @@ ok('logo del repo pasa', r.errores.length === 0 && r.datos.patrocinadores[0].log
 r = validar('marcas', { patrocinadores: [{ nombre: 'X' }], colaboradores: [{ nombre: 'Y' }] }, {});
 ok('colaboradores ya no se guarda', r.errores.length === 0 && !('colaboradores' in r.datos));
 
-// ── Textos de sala ───────────────────────────────────────────────────────────
+// ── Descripciones ───────────────────────────────────────────────────────────
 //
 // Lo que se prueba aquí es lo que acaba impreso en un papel pegado a una pared.
 // Un `id` que no cuadra o un publicado sin texto no se descubren en la pantalla:
 // se descubren delante de la obra, con alguien mirando su teléfono.
 
-console.log('\nprograma › textos de sala');
+console.log('\nprograma › descripciones');
 
 const conSala = (sala, extra = {}) => base({ sala, ...extra });
 

@@ -1,11 +1,26 @@
 /**
- * Los textos de sala: escribirlos, publicarlos e imprimir su cartela.
+ * Las descripciones: escribirlas, publicarlas e imprimir su cartela.
  *
  * El trato con el equipo es éste: el texto que iría impreso en la pared se
  * escribe aquí, el sitio le da una página, y lo que se imprime y se pega es una
  * etiqueta de un tercio de hoja con un QR. Treinta y dos actividades son once
  * hojas en vez del taco de trescientas que nadie iba a pagar ni a pegar ni a
  * corregir cuando cambiara algo.
+ *
+ * **Se llamaba «texto de sala» y ahora se llama «descripción»**, y eso cambió
+ * en la pantalla y en ningún otro sitio. El archivo sigue siendo `sala.ts`, el
+ * campo sigue siendo `sala`, el tipo sigue siendo `TextoDeSala` y la página
+ * sigue siendo `/sala/<id>` — a propósito, y no por pereza:
+ *
+ *   · **la dirección es papel.** `/sala/<id>` es lo que va dentro de un QR que
+ *     se imprime y se pega a una pared. Mover la ruta por un cambio de rótulo
+ *     es dejar sin página todo lo que ya esté pegado. Es la misma regla que
+ *     sostiene `acunar()` aquí abajo: la dirección se acuña una vez y no se
+ *     mueve, ni cuando cambia el título ni cuando cambia el nombre de la cosa.
+ *   · **el campo es un almacén.** `sala` es una clave dentro de lo que hay
+ *     guardado en KV y lo que valida el Worker. Renombrarla es una migración de
+ *     datos y un `CONTRATO` nuevo a cambio de nada — lo mismo que ya se decidió
+ *     con `archivo`, que se rotula «Galería» desde hace meses. Ver PANEL.md.
  *
  * Lo único delicado de todo esto es la dirección, y está explicado donde toca:
  * ver `acunar()` aquí abajo y `TextoDeSala` en `src/data/tipos.ts`.
@@ -38,7 +53,7 @@ export type Formato = keyof typeof POR_HOJA;
 /**
  * De un título a una dirección.
  *
- * **Se llama una sola vez en la vida de un texto de sala**, cuando se activa, y
+ * **Se llama una sola vez en la vida de una descripción**, cuando se activa, y
  * a partir de ahí el `id` guardado manda: `abrirSala()` nunca lo vuelve a
  * calcular. Ésa es toda la garantía de que un QR impreso siga funcionando
  * cuando alguien corrija una tilde del título tres días después.
@@ -121,7 +136,7 @@ type Ctx = {
 };
 
 /**
- * Abre el texto de sala de una actividad.
+ * Abre la descripción de una actividad.
  *
  * Se monta el `<dialog>` al vuelo y se tira al cerrar. Es un formulario que se
  * abre de uno en uno: dejarlo vivo en el DOM sería guardar estado de algo que
@@ -169,14 +184,14 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
   /**
    * Cerrar sin guardar, que es lo que hacen la ✕ y el Escape.
    *
-   * Un texto de sala son diez minutos de escribir mirando la obra. Perderlo por
+   * Una descripción son diez minutos de escribir mirando la obra. Perderlo por
    * rozar Escape es de las cosas que no se perdonan a un panel, así que se
    * pregunta — pero sólo cuando hay algo escrito que no se ha guardado: un
    * «¿seguro?» que sale siempre se aprende a despachar sin leerlo.
    */
   const cerrarSinGuardar = () => {
     if (hayCambios() && !confirm(
-      'Lo que escribiste en este texto de sala no se ha guardado y se va a perder.\n\n¿Cerrar igual?',
+      'Lo que escribiste en esta descripción no se ha guardado y se va a perder.\n\n¿Cerrar igual?',
     )) return;
     cerrar();
   };
@@ -184,12 +199,12 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
   function guardar(publicar: boolean) {
     const texto = cuerpo.value.trim();
     if (publicar && !texto) {
-      ctx.avisar('Un texto de sala publicado no puede estar vacío: el QR llevaría a una página en blanco.', 'error');
+      ctx.avisar('Una descripción publicada no puede estar vacía: el QR llevaría a una página en blanco.', 'error');
       cuerpo.focus();
       return;
     }
     if (texto.length > TOPE_CUERPO) {
-      ctx.avisar(`El texto son ${texto.length.toLocaleString('es-MX')} caracteres y el tope son ${TOPE_CUERPO.toLocaleString('es-MX')}.`, 'error');
+      ctx.avisar(`La descripción tiene ${texto.length.toLocaleString('es-MX')} caracteres y el tope son ${TOPE_CUERPO.toLocaleString('es-MX')}.`, 'error');
       cuerpo.focus();
       return;
     }
@@ -208,7 +223,7 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
 
   function quitar() {
     if (publicado && !confirm(
-      `Vas a quitar el texto de sala de «${a.titulo}».\n\n` +
+      `Vas a quitar la descripción de «${a.titulo}».\n\n` +
       `Si su cartela ya está impresa y pegada, el QR de ese papel se queda sin página: ` +
       `${url}\n\n¿Seguro?`,
     )) return;
@@ -225,13 +240,13 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
   // formulario sin botón de envío y con EXACTAMENTE un campo de texto que
   // bloquea el envío implícito —«Firma»— se manda solo al pulsar Enter. Y
   // mandarlo, con `method="dialog"`, cerraba el diálogo. Es decir: escribías el
-  // texto de sala, pasabas a la firma, dabas Enter por costumbre y se cerraba
+  // descripción, pasabas a la firma, dabas Enter por costumbre y se cerraba
   // todo sin guardar nada. Sin formulario no hay envío implícito que valga.
   dialogo.append(
     el('div', { class: 'modal' },
       el('div', { class: 'modal-cabeza' },
         el('div', {},
-          el('p', { class: 'rotulo rojo' }, nuevo ? 'Nuevo texto de sala' : 'Texto de sala'),
+          el('p', { class: 'rotulo rojo' }, nuevo ? 'Nuevo descripción' : 'Descripción'),
           el('h3', {}, a.titulo || 'Sin título'),
           el('p', { class: 'modal-donde' },
             [a.sede, ctx.dias()[a.dia], a.inicio && a.fin ? `${a.inicio}–${a.fin}` : null]
@@ -242,7 +257,7 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
 
       el('div', { class: 'modal-cuerpo' },
         el('div', { class: 'campo' },
-          el('label', { for: marca + '-cuerpo' }, 'El texto'),
+          el('label', { for: marca + '-cuerpo' }, 'La descripción'),
           el('span', { class: 'ayuda' },
             'Lo que estaría impreso en la pared. Deja una línea en blanco entre párrafos. ' +
             'Se lee de pie y en un teléfono: tres o cuatro párrafos cortos se leen enteros, dos mil palabras no.'),
@@ -268,12 +283,12 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
       ),
 
       el('div', { class: 'modal-pie' },
-        a.sala && el('button', { type: 'button', class: 'boton peligro', onclick: quitar }, 'Quitar el texto'),
+        a.sala && el('button', { type: 'button', class: 'boton peligro', onclick: quitar }, 'Quitar la descripción'),
         el('span', { class: 'empuje' }),
         el('button', { type: 'button', class: 'boton', onclick: () => guardar(false) },
           publicado ? 'Pasar a borrador' : 'Guardar borrador'),
         el('button', { type: 'button', class: 'boton fuerte', onclick: () => guardar(true) },
-          publicado ? 'Guardar cambios' : 'Publicar texto'),
+          publicado ? 'Guardar cambios' : 'Publicar descripción'),
       ),
     ),
   );
@@ -308,7 +323,7 @@ export function abrirSala(a: any, ctx: Ctx, alGuardar: () => void) {
 export function elegirCartelas(actividades: any[], dias: string[], avisar: Ctx['avisar'], raiz: string) {
   const publicadas = actividades.filter((a) => a.sala?.publicado && a.sala.cuerpo);
   if (!publicadas.length) {
-    avisar('Todavía no hay ningún texto de sala publicado. Las cartelas salen de los publicados: un QR impreso que lleva a un 404 es peor que no tener QR.', 'ojo');
+    avisar('Todavía no hay ninguna descripción publicada. Las cartelas salen de las publicadas: un QR impreso que lleva a un 404 es peor que no tener QR.', 'ojo');
     return;
   }
 
@@ -434,7 +449,7 @@ export function elegirCartelas(actividades: any[], dias: string[], avisar: Ctx['
           el('h3', {}, 'Cuáles'),
           el('p', { class: 'modal-donde' },
             'La cartela es una etiqueta de un tercio de hoja, tres por hoja, y las marcas rojas de ' +
-            'las esquinas son por dónde se corta. La hoja de QR es una hoja entera por texto, para colgar.'),
+            'las esquinas son por dónde se corta. La hoja de QR es una hoja entera por descripción, para colgar.'),
         ),
         el('button', {
           type: 'button', class: 'modal-cerrar', 'aria-label': 'Cerrar',
@@ -469,7 +484,7 @@ const paraImprimir = (actividades: any[]) =>
   actividades.filter((a) => a.sala?.publicado && a.sala.cuerpo);
 
 const SIN_NADA =
-  'Todavía no hay ningún texto de sala publicado. Lo que se imprime sale de los publicados: ' +
+  'Todavía no hay ninguna descripción publicada. Lo que se imprime sale de las publicadas: ' +
   'un QR impreso que lleva a un 404 es peor que no tener QR.';
 
 /**
@@ -517,13 +532,13 @@ export function imprimirCartelas(actividades: any[], dias: string[], avisar: Ctx
       el('i', { class: 'mc mc1' }), el('i', { class: 'mc mc2' }),
       el('i', { class: 'mc mc3' }), el('i', { class: 'mc mc4' }),
       // El cabecero va SUELTO y no dentro de `.cartela-texto`, que es la
-      // columna estrecha. Dentro, «Texto de sala» se alineaba a la derecha de
+      // columna estrecha. Dentro, «Descripción» se alineaba a la derecha de
       // esa columna: acababa a un dedo del QR y a cuatro centímetros del canto
       // del papel, en mitad de la nada. Un cabecero se alinea con el papel o no
       // es un cabecero — así que cruza las dos columnas y sus dos extremos caen
       // en los dos cantos.
       el('p', { class: 'cartela-cab' },
-        el('span', {}, 'Cuarta Silla'), el('span', {}, 'Texto de sala')),
+        el('span', {}, 'Cuarta Silla'), el('span', {}, 'Descripción')),
       // Dos columnas y no una pila: la etiqueta es apaisada —un tercio de hoja
       // de canto a canto— y en una pila el QR se iba a una esquina con un
       // palmo de blanco encima. El texto a la izquierda, el QR a la derecha a
@@ -569,7 +584,7 @@ export function imprimirQR(actividades: any[], avisar: Ctx['avisar'], raiz: stri
 
     pliego.append(el('article', { class: 'hoja-qr' },
       el('p', { class: 'cartela-cab' },
-        el('span', {}, 'Cuarta Silla'), el('span', {}, 'Texto de sala')),
+        el('span', {}, 'Cuarta Silla'), el('span', {}, 'Descripción')),
       el('div', { class: 'hoja-qr-medio' },
         el('h6', {}, a.titulo || 'Sin título'),
         caja,

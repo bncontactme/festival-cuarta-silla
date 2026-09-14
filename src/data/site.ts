@@ -450,7 +450,7 @@ export const registroPorDia = programa.dias
   }))
   .filter((d) => d.actividades.length > 0);
 
-/** ── Los textos de sala ───────────────────────────────────────────────────
+/** ── Las descripciones ───────────────────────────────────────────────────
  *
  * La cartela de museo, sin la cartela. Cada actividad puede llevar el texto que
  * estaría impreso en la pared; el sitio le da una página y el panel imprime una
@@ -462,7 +462,7 @@ export const registroPorDia = programa.dias
  * falta.
  */
 
-/** Una actividad con su texto de sala ya publicado. El tipo se estrecha para
+/** Una actividad con su descripción ya publicada. El tipo se estrecha para
  *  que las páginas no tengan que preguntar dos veces por lo mismo. */
 export type ConSala = ActividadGantt & { sala: TextoDeSala };
 
@@ -479,7 +479,7 @@ export const actividadesConSala: ConSala[] = actividades
   .filter((a): a is ConSala => Boolean(a.sala?.publicado && a.sala.cuerpo))
   .sort((a, b) => a.dia - b.dia || a.inicio.localeCompare(b.inicio));
 
-/** La ruta de un texto de sala. Una sola función para las cuatro cosas que la
+/** La ruta de una descripción. Una sola función para las cuatro cosas que la
  *  necesitan —el QR del panel, el botón de la ficha, la página y el sitemap—:
  *  si alguna vez cambia el prefijo, que no haya cuatro sitios donde no cambió. */
 export const rutaSala = (sala: TextoDeSala) => `/sala/${sala.id}`;

@@ -17,14 +17,14 @@
  *   · el tipo con su tinta, que es como se lee la rejilla del sitio;
  *   · **con qué se encima**, por su nombre — lo que sólo decía el cuadro de
  *     horarios, y que en una lista hay que escribir porque no se ve;
- *   · el texto de sala: su estado, su dirección, su QR y sus botones.
+ *   · la descripción: su estado, su dirección, su QR y sus botones.
  */
 import { el } from './dom';
 import { qrChico, rutaDe } from './sala';
 
 export type MandosSala = {
   raiz: () => string;
-  /** Abrir el texto de sala de esta actividad. */
+  /** Abrir la descripción de esta actividad. */
   alSala: (a: any) => void;
   /** Mandar esta cartela a la impresora. */
   alImprimir: (a: any) => void;
@@ -82,7 +82,7 @@ export function bloqueActividad(a: any, choca?: any[]): HTMLElement[] {
 }
 
 /**
- * Los mandos del texto de sala, a la derecha del renglón.
+ * Los mandos de la descripción, a la derecha del renglón.
  *
  * Tres estados y ninguno es un botón apagado: lo que no tiene texto enseña la
  * puerta de crearlo, no la de que no hay.
@@ -93,7 +93,7 @@ export function mandoSala(a: any, mandos: MandosSala): HTMLElement {
       el('button', {
         type: 'button', class: 'sala-off',
         onclick: () => mandos.alSala(a),
-      }, '+ Texto de sala'),
+      }, '+ Descripción'),
     );
   }
 
@@ -116,9 +116,9 @@ export function mandoSala(a: any, mandos: MandosSala): HTMLElement {
     el('span', { class: 'ruta', title: url }, '/sala/' + a.sala.id),
     el('span', { class: 'acto-acciones' },
       el('button', {
-        type: 'button', title: `Escribir el texto de sala de «${que}»`,
+        type: 'button', title: `Escribir la descripción de «${que}»`,
         onclick: () => mandos.alSala(a),
-      }, 'Texto'),
+      }, 'Descripción'),
       publicado ? el('button', {
         type: 'button', title: `Imprimir la cartela de «${que}» — etiqueta de un tercio de hoja`,
         onclick: () => mandos.alImprimir(a),

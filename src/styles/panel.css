@@ -553,7 +553,7 @@ select {
 .fila--sin-asa { grid-template-columns: 1fr; }
 
 /* El renglón y sus mandos, uno al lado del otro. El botón que pliega se lleva
-   todo el ancho que sobre; los mandos del texto de sala se quedan a la derecha
+   todo el ancho que sobre; los mandos de la descripción se quedan a la derecha
    y FUERA de él, que es lo que les deja ser botones.
 
    La columna de los mandos mide SIEMPRE lo mismo, y eso es el arreglo. Era
@@ -569,7 +569,11 @@ select {
    en columna. */
 .resumen-linea { display: flex; align-items: stretch; gap: 0.4rem; min-width: 0; }
 .resumen-linea > .resumen { flex: 1 1 auto; min-width: 0; }
-.resumen-linea > .acto-fin { flex: 0 0 14rem; padding: 0.5rem 0.7rem 0.5rem 0; }
+/* 16rem y no 14: los tres botones son «Descripción · Cartela · QR» y en 14 el
+   primero ya no cabía con los otros dos, así que «QR» se caía al renglón de
+   abajo y volvía la escalerita. Con el rótulo largo, la cuenta es 182px de
+   botones + el QR chico + los aires. */
+.resumen-linea > .acto-fin { flex: 0 0 16rem; padding: 0.5rem 0.7rem 0.5rem 0; }
 
 /* El renglón cuando es un bloque y no una línea de texto. */
 .resumen.resumen--bloque {
@@ -638,7 +642,7 @@ select {
 .acto-fin { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 0.35rem; min-width: 0; }
 .lista-vacia { background: var(--papel); border: 2px solid var(--tinta); border-top: 0; padding: 0.7rem; font-family: var(--mono); font-size: 0.65rem; opacity: 0.6; }
 
-/* ── El control de texto de sala ────────────────────────────────────────── */
+/* ── El control de descripción ────────────────────────────────────────── */
 
 .sala-off {
   font-family: var(--mono);
@@ -694,7 +698,7 @@ select {
 .qr--chico { width: 3.2rem; height: 3.2rem; }
 .qr--falla { font-family: var(--mono); font-size: 0.4rem; word-break: break-all; line-height: 1.15; padding: 2px; }
 
-/* ── La ventana del texto de sala ───────────────────────────────────────── */
+/* ── La ventana de la descripción ───────────────────────────────────────── */
 
 /* El `margin: auto` no es decorativo: es lo ÚNICO que centra un <dialog> modal.
    El navegador se lo pone en su hoja de estilos, y el `* { margin: 0 }` de la
@@ -809,7 +813,7 @@ select {
 .pliego { display: none; --cartela-alto: 78mm; --cartela-aire: 7mm; }
 /* Dos columnas y dos filas: arriba el cabecero cruzando las dos, y debajo el
    texto y el QR. El cabecero estaba dentro de `.cartela-texto` —o sea, dentro
-   de la columna estrecha— y «Texto de sala», alineado a la derecha, acababa a
+   de la columna estrecha— y «Descripción», alineado a la derecha, acababa a
    1.4rem del QR y a cuatro centímetros del canto del papel. Se leía como un
    cabecero a medio hacer. Cruzando las dos columnas, sus dos extremos caen
    donde tienen que caer: en los dos cantos de la etiqueta.
@@ -1019,7 +1023,7 @@ select {
 
 @media (max-width: 640px) {
   /*
-   * Los mandos del texto de sala, DEBAJO del bloque y no al lado.
+   * Los mandos de la descripción, DEBAJO del bloque y no al lado.
    *
    * Al lado no caben, y no «no caben bien»: en 375px la columna de los mandos
    * se llevaba 234 y al renglón le quedaban 107. Con 107 ya no caben las dos

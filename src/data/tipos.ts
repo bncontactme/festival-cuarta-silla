@@ -85,7 +85,7 @@ export type ActividadGantt = {
    */
   libre?: boolean;
   /**
-   * El texto de sala: lo que estaría impreso en la pared, si se imprimiera.
+   * La descripción: lo que estaría impreso en la pared, si se imprimiera.
    *
    * No se imprime. El festival son 32 actividades y las cartelas de todas son
    * un taco de trescientas hojas que nadie va a pagar ni a pegar; lo que se
@@ -99,7 +99,7 @@ export type ActividadGantt = {
 };
 
 /**
- * Un texto de sala.
+ * Una descripción.
  *
  * Lo que hay que entender de esto es el `id`, y por qué no se deduce del
  * título: **el QR se imprime**. Una vez que la etiqueta está cortada y pegada a
