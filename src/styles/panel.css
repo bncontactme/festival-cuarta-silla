@@ -771,25 +771,44 @@ select {
 
 /* ── Las cartelas ───────────────────────────────────────────────────────────
    Sólo existen mientras dura el diálogo de impresión: `imprimirCartelas()` las
-   cuelga del <body> y las tira al volver. En pantalla no se ven nunca. */
+   cuelga del <body> y las tira al volver. En pantalla no se ven nunca.
 
-.pliego { display: none; }
-.cartela { position: relative; border: 2px solid var(--tinta); background: var(--papel); padding: 0.85rem; display: grid; gap: 0.5rem; break-inside: avoid; }
+   Tres por hoja, cruzadas de canto a canto: cada etiqueta es un tercio de la
+   hoja. Eran cuatro, en dos columnas y con el alto a merced del texto, y eso
+   tenía dos costes: la etiqueta salía del tamaño de un naipe —leída de pie,
+   delante de la obra, se quedaba corta— y **ninguna medía lo mismo que la de
+   al lado**, así que cada hoja se cortaba a ojo y de nuevo. Con el alto fijo
+   los dos cortes caen a la misma altura en todas las hojas y el taco se corta
+   entero de una vez.
+
+   El alto sale de la hoja más corta de las dos que se usan —Carta mide 279 mm;
+   A4, 297— para que tres quepan en las dos sin tocar nada: 3 × 78 + 2 × 7 =
+   248 mm, y la caja útil de Carta con los márgenes de `@page` es 255. */
+
+.pliego { display: none; --cartela-alto: 78mm; --cartela-aire: 7mm; }
+.cartela { position: relative; height: var(--cartela-alto); border: 2px solid var(--tinta); background: var(--papel); padding: 1rem 1.3rem; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.4rem; break-inside: avoid; }
+.cartela-texto { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+.cartela-qr { display: flex; flex-direction: column; align-items: center; }
 .cartela .mc { position: absolute; width: 9px; height: 9px; }
 .cartela .mc1 { top: -2px; left: -2px; border-top: 2px solid var(--rojo); border-left: 2px solid var(--rojo); }
 .cartela .mc2 { top: -2px; right: -2px; border-top: 2px solid var(--rojo); border-right: 2px solid var(--rojo); }
 .cartela .mc3 { bottom: -2px; left: -2px; border-bottom: 2px solid var(--rojo); border-left: 2px solid var(--rojo); }
 .cartela .mc4 { bottom: -2px; right: -2px; border-bottom: 2px solid var(--rojo); border-right: 2px solid var(--rojo); }
-.cartela-cab { font-family: var(--mono); font-weight: 700; font-size: 0.5rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--rojo); display: flex; justify-content: space-between; gap: 0.4rem; }
-.cartela h6 { font-family: var(--display); font-size: 1.1rem; text-transform: uppercase; line-height: 0.98; font-weight: 400; }
-.cartela-aut { font-size: 0.74rem; font-weight: 600; line-height: 1.25; }
-.cartela-filete { height: 2px; background: var(--tinta); }
-.cartela-pie { display: flex; align-items: flex-end; gap: 0.7rem; justify-content: space-between; }
-.cartela-meta { font-family: var(--mono); font-size: 0.55rem; line-height: 1.5; text-transform: uppercase; letter-spacing: 0.04em; }
-.cartela-meta b { display: block; font-size: 0.47rem; letter-spacing: 0.13em; opacity: 0.55; font-weight: 700; margin-top: 0.3rem; }
+.cartela-cab { font-family: var(--mono); font-weight: 700; font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--rojo); display: flex; justify-content: space-between; gap: 0.4rem; }
+/* Un pelo más de interlínea que antes: a 1.1rem los acentos de las mayúsculas
+   cabían en el 0.98 de siempre, y al doble de cuerpo se subían al renglón de
+   arriba. Sigue siendo apretada, que es como escribe la Anton. */
+.cartela h6 { font-family: var(--display); font-size: 2rem; text-transform: uppercase; line-height: 1.12; font-weight: 400; }
+.cartela-aut { font-size: 0.98rem; font-weight: 600; line-height: 1.25; }
+/* El filete separa el título de los datos, y es lo único que queda del pie:
+   con la etiqueta apaisada, «dónde y cuándo» va debajo del título y no en una
+   fila aparte peleándose con el QR por el ancho. */
+.cartela-filete { height: 2px; background: var(--tinta); margin-top: 0.15rem; }
+.cartela-meta { font-family: var(--mono); font-size: 0.68rem; line-height: 1.5; text-transform: uppercase; letter-spacing: 0.04em; }
+.cartela-meta b { display: block; font-size: 0.56rem; letter-spacing: 0.13em; opacity: 0.55; font-weight: 700; margin-top: 0.3rem; }
 .cartela-meta b:first-child { margin-top: 0; }
-.cartela .qr { width: 4.4rem; height: 4.4rem; }
-.cartela-lee { font-family: var(--mono); font-size: 0.45rem; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; margin-top: 0.2rem; }
+.cartela .qr { width: 7rem; height: 7rem; }
+.cartela-lee { font-family: var(--mono); font-size: 0.54rem; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; margin-top: 0.2rem; }
 
 /* Imprimir es imprimir LAS CARTELAS. El panel entero no se imprime nunca —no
    hay nada en él que quepa en una hoja— así que se esconde todo y se saca sólo
@@ -802,14 +821,20 @@ select {
   #pliego, #pliego * { visibility: visible; }
   #pliego {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8mm;
+    grid-template-columns: 1fr;
+    gap: var(--cartela-aire);
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
   }
   .cartela { page-break-inside: avoid; box-shadow: none; }
+  /* Tres y salto. El alto ya las hace caber de tres en tres, pero quien parte
+     la rejilla en hojas es el navegador y cada uno redondea a su manera: con
+     el salto escrito, una cuarta no se cuela nunca por un milímetro de más.
+     El `:not(:last-child)` evita la hoja en blanco del final cuando el pliego
+     acaba justo en múltiplo de tres. */
+  .cartela:nth-child(3n):not(:last-child) { break-after: page; }
 }
 
 /* ── Registro ───────────────────────────────────────────────────────────── */
