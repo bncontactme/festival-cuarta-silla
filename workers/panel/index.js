@@ -65,6 +65,31 @@ const MIMES = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'im
 /** Un guardado son unos pocos KB. Un megabyte ya es alguien probando cosas. */
 const CUERPO_MAX = 1_000_000;
 
+/**
+ * Qué campos entiende este Worker. **Se sube a mano cada vez que el validador
+ * aprende un campo nuevo.**
+ *
+ * Existe por una tarde concreta. El 14/09, con el festival a diez días, se
+ * escribió un texto de sala en el panel, se guardó, la versión subió, el sitio
+ * se reconstruyó en verde — y el texto no estaba en ninguna parte. El sitio se
+ * había actualizado al mezclar el PR; el Worker no, porque vive en Cloudflare y
+ * entonces sólo se desplegaba a mano. Y el Worker es la puerta: `validar.js`
+ * construye un objeto limpio con los campos que conoce, así que uno viejo tira
+ * los que no conoce por el desagüe sin decir nada.
+ *
+ * Un panel que contesta «guardado» y pierde la mitad de lo guardado es peor que
+ * uno que falla: el que falla te deja el texto en la pantalla para copiarlo.
+ *
+ * Así que ahora este número viaja en cada respuesta y el panel lo mira antes de
+ * dejar tocar nada. Si el Worker va por detrás, sale un cartel rojo que no se
+ * quita y el botón de guardar se queda apagado. Ver `CONTRATO_NECESARIO` en
+ * `src/scripts/panel/panel.ts`.
+ *
+ *   1 → sedes, programa, artistas, archivo, marcas
+ *   2 → + `sala` en las actividades (textos de sala)
+ */
+const CONTRATO = 2;
+
 export default {
   async fetch(request, env, ctx) {
     const origen = request.headers.get('Origin') || '';
@@ -88,7 +113,10 @@ export default {
       const partes = url.pathname.split('/').filter(Boolean);
 
       if (partes[0] === 'contenido' && partes.length === 1) {
-        return json(await leerTodo(env), 200, '*', { cache: 30 });
+        // El contrato viaja también aquí, sin contraseña: así el despliegue de
+        // Actions puede comprobar desde fuera que el Worker que quedó puesto es
+        // el que se acaba de subir. Ver `.github/workflows/worker.yml`.
+        return json({ contrato: CONTRATO, ...(await leerTodo(env)) }, 200, '*', { cache: 30 });
       }
       if (partes[0] === 'contenido' && COLECCIONES[partes[1]]) {
         return json(await leerColeccion(env, partes[1]), 200, '*', { cache: 30 });
@@ -126,7 +154,7 @@ export default {
 
     try {
       switch (cuerpo.accion) {
-        case 'ping':         return json({ ok: true, ...(await leerMeta(env)) }, 200, cors);
+        case 'ping':         return json({ ok: true, contrato: CONTRATO, ...(await leerMeta(env)) }, 200, cors);
         case 'guardar':      return await guardar(cuerpo, env, ctx, cors);
         case 'firmar':       return await firmar(cuerpo, env, cors);
         case 'medios':       return await medios(cuerpo, env, cors);

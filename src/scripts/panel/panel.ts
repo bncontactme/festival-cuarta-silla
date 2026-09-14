@@ -32,6 +32,25 @@ const RAIZ: string = config.raiz || location.origin + '/';
 const COLECCIONES = ['sedes', 'programa', 'artistas', 'archivo', 'marcas'] as const;
 type Coleccion = (typeof COLECCIONES)[number];
 
+/**
+ * Qué versión del Worker hace falta para que lo que se guarde llegue entero.
+ *
+ * Tiene que coincidir con `CONTRATO` en `workers/panel/index.js`, y es la misma
+ * historia contada desde este lado: el 14/09 se escribió un texto de sala, se
+ * guardó, la versión subió, el sitio se reconstruyó en verde y el texto no
+ * estaba. El sitio se había actualizado al mezclar el PR; el Worker no, porque
+ * vive en Cloudflare. Y el Worker construye un objeto limpio con los campos que
+ * conoce: uno viejo tira los que no conoce sin decir nada.
+ *
+ * Ahora se pregunta al entrar. Si va por detrás, el panel **no deja guardar** —
+ * porque guardar contra un Worker viejo no es arriesgado, es perder el trabajo
+ * con un «guardado» en pantalla.
+ */
+const CONTRATO_NECESARIO = 2;
+/** Lo que contestó el Worker. `0` = uno tan viejo que ni sabe de esto. */
+let contratoDelWorker = 0;
+const workerAtrasado = () => contratoDelWorker < CONTRATO_NECESARIO;
+
 // ── Estado ───────────────────────────────────────────────────────────────────
 
 let estado: any = null;
@@ -87,9 +106,28 @@ async function entrar(pass: string) {
   boton.textContent = 'Comprobando…';
   try {
     meta = await pedir('ping');
+    contratoDelWorker = Number((meta as any).contrato ?? 0);
     $('#entrada').hidden = true;
     $('#armazon').hidden = false;
     await cargar();
+
+    // Lo primero de todo, antes que el estado del build: si el Worker va por
+    // detrás del panel, cualquier cosa que se escriba aquí se pierde al
+    // guardar, y se pierde en silencio. Este aviso no se puede quitar.
+    if (workerAtrasado()) {
+      avisar(
+        'El panel de esta página sabe de campos que el Worker todavía no conoce, y el Worker es quien guarda. ' +
+        'Si guardas así, esos campos —hoy los textos de sala— se tiran al guardar y no te avisa nadie: ' +
+        'la versión sube, el sitio se reconstruye en verde, y el texto no está. ' +
+        'Por eso el botón de Guardar está apagado. Avisa a quien lleva el sitio: hay que desplegar el Worker.',
+        'error',
+        'El Worker está viejo — no se puede guardar',
+        [
+          `El Worker va por el contrato ${contratoDelWorker || 'ninguno'} y hace falta el ${CONTRATO_NECESARIO}.`,
+          'Se arregla solo al empujar a main, o a mano: cd workers/panel && npx wrangler deploy',
+        ],
+      );
+    }
     // Lo primero que hay que saber al entrar es si lo último que se guardó
     // llegó al sitio. Si no llegó, sale el aviso antes de tocar nada.
     mirarBuild();
@@ -460,7 +498,9 @@ function interruptorEjemplo() {
 
 function estadoBarras() {
   const n = COLECCIONES.filter(sucia).length;
-  $('#guardar-boton').toggleAttribute('disabled', n === 0 || guardando);
+  // `workerAtrasado()` apaga el botón: contra un Worker viejo, guardar no es
+  // arriesgado — es perder lo escrito con un «guardado» en pantalla.
+  $('#guardar-boton').toggleAttribute('disabled', n === 0 || guardando || workerAtrasado());
   $('#estado-cambios').textContent = guardando
     ? 'guardando…'
     : n === 0
@@ -515,6 +555,15 @@ function aLaPrimeraMala() {
 
 async function guardar() {
   if (guardando || !haySucias()) return;
+  // El cinturón, por si alguien llega aquí con Ctrl+S en vez del botón.
+  if (workerAtrasado()) {
+    avisar(
+      'El Worker todavía no conoce los campos que edita este panel, así que no se manda nada: ' +
+      'lo que tienes escrito sigue aquí, en la pantalla. Hay que desplegar el Worker primero.',
+      'error', 'No se puede guardar',
+    );
+    return;
+  }
   guardando = true;
   estadoBarras();
 

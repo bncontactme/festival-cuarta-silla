@@ -505,6 +505,51 @@ se le pide.
 
 ---
 
+## Dos despliegues, no uno
+
+Esto es lo que más caro ha salido de todo el panel, así que va arriba del todo.
+
+**El sitio y el Worker se despliegan por separado, y son cosas distintas.**
+
+| | Dónde vive | Cómo se actualiza |
+| --- | --- | --- |
+| El sitio y `/admin` | GitHub Pages | `publicar.yml`, con cada push a `main` |
+| El Worker | Cloudflare | `worker.yml`, cuando cambia `workers/panel/**` |
+
+Hasta el 14/09 el segundo no existía: el Worker se desplegaba escribiendo
+`npx wrangler deploy` a mano. Con el festival a diez días se escribió un texto
+de sala en el panel, se guardó, la versión subió, el sitio se reconstruyó en
+verde — y el texto no estaba en ninguna parte. El sitio tenía el código nuevo
+desde que se mezcló el PR; el Worker seguía siendo el de antes.
+
+Y el Worker es **la puerta**: `validar.js` no filtra campos, los *reconstruye* —
+arma un objeto limpio con los que conoce. Uno viejo no conoce `sala`, así que lo
+tiraba por el desagüe sin quejarse. Un panel que contesta «guardado» y pierde la
+mitad de lo guardado es peor que uno que falla: el que falla te deja el texto en
+la pantalla para copiarlo.
+
+Así que ahora hay dos redes:
+
+1. **El despliegue es automático.** `.github/workflows/worker.yml` sube el Worker
+   con cada cambio en `workers/panel/**`, y después le pregunta desde fuera si de
+   verdad quedó puesto el nuevo. Necesita el secreto `CLOUDFLARE_API_TOKEN` una
+   sola vez — la cabecera de ese archivo dice cómo sacarlo, en dos pasos. Sin él
+   el workflow **falla en rojo** a propósito: saltárselo en silencio sería repetir
+   el mismo fallo.
+
+2. **El panel comprueba antes de dejar tocar nada.** El Worker contesta en qué
+   `CONTRATO` está y el panel sabe cuál necesita. Si va por detrás, sale un cartel
+   rojo que no se quita y **el botón de Guardar se queda apagado**. Al añadir un
+   campo nuevo al validador hay que subir ese número en los dos sitios:
+   `CONTRATO` en `workers/panel/index.js` y `CONTRATO_NECESARIO` en
+   `src/scripts/panel/panel.ts`.
+
+Para desplegar el Worker a mano, que sigue valiendo:
+
+```bash
+cd workers/panel && npx wrangler deploy
+```
+
 ## Publicar
 
 Guardar y publicar son dos cosas distintas, y el panel lo dice:
