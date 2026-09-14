@@ -112,8 +112,17 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
 
       {/* Las dos puertas de vuelta. La del programa lleva al día de esta
           actividad, no al principio: quien acaba de leer esto está en esa sala,
-          ese día, y lo siguiente que quiere saber es qué más hay. */}
-      <nav class="mt-9 grid gap-3 sm:grid-cols-2">
+          ese día, y lo siguiente que quiere saber es qué más hay.
+
+          Una columna y no dos. Con dos, cada botón se quedaba en 298px —menos
+          de lo que tiene en un teléfono— y con el relleno grande del
+          escritorio, que sólo se comprime por debajo de 40rem. El rótulo se
+          partía y el adorno del final se iba solo al segundo renglón: «★ QUÉ
+          MÁS HAY EL DOMINGO / ★». Y no era cosa de esa etiqueta: «Cómo llegar
+          a Taller Industria Gráfica ↗» es la sede más larga que hay y tampoco
+          cabía. A lo ancho de la columna de lectura los dos entran de una
+          línea, con el nombre de sede que sea. */}
+      <nav class="mt-9 grid gap-3">
         <a class="boton" href={conBase(`/programa#dia-${a.dia}`)}>
           ★ Qué más hay el {dia.dia.toLowerCase()} ★
         </a>
