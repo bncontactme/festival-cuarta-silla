@@ -339,21 +339,24 @@ class Verificador {
       return podar(act);
     });
 
-    // Encimarse no es un error: una sede puede tener dos cosas a la vez y la
-    // rejilla las apila. Pero casi siempre es una hora mal escrita, así que se
-    // avisa y que decida quien está mirando.
-    for (let i = 0; i < actividades.length; i++) {
-      for (let j = i + 1; j < actividades.length; j++) {
-        const a = actividades[i], b = actividades[j];
-        // Un recorrido que pasa por todas se cruza con medio programa por
-        // definición: avisarlo sería avisar de lo que es.
-        if (!a.sede || a.sede === SEDE_TODAS || a.sede !== b.sede || a.dia !== b.dia) continue;
-        if (!a.inicio || !a.fin || !b.inicio || !b.fin) continue;
-        if (minutos(a.inicio) < minutos(b.fin) && minutos(b.inicio) < minutos(a.fin)) {
-          this.aviso('programa', '«' + a.titulo + '» y «' + b.titulo + '» se enciman en ' + a.sede);
-        }
-      }
-    }
+    // Aquí había un aviso por cada par de actividades que se encimaran en su
+    // sede, y se quitó. No porque encimarse dé igual —no es un error, una sede
+    // puede tener dos cosas a la vez, pero casi siempre es una hora mal
+    // escrita— sino porque el sitio de decirlo no es éste.
+    //
+    // El programa de verdad son ocho pares encimados, así que CADA Guardar
+    // sacaba ocho renglones de lo mismo, y debajo, en el mismo tono y la misma
+    // caja, el aviso que sí hay que leer: «/sala/… estaba publicado y ya no lo
+    // está. Si su cartela está impresa, ese QR se queda sin página» (lo da
+    // `index.js`, no esto). Una caja que sale siempre y siempre dice lo mismo
+    // se aprende a despachar sin leerla, y el día que trae algo se despacha
+    // igual. Por callar ocho renglones se lee el noveno.
+    //
+    // Y no se pierde nada, porque el panel ya lo dice tres veces y en el sitio
+    // donde se puede hacer algo al respecto: en el renglón de la actividad y
+    // con el nombre de la otra delante (`bloque.ts`), en la cabecera del día
+    // (`esquema.ts`), y en Horarios, que es el cuadro que existe justo para
+    // eso (`previa.ts`). Aquí se veía al guardar; allí se ve al mirar.
 
     // Dos textos de sala no pueden compartir dirección: `/sala/<id>` es una
     // página y sólo puede enseñar una cosa. Esto sí es un error y no un aviso —
