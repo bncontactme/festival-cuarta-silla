@@ -1,7 +1,7 @@
 {
   "contrato": 2,
-  "version": 136,
-  "actualizado": "2026-09-14T20:20:41.425Z",
+  "version": 137,
+  "actualizado": "2026-09-15T01:50:49.112Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -787,7 +787,7 @@
       "sede": "Días Feriados"
     },
     {
-      "nombre": "Cristina Galván Mercado",
+      "nombre": "Tin Galván",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788656220/cuartasilla/artistas/cssl3zmkpxb2pbqp8fex.jpg",
       "instagram": "https://www.instagram.com/int_tiin/",
       "sede": "Días Feriados"
