@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 142,
-  "actualizado": "2026-09-15T07:21:39.448Z",
+  "version": 144,
+  "actualizado": "2026-09-15T20:34:27.035Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1551,6 +1551,42 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789456837/cuartasilla/artistas/lksn8sxf3mlem6vmodxr.jpg",
       "instagram": "https://www.instagram.com/valvaldez.a?stkn=MXJjb2plNnV5Zmg2bw==",
       "sede": "Estudio Arechiga"
+    },
+    {
+      "nombre": "Ham",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789503965/cuartasilla/artistas/e4jydklwnjprewtzuqz6.jpg",
+      "instagram": "https://www.instagram.com/pasajera_o_testigo",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Neofantasías",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504247/cuartasilla/artistas/neofantasias/x5nywxoinckjfa6jhh5t.jpg",
+      "instagram": "https://www.instagram.com/neofantasias",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "David R",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504291/cuartasilla/artistas/david-r/znl0n94fcb1p7tntyaas.jpg",
+      "instagram": "https://www.instagram.com/nekrocrust",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Ana Vázquez de la Torre",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504345/cuartasilla/artistas/ana-vazquez-de-la-torre/xwncbjynsfwizbhzk2l5.jpg",
+      "instagram": "https://www.instagram.com/delatorrevazquezana",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Sophia B. Heredia",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504386/cuartasilla/artistas/x1sdvw3tostw9shlptbj.jpg",
+      "instagram": "https://www.instagram.com/sophiabheredia",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Elizabeth Mejía",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504452/cuartasilla/artistas/qycl7g6r7nsc9rfkuezi.jpg",
+      "instagram": "https://www.instagram.com/lady.fuego/",
+      "sede": "Taller Industria Gráfica"
     }
   ],
   "archivo": [],
