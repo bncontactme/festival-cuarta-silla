@@ -1,7 +1,7 @@
 {
   "contrato": 2,
-  "version": 138,
-  "actualizado": "2026-09-15T02:26:28.932Z",
+  "version": 139,
+  "actualizado": "2026-09-15T02:32:34.841Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -32,7 +32,7 @@
       ]
     },
     {
-      "nombre": "Estudio Arrechiga",
+      "nombre": "Estudio Arechiga",
       "direccion": "Camarena 118, Col Americana, Americana, 44160 Guadalajara, Jal.",
       "instagram": "https://www.instagram.com/estudioarechiga/",
       "mapa": "https://maps.app.goo.gl/C1F4Us1jy6buYTJJA",
@@ -137,10 +137,6 @@
         20.673916,
         -103.366453
       ]
-    },
-    {
-      "nombre": "Todas Las Sedes",
-      "direccion": "Todas"
     },
     {
       "nombre": "Estampa Café",
