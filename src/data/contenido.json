@@ -1,7 +1,7 @@
 {
   "contrato": 2,
-  "version": 137,
-  "actualizado": "2026-09-15T01:50:49.112Z",
+  "version": 138,
+  "actualizado": "2026-09-15T02:26:28.932Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -196,13 +196,13 @@
         "libre": true
       },
       {
-        "titulo": "Oratoria Política",
+        "titulo": "Oratorio Político",
         "dia": 0,
         "inicio": "21:00",
         "fin": "22:00",
         "sede": "No Museo",
         "tipo": "escena",
-        "artista": "Oratoria Política",
+        "artista": "Oratorio Político",
         "libre": true
       },
       {
