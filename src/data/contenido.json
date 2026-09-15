@@ -1,7 +1,7 @@
 {
   "contrato": 2,
-  "version": 139,
-  "actualizado": "2026-09-15T02:32:34.841Z",
+  "version": 140,
+  "actualizado": "2026-09-15T02:40:33.134Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -256,7 +256,7 @@
         "dia": 1,
         "inicio": "18:00",
         "fin": "20:30",
-        "sede": "Salón Liminal",
+        "sede": "Estampa Café",
         "tipo": "taller",
         "artista": "Zahira Rico",
         "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
@@ -336,7 +336,7 @@
         "dia": 2,
         "inicio": "12:00",
         "fin": "14:00",
-        "sede": "Estudio Arrechiga",
+        "sede": "Estudio Arechiga",
         "tipo": "taller",
         "artista": "Comuna 9",
         "registro": "https://forms.gle/2YNFXExX9UvyG8qB6"
@@ -426,7 +426,7 @@
         "dia": 3,
         "inicio": "14:00",
         "fin": "18:00",
-        "sede": "Estudio Arrechiga",
+        "sede": "Estudio Arechiga",
         "tipo": "muestra",
         "artista": "Expositores",
         "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
