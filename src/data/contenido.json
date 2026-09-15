@@ -549,6 +549,16 @@
         "sede": "No Museo",
         "tipo": "muestra",
         "artista": "DocualParque"
+      },
+      {
+        "titulo": "Performance Xenoremas",
+        "dia": 1,
+        "inicio": "20:30",
+        "fin": "21:30",
+        "sede": "Taller Industria Gráfica",
+        "tipo": "escena",
+        "artista": "Neofantasías x Pasajeras o Testigo ft. Dis-föria",
+        "libre": true
       }
     ],
     "esEjemplo": false
