@@ -1664,5 +1664,12 @@
         "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788912491/cuartasilla/marcas/tlmhyrnd6vx3zjopj0rn.jpg"
       }
     ]
+  },
+  "festival": {
+    "manifiesto": {
+      "titulo": "¿Qué entendemos por arte conceptual?",
+      "cuerpo": "Entendemos el arte conceptual como una práctica crítica en la que las ideas, las preguntas y las tensiones que una obra provoca tienen mayor relevancia que su apariencia material. Se trata de generar pensamiento, abrir diálogos y cuestionar las estructuras culturales, políticas y sociales que organizan nuestra realidad.\n\nPartimos de la tradición del conceptualismo latinoamericano, que transformó el arte conceptual en una herramienta de intervención social. Desde esta perspectiva, la obra deja de ser un fin en sí mismo para convertirse en un medio de reflexión, resistencia y construcción de nuevas formas de imaginar el mundo.\n\nPor ello, en este festival nos preguntamos qué pone en discusión la obra, qué relaciones activa y qué posibilidades de transformación abre.",
+      "cierre": "El arte conceptual propone preguntas capaces de alterar nuestra manera de mirar y habitar la realidad."
+    }
   }
 }

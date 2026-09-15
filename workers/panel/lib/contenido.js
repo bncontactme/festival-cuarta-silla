@@ -8,8 +8,9 @@
 //   cs:build             marca de tiempo del último rebuild disparado
 //   fail:<ip>            intentos fallidos de contraseña (lo usa index.js)
 //
-// Las cinco colecciones son listas de menos de cien elementos: se guardan y se
-// leen enteras. Nada de paginar ni de índices — sería complicar un JSON de 30 KB.
+// Las cinco listas son de menos de cien elementos: se guardan y se leen enteras.
+// Nada de paginar ni de índices — sería complicar un JSON de 30 KB. La sexta,
+// `festival`, no es una lista: son dos textos y uno de cada.
 
 /**
  * El contrato. La forma de cada colección es EXACTAMENTE la de los tipos de
@@ -22,6 +23,12 @@ export const COLECCIONES = {
   artistas: { clave: 'cs:col:artistas', vacio: [] },
   archivo:  { clave: 'cs:col:archivo',  vacio: [] },
   marcas:   { clave: 'cs:col:marcas',   vacio: { patrocinadores: [] } },
+  /* Los dos textos del festival entero, los que no son de ninguna actividad: el
+     texto de sala de la entrada y el manifiesto de la portada. Va en una
+     colección y no en dos claves sueltas porque se editan juntos, en la misma
+     pestaña, y así el guardado es uno. `vacio` es un objeto pelado: sin sembrar
+     no hay ninguno de los dos, y cada lado lo dice a su manera. */
+  festival: { clave: 'cs:col:festival', vacio: {} },
 };
 
 export const NOMBRES = Object.keys(COLECCIONES);

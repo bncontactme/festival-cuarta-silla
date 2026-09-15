@@ -42,7 +42,22 @@ const TIPOS = ['taller', 'charla', 'muestra', 'escena'];
 const SEDE_TODAS = 'Todas las sedes';
 
 /**
- * @param nombre  cuál de las cinco colecciones
+ * La dirección del texto de sala del festival: `/sala/festival`.
+ *
+ * Es fija y no se acuña: el festival es uno, su texto es uno, y su página no
+ * puede cambiar de sitio porque su QR se cuelga en una puerta. Por eso aquí
+ * hace falta reservarla — una actividad titulada «Festival» acuñaría ese mismo
+ * `id` sin querer, y entonces habría dos cosas peleándose por una página: la
+ * suya y la del festival. Gana la estática de Astro, así que el que se queda
+ * sin página es el que nadie está mirando. Mejor decirlo al guardar.
+ *
+ * Mismo texto que `SALA_FESTIVAL` en `src/data/tipos.ts`; si cambia allí,
+ * cambia aquí — y sólo se puede cambiar mientras no haya nada impreso.
+ */
+const SALA_FESTIVAL = 'festival';
+
+/**
+ * @param nombre  cuál de las colecciones
  * @param datos   lo que mandó el panel
  * @param ctx     { sedes: string[] } — los nombres de sede vigentes, para
  *                emparejar. Los lee index.js de KV antes de llamar.
@@ -57,6 +72,7 @@ export function validar(nombre, datos, ctx = {}) {
     artistas: () => v.artistas(datos),
     archivo:  () => v.archivo(datos),
     marcas:   () => v.marcas(datos),
+    festival: () => v.festival(datos),
   }[nombre];
 
   if (!limpio) {
@@ -365,6 +381,21 @@ class Verificador {
     const vistos = new Map();
     actividades.forEach((a, i) => {
       if (!a.sala) return;
+
+      // `/sala/festival` es del festival y no de una actividad. Si alguien
+      // titula una «Festival», el panel acuña ese mismo `id` sin querer y
+      // entonces hay dos cosas peleándose por una página — y gana la ruta
+      // estática de Astro, así que el que se queda sin página es justo el que
+      // nadie está mirando. Ver `SALA_FESTIVAL`.
+      if (a.sala.id === SALA_FESTIVAL) {
+        this.error(
+          'programa[' + i + '].sala.id',
+          '«' + SALA_FESTIVAL + '» es la dirección del texto de sala del festival, no de una actividad. ' +
+            'Cámbiale la dirección a «' + (a.titulo || 'sin título') + '».',
+        );
+        return;
+      }
+
       const antes = vistos.get(a.sala.id);
       if (antes !== undefined) {
         this.error(
@@ -459,6 +490,90 @@ class Verificador {
     });
 
     return { patrocinadores: lista };
+  }
+
+  /**
+   * Los dos textos del festival entero: el de sala y el manifiesto.
+   *
+   * Es la única colección que no es una lista, y por eso no se parece al resto
+   * de este archivo: en los mensajes no hay índices porque no hay un tercer
+   * elemento al que señalar. Son dos textos, uno de cada.
+   *
+   * Lo que sí cambia entre los dos es qué pasa si se quedan en blanco, y sale
+   * de dónde se pinta cada uno:
+   *
+   *   · el **texto de sala** tiene página propia y un QR que se cuelga en una
+   *     puerta. Vacío es legítimo —todavía no lo han escrito— pero *publicado y
+   *     vacío* no: sería colgar un código que abre una hoja en blanco. Es la
+   *     misma regla de `sala()`, aquí arriba.
+   *   · el **manifiesto** no tiene página propia: es una sección de la portada
+   *     que lleva ahí desde el primer día. Vaciarlo no deja un hueco honesto,
+   *     deja una banda roja con un titular y nada debajo. Así que es requerido.
+   */
+  festival(datos) {
+    const d = datos && typeof datos === 'object' ? datos : {};
+    return podar({
+      sala: this.salaFestival(d.sala),
+      manifiesto: this.manifiesto(d.manifiesto),
+    });
+  }
+
+  /** El texto de sala del festival. Es `sala()` con dos diferencias: no lleva
+   *  `id` —la dirección es fija, ver `SALA_FESTIVAL`— y sí lleva título, que
+   *  allí lo pone la actividad y aquí no lo pone nadie. */
+  salaFestival(valor) {
+    if (!valor || typeof valor !== 'object') return undefined;
+
+    const cuerpo = this.parrafo(valor.cuerpo, 'festival.sala.cuerpo');
+    const publicado = this.bandera(valor.publicado);
+
+    if (publicado && !cuerpo) {
+      this.error(
+        'festival.sala',
+        'está marcado como publicado y no tiene texto: el QR de la puerta abriría una página en blanco',
+      );
+      return undefined;
+    }
+    if (!cuerpo) return undefined;
+
+    return podar({
+      titulo: this.texto(valor.titulo, 'festival.sala.titulo', { max: 120 }),
+      cuerpo,
+      firma: this.texto(valor.firma, 'festival.sala.firma', { max: 160 }),
+      publicado,
+    });
+  }
+
+  /**
+   * El manifiesto de la portada: título, párrafos y cierre.
+   *
+   * `cierre` es la frase que se pinta dos veces —de subtítulo en la banda roja
+   * y de remate al final del modal— así que es una línea y no un párrafo. El
+   * tope de 400 lo dice mejor que cualquier ayuda: a partir de ahí deja de
+   * caber donde va.
+   *
+   * Sin nada escrito no se queja: mientras nadie lo haya tocado, la clave no
+   * existe y el sitio tira del texto que trae de fábrica. Lo que no se puede es
+   * BORRARLO, que es otra cosa — y ésa sí se rechaza.
+   */
+  manifiesto(valor) {
+    if (!valor || typeof valor !== 'object') return undefined;
+
+    const titulo = this.texto(valor.titulo, 'festival.manifiesto.titulo', { max: 160, requerido: true });
+    const cuerpo = this.parrafo(valor.cuerpo, 'festival.manifiesto.cuerpo');
+    if (!cuerpo) {
+      this.error(
+        'festival.manifiesto.cuerpo',
+        'hace falta: el manifiesto es una sección de la portada y no puede quedarse en blanco',
+      );
+      return undefined;
+    }
+
+    return podar({
+      titulo,
+      cuerpo,
+      cierre: this.texto(valor.cierre, 'festival.manifiesto.cierre', { max: 400 }),
+    });
   }
 }
 

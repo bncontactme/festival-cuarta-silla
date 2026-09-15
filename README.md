@@ -207,10 +207,12 @@ src/
   styles/global.css   tokens, componentes, las tres capas de movimiento
   styles/movil.css    el sitio móvil entero (una sola media query)
   styles/panel.css    el panel; CSS propio, no el del sitio
+  lib/analitica.ts    el token del faro de visitas (vacío = no se mide nada)
   scripts/motion.ts   Lenis + reveals + partidor + cuenta + menú + entrada
-  scripts/panel/      el panel: api, esquema, campos, tabla, previa
+  scripts/panel/      el panel: api, esquema, campos, tabla, previa, sala,
+                      registro, festival (los dos textos del festival)
   layouts/Base.astro  head, SEO, JSON-LD, nav, pie, reparto móvil/escritorio
-  components/         Nav, Footer, Marquee, Silla, Encabezado
+  components/         Nav, Footer, Marquee, Silla, Encabezado, Analitica
   components/movil/   Portada (con la entrada), Pantalla
   pages/              index, programa, artistas, sedes, archivo, registro,
                       privacidad, 404
@@ -218,6 +220,32 @@ src/
 scripts/instantanea.mjs   baja el contenido del panel antes de cada build
 workers/panel/            el Worker: KV, validación, Cloudinary, historial
 ```
+
+## Cuánta gente entra
+
+**Cloudflare Web Analytics**, y está montado esperando un token igual que las
+donaciones esperan su enlace: mientras `FARO` esté vacío en
+[`src/lib/analitica.ts`](src/lib/analitica.ts) **no se escribe ni una etiqueta**
+en ninguna página, no sale una petición de más, y la política de privacidad no
+menciona nada — porque no habría nada que mencionar.
+
+Para encenderlo: en el panel de Cloudflare, Analytics & Logs → Web Analytics →
+Add a site, se escribe `www.festivaldearteconceptual.com`, y del fragmento que
+devuelve se copia el `token` (32 caracteres) a ese archivo. No es un secreto:
+viaja en el HTML de todas las páginas. El siguiente build lo lleva.
+
+Por qué éste y no otro: la cuenta de Cloudflare ya existe —ahí vive el Worker
+del panel—, **no pone cookies ni huella digital**, así que el sitio se queda sin
+banner de consentimiento, y no hace falta mover el DNS, que sigue atrapado en
+Wix. Google Analytics traía las tres cosas contrarias.
+
+**Lo que de verdad se quiere contar está en `/sala/…`.** Las cartelas y las
+hojas de QR son papel pegado a una pared, y hasta ahora no había forma de saber
+si alguien las escaneaba. Cada página de sala cuenta sus visitas: eso es el
+número por el que se decide, el año que viene, si se imprimen más o menos.
+
+Va en las páginas públicas y **no en `/admin`** — contar las visitas de la
+herramienta sólo ensucia el número que importa.
 
 ## URLs
 

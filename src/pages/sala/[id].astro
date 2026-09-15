@@ -13,11 +13,15 @@
  * Lo que sí comparte con el sitio es `global.css`: la paleta y las tipografías,
  * porque esto es del festival y tiene que verse del festival.
  *
- * Cero JavaScript. La página es HTML y una hoja de estilos, y eso es todo lo
- * que tiene que llegar por una red de sala de concreto.
+ * Cero JavaScript propio. La página es HTML y una hoja de estilos, y eso es
+ * todo lo que tiene que llegar por una red de sala de concreto. Lo único que se
+ * añadió después es el faro de visitas —`Analitica`, al final del `<body>`—, y
+ * entró porque es justo aquí donde hacía falta: sin él no hay forma de saber si
+ * alguien escanea los códigos que se imprimen. Va `defer` y después del texto.
  */
 import '../../styles/global.css';
 import { conBase } from '../../lib/base';
+import Analitica from '../../components/Analitica.astro';
 import {
   actividadesConSala,
   parrafosDe,
@@ -137,5 +141,11 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
         {festival.nombreCompleto} · {festival.fechas} · {festival.ciudad}
       </p>
     </main>
+
+    {/* La única excepción al «cero JavaScript» de aquí arriba, y es por lo que
+        esta página existe: es papel pegado a una pared y hasta ahora no había
+        forma de saber si alguien lo escaneaba. Son unos KB, no bloquean, y
+        llegan DESPUÉS del texto; si no cargan, la página ni se entera. */}
+    <Analitica />
   </body>
 </html>

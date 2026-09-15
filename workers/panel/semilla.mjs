@@ -39,7 +39,7 @@ const datos = JSON.parse(await readFile(ORIGEN, 'utf8'));
 
 // Las sedes primero: el programa y las fichas de artistas se validan contra
 // ellas, y contra un panel vacío no habría ninguna que emparejar.
-const ORDEN = ['sedes', 'programa', 'artistas', 'archivo', 'marcas'];
+const ORDEN = ['sedes', 'programa', 'artistas', 'archivo', 'marcas', 'festival'];
 
 console.log(`\nSembrando ${PANEL}\ndesde ${ORIGEN}\n`);
 
@@ -64,9 +64,12 @@ for (const coleccion of ORDEN) {
     continue;
   }
 
+  // `festival` no tiene listas dentro —son dos textos— así que ahí se cuentan
+  // las claves: decir «0 elementos» de algo que acaba de entrar es mentir.
   const cuantos = Array.isArray(datos[coleccion])
     ? datos[coleccion].length
-    : Object.values(datos[coleccion]).filter(Array.isArray).flat().length;
+    : Object.values(datos[coleccion] ?? {}).filter(Array.isArray).flat().length ||
+      Object.keys(datos[coleccion] ?? {}).length;
   console.log(`  ✓ ${coleccion.padEnd(10)} ${String(cuantos).padStart(3)} elementos → versión ${r.version}`);
   (r.avisos ?? []).forEach((a) => console.log(`       ⚠ ${a}`));
 }

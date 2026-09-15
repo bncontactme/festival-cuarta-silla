@@ -141,6 +141,7 @@ cs:col:programa        { actividades: ActividadGantt[], esEjemplo, registro }
 cs:col:artistas        Artista[]
 cs:col:archivo         Edicion[]
 cs:col:marcas          { patrocinadores: Marca[] }
+cs:col:festival        { sala: SalaFestival, manifiesto: Manifiesto }
 
 cs:meta                { version, actualizado, ultimoDeploy }
 cs:hist:<version>      instantánea completa (se conservan las últimas 20)
@@ -341,8 +342,10 @@ decoración, es que se entienda de un vistazo dónde estás.
 No usa el layout del sitio: nada de Lenis, ni cortinas, ni portada. Layout
 propio, denso, de teclado.
 
-**Seis pestañas**: cinco de colección y la de Registro, que no es una colección
-sino el programa mirado por otra puerta. Las de colección, cada una:
+**Siete pestañas**: cinco de colección, la de Registro —que no es una colección
+sino el programa mirado por otra puerta— y la de Texto de sala / Manifiesto, que
+sí es una colección pero no es una lista: son dos textos y uno de cada. Las de
+lista, cada una:
 
 - Lista editable, **una fila plegada por elemento**: título y los cuatro datos
   que la identifican. Se abre la que se va a tocar. Diecinueve actividades
@@ -528,6 +531,79 @@ comparó y qué dos fallos cazó la comparación antes de que nada se imprimiera
 Y del lado del público son dos cosas y nada más: un botón de más en la ficha de
 la rejilla y un renglón subrayado en las listas de `/programa`, **sólo cuando
 hay texto publicado**. Nunca apagado — la misma regla que el registro.
+
+### Los dos textos del festival
+
+Las descripciones son de una actividad. Lo del festival entero es otra cosa, y
+son dos: el **texto de sala** que iría en la pared de la entrada —que no existía
+en ninguna parte— y el **manifiesto**, que existía desde el primer día pero
+escrito a mano en `src/data/site.ts`, así que cambiarle una coma era tocar
+código y esperar un despliegue.
+
+Viven en una pestaña, **Texto de sala / Manifiesto**, y se pasa de uno a otro
+con el conmutador de burbuja — el mismo de Programa/Horarios y el de elegir
+cartelas, y a propósito: es una cosa o la otra, no dos ajustes que se pueden dar
+a la vez. Dos pestañas para dos textos habrían sido dos pestañas casi siempre
+vacías.
+
+**No son listas y eso cambia todo lo demás.** Uno de cada. Una lista de textos
+de sala del festival es una lista de la que sólo puede haber una fila buena, y
+el día que haya dos nadie va a saber cuál se está leyendo en la puerta. De ahí
+salen las dos diferencias con las descripciones:
+
+- **La dirección no se acuña: es fija.** `/sala/festival`, desde antes de que
+  nadie escriba el título. Las de las actividades salen del título porque hay
+  muchas y hay que distinguirlas; aquí no hay nada que distinguir. Lo que sí
+  hace falta es **reservarla**: una actividad titulada «Festival» acuñaría ese
+  mismo `id` sin querer, y entonces habría dos páginas peleándose por una ruta
+  —gana la estática de Astro, o sea la del festival— dejando sin página a la
+  actividad, que es justo la que nadie estaría mirando. El validador lo rechaza
+  al guardar, igual que hace con «Todas las sedes».
+- **El manifiesto no tiene borrador.** No tiene página propia que aparezca o
+  desaparezca: es una sección de la portada que lleva ahí desde el primer día.
+  Lo que se puede hacer con él es escribirlo mejor, no apagarlo — así que
+  vaciarlo se rechaza. El texto de sala sí lo tiene, y por lo de siempre: en
+  borrador no hay página, y sin página no se cuelga la hoja de QR.
+
+**El manifiesto se guarda antes de que la portada lo lea, y eso es a propósito.**
+Hoy la portada sigue tirando de `site.ts`: la pestaña escribe y guarda, y el
+sitio no se entera todavía. Es una línea de `site.ts` el día que se quiera —
+`manifiesto` seguirá exportando `{ titulo, parrafos, cierre }`, así que ni
+`index.astro` ni `movil/Portada.astro` se enteran del cambio— y mientras tanto
+la pestaña lo dice en un cartel, para que nadie escriba ahí creyendo que sale
+publicado.
+
+Dos cosas de la pestaña que no son adorno:
+
+- Cuando el manifiesto del panel está en blanco, **se ofrece traer el que está
+  publicado** en vez de enseñar una caja vacía. El texto ya existe y está a la
+  vista en la portada; una caja en blanco invita a reescribirlo desde cero y de
+  paso hace pensar que se ha perdido. Viaja desde `site.ts` por el mismo
+  `<script>` que los días — el panel no puede importar el sitio.
+- Al lado del manifiesto se pinta **la banda roja de la portada en chiquito**,
+  rehecha mientras se escribe. No pretende ser fiel al píxel: contesta la única
+  pregunta que una caja de texto no contesta, que es en cuántas líneas se parte
+  el título.
+
+**La página lleva los dos textos.** `/sala/festival` abre con el texto de sala
+—quien acaba de escanear está de pie en la puerta y lo que pregunta es «qué es
+esto»— y debajo, tras el filete, el manifiesto entero con su cierre. Un código,
+una página, todo lo que el panel guarda.
+
+**Y se construye siempre, publicado o no.** Ésa es la diferencia con
+`/sala/<id>`, y no es un descuido: esa página es también la casa del manifiesto,
+así que existe aunque el texto de sala esté en borrador. El día que alguien lo
+pase a borrador con el papel ya colgado, **el QR de la puerta no se rompe** — lo
+que se pierde es el texto, no la página. Por eso aquí el borrador se explica al
+revés que en las descripciones: no es «no hay página todavía», es «tu texto no
+sale en ella».
+
+**Lo que se imprime es una hoja de QR y nada más.** Una hoja entera, el código a
+quince centímetros, el título encima. Cartela no: la etiqueta de un tercio de
+hoja existe para ponerla al lado de una obra, y esto no es una obra. La hoja la
+saca la misma máquina que las de las actividades — `imprimirHojasQR()` en
+`sala.ts` dejó de pedir actividades y pide lo que de verdad necesita: un título,
+una dirección y qué pone en el cabecero.
 
 ### Que no se pisen dos personas
 
