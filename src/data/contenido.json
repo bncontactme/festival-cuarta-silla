@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 147,
-  "actualizado": "2026-09-15T20:45:18.159Z",
+  "version": 148,
+  "actualizado": "2026-09-15T22:28:29.546Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1593,6 +1593,24 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504452/cuartasilla/artistas/qycl7g6r7nsc9rfkuezi.jpg",
       "instagram": "https://www.instagram.com/lady.fuego/",
       "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Ale Hernández",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789511150/cuartasilla/artistas/g8t7y9kwka8m0pec3un6.jpg",
+      "instagram": "https://www.instagram.com/alejandrahrosas",
+      "sede": "Estudio Arechiga"
+    },
+    {
+      "nombre": "Abigail Arias",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789511219/cuartasilla/artistas/nvym1mqfg9dbla3eaup1.jpg",
+      "instagram": "https://www.instagram.com/abigail.ujrm",
+      "sede": "Estudio Arechiga"
+    },
+    {
+      "nombre": "Ximena Contreras",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789511266/cuartasilla/artistas/aezezxulis6zwotmzcof.jpg",
+      "instagram": "https://www.instagram.com/xim_.c_",
+      "sede": "Estudio Arechiga"
     }
   ],
   "archivo": [],
