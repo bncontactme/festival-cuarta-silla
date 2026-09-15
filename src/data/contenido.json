@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 145,
-  "actualizado": "2026-09-15T20:44:45.308Z",
+  "version": 147,
+  "actualizado": "2026-09-15T20:45:18.159Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1469,6 +1469,12 @@
       "sede": "Días Feriados"
     },
     {
+      "nombre": "Valentina",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789456837/cuartasilla/artistas/lksn8sxf3mlem6vmodxr.jpg",
+      "instagram": "https://www.instagram.com/valvaldez.a?stkn=MXJjb2plNnV5Zmg2bw==",
+      "sede": "Estudio Arechiga"
+    },
+    {
       "nombre": "Karen Serrato Trejo",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161191/cuartasilla/artistas/xm6o7hxb7dzgf7pyuhz4.jpg",
       "instagram": "https://www.instagram.com/h4da_caid4/",
@@ -1491,6 +1497,12 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161675/cuartasilla/artistas/tpblaqapoqbaiz111h4b.jpg",
       "instagram": "https://www.instagram.com/cast_0104/",
       "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Tetépetl 107",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789505048/cuartasilla/artistas/y5tsbh961zjxbknenlmh.jpg",
+      "instagram": "https://www.instagram.com/tetepetl_107/",
+      "sede": "Cuerpos Parlantes"
     },
     {
       "nombre": "Mariluz Robles Farias",
@@ -1547,12 +1559,6 @@
       "sede": "Taller Industria Gráfica"
     },
     {
-      "nombre": "Valentina",
-      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789456837/cuartasilla/artistas/lksn8sxf3mlem6vmodxr.jpg",
-      "instagram": "https://www.instagram.com/valvaldez.a?stkn=MXJjb2plNnV5Zmg2bw==",
-      "sede": "Estudio Arechiga"
-    },
-    {
       "nombre": "Ham",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789503965/cuartasilla/artistas/e4jydklwnjprewtzuqz6.jpg",
       "instagram": "https://www.instagram.com/pasajera_o_testigo",
@@ -1587,12 +1593,6 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504452/cuartasilla/artistas/qycl7g6r7nsc9rfkuezi.jpg",
       "instagram": "https://www.instagram.com/lady.fuego/",
       "sede": "Taller Industria Gráfica"
-    },
-    {
-      "nombre": "Pedro A.C. & Lied Jarán",
-      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789505048/cuartasilla/artistas/y5tsbh961zjxbknenlmh.jpg",
-      "instagram": "https://www.instagram.com/tetepetl_107/",
-      "sede": "Cuerpos Parlantes"
     }
   ],
   "archivo": [],
