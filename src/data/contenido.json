@@ -1,7 +1,7 @@
 {
   "contrato": 2,
-  "version": 140,
-  "actualizado": "2026-09-15T02:40:33.134Z",
+  "version": 141,
+  "actualizado": "2026-09-15T03:57:06.993Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -618,13 +618,13 @@
       "nombre": "Santiago García",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788375534/cuartasilla/artistas/icm1nyvxtztznm4h5ezr.jpg",
       "instagram": "https://www.instagram.com/_insufrible/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Paola Anaid Rodríguez Ávila",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788376537/cuartasilla/artistas/paola-anaid-rodriguez-avila/n8o3qlfwebyttilqaqs0.jpg",
       "instagram": "https://www.instagram.com/anaiddmonroy/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Andrés Blas",
@@ -642,7 +642,7 @@
       "nombre": "Arhat Alejandro.",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788376709/cuartasilla/artistas/arhat-alejandro/qla04exj4cufarzjpt65.jpg",
       "instagram": "https://www.instagram.com/arhat.alejandro/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Alejandra Muñoz",
@@ -666,7 +666,7 @@
       "nombre": "Enrique Chiu",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788389212/cuartasilla/artistas/n2jc6sq0e4nepmwk5kas.jpg",
       "instagram": "https://www.instagram.com/enriquechiuarte/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Oro Radio",
@@ -696,7 +696,7 @@
       "nombre": "Alejandro Sánchez Rivera",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788655485/cuartasilla/artistas/alejandro-sanchez-rivera/fytocsrwgqmqwky99nzy.jpg",
       "instagram": "https://www.instagram.com/alejo.sanrive/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Alheli Contreras",
@@ -708,7 +708,7 @@
       "nombre": "Ana Elena Morfin",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788655565/cuartasilla/artistas/ana-elena-morfin/cm4hsnicokinxqwpemhs.jpg",
       "instagram": "https://www.instagram.com/cubyys/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Andrea Torrencial",
@@ -732,7 +732,7 @@
       "nombre": "Aranzazú Ramos",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788655719/cuartasilla/artistas/aranzazu-ramos/zjywbpe64yaufhfgf0wi.jpg",
       "instagram": "https://www.instagram.com/aranzazuram/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Ari Garcia",
@@ -774,7 +774,7 @@
       "nombre": "César Estrada",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788656131/cuartasilla/artistas/yi2tfsiqz4hmto2ktjwc.jpg",
       "instagram": "https://www.instagram.com/pictoriano/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Christian Becerra",
@@ -792,7 +792,7 @@
       "nombre": "Dana Yanira",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788656259/cuartasilla/artistas/rh7dmzz9lntsacbkmvjx.jpg",
       "instagram": "https://www.instagram.com/yanira___aa/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Dario Sandoval",
@@ -834,7 +834,7 @@
       "nombre": "Diego Ortiz S.",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788656620/cuartasilla/artistas/diego-ortiz-s/ikyfrcpizdxlikemaj82.jpg",
       "instagram": "https://www.instagram.com/medias.rasgadas/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Orizaba 24",
@@ -912,7 +912,7 @@
       "nombre": "Gallo Gang",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902542/cuartasilla/artistas/l1uaeoh1qym2mewsd1jc.jpg",
       "instagram": "https://www.instagram.com/enelcorraldelgallo/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Genesis Pinedo Martinez",
@@ -924,7 +924,7 @@
       "nombre": "Iskar",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902869/cuartasilla/artistas/uuanemjxz2yu1hofiqno.jpg",
       "instagram": "https://www.instagram.com/iskar.art/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Iván García",
@@ -936,7 +936,7 @@
       "nombre": "Ixchel Sabina Aguilar Flores",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788902965/cuartasilla/artistas/mt8ofheihnwm3iqvle8t.jpg",
       "instagram": "https://www.instagram.com/xelsab/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Lasser",
@@ -966,7 +966,7 @@
       "nombre": "Jessica D. Sanguino González",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903237/cuartasilla/artistas/peo9nxmw2cfxfcuwa5em.jpg",
       "instagram": "https://www.instagram.com/gota.ddessden/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Jesús Irene",
@@ -984,7 +984,7 @@
       "nombre": "Job Samaniego Rivera",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903449/cuartasilla/artistas/g35zfr0srjxpj2lsrhvj.jpg",
       "instagram": "https://www.instagram.com/tapatixtriste/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "José G. Rivera",
@@ -1050,7 +1050,7 @@
       "nombre": "Luis Flores Valente",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788903959/cuartasilla/artistas/rz8qvmxbciwisbarqbck.jpg",
       "instagram": "https://www.instagram.com/unpezdebabel/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Luisa Dozell",
@@ -1122,13 +1122,13 @@
       "nombre": "Bohemia",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905036/cuartasilla/artistas/mia/uyjjs1qj3uivcvfn0jyd.jpg",
       "instagram": "https://www.instagram.com/esabohemia/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Miguel Ángel Vega Magallón",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905079/cuartasilla/artistas/q1z2aukqvjkbjssdvqhp.jpg",
       "instagram": "https://www.instagram.com/vegamvm/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Miguel Galindo Alvarado",
@@ -1170,7 +1170,7 @@
       "nombre": "Natalia Robles",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788905448/cuartasilla/artistas/dxudbdenrmnbsdfi2xv4.jpg",
       "instagram": "https://www.instagram.com/roblerojo_/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Oliver O Casillas",
@@ -1245,12 +1245,6 @@
       "sede": "No Museo"
     },
     {
-      "nombre": "Roberto Vázquez Hernández",
-      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906406/cuartasilla/artistas/htxunou7bkd9czyjugwd.jpg",
-      "instagram": "https://www.instagram.com/xehan.art/",
-      "sede": "Estudio Arrechiga"
-    },
-    {
       "nombre": "Rodrigo Cacho",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788906884/cuartasilla/artistas/rodrigo-cacho/gh8jhgxmmophu4vf0vai.jpg",
       "instagram": "https://www.instagram.com/rodrigo_cacho/",
@@ -1290,7 +1284,7 @@
       "nombre": "Silvia Grace Donovan Galindo",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907082/cuartasilla/artistas/silvia-grace-donovan-galindo/xp7kbddeb7s5vzpgg81e.jpg",
       "instagram": "https://www.instagram.com/silvia.donovann/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Sinuhe de Jesús Anica Saavedra",
@@ -1308,7 +1302,7 @@
       "nombre": "Syndell Razo",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1788907215/cuartasilla/artistas/syndell-razo/x7qsd0y9w5o2azbiwvzx.jpg",
       "instagram": "https://www.instagram.com/syndellrazoarchivo/",
-      "sede": "Estudio Arrechiga"
+      "sede": "Estudio Arechiga"
     },
     {
       "nombre": "Valeria Luna",
