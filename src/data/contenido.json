@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 144,
-  "actualizado": "2026-09-15T20:34:27.035Z",
+  "version": 145,
+  "actualizado": "2026-09-15T20:44:45.308Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1587,6 +1587,12 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504452/cuartasilla/artistas/qycl7g6r7nsc9rfkuezi.jpg",
       "instagram": "https://www.instagram.com/lady.fuego/",
       "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Pedro A.C. & Lied Jarán",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789505048/cuartasilla/artistas/y5tsbh961zjxbknenlmh.jpg",
+      "instagram": "https://www.instagram.com/tetepetl_107/",
+      "sede": "Cuerpos Parlantes"
     }
   ],
   "archivo": [],
