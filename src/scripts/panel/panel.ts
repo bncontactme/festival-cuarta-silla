@@ -34,10 +34,10 @@ const RAIZ: string = config.raiz || location.origin + '/';
  * El manifiesto que hoy está publicado, tal cual está escrito en `site.ts`.
  *
  * Viaja en el `<script>` de la página como los días, y por lo mismo: el panel no
- * puede importar el sitio. Sirve para una sola cosa —ofrecerlo en la pestaña de
- * Texto de sala / Manifiesto cuando ahí todavía no hay nada escrito— y esa cosa
- * importa: el manifiesto ya existe y está a la vista en la portada, así que una
- * caja en blanco invitaría a reescribir desde cero un texto que ya está hecho.
+ * puede importar el sitio. Con esto se llenan las cajas de la pestaña de Texto
+ * de sala / Manifiesto mientras el panel no tenga nada suyo, y esa cosa importa:
+ * el manifiesto ya existe y está a la vista en la portada, así que un formulario
+ * en blanco haría creer que no hay nada escrito.
  */
 const MANIFIESTO_DEL_SITIO: { titulo: string; cuerpo: string; cierre: string } =
   config.manifiesto ?? { titulo: '', cuerpo: '', cierre: '' };

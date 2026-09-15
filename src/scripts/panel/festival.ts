@@ -76,8 +76,6 @@ export function pintarFestival(estado: any, ctx: Ctx): HTMLElement {
   const seccion = el('section');
   const cuerpo = el('div');
 
-  const pie = el('span', { class: 'mandos-nota' });
-
   /* El conmutador de siempre: las dos celdas miden lo mismo, así que la burbuja
      no se mide — se le dice en cuál está y CSS la desliza. */
   const conmutador = el('div', {
@@ -89,11 +87,6 @@ export function pintarFestival(estado: any, ctx: Ctx): HTMLElement {
     ['sala', 'Texto de sala', 'El de la pared de la entrada, con su página y su QR'],
     ['manifiesto', 'Manifiesto', 'El de la banda roja de la portada'],
   ] as const;
-
-  const NOTA: Record<string, string> = {
-    sala: 'Los dos son del festival entero y ninguno es de una actividad. El de sala tiene página propia; el manifiesto es el de la portada.',
-    manifiesto: 'El mismo texto que hoy vive escrito en el código del sitio, ahora editable desde aquí.',
-  };
 
   ROTULOS.forEach(([clave, texto, ayuda], i) => {
     conmutador.append(el('button', {
@@ -115,11 +108,10 @@ export function pintarFestival(estado: any, ctx: Ctx): HTMLElement {
    *  esto — y de paso se llevaría el foco de donde estuviera. */
   function repintar() {
     vaciar(cuerpo);
-    pie.textContent = NOTA[vista];
-    cuerpo.append(vista === 'sala' ? vistaSala(f, ctx, repintar) : vistaManifiesto(f, ctx, repintar));
+    cuerpo.append(vista === 'sala' ? vistaSala(f, ctx, repintar) : vistaManifiesto(f, ctx));
   }
 
-  seccion.append(el('div', { class: 'mandos' }, conmutador, pie), cuerpo);
+  seccion.append(el('div', { class: 'mandos' }, conmutador), cuerpo);
   repintar();
   return seccion;
 }
@@ -156,9 +148,10 @@ function vistaSala(f: any, ctx: Ctx, repintar: () => void): HTMLElement {
   }
   contar();
 
+  /* Los rótulos hacen el trabajo y los marcadores de posición enseñan el resto:
+     la ayuda se queda sólo donde dice algo que no se adivina mirando la caja. */
   const formulario = el('div', { class: 'festival-caja' },
-    campo('festival-sala-titulo', 'Título',
-      'Lo que va en grande arriba de la página. Si se deja vacío, sale el nombre del festival.',
+    campo('festival-sala-titulo', 'Título', '',
       el('input', {
         type: 'text', id: 'festival-sala-titulo', value: f.sala?.titulo ?? '',
         placeholder: 'La Cuarta Silla',
@@ -166,12 +159,10 @@ function vistaSala(f: any, ctx: Ctx, repintar: () => void): HTMLElement {
       })),
 
     campo('festival-sala-cuerpo', 'El texto',
-      'Lo que estaría impreso en la pared. Deja una línea en blanco entre párrafos. ' +
-      'Se lee de pie y en un teléfono: tres o cuatro párrafos cortos se leen enteros, dos mil palabras no.',
+      'Una línea en blanco entre párrafos. Se lee de pie: tres o cuatro cortos.',
       cuerpo, cuenta),
 
-    campo('festival-sala-firma', 'Firma',
-      'Quién lo escribe. Va al pie de la página, en pequeño. Puede quedarse vacío.',
+    campo('festival-sala-firma', 'Firma', '',
       el('input', {
         type: 'text', id: 'festival-sala-firma', value: f.sala?.firma ?? '',
         placeholder: 'Texto: nombre de quien lo firma',
@@ -192,14 +183,10 @@ function vistaSala(f: any, ctx: Ctx, repintar: () => void): HTMLElement {
     // se puede fotografiar de la pantalla es un código que alguien va a pegar.
     publicado ? qrChico(url) : el('div', { class: 'qr-hueco' }, 'Aquí va el QR'),
 
-    el('div', { class: 'direccion' },
+    el('div', { class: 'direccion', title: 'Es lo que va dentro del QR y no cambia nunca, pase lo que pase con el título' },
       el('code', {}, url.replace(/^https?:\/\//, '')),
       el('span', { class: 'candado' }, '🔒 No se mueve'),
     ),
-    el('span', { class: 'ayuda' },
-      'Es lo que va dentro del QR y no cambia nunca, pase lo que pase con el título. ' +
-      'No se acuña como las de las actividades: el festival es uno, y su página existe antes ' +
-      'de que nadie escriba nada.'),
 
     el('label', { class: 'sino', for: 'festival-sala-publicado' },
       el('input', {
@@ -234,22 +221,28 @@ function vistaSala(f: any, ctx: Ctx, repintar: () => void): HTMLElement {
     ),
   );
 
+  /* Dos cajas y ni un cartel amarillo. Lo que había —tres renglones de ayuda y
+     un aviso de cuatro— decía cosas verdaderas que nadie iba a leer dos veces:
+     lo que se lee de una pestaña que se usa cinco veces en la vida es el rótulo
+     del botón y, como mucho, el renglón de debajo. El resto vive en los `title`,
+     que están ahí para quien pregunte. */
   const imprimir = el('div', { class: 'festival-caja' },
-    el('span', { class: 'rotulo', style: 'opacity:.65' }, 'Lo que sale por la impresora'),
     el('button', {
       type: 'button', class: 'boton fuerte', disabled: !publicado,
       title: publicado
-        ? 'Una hoja entera con el código, para colgar en la entrada'
+        ? 'Una hoja entera con el código a 15 cm y el título encima, para colgar en la entrada'
         : 'Publícalo primero: en borrador el código llevaría a una página sin tu texto',
       onclick: () => imprimirHojasQR(
         [{ titulo: f.sala?.titulo || 'Cuarta Silla', url, cab: 'Texto de sala' }],
         ctx.avisar,
       ),
     }, 'Hoja de QR — 1 hoja'),
+    // La única frase que de verdad evita un error: la página se rehace minuto y
+    // medio después de guardar, y el papel no se recoge.
     el('span', { class: 'ayuda' },
-      'Una hoja entera con el código a quince centímetros y el título encima: el cartel de la ' +
-      'puerta, el que se escanea desde donde estás sin acercarte. Cartela no hay —la etiqueta ' +
-      'de un tercio de hoja es para ponerla al lado de una obra, y esto no es una obra—.'),
+      publicado
+        ? 'Guarda y espera el «publicado ✓» de arriba antes de imprimir.'
+        : 'En borrador la página existe, pero sin tu texto.'),
     el('a', {
       class: 'boton', href: url, target: '_blank', rel: 'noopener',
     }, 'Ver la página ↗'),
@@ -257,44 +250,54 @@ function vistaSala(f: any, ctx: Ctx, repintar: () => void): HTMLElement {
 
   lado.append(tarjeta, imprimir);
 
-  if (!publicado) {
-    lado.append(el('div', { class: 'aviso ojo' },
-      el('h3', {}, 'En borrador'),
-      el('p', {},
-        'La página existe igual —es la del manifiesto también, así que no hay forma de que ' +
-        'ese código lleve a un 404— pero tu texto no sale en ella hasta que marques ' +
-        '«Enseñarlo en el sitio». Por eso la hoja no se imprime todavía.'),
-    ));
-  } else {
-    lado.append(el('div', { class: 'aviso ojo' },
-      el('h3', {}, 'Antes de colgar la hoja'),
-      el('p', {},
-        'Publicado en el panel no es publicado en el sitio: la página se rehace un minuto y ' +
-        'medio después de guardar. Dale a Guardar, espera a que la barra de arriba diga ' +
-        '«publicado ✓», y entonces imprime.'),
-    ));
-  }
-
   return el('div', {},
     cabecera('Texto de sala del festival', 'Uno solo · toda la edición',
-      'El que iría en la pared de la entrada: qué es esta edición y cómo se lee lo que hay ' +
-      'dentro. No es de ninguna actividad —para eso está la descripción de cada una, en ' +
-      'Programa— y por eso vive aquí. El sitio le da una página y de ahí sale la hoja de QR ' +
-      'que se cuelga en la puerta.'),
+      'El que va en la pared de la entrada. Tiene página propia y su hoja de QR.'),
     el('div', { class: 'festival-dos' }, formulario, lado),
   );
 }
 
 // ── El manifiesto ────────────────────────────────────────────────────────────
 
-function vistaManifiesto(f: any, ctx: Ctx, repintar: () => void): HTMLElement {
-  const mani = () => (f.manifiesto ??= {});
-  const hay = Boolean(f.manifiesto?.cuerpo);
+function vistaManifiesto(f: any, ctx: Ctx): HTMLElement {
+  /**
+   * El manifiesto que hoy está publicado, tal cual está escrito en el código.
+   *
+   * **Con esto se llenan las cajas cuando el panel todavía no tiene nada.** Aquí
+   * hubo una caja en blanco y un botón de «traer el que está publicado», y era
+   * un paso de más para llegar al mismo sitio: el manifiesto EXISTE y está a la
+   * vista en la portada, así que enseñar un formulario vacío es hacerle creer a
+   * quien abre esto que no hay nada escrito.
+   */
+  const semilla = ctx.manifiestoDelSitio();
+
+  /** Si lo escrito sale del panel o todavía es lo que trae el código. Sólo
+   *  cambia lo que dice la nota del lado. */
+  const delPanel = Boolean(f.manifiesto?.cuerpo);
+
+  /**
+   * La caja del panel, creada en el momento en que se toca algo.
+   *
+   * Nace **con el texto publicado dentro**, no vacía, y ahí está el detalle que
+   * importa: si naciera vacía, cambiar sólo el título mandaría al Worker un
+   * manifiesto con título y sin párrafos —los párrafos se estarían leyendo de
+   * una caja que el modelo no tiene— y el guardado se caería con un error que
+   * no se parece en nada a lo que se acaba de hacer.
+   *
+   * Y no se crea al pintar, sino al primer cambio: crearla al pintar dejaría el
+   * panel diciendo «1 sección sin guardar» nada más abrir la pestaña, sin que
+   * nadie haya tocado una tecla.
+   */
+  const mani = () => (f.manifiesto ??= {
+    titulo: semilla.titulo,
+    cuerpo: semilla.cuerpo,
+    ...(semilla.cierre ? { cierre: semilla.cierre } : {}),
+  });
 
   const cuenta = el('p', { class: 'cuentaletras' });
   const cuerpo = el('textarea', {
     id: 'festival-mani-cuerpo', class: 'alto',
-    value: f.manifiesto?.cuerpo ?? '',
+    value: f.manifiesto?.cuerpo ?? semilla.cuerpo,
     placeholder: 'Un párrafo, una línea en blanco, otro párrafo…',
     oninput: (e: any) => {
       mani().cuerpo = e.target.value;
@@ -314,13 +317,13 @@ function vistaManifiesto(f: any, ctx: Ctx, repintar: () => void): HTMLElement {
   }
 
   const titulo = el('input', {
-    type: 'text', id: 'festival-mani-titulo', value: f.manifiesto?.titulo ?? '',
+    type: 'text', id: 'festival-mani-titulo', value: f.manifiesto?.titulo ?? semilla.titulo,
     placeholder: '¿Qué entendemos por arte conceptual?',
     oninput: (e: any) => { mani().titulo = e.target.value; previa(); ctx.cambiado(); },
   });
 
   const cierre = el('textarea', {
-    id: 'festival-mani-cierre', rows: 3, value: f.manifiesto?.cierre ?? '',
+    id: 'festival-mani-cierre', rows: 3, value: f.manifiesto?.cierre ?? semilla.cierre,
     placeholder: 'La frase que resume todo lo de arriba.',
     oninput: (e: any) => { mani().cierre = e.target.value; previa(); ctx.cambiado(); },
   });
@@ -328,19 +331,9 @@ function vistaManifiesto(f: any, ctx: Ctx, repintar: () => void): HTMLElement {
   contar();
 
   const formulario = el('div', { class: 'festival-caja' },
-    campo('festival-mani-titulo', 'Título',
-      'Va en display a dos líneas y muy grande. Una pregunta corta aguanta; un párrafo no.',
-      titulo),
-
-    campo('festival-mani-cuerpo', 'Los párrafos',
-      'Una línea en blanco entre cada uno. Salen numerados dentro del modal, así que tres o ' +
-      'cuatro se leen y ocho se hojean.',
-      cuerpo, cuenta),
-
-    campo('festival-mani-cierre', 'El cierre',
-      'La frase que resume. Se pinta dos veces: de subtítulo en la banda roja de la portada y ' +
-      'de remate al final del modal. Una línea, no un párrafo.',
-      cierre),
+    campo('festival-mani-titulo', 'Título', '', titulo),
+    campo('festival-mani-cuerpo', 'Los párrafos', 'Una línea en blanco entre cada uno.', cuerpo, cuenta),
+    campo('festival-mani-cierre', 'El cierre', 'Una línea. Se lee dos veces: en la banda y al final.', cierre),
   );
 
   // ── La banda de la portada, en chiquito ──────────────────────────────────
@@ -362,57 +355,28 @@ function vistaManifiesto(f: any, ctx: Ctx, repintar: () => void): HTMLElement {
   }
   previa();
 
+  /* La previa se explica sola: es la banda de la portada, en chiquito y
+     rehaciéndose mientras se escribe. No hace falta un párrafo diciéndolo. */
   const lado = el('div', { class: 'festival-lado' },
     el('div', { class: 'festival-caja' },
       el('span', { class: 'rotulo', style: 'opacity:.65' }, 'Dónde sale'),
       banda,
       el('span', { class: 'ayuda' },
-        'La banda roja de la portada, en chiquito. Se rehace mientras escribes: el título de ' +
-        'ahí arriba es el que se parte en dos líneas, y si crece se parte en tres.'),
-    ),
-
-    el('div', { class: 'aviso ojo' },
-      el('h3', {}, 'Todavía no manda'),
-      el('p', {},
-        'Esto se guarda aquí, pero la portada sigue leyendo el texto que está escrito en el ' +
-        'código del sitio. Se cambia el día que lo digas —es una línea— y hasta entonces lo ' +
-        'de aquí y lo de allá dicen lo mismo.'),
+        'La portada todavía lee el del código: esto se guarda, pero allí no cambia aún.'),
     ),
   );
 
-  // Si nunca se ha tocado, se ofrece el que está publicado en vez de una caja
-  // en blanco. Empezar de cero un texto que ya existe y que está a la vista en
-  // la portada es la clase de trabajo que nadie tiene por qué repetir.
-  if (!hay) {
-    lado.append(el('div', { class: 'festival-caja' },
-      el('span', { class: 'rotulo', style: 'opacity:.65' }, 'Está en blanco'),
-      el('span', { class: 'ayuda' },
-        'Nadie lo ha escrito todavía desde el panel. El manifiesto que hay en el sitio no se ' +
-        'ha perdido: sigue publicado y sigue viniendo del código. Tráelo aquí y edítalo desde ahí.'),
-      el('button', {
-        type: 'button', class: 'boton fuerte', style: 'margin-top:.5rem',
-        onclick: () => {
-          Object.assign(mani(), ctx.manifiestoDelSitio());
-          ctx.cambiado();
-          // Se rehace la vista entera y no sólo las tres cajas: con el texto
-          // dentro, la tarjeta de «está en blanco» ya no tiene nada que decir y
-          // dejarla ahí, con su botón, invita a darle otra vez.
-          repintar();
-          ctx.avisar(
-            'Traído el que está publicado. Todavía no se ha guardado nada: míralo, cámbialo si ' +
-            'quieres, y dale a Guardar.',
-            'bien',
-          );
-        },
-      }, 'Traer el que está publicado'),
-    ));
+  // Un formulario lleno parece uno ya guardado, y no lo está: lo que se lee es
+  // el texto publicado, traído del código. Se dice en un renglón, al pie de la
+  // columna, y sólo mientras sea verdad.
+  if (!delPanel) {
+    lado.append(el('p', { class: 'ayuda' },
+      'Lo de las cajas es el manifiesto publicado hoy. Cámbialo y guarda, y manda éste.'));
   }
 
   return el('div', {},
     cabecera('Manifiesto', '01 / Portada',
-      'El de la banda roja de la portada y el que se abre al pulsar «Leer el manifiesto». Tres ' +
-      'párrafos y un cierre — el cierre es el que se lee dos veces: de subtítulo en la banda y ' +
-      'de remate dentro del modal.'),
+      'El de la banda roja de la portada y el que se abre al pulsar «Leer el manifiesto».'),
     el('div', { class: 'festival-dos' }, formulario, lado),
   );
 }
@@ -440,8 +404,10 @@ function cabecera(titulo: string, rotulo: string, nota: string): HTMLElement {
  *  rojo de `.campo.malo` son los mismos de todo el panel. */
 function campo(para: string, etiqueta: string, ayuda: string, ...detras: (Node | null)[]): HTMLElement {
   return el('div', { class: 'campo' },
-    el('label', { for: para, title: ayuda }, etiqueta),
-    el('span', { class: 'ayuda' }, ayuda),
+    el('label', { for: para, title: ayuda || undefined }, etiqueta),
+    // Sin ayuda no se pinta el hueco: un `<span>` vacío deja un escalón entre el
+    // rótulo y la caja, y en una columna de tres campos se nota.
+    ayuda ? el('span', { class: 'ayuda' }, ayuda) : null,
     ...detras,
   );
 }
