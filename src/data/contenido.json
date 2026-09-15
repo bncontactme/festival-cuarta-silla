@@ -1,7 +1,7 @@
 {
   "contrato": 2,
-  "version": 141,
-  "actualizado": "2026-09-15T03:57:06.993Z",
+  "version": 142,
+  "actualizado": "2026-09-15T07:21:39.448Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1535,6 +1535,12 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789417237/cuartasilla/artistas/gabriela-girbau/iteeks3s1fydjnfnac8m.jpg",
       "instagram": "https://www.instagram.com/art_girbau/",
       "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Valentina",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789456837/cuartasilla/artistas/lksn8sxf3mlem6vmodxr.jpg",
+      "instagram": "https://www.instagram.com/valvaldez.a?stkn=MXJjb2plNnV5Zmg2bw==",
+      "sede": "Estudio Arechiga"
     }
   ],
   "archivo": [],
