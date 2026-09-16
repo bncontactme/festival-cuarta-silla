@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 148,
-  "actualizado": "2026-09-15T22:28:29.546Z",
+  "version": 149,
+  "actualizado": "2026-09-16T00:10:48.576Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1611,6 +1611,18 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789511266/cuartasilla/artistas/aezezxulis6zwotmzcof.jpg",
       "instagram": "https://www.instagram.com/xim_.c_",
       "sede": "Estudio Arechiga"
+    },
+    {
+      "nombre": "Lied Jarán",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789517346/cuartasilla/artistas/clhpgoxcusbgt0kcx821.jpg",
+      "instagram": "https://www.instagram.com/liedjaran/",
+      "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Pedro A.C.",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789517399/cuartasilla/artistas/lnldvnwsm8sapehs2el8.jpg",
+      "instagram": "https://www.instagram.com/pedrocarbvajal/",
+      "sede": "Cuerpos Parlantes"
     }
   ],
   "archivo": [],
