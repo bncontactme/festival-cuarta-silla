@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 150,
-  "actualizado": "2026-09-16T01:41:43.515Z",
+  "version": 151,
+  "actualizado": "2026-09-16T01:43:16.526Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -352,7 +352,7 @@
         "libre": true
       },
       {
-        "titulo": "Metro cuadrado (rebasadito por los bordes) 2023",
+        "titulo": "Galería Jaime Nunó Metro cuadrado (rebasadito por los bordes)",
         "dia": 2,
         "inicio": "13:00",
         "fin": "18:00",
