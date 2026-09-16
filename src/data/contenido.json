@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 149,
-  "actualizado": "2026-09-16T00:10:48.576Z",
+  "version": 150,
+  "actualizado": "2026-09-16T01:41:43.515Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1623,6 +1623,30 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789517399/cuartasilla/artistas/lnldvnwsm8sapehs2el8.jpg",
       "instagram": "https://www.instagram.com/pedrocarbvajal/",
       "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Octopus",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789522720/cuartasilla/artistas/octopus/wuwye2vnjepko6y0nndl.jpg",
+      "instagram": "https://www.instagram.com/tavocuadros",
+      "sede": "Casa Dos Guayabos"
+    },
+    {
+      "nombre": "Topiz",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789522798/cuartasilla/artistas/topiz/bi0qbtocvc9gvber09zh.jpg",
+      "instagram": "https://www.instagram.com/topiztopiz",
+      "sede": "Casa Dos Guayabos"
+    },
+    {
+      "nombre": "Mar M.",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789522856/cuartasilla/artistas/mar-m/dsldiqpjkjhtaqtoa8y5.jpg",
+      "instagram": "https://www.instagram.com/mrafrnda",
+      "sede": "Casa Dos Guayabos"
+    },
+    {
+      "nombre": "Itzel Martinez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789522892/cuartasilla/artistas/gmxpewacb2e0vtaeixde.jpg",
+      "instagram": "https://www.instagram.com/bocadealgodon",
+      "sede": "Casa Dos Guayabos"
     }
   ],
   "archivo": [],
