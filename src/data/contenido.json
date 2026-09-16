@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 151,
-  "actualizado": "2026-09-16T01:43:16.526Z",
+  "version": 152,
+  "actualizado": "2026-09-16T01:51:17.302Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -179,7 +179,12 @@
         "sede": "No Museo",
         "tipo": "charla",
         "artista": "Equipo del festival",
-        "libre": true
+        "libre": true,
+        "sala": {
+          "id": "palabras-de-inauguracion",
+          "cuerpo": "Palabras que darán el equipo de la cuarta silla para agradecer a todxs los involucradxs",
+          "publicado": true
+        }
       },
       {
         "titulo": "¨El coro de las familias buscadoras de Jalisco¨",
@@ -189,7 +194,12 @@
         "sede": "No Museo",
         "tipo": "muestra",
         "artista": "El Coro Inolvidable",
-        "libre": true
+        "libre": true,
+        "sala": {
+          "id": "el-coro-de-las-familias-buscadoras-de-ja",
+          "cuerpo": "El coro Inolvidable es un proyecto artístico y de sanación integrado por cerca de 20 familiares y Buscadoras de Jalisco que transforma el dolor de la desaparición forzada en música, memoria y exigencia de justicia.",
+          "publicado": true
+        }
       },
       {
         "titulo": "Oratorio Político",
@@ -199,7 +209,12 @@
         "sede": "No Museo",
         "tipo": "escena",
         "artista": "Oratorio Político",
-        "libre": true
+        "libre": true,
+        "sala": {
+          "id": "oratorio-politico",
+          "cuerpo": "Oratorio II es la deconstrucción de un recital de flamenco desde un lugar\ndonde el quejido del cante jondo es transmutado a una prosa litúrgica contra\nel despojo territorial y donde las palmas, jaleos y taconeo se interpretan con\nel noise, drum n’bass, y el post punk.\nEsta propuesta cultural se alimenta de las luchas por la defensa del territorio\nde diversos colectivos en Jalisco. Un dispositivo donde convergen la oratoria,\nla música, las artes plásticas y la política. Una experiencia que pretende\nregenerar el tejido entre la memoria y diversas texturas audiovisuales,\nbuscando alcanzar una cierta coherencia conceptual para la defensa del\nterritorio ante los ataques continuados por el desarrollo del sistema\ncapitalista.\nLa palabra escrita se materializa en la lectura pública, una voz que es\nacompañada y amplificada por el sonido, la música y el ruido, todo esto\nenvuelto en un despliegue escénico compuesto de video, escultura y\nperformance.\nLos elementos sonoros constitutivos de este Oratorio Político son la voz, el\nradio, el motor y herramientas de albañilería. La intersección de estos cuatro\nelementos son la semilla que crece en conjunto con otros instrumentos y\ngestos sonoros.",
+          "publicado": true
+        }
       },
       {
         "titulo": "Fiesta de Inauguración",
@@ -209,7 +224,12 @@
         "sede": "Staditche",
         "tipo": "escena",
         "artista": "Territorio hostil, dsgstng677, Kalbox",
-        "libre": true
+        "libre": true,
+        "sala": {
+          "id": "fiesta-de-inauguracion",
+          "cuerpo": "Fiesta de inauguración en Staditche donde se disfrutará de música latinoamericana tales como la cumbia, reggaeton, salsa, guaracha, etc...",
+          "publicado": true
+        }
       },
       {
         "titulo": "Presentación del manga “Carmen caracol & Tello cucaracho: Agentes secretos del arte contemporáneo”",
@@ -309,7 +329,12 @@
         "sede": "No Museo",
         "tipo": "muestra",
         "artista": "Colectiva Hilos",
-        "libre": true
+        "libre": true,
+        "sala": {
+          "id": "entretejiendo-arrullos-una-ofrenda-a-las",
+          "cuerpo": "Entretejiendo arrullos nace de la necesidad de dar voz y poner el cuerpo ante la\nsituación de violencia que se vive en la actualidad en México.\nSurge como una colaboración con la Colectiva hilos y la acción artística participativa\ny de resistencia social “Sangre de mi sangre”, la cual consiste en la elaboración de\nun tejido colectivo a gran escala. La red que se va construyendo con hilo rojo\nrepresenta la mancha de sangre generada por la violencia y al mismo tiempo la\nposibilidad de unirnos en este gran tejido.\nDirección, creación e interpretación: Liz Mercado\nPaisajes sonoros, voz e interpretación: Pedro Delgadillo, Sinclair Castro\nDiseño de iluminación: Nano Cano\nVestuario: Pájaro muerto\nTejido Sangre de mi sangre, Colectiva Hilos\nCharla: Claudia Rodriguez, Liz Mercado\nArrullo náhuatl\nManokoxteka pitelontsin\nmakochi kochi noxokoyo manokoxteka\nnoxokoyotzin manokoxteka nopitelontsin makochi kochi pitentsin\n“Que duerma mi niño,\nque no despierte mi pequeñito, mi niño, niño, mi niñito.\nQue no despierte mi pequeñito, que no despierte del dulce sueño mi niño, niño, mi\nniñito.”\nEl arrullo de la madre llama a una paz silenciosa, a un sueño dulce y la calma suave\nde sus hijos; cubriéndoles con el manto de sus brazos y de su corazón. Este arrullo\nalza la voz y clama por sosiego, por el sereno de la noche que reunirá a madres e\nhijos en el mismo sueño..\nLiz Mercado\nArtista escénica, Licenciada en Artes, bailarina, maestra y creadora.\nHa incursionando en distintas formas de expresión y movimiento a través de la\ndanza contemporánea, experimental y butoh integrando a su danza prácticas de\nmovimiento somático, danza terapia, danza ritual así como una gran variedad de\nexploraciones sobre cómo plasmar el amor y cultivar el espíritu desde la que es su\nmayor inspiración, la naturaleza.\nSu danza la ha llevado a presentarse en México, Argentina, Cuba, Bolivia, Estados\nUnidos, España y Francia. Ha colaborado en distintos proyectos de carácter social,\ncomunitario y educativo, forma parte de la Colectiva Hilos con quienes realiza\ndiferentes actividades interpretativas como búsqueda por aportar al gran tejido que\nformamos como sociedad y compartir también su visión de generar comunidad a\ntravés de las manifestaciones artísticas.",
+          "publicado": true
+        }
       },
       {
         "titulo": "Poesía y performance",
