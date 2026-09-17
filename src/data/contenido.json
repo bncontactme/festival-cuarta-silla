@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 155,
-  "actualizado": "2026-09-17T01:43:48.602Z",
+  "version": 156,
+  "actualizado": "2026-09-17T03:51:32.127Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1682,6 +1682,18 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789522892/cuartasilla/artistas/gmxpewacb2e0vtaeixde.jpg",
       "instagram": "https://www.instagram.com/bocadealgodon",
       "sede": "Casa Dos Guayabos"
+    },
+    {
+      "nombre": "Ann Barba",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789617034/cuartasilla/artistas/g0t7zhgp7s2plvmf2hqw.jpg",
+      "instagram": "https://www.instagram.com/annnbarba/",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Medusa Río Santiago",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789617080/cuartasilla/artistas/zu8mnnrb2w7ltx9afozy.jpg",
+      "instagram": "https://www.instagram.com/medusa.riosantiago/",
+      "sede": "Taller Industria Gráfica"
     }
   ],
   "archivo": [],
