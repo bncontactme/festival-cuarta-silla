@@ -1,0 +1,210 @@
+---
+/**
+ * La página de una sede: qué pasa aquí.
+ *
+ * Dos lecturas de lo mismo, como el resto del sitio. En pantalla ancha es el
+ * tablero de `/sedes` con esta sede abierta —las dieciséis siguen a la
+ * izquierda, así que ver la de al lado es un clic y no un viaje de ida y
+ * vuelta—. En el teléfono es una pantalla entera para esta sede: el nombre, la
+ * dirección, las dos puertas y el programa por días. Ahí la lista de las otras
+ * quince no cabe al lado, y meterla debajo sería pedirle a alguien que está de
+ * pie en la calle que haga scroll por catorce nombres para llegar al suyo.
+ *
+ * La dirección sale del nombre —ver `ranuraDeSede` en `site.ts`— así que el
+ * panel manda: lo que el festival escriba en `/admin` es lo que sirve el sitio.
+ */
+import Base from '../../layouts/Base.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import Estrella from '../../components/Estrella.astro';
+import Pantalla from '../../components/movil/Pantalla.astro';
+import TableroSedes from '../../components/TableroSedes.astro';
+import AvisoPrograma from '../../components/AvisoPrograma.astro';
+import { conBase } from '../../lib/base';
+import { tarjetaAlterna } from '../../lib/campos';
+import {
+  agendaPorSede,
+  ranuraDeSede,
+  sedes,
+  festival,
+  enlaceMapa,
+  enTodasLasSedes,
+  programaPublicado,
+  rutaSala,
+} from '../../data/site';
+
+export function getStaticPaths() {
+  /* Una página por sede, y sólo una por dirección. Dos sedes que se llamen casi
+     igual caen en la misma ranura; la red de seguridad de `site.ts` ya lo dice
+     con los dos nombres delante, y aquí se descarta la segunda en vez de dejar
+     que Astro reviente con «duplicate route» y sin decir de quién es. */
+  const vistas = new Set<string>();
+
+  return agendaPorSede.flatMap((agenda) => {
+    const ranura = ranuraDeSede(agenda.sede.nombre);
+    if (!ranura || vistas.has(ranura)) return [];
+    vistas.add(ranura);
+    return [{ params: { ranura }, props: { agenda } }];
+  });
+}
+
+const { agenda } = Astro.props;
+const { sede } = agenda;
+
+/* La de al lado, para el pie del teléfono: en el tablero de escritorio eso lo
+   hace la lista, pero en el móvil no hay lista a la vista. Da la vuelta al
+   final — las dieciséis en círculo. */
+const siguiente = agendaPorSede[(agenda.indice + 1) % agendaPorSede.length];
+
+const numero = String(agenda.indice + 1).padStart(2, '0');
+---
+
+<Base
+  titulo={sede.nombre}
+  descripcion={`${sede.nombre} — sede del ${festival.nombre}. ${sede.direccion}`}
+>
+  {/* ── Móvil: la sede, entera ──────────────────────────────────────────── */}
+  <Fragment slot="movil">
+    <Pantalla
+      titulo={sede.nombre}
+      indice={numero}
+      nota={programaPublicado ? agenda.resumen : festival.fechas}
+      fondo="rojo"
+      fondoCuerpo="amarillo"
+    >
+      <div class="border-b-2 border-tinta px-4 py-4">
+        <address class="text-sm leading-snug not-italic opacity-70">{sede.direccion}</address>
+
+        <div class="mt-4 flex divide-x-2 divide-tinta border-2 border-tinta">
+          {
+            sede.instagram && (
+              <a
+                href={sede.instagram}
+                target="_blank"
+                rel="noopener"
+                class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
+              >
+                {sedes.acciones.conoce} ↗
+              </a>
+            )
+          }
+          <a
+            href={enlaceMapa(sede)}
+            target="_blank"
+            rel="noopener"
+            class="meta flex-1 bg-rojo px-3 py-3 text-center text-[0.55rem] font-bold text-papel"
+          >
+            {sedes.acciones.ubicacion} ↗
+          </a>
+        </div>
+      </div>
+
+      {
+        !programaPublicado ? (
+          <div class="p-4 pb-1">
+            <AvisoPrograma movil />
+          </div>
+        ) : agenda.dias.length === 0 ? (
+          <p class="border-b-2 border-tinta px-4 py-6 text-sm leading-relaxed opacity-70">
+            {sede.nombre} es sede del festival, pero todavía no tiene nada anunciado.
+            Lo que se programe aquí sale en esta pantalla.
+          </p>
+        ) : (
+          agenda.dias.map((dia) => (
+            <div class="border-b-2 border-tinta">
+              {/* La barra del día se queda en tinta y no en campo alterno: es
+                  la que deja saltar de un día a otro deslizando. */}
+              <p class="meta bg-tinta px-4 py-2 text-[0.55rem] text-amarillo">{dia.corto}</p>
+
+              <ul class="space-y-3 p-3">
+                {dia.actividades.map((a, i) => {
+                  const recorrido = enTodasLasSedes(a.sede);
+                  return (
+                    <li
+                      class={tarjetaAlterna(i, 'fila').clase}
+                      style={tarjetaAlterna(i, 'fila').estilo}
+                    >
+                      <p class="evento-hora">
+                        {a.inicio}
+                        <span class="evento-tipo">{a.tipo}</span>
+                      </p>
+
+                      <div class="min-w-0">
+                        <h3 class="text-sm leading-snug font-bold">{a.titulo}</h3>
+                        {a.artista && <p class="evento-artista text-[0.8rem]">{a.artista}</p>}
+
+                        {/* El recorrido dice que pasa por aquí. Sin la marca,
+                            ocho horas de Marcha del Arte se leen como una obra
+                            de esta sede. */}
+                        {recorrido && (
+                          <p class="meta evento-sede text-[0.5rem]">
+                            Pasa por aquí · todas las sedes
+                          </p>
+                        )}
+
+                        {a.registro && (
+                          <a
+                            href={a.registro}
+                            target="_blank"
+                            rel="noopener"
+                            class="evento-puerta"
+                            aria-label={`Registrarme en ${a.titulo}`}
+                          >
+                            Registrarme <span aria-hidden="true">↗</span>
+                          </a>
+                        )}
+                        {a.sala?.publicado && (
+                          <a
+                            href={conBase(rutaSala(a.sala))}
+                            class="evento-lectura"
+                            aria-label={`Leer la descripción de ${a.titulo}`}
+                          >
+                            Descripción
+                          </a>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))
+        )
+      }
+
+      <div class="flex flex-col gap-3 p-4">
+        <a href={conBase(siguiente.ruta)} class="boton">
+          {siguiente.sede.nombre} →
+        </a>
+        <a href={conBase('/sedes')} class="boton boton--papel">Todas las sedes</a>
+      </div>
+    </Pantalla>
+  </Fragment>
+
+  <Encabezado indice={`Sedes / ${numero}`} titulo={sede.nombre} fondo="rojo" />
+
+  {/* En escritorio no hay página de sede aparte: es el mismo tablero con esta
+      abierta. La única diferencia es que el nombre no se repite dentro —ya está
+      arriba, a tamaño cartel—. */}
+  <TableroSedes activa={agenda} titular={false} />
+
+  {/* El mismo remate que el resto de las páginas: rojo, con las fechas. */}
+  <section class="relative overflow-hidden border-t-2 border-tinta bg-rojo">
+    <Estrella tinta="amarilla" alto="abajo" />
+    <div class="relative px-4 py-20 sm:px-6 lg:px-10">
+      <p class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta" data-reveal="lado">
+        {festival.ciudad}
+      </p>
+      <p
+        class="display max-w-4xl text-[9vw] leading-[0.95] text-amarillo lg:text-[5.5vw]"
+        data-lineas
+        data-reveal="lineas"
+      >
+        {festival.fechas}
+      </p>
+      <div class="mt-10 flex flex-wrap gap-4" data-reveal="arriba">
+        <a href={conBase('/programa')} class="boton boton--amarillo">Ver el programa</a>
+        <a href={conBase('/sedes')} class="boton boton--papel">Todas las sedes</a>
+      </div>
+    </div>
+  </section>
+</Base>

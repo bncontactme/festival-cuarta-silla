@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import {
   nav, inicio, accionPrincipal, privacidad, actividadesConSala, rutaSala,
-  rutaSalaFestival,
+  rutaSalaFestival, agendaPorSede,
 } from '../data/site';
 
 /**
@@ -27,6 +27,10 @@ export const GET: APIRoute = ({ site }) => {
     ...nav,
     accionPrincipal,
     { label: privacidad.titulo, href: '/privacidad' },
+    /* Una por sede. Van con las de arriba y no con las hojas de sala: son
+       páginas que alguien busca por su nombre —«no museo guadalajara»— y la
+       dirección de cada una cambia cuando cambia el programa de esa sede. */
+    ...agendaPorSede.map((a) => ({ label: a.sede.nombre, href: a.ruta })),
   ];
 
   /* La del festival va con ellas y va SIEMPRE, tenga o no texto de sala

@@ -9,6 +9,7 @@
  */
 
 import { contenido, delPanel } from './contenido';
+import { aplanar } from '../lib/texto';
 import type { Sede, Marca, ActividadGantt, TextoDeSala } from './tipos';
 import { SEDE_TODAS, SALA_FESTIVAL } from './tipos';
 
@@ -431,6 +432,115 @@ export const agendaPorDia = programa.dias.map((d, i) => ({
     .sort((a, b) => a.inicio.localeCompare(b.inicio)),
 }));
 
+/** ── Lo que pasa en cada sede ─────────────────────────────────────────────
+ *
+ * La tercera lectura de la misma lista. La rejilla contesta «qué se pisa con
+ * qué», `agendaPorDia` contesta «qué hay el sábado», y esto contesta «qué pasa
+ * en este local» — la pregunta de quien ya eligió a dónde ir, o la de quien
+ * está parado en la puerta con el teléfono en la mano.
+ *
+ * Sale de `actividades` como las otras dos, y no de una lista de «eventos por
+ * sede» guardada aparte. No puede haberla, por lo de siempre: dos listas de lo
+ * mismo se separan el primer día que alguien cambia una hora en una sola.
+ */
+
+/** «Vie 25 sep». El día entero no cabe en la columna de un tablero. */
+const diaCorto = (i: number) =>
+  `${programa.dias[i].dia.slice(0, 3)} ${programa.dias[i].fecha.replace(' de septiembre', ' sep')}`;
+
+/**
+ * Los recorridos: las actividades que no son de ninguna sede porque pasan por
+ * todas.
+ *
+ * Se pintan DENTRO del programa de cada sede, marcados, y no se suman a su
+ * cuenta. Las dos mitades de esa regla hacen falta: sin la marca, un recorrido
+ * de ocho horas se lee como una obra de esa sede; sumado a la cuenta, una sola
+ * Marcha del Arte inventa dieciséis actividades que no existen.
+ */
+export const recorridos = actividades
+  .filter((a) => enTodasLasSedes(a.sede))
+  .sort((a, b) => a.dia - b.dia || a.inicio.localeCompare(b.inicio));
+
+/** Un día de una sede. Sólo existe si tiene algo: un día vacío con su titular
+ *  y nada debajo se lee como un error del sitio. */
+export type DiaDeSede = {
+  dia: string;
+  fecha: string;
+  indice: number;
+  corto: string;
+  actividades: ActividadGantt[];
+};
+
+export type AgendaDeSede = {
+  sede: Sede;
+  /** Su número en la lista: el 01…16 que se pinta, no un id. */
+  indice: number;
+  ruta: string;
+  /** Las suyas, y sólo las suyas — los recorridos no cuentan. */
+  total: number;
+  /** «6 actividades · Vie · Sáb · Dom», ya escrito. */
+  resumen: string;
+  dias: DiaDeSede[];
+};
+
+/**
+ * El trozo final de `/sedes/<…>`. **Se calcula del nombre en cada build**, y
+ * ahí está la gracia: manda el panel. Se corrige una tilde en `/admin` y la
+ * dirección la sigue sola, sin un segundo sitio que actualizar a mano.
+ *
+ * Lo que se paga: renombrar una sede cambia su dirección y el enlace viejo deja
+ * de existir. Es asumible mientras el enlace viva dentro del sitio. El día que
+ * se imprima un QR por puerta habrá que acuñarlo UNA vez y dejar de deducirlo,
+ * exactamente por lo que explica `TextoDeSala` en `tipos.ts`: una dirección
+ * pegada a una pared ya no es un detalle de implementación.
+ */
+export const ranuraDeSede = (nombre: string) =>
+  aplanar(nombre)
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+export const rutaDeSede = (nombre: string) => `/sedes/${ranuraDeSede(nombre)}`;
+
+const cuantasActividades = (n: number) => `${n} ${n === 1 ? 'actividad' : 'actividades'}`;
+
+/** Lo que pasa en una sede, por días y en orden de reloj. */
+export const agendaDeSede = (sede: Sede, indice: number): AgendaDeSede => {
+  const suyas = actividades
+    .filter((a) => a.sede === sede.nombre)
+    .sort((a, b) => a.dia - b.dia || a.inicio.localeCompare(b.inicio));
+
+  /* Los recorridos entran en los días, no en la cuenta. */
+  const conRecorridos = [...suyas, ...recorridos];
+
+  /* Los días en los que esta sede tiene algo PROPIO. Sin esta distinción, una
+     sede vacía anunciaría «Sáb · Dom» por los dos días que pasa la Marcha. */
+  const suyosDias = [...new Set(suyas.map((a) => programa.dias[a.dia].dia.slice(0, 3)))];
+
+  return {
+    sede,
+    indice,
+    ruta: rutaDeSede(sede.nombre),
+    total: suyas.length,
+    resumen: suyas.length
+      ? `${cuantasActividades(suyas.length)} · ${suyosDias.join(' · ')}`
+      : recorridos.length
+        ? 'Sólo pasa el recorrido'
+        : 'Sin actividades en el programa',
+    dias: programa.dias
+      .map((d, i) => ({
+        ...d,
+        indice: i,
+        corto: diaCorto(i),
+        actividades: conRecorridos
+          .filter((a) => a.dia === i)
+          .sort((a, b) => a.inicio.localeCompare(b.inicio)),
+      }))
+      .filter((d) => d.actividades.length > 0),
+  };
+};
+
+export const agendaPorSede: AgendaDeSede[] = sedes.lista.map((s, i) => agendaDeSede(s, i));
+
 /**
  * Lo que se lee al lado del rótulo «Programa»: en la marquesina de `/programa`,
  * en su cabecera de móvil y en el índice de la portada del móvil.
@@ -638,6 +748,28 @@ export const parrafosDe = (sala: TextoDeSala) =>
       `construye su página: la del festival gana.\n${cuales}\n\n` +
       `Se arregla desde /admin: quítale la descripción y vuelve a crearla, que ` +
       `acuña otra dirección.`;
+    if (delPanel) console.warn(`\n⚠️  Contenido del panel: ${parte}\n`);
+    else throw new Error(`site.ts: ${parte}`);
+  }
+
+  /* Y la tercera: dos sedes que caigan en la misma dirección. Las direcciones
+     se deducen del nombre —ver `ranuraDeSede`—, así que «Casa Feria» y «Casa
+     Feria.» son dos filas del panel y una sola página. Astro no avisa de forma
+     entendible: `getStaticPaths` revienta con la ruta repetida y sin decir de
+     quién es. Aquí se dice con los dos nombres delante, que es lo que hace
+     falta para ir a cambiar uno. */
+  const ranuras = new Map<string, string[]>();
+  for (const n of nombres) {
+    const r = ranuraDeSede(n);
+    ranuras.set(r, [...(ranuras.get(r) ?? []), n]);
+  }
+  const chocadas = [...ranuras].filter(([, quienes]) => quienes.length > 1);
+  if (chocadas.length) {
+    const parte =
+      `hay ${chocadas.length} dirección(es) de sede repetida(s). Dos sedes no ` +
+      `pueden compartir página.\n` +
+      chocadas.map(([r, quienes]) => `  · /sedes/${r} — ${quienes.join(' · ')}`).join('\n') +
+      `\n\nSe arregla desde /admin, cambiándole el nombre a una de las dos.`;
     if (delPanel) console.warn(`\n⚠️  Contenido del panel: ${parte}\n`);
     else throw new Error(`site.ts: ${parte}`);
   }
