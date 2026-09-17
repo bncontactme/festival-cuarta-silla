@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 157,
-  "actualizado": "2026-09-17T04:38:22.087Z",
+  "version": 158,
+  "actualizado": "2026-09-17T21:40:55.292Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -594,6 +594,14 @@
         "tipo": "muestra",
         "artista": "Cheapqueen2000",
         "libre": true
+      },
+      {
+        "titulo": "Inauguración Casa Feria",
+        "dia": 2,
+        "inicio": "10:00",
+        "fin": "11:00",
+        "sede": "Casa Feria",
+        "tipo": "muestra"
       }
     ],
     "esEjemplo": false
