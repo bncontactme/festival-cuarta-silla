@@ -1,0 +1,307 @@
+---
+/**
+ * MAQUETA A — «la sede se abre».
+ *
+ * La rejilla de `/sedes` se queda como está y cada tarjeta gana dos cosas: una
+ * línea que cuenta lo que hay («6 actividades · Vie · Sáb · Dom») y un pliegue
+ * que enseña esas actividades sin salir de la página.
+ *
+ * Desechable: todo `src/pages/mock/` se borra antes de fusionar.
+ */
+import Base from '../../layouts/Base.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import Pantalla from '../../components/movil/Pantalla.astro';
+import { conBase } from '../../lib/base';
+import { sedes, festival, enlaceMapa, programa, rutaSala } from '../../data/site';
+import { agendaPorSede, recorridos, cuandoRecorrido, resumenDeSede } from './_datos';
+---
+
+<Base titulo="Maqueta A — Sedes con sus actividades">
+  <Fragment slot="movil">
+    <Pantalla
+      titulo={sedes.titulo}
+      indice="03"
+      nota={`${sedes.lista.length} lugares en ${festival.ciudad}`}
+      fondo="rojo"
+      fondoCuerpo="amarillo"
+    >
+      {
+        agendaPorSede.map((agenda) => (
+          <details class="plegable">
+            <summary>
+              <span class="display text-2xl leading-none">{agenda.sede.nombre}</span>
+              <span class="plegable-signo" aria-hidden="true">+</span>
+            </summary>
+
+            <div class="bg-amarillo px-4 py-4 text-tinta">
+              <address class="text-sm leading-snug not-italic opacity-70">
+                {agenda.sede.direccion}
+              </address>
+
+              {/* Lo que pasa aquí, antes que los botones: es la razón de abrir
+                  la sede. Sin nada que enseñar se dice, no se calla — una
+                  sede sin renglón se lee como una sede rota. */}
+              {agenda.total === 0 ? (
+                <p class="meta mt-4 text-[0.55rem] opacity-55">Sin actividades en el programa</p>
+              ) : (
+                <div class="mt-4 border-t-2 border-tinta pt-3">
+                  <p class="meta text-[0.55rem] opacity-55">{resumenDeSede(agenda)}</p>
+                  {agenda.dias.map((dia) => (
+                    <div class="mt-3">
+                      <p class="meta text-[0.5rem] text-rojo">{dia.corto}</p>
+                      <ul class="mt-1 divide-y divide-tinta/15">
+                        {dia.actividades.map((a) => (
+                          <li class="flex items-baseline gap-3 py-2">
+                            <span class="font-mono text-xs font-bold text-rojo tabular-nums">
+                              {a.inicio}
+                            </span>
+                            <span class="min-w-0">
+                              <span class="block text-sm leading-snug">{a.titulo}</span>
+                              <span class="meta mt-1 block text-[0.5rem] opacity-50">{a.tipo}</span>
+                              {a.registro && (
+                                <a
+                                  href={a.registro}
+                                  target="_blank"
+                                  rel="noopener"
+                                  class="evento-lectura"
+                                >
+                                  Registrarme ↗
+                                </a>
+                              )}
+                              {a.sala?.publicado && (
+                                <a href={conBase(rutaSala(a.sala))} class="evento-lectura">
+                                  Descripción
+                                </a>
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div class="mt-4 flex divide-x-2 divide-tinta border-2 border-tinta">
+                {agenda.sede.instagram && (
+                  <a
+                    href={agenda.sede.instagram}
+                    target="_blank"
+                    rel="noopener"
+                    class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
+                  >
+                    {sedes.acciones.conoce} ↗
+                  </a>
+                )}
+                <a
+                  href={enlaceMapa(agenda.sede)}
+                  target="_blank"
+                  rel="noopener"
+                  class="meta flex-1 bg-rojo px-3 py-3 text-center text-[0.55rem] font-bold text-papel"
+                >
+                  {sedes.acciones.ubicacion} ↗
+                </a>
+              </div>
+            </div>
+          </details>
+        ))
+      }
+
+      {recorridos.length > 0 && (
+        <div class="border-t-2 border-tinta bg-rojo px-4 py-4 text-papel">
+          <p class="meta text-[0.55rem]">Además, pasa por todas</p>
+          {recorridos.map((a) => (
+            <p class="mt-2 text-sm leading-snug text-amarillo">
+              {a.titulo} <span class="meta block text-[0.5rem] text-papel/80">{cuandoRecorrido(a)}</span>
+            </p>
+          ))}
+        </div>
+      )}
+    </Pantalla>
+  </Fragment>
+
+  <Encabezado indice="Maqueta A / la sede se abre" titulo={sedes.titulo} fondo="rojo" />
+
+  <section class="bg-amarillo">
+    <ul class="grid sm:grid-cols-2 lg:grid-cols-3">
+      {
+        agendaPorSede.map((agenda, i) => (
+          <li
+            class="sede group relative flex flex-col justify-between border-r-2 border-b-2 border-tinta"
+          >
+            <span class="sede-cortina" aria-hidden="true" />
+
+            <div class="sede-cuerpo relative p-6 lg:p-8">
+              <p class="meta text-tinta/55">{String(i + 1).padStart(2, '0')}</p>
+
+              <h2 class="display mt-4 text-4xl leading-[0.95] lg:text-5xl">
+                {agenda.sede.nombre}
+              </h2>
+
+              <address class="mt-5 min-h-[3.5rem] text-base leading-snug not-italic opacity-70">
+                {agenda.sede.direccion}
+              </address>
+
+              {/* La cuenta, siempre. Cero también es una respuesta. */}
+              <p class="meta mt-4 text-tinta/55">
+                {resumenDeSede(agenda) ?? 'Sin actividades en el programa'}
+              </p>
+            </div>
+
+            {agenda.total > 0 && (
+              <details class="sede-pliegue relative">
+                <summary class="sede-abrir">
+                  <span class="meta">Ver el programa de la sede</span>
+                  <span class="sede-signo" aria-hidden="true">+</span>
+                </summary>
+
+                <div class="border-t-2 border-tinta bg-papel px-6 py-5 lg:px-8">
+                  {agenda.dias.map((dia, j) => (
+                    <div class={j > 0 ? 'mt-5' : ''}>
+                      <p class="meta border-b-2 border-rojo pb-2 text-tinta/70">{dia.corto}</p>
+                      <ul class="divide-y divide-tinta/12">
+                        {dia.actividades.map((a) => (
+                          <li class="flex items-baseline gap-3 py-3">
+                            <span class="font-mono text-sm font-bold text-rojo tabular-nums">
+                              {a.inicio}
+                            </span>
+                            <span aria-hidden="true" class="text-tinta/25">//</span>
+                            <span class="min-w-0">
+                              <span class="block text-sm leading-snug">{a.titulo}</span>
+                              <span class="meta mt-1 block text-[0.55rem] text-tinta/45">
+                                {a.tipo}
+                                {a.artista && <> · {a.artista}</>}
+                              </span>
+                              {a.registro && (
+                                <a
+                                  href={a.registro}
+                                  target="_blank"
+                                  rel="noopener"
+                                  class="evento-lectura"
+                                >
+                                  Registrarme ↗
+                                </a>
+                              )}
+                              {a.sala?.publicado && (
+                                <a href={conBase(rutaSala(a.sala))} class="evento-lectura">
+                                  Descripción
+                                </a>
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
+
+            <div class="relative flex divide-x-2 divide-tinta border-t-2 border-tinta">
+              {agenda.sede.instagram && (
+                <a
+                  href={agenda.sede.instagram}
+                  target="_blank"
+                  rel="noopener"
+                  class="meta flex-1 bg-tinta px-4 py-4 text-center font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
+                >
+                  {sedes.acciones.conoce} ↗
+                </a>
+              )}
+              <a
+                href={enlaceMapa(agenda.sede)}
+                target="_blank"
+                rel="noopener"
+                class="meta flex-1 bg-rojo px-4 py-4 text-center font-bold text-papel transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
+              >
+                {sedes.acciones.ubicacion} ↗
+              </a>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {/* Los recorridos, una vez y aparte: no son de ninguna sede y sumarlos a las
+      dieciséis sería contarlos dieciséis veces. */}
+  {
+    recorridos.length > 0 && (
+      <section class="border-t-2 border-tinta bg-tinta px-4 py-10 text-papel sm:px-6 lg:px-10">
+        <p class="meta text-amarillo">Y por todas las sedes</p>
+        <ul class="mt-4 flex flex-wrap gap-x-10 gap-y-4">
+          {recorridos.map((a) => (
+            <li>
+              <p class="display text-2xl leading-none text-amarillo">{a.titulo}</p>
+              <p class="meta mt-2 text-papel/70">{cuandoRecorrido(a)}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <div class="border-t-2 border-tinta bg-amarillo px-4 py-8 sm:px-6 lg:px-10">
+    <a href={conBase('/programa')} class="boton">{`Ver el programa entero · ${programa.dias.length} días`}</a>
+  </div>
+</Base>
+
+<style>
+  /* La cortina de la tarjeta: la misma de `/sedes`, pero recortada a la
+     cabecera. Con el pliegue abierto, una cortina que tapa la tarjeta entera
+     volcaría a amarillo las actividades que se acaban de abrir. */
+  .sede-cortina {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    transform-origin: bottom;
+    scale: 1 0;
+    background-color: var(--color-tinta);
+    transition: scale 0.5s var(--ease-cortina);
+  }
+  .sede:hover .sede-cortina {
+    scale: 1 1;
+  }
+  .sede:has(.sede-pliegue[open]) .sede-cortina {
+    display: none;
+  }
+  .sede-cuerpo {
+    transition: color 0.5s var(--ease-cortina);
+  }
+  .sede:hover .sede-cuerpo {
+    color: var(--color-amarillo);
+  }
+  .sede:has(.sede-pliegue[open]):hover .sede-cuerpo {
+    color: var(--color-tinta);
+  }
+
+  .sede-abrir {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    border-top: 2px solid var(--color-tinta);
+    padding: 0.85rem 1.5rem;
+    cursor: pointer;
+    list-style: none;
+    background-color: var(--color-amarillo);
+    transition: background-color 0.25s var(--ease-salida);
+  }
+  .sede-abrir::-webkit-details-marker {
+    display: none;
+  }
+  .sede-abrir::marker {
+    content: '';
+  }
+  .sede-abrir:hover {
+    background-color: var(--color-tinta);
+    color: var(--color-amarillo);
+  }
+  .sede-signo {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    transition: rotate 0.3s var(--ease-salida);
+  }
+  .sede-pliegue[open] .sede-signo {
+    rotate: 45deg;
+  }
+</style>

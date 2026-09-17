@@ -1,0 +1,156 @@
+---
+/**
+ * MAQUETA B — la rejilla de `/sedes` con la puerta a la página de cada sede.
+ *
+ * La tarjeta dice lo que hay y la página lo enseña. La acción maciza deja de
+ * ser Instagram: pasa a ser «qué pasa aquí», que es a lo que viene la mayoría.
+ * Instagram se conserva dentro de la página de la sede.
+ */
+import Base from '../../layouts/Base.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import Estrella from '../../components/Estrella.astro';
+import Pantalla from '../../components/movil/Pantalla.astro';
+import { conBase } from '../../lib/base';
+import { sedes, festival, enlaceMapa } from '../../data/site';
+import { agendaPorSede, recorridos, cuandoRecorrido, resumenDeSede } from './_datos';
+
+/* La maqueta no genera `/sedes/<slug>`: las dos páginas de ejemplo son las que
+   enseñan el resultado, y todas las tarjetas apuntan a la que toca. */
+const rutaDeMuestra = (nombre: string, total: number) =>
+  total > 0 ? (nombre === 'Palma Galería' ? '/mock/b-vacia' : '/mock/b-sede') : '/mock/b-vacia';
+---
+
+<Base titulo="Maqueta B — Una página por sede">
+  <Fragment slot="movil">
+    <Pantalla
+      titulo={sedes.titulo}
+      indice="03"
+      nota={`${sedes.lista.length} lugares en ${festival.ciudad}`}
+      fondo="rojo"
+      fondoCuerpo="amarillo"
+    >
+      {/* En el teléfono la tarjeta se queda plegada como está, y lo que cambia
+          es el primer botón: lleva a la página de la sede en vez de a
+          Instagram. */}
+      {
+        agendaPorSede.map((agenda) => (
+          <details class="plegable">
+            <summary>
+              <span>
+                <span class="display block text-2xl leading-none">{agenda.sede.nombre}</span>
+                <span class="plegable-nota meta mt-1 block text-[0.5rem] opacity-50">
+                  {resumenDeSede(agenda) ?? 'Sin actividades'}
+                </span>
+              </span>
+              <span class="plegable-signo" aria-hidden="true">+</span>
+            </summary>
+
+            <div class="bg-amarillo px-4 py-4 text-tinta">
+              <address class="text-sm leading-snug not-italic opacity-70">
+                {agenda.sede.direccion}
+              </address>
+              <div class="mt-4 flex divide-x-2 divide-tinta border-2 border-tinta">
+                <a
+                  href={conBase(rutaDeMuestra(agenda.sede.nombre, agenda.total))}
+                  class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
+                >
+                  {agenda.total > 0 ? `Qué pasa aquí · ${agenda.total}` : 'Ver la sede'}
+                </a>
+                <a
+                  href={enlaceMapa(agenda.sede)}
+                  target="_blank"
+                  rel="noopener"
+                  class="meta flex-1 bg-rojo px-3 py-3 text-center text-[0.55rem] font-bold text-papel"
+                >
+                  {sedes.acciones.ubicacion} ↗
+                </a>
+              </div>
+            </div>
+          </details>
+        ))
+      }
+    </Pantalla>
+  </Fragment>
+
+  <Encabezado indice="Maqueta B / una página por sede" titulo={sedes.titulo} fondo="rojo" />
+
+  <section class="bg-amarillo">
+    <ul class="grid sm:grid-cols-2 lg:grid-cols-3">
+      {
+        agendaPorSede.map((agenda, i) => (
+          <li class="group relative flex flex-col justify-between overflow-hidden border-r-2 border-b-2 border-tinta">
+            <span
+              class="absolute inset-0 -z-0 origin-bottom scale-y-0 bg-tinta transition-transform duration-500 ease-[var(--ease-cortina)] group-hover:scale-y-100"
+              aria-hidden="true"
+            />
+
+            <div class="relative p-6 transition-colors duration-500 group-hover:text-amarillo lg:p-8">
+              <p class="meta text-tinta/55 transition-colors duration-500 group-hover:text-amarillo">
+                {String(i + 1).padStart(2, '0')}
+              </p>
+
+              <h2 class="display mt-4 text-4xl leading-[0.95] lg:text-5xl">
+                {agenda.sede.nombre}
+              </h2>
+
+              <address class="mt-5 min-h-[3.5rem] text-base leading-snug not-italic opacity-70">
+                {agenda.sede.direccion}
+              </address>
+
+              {/* Lo que hay, en una línea. Es lo que convierte la rejilla de
+                  «dónde es el festival» en «qué hay en cada sitio». */}
+              <p class="meta mt-4 text-tinta/55 transition-colors duration-500 group-hover:text-amarillo">
+                {resumenDeSede(agenda) ?? 'Sin actividades en el programa'}
+              </p>
+            </div>
+
+            <div class="relative flex divide-x-2 divide-tinta border-t-2 border-tinta">
+              {/* La acción maciza es la página de la sede. Instagram baja
+                  dentro: quien quiere ver el local ya llegó a él. */}
+              <a
+                href={conBase(rutaDeMuestra(agenda.sede.nombre, agenda.total))}
+                class="meta flex-1 bg-tinta px-4 py-4 text-center font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
+              >
+                {agenda.total > 0 ? `Qué pasa aquí · ${agenda.total}` : 'Ver la sede'}
+              </a>
+              <a
+                href={enlaceMapa(agenda.sede)}
+                target="_blank"
+                rel="noopener"
+                class="meta flex-1 bg-rojo px-4 py-4 text-center font-bold text-papel transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
+              >
+                {sedes.acciones.ubicacion} ↗
+              </a>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {
+    recorridos.length > 0 && (
+      <section class="border-t-2 border-tinta bg-tinta px-4 py-10 text-papel sm:px-6 lg:px-10">
+        <p class="meta text-amarillo">Y por todas las sedes</p>
+        <ul class="mt-4 flex flex-wrap gap-x-10 gap-y-4">
+          {recorridos.map((a) => (
+            <li>
+              <p class="display text-2xl leading-none text-amarillo">{a.titulo}</p>
+              <p class="meta mt-2 text-papel/70">{cuandoRecorrido(a)}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section class="relative overflow-hidden border-t-2 border-tinta bg-rojo">
+    <Estrella tinta="amarilla" alto="abajo" />
+    <div class="relative px-4 py-20 sm:px-6 lg:px-10">
+      <p class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta">{festival.ciudad}</p>
+      <p class="display max-w-4xl text-[9vw] leading-[0.95] text-amarillo lg:text-[5.5vw]">
+        {festival.fechas}
+      </p>
+    </div>
+  </section>
+</Base>

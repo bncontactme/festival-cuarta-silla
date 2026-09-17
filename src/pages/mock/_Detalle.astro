@@ -1,0 +1,243 @@
+---
+/**
+ * MAQUETA B — la página de una sede: `/sedes/<slug>`.
+ *
+ * Contesta una sola pregunta —qué pasa aquí— y la contesta entera: el
+ * programa de esa sede por días, con la dirección, el mapa y la cuenta de
+ * Instagram a mano. Desechable con el resto de `src/pages/mock/`.
+ */
+import Base from '../../layouts/Base.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import Pantalla from '../../components/movil/Pantalla.astro';
+import { conBase } from '../../lib/base';
+import { tarjetaAlterna } from '../../lib/campos';
+import { sedes, festival, enlaceMapa, rutaSala } from '../../data/site';
+import { agendaPorSede, recorridos, cuandoRecorrido } from './_datos';
+
+interface Props {
+  nombre: string;
+}
+
+const { nombre } = Astro.props;
+
+const i = agendaPorSede.findIndex((a) => a.sede.nombre === nombre);
+const agenda = agendaPorSede[i];
+const sede = agenda.sede;
+
+/* La de al lado, para no tener que volver a la rejilla entre una sede y la
+   siguiente. Da la vuelta al final: dieciséis sedes en círculo. */
+const siguiente = agendaPorSede[(i + 1) % agendaPorSede.length];
+const anterior = agendaPorSede[(i - 1 + agendaPorSede.length) % agendaPorSede.length];
+
+const cuenta =
+  agenda.total === 1 ? '1 actividad' : `${agenda.total} actividades`;
+---
+
+<Base titulo={`Maqueta B — ${sede.nombre}`}>
+  <Fragment slot="movil">
+    <Pantalla
+      titulo={sede.nombre}
+      indice={String(i + 1).padStart(2, '0')}
+      nota={agenda.total ? cuenta : 'Sin actividades en el programa'}
+      fondo="rojo"
+      fondoCuerpo="amarillo"
+    >
+      <div class="border-b-2 border-tinta bg-amarillo px-4 py-4">
+        <address class="text-sm leading-snug not-italic opacity-70">{sede.direccion}</address>
+        <div class="mt-4 flex divide-x-2 divide-tinta border-2 border-tinta">
+          {sede.instagram && (
+            <a
+              href={sede.instagram}
+              target="_blank"
+              rel="noopener"
+              class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
+            >
+              {sedes.acciones.conoce} ↗
+            </a>
+          )}
+          <a
+            href={enlaceMapa(sede)}
+            target="_blank"
+            rel="noopener"
+            class="meta flex-1 bg-rojo px-3 py-3 text-center text-[0.55rem] font-bold text-papel"
+          >
+            {sedes.acciones.ubicacion} ↗
+          </a>
+        </div>
+      </div>
+
+      {agenda.dias.map((dia) => (
+        <div class="border-b-2 border-tinta">
+          <p class="meta bg-tinta px-4 py-2 text-[0.55rem] text-amarillo">{dia.corto}</p>
+          <ul class="space-y-3 bg-amarillo p-3">
+            {dia.actividades.map((a, j) => (
+              <li class={tarjetaAlterna(j, 'fila').clase} style={tarjetaAlterna(j, 'fila').estilo}>
+                <p class="evento-hora">
+                  {a.inicio}
+                  <span class="evento-tipo">{a.tipo}</span>
+                </p>
+                <div class="min-w-0">
+                  <h3 class="text-sm leading-snug font-bold">{a.titulo}</h3>
+                  {a.artista && <p class="evento-artista text-[0.8rem]">{a.artista}</p>}
+                  {a.registro && (
+                    <a href={a.registro} target="_blank" rel="noopener" class="evento-puerta">
+                      Registrarme <span aria-hidden="true">↗</span>
+                    </a>
+                  )}
+                  {a.sala?.publicado && (
+                    <a href={conBase(rutaSala(a.sala))} class="evento-lectura">Descripción</a>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+
+      {agenda.total === 0 && (
+        <p class="border-b-2 border-tinta px-4 py-6 text-sm leading-snug opacity-70">
+          Esta sede todavía no tiene actividades en el programa.
+        </p>
+      )}
+
+      <div class="p-4">
+        <a href={conBase('/sedes')} class="boton">Todas las sedes</a>
+      </div>
+    </Pantalla>
+  </Fragment>
+
+  <Encabezado
+    indice={`Sede ${String(i + 1).padStart(2, '0')} / ${agendaPorSede.length}`}
+    titulo={sede.nombre}
+    fondo="rojo"
+  />
+
+  {/* La cabecera de la sede: dónde es y por dónde se llega. En tinta, como el
+      resto de las bandas de dato del sitio. */}
+  <section class="border-b-2 border-tinta bg-tinta px-4 py-8 text-papel sm:px-6 lg:px-10">
+    <div class="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
+      <div>
+        <p class="meta text-amarillo">{festival.ciudad}</p>
+        <address class="mt-3 max-w-md text-lg leading-snug not-italic">{sede.direccion}</address>
+        <p class="meta mt-4 text-papel/60">{agenda.total ? cuenta : 'Sin actividades en el programa'}</p>
+      </div>
+
+      <div class="flex divide-x-2 divide-tinta border-2 border-papel">
+        {sede.instagram && (
+          <a
+            href={sede.instagram}
+            target="_blank"
+            rel="noopener"
+            class="meta bg-amarillo px-5 py-4 font-bold text-tinta transition-colors hover:bg-papel"
+          >
+            {sedes.acciones.instagram} ↗
+          </a>
+        )}
+        <a
+          href={enlaceMapa(sede)}
+          target="_blank"
+          rel="noopener"
+          class="meta bg-rojo px-5 py-4 font-bold text-papel transition-colors hover:bg-amarillo hover:text-tinta"
+        >
+          {sedes.acciones.ubicacion} ↗
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-amarillo px-4 pt-14 pb-16 sm:px-6 lg:px-10">
+    {
+      agenda.total > 0 ? (
+        <div class="space-y-12">
+          {agenda.dias.map((dia) => (
+            <section data-reveal="arriba">
+              <header class="flex flex-wrap items-baseline gap-x-5 gap-y-1 border-b-2 border-tinta pb-3">
+                <h2 class="display text-4xl leading-none lg:text-5xl">{dia.dia}</h2>
+                <p class="meta text-tinta/50">{dia.fecha}</p>
+                <p class="meta ml-auto text-tinta/50">
+                  {dia.actividades.length === 1
+                    ? '1 actividad'
+                    : `${dia.actividades.length} actividades`}
+                </p>
+              </header>
+
+              <ul class="mt-6 grid gap-5 lg:grid-cols-2">
+                {dia.actividades.map((a, j) => (
+                  <li class={tarjetaAlterna(j, 'bloque').clase} style={tarjetaAlterna(j, 'bloque').estilo}>
+                    <p class="evento-hora">
+                      {a.inicio}–{a.fin}
+                      <span class="evento-tipo">{a.tipo}</span>
+                    </p>
+
+                    <div class="min-w-0">
+                      <h3 class="text-xl leading-snug font-bold lg:text-2xl">{a.titulo}</h3>
+                      {a.artista && <p class="evento-artista text-base">{a.artista}</p>}
+                    </div>
+
+                    {a.registro ? (
+                      <a href={a.registro} target="_blank" rel="noopener" class="evento-puerta">
+                        Registrarme ↗
+                      </a>
+                    ) : a.libre ? (
+                      <p class="meta evento-sede">Entrada libre</p>
+                    ) : null}
+
+                    {a.sala?.publicado && (
+                      <a href={conBase(rutaSala(a.sala))} class="evento-lectura">Descripción</a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      ) : (
+        /* El hueco honesto: lo que falta, dicho, y por dónde seguir. */
+        <div class="max-w-2xl">
+          <p class="display text-5xl leading-[0.95] lg:text-6xl">Sin actividades<br />en el programa</p>
+          <p class="mt-6 text-lg leading-relaxed text-tinta/70">
+            {sede.nombre} es sede del festival, pero todavía no tiene nada anunciado.
+            Lo que se programe aquí sale en esta página.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-4">
+            <a href={conBase('/programa')} class="boton">Ver el programa</a>
+            {sede.instagram && (
+              <a href={sede.instagram} target="_blank" rel="noopener" class="boton boton--papel">
+                {sedes.acciones.conoce} ↗
+              </a>
+            )}
+          </div>
+        </div>
+      )
+    }
+  </section>
+
+  {
+    recorridos.length > 0 && (
+      <section class="border-t-2 border-tinta bg-tinta px-4 py-10 text-papel sm:px-6 lg:px-10">
+        <p class="meta text-amarillo">Y por todas las sedes, también aquí</p>
+        <ul class="mt-4 flex flex-wrap gap-x-10 gap-y-4">
+          {recorridos.map((a) => (
+            <li>
+              <p class="display text-2xl leading-none text-amarillo">{a.titulo}</p>
+              <p class="meta mt-2 text-papel/70">{cuandoRecorrido(a)}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {/* La de al lado. Sin esto, ver dos sedes son dos viajes a la rejilla. */}
+  <section class="grid border-t-2 border-tinta bg-rojo sm:grid-cols-3">
+    <a href={conBase('/mock/b')} class="meta border-b-2 border-tinta px-6 py-6 text-amarillo sm:border-r-2 sm:border-b-0">
+      ← {anterior.sede.nombre}
+    </a>
+    <a href={conBase('/mock/b')} class="meta border-b-2 border-tinta px-6 py-6 text-center text-amarillo sm:border-r-2 sm:border-b-0">
+      Todas las sedes
+    </a>
+    <a href={conBase('/mock/b')} class="meta px-6 py-6 text-right text-amarillo">
+      {siguiente.sede.nombre} →
+    </a>
+  </section>
+</Base>
