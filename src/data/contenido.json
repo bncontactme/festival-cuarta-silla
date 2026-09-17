@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 152,
-  "actualizado": "2026-09-16T01:51:17.302Z",
+  "version": 153,
+  "actualizado": "2026-09-17T01:02:28.051Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -448,9 +448,9 @@
       },
       {
         "titulo": "Proyecciones / 45 días en Harvard / Tapatixtriste Flores",
-        "dia": 3,
-        "inicio": "14:00",
-        "fin": "18:00",
+        "dia": 2,
+        "inicio": "18:00",
+        "fin": "20:00",
         "sede": "Estudio Arechiga",
         "tipo": "muestra",
         "artista": "Expositores",
