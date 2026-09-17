@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 154,
-  "actualizado": "2026-09-17T01:06:28.818Z",
+  "version": 155,
+  "actualizado": "2026-09-17T01:43:48.602Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -586,7 +586,7 @@
         "libre": true
       },
       {
-        "titulo": "Performance",
+        "titulo": "Performance \"Tratados de agua\"",
         "dia": 2,
         "inicio": "17:00",
         "fin": "18:00",
