@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 156,
-  "actualizado": "2026-09-17T03:51:32.127Z",
+  "version": 157,
+  "actualizado": "2026-09-17T04:38:22.087Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1685,7 +1685,7 @@
     },
     {
       "nombre": "Ann Barba",
-      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789617034/cuartasilla/artistas/g0t7zhgp7s2plvmf2hqw.jpg",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789619895/cuartasilla/artistas/ann-barba/m1hijjssmsk8fsemwq3h.jpg",
       "instagram": "https://www.instagram.com/annnbarba/",
       "sede": "Taller Industria Gráfica"
     },
