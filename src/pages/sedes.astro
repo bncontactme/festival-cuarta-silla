@@ -1,36 +1,21 @@
 ---
-/**
- * Las sedes: el índice.
- *
- * Esta página contesta «cuáles son y dónde»; la de cada sede contesta «qué pasa
- * aquí». Se separaron a propósito. Lo que había era una rejilla de tarjetas con
- * la dirección y dos botones, y no tenía dónde meter el programa de cada una
- * —se probaron el pliegue dentro de la tarjeta y un tablero de dos columnas, y
- * los dos convertían la sede en la fila de una tabla—. Ahora cada sede es un
- * cartel entero en su propia dirección, y esto es la lista que lleva a ellos.
- *
- * Por eso aquí no hay tarjetas: son dieciséis renglones a lo ancho, con el
- * nombre a tamaño de titular y, a la derecha, lo que hay dentro. La rejilla de
- * tres columnas repartía el mismo nombre en tres tamaños distintos según lo
- * largo que fuera; en un renglón todos pesan lo mismo, que es lo que son.
- */
 import Base from '../layouts/Base.astro';
 import Encabezado from '../components/Encabezado.astro';
 import Estrella from '../components/Estrella.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import { conBase } from '../lib/base';
-import { sedes, festival, agendaPorSede, programaPublicado, recorridos } from '../data/site';
+import { sedes, festival, enlaceMapa, rutaDeSede } from '../data/site';
 ---
 
 <Base
   titulo={sedes.titulo}
-  descripcion={`Las ${sedes.lista.length} sedes del ${festival.nombre} en ${festival.ciudad}, con el programa de cada una.`}
+  descripcion={`Las ${sedes.lista.length} sedes del ${festival.nombre} en ${festival.ciudad}.`}
 >
-  {/* ── Móvil: el índice de las dieciséis ───────────────────────────────
-      Cada renglón es un enlace a su pantalla, no un pliegue. El pliegue
-      enseñaba la dirección a un toque, que estaba bien cuando la tarjeta era
-      todo lo que había; ahora hay una pantalla por sede con la dirección
-      arriba, y dejar el pliegue sería poner un paso antes de la puerta. */}
+  {/* ── Móvil: las ocho a la vez, la dirección a un toque ──────────────── */}
+  {/* La cuadrícula de tarjetas de escritorio, en una columna, eran ocho
+      pantallas. Aquí lo primero que hace falta es el nombre — «¿cuáles
+      son?» —; la dirección y los enlaces sólo importan de la que te
+      interesa. */}
   <Fragment slot="movil">
     <Pantalla
       titulo={sedes.titulo}
@@ -40,93 +25,145 @@ import { sedes, festival, agendaPorSede, programaPublicado, recorridos } from '.
       fondoCuerpo="amarillo"
     >
       {
-        agendaPorSede.map((agenda) => (
-          <a
-            href={conBase(agenda.ruta)}
-            class="flex items-center gap-4 border-b-2 border-tinta px-4 py-3"
-          >
-            <span class="min-w-0">
-              <span class="display block text-2xl leading-none">{agenda.sede.nombre}</span>
-              {programaPublicado && (
-                <span class="meta mt-1 block text-[0.5rem] opacity-50">{agenda.resumen}</span>
-              )}
-            </span>
-            <span class="meta ml-auto shrink-0" aria-hidden="true">→</span>
-          </a>
+        sedes.lista.map((sede) => (
+          <details class="plegable">
+            <summary>
+              {/* Sin numerar, como los días del programa: aquí no hay plano al
+                  lado al que remita el número —ése es el del escritorio— y
+                  cuántas son ya lo dice la nota del titular. */}
+              <span class="display text-2xl leading-none">{sede.nombre}</span>
+              <span class="plegable-signo" aria-hidden="true">
+                +
+              </span>
+            </summary>
+
+            <div class="bg-amarillo px-4 py-4 text-tinta">
+              <address class="text-sm leading-snug not-italic opacity-70">
+                {sede.direccion}
+              </address>
+
+              <a
+                href={conBase(rutaDeSede(sede.nombre))}
+                class="meta mt-3 inline-block text-[0.55rem] underline decoration-2 underline-offset-4"
+              >
+                Qué pasa aquí →
+              </a>
+              <div class="mt-4 flex divide-x-2 divide-tinta border-2 border-tinta">
+                {sede.instagram && (
+                  <a
+                    href={sede.instagram}
+                    target="_blank"
+                    rel="noopener"
+                    class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
+                  >
+                    {sedes.acciones.conoce} ↗
+                  </a>
+                )}
+                <a
+                  href={enlaceMapa(sede)}
+                  target="_blank"
+                  rel="noopener"
+                  class="meta flex-1 bg-rojo px-3 py-3 text-center text-[0.55rem] font-bold text-papel"
+                >
+                  {sedes.acciones.ubicacion} ↗
+                </a>
+              </div>
+            </div>
+          </details>
         ))
       }
-
-      <div class="p-4">
-        <a href={conBase('/programa')} class="boton">Ver el programa</a>
-      </div>
     </Pantalla>
   </Fragment>
 
   <Encabezado
-    indice={`${sedes.titulo} / ${festival.ciudad}`}
+    indice={`${sedes.titulo} / Guadalajara`}
     titulo={sedes.titulo}
     fondo="rojo"
   />
 
-  <section class="border-t-2 border-tinta bg-amarillo">
-    <ul>
+  {/* El campo pasa a amarillo. Tinta sobre amarillo son 15,3:1 — se leen
+      mejor que como estaban, en tinta sobre blanco justo debajo de un
+      encabezado negro. El blanco sale de aquí porque en este sistema es la
+      ventana donde algo tiene que verse de verdad (fotos, logos), y una
+      dirección no es ninguna de las dos cosas. */}
+  <section class="bg-amarillo">
+    <ul class="grid sm:grid-cols-2 lg:grid-cols-3">
       {
-        agendaPorSede.map((agenda, i) => (
-          <li>
+        sedes.lista.map((sede, i) => (
+          <li
+            class="group relative flex flex-col justify-between overflow-hidden border-r-2 border-b-2 border-tinta"
+            data-reveal="escala"
+            data-retraso={(i % 3) * 90}
+          >
+            {/* Cortina que sube al pasar el cursor. Es de tinta y no roja: la
+                dirección mide 16px y sobre rojo se queda en 4,0:1 en el mejor
+                caso, mientras que sobre tinta llega a 15,3:1. El rojo no se
+                pierde — vive en la barra de ubicación, que es donde el rojo
+                tiene su oficio en esta página: la acción. */}
+            <span
+              class="absolute inset-0 -z-0 origin-bottom scale-y-0 bg-tinta transition-transform duration-500 ease-[var(--ease-cortina)] group-hover:scale-y-100"
+              aria-hidden="true"
+            />
+
+            {/* El cuerpo de la tarjeta es el enlace a la página de la sede —el
+                cartel con su programa—. Se queda como estaba a la vista: mismo
+                relleno, misma cortina, mismo vuelco de color; lo único que
+                cambia es que ahora lleva a algún sitio. Las dos barras de abajo
+                siguen siendo lo que eran, Instagram y el mapa. */}
             <a
-              href={conBase(agenda.ruta)}
-              class="fila-sede flex flex-wrap items-baseline gap-x-6 gap-y-2 border-b-2 border-tinta px-4 py-5 sm:px-6 lg:grid lg:grid-cols-[3rem_minmax(0,1fr)_15rem_18rem] lg:items-baseline lg:px-10"
-              data-reveal="lado"
-              data-retraso={Math.min(i, 8) * 40}
+              href={conBase(rutaDeSede(sede.nombre))}
+              class="relative block p-6 transition-colors duration-500 group-hover:text-amarillo lg:p-8"
             >
-              <span class="meta w-8 shrink-0 text-tinta/45">
+              <p class="meta text-tinta/55 transition-colors duration-500 group-hover:text-amarillo">
                 {String(i + 1).padStart(2, '0')}
-              </span>
+              </p>
 
-              <span class="display text-4xl leading-[0.95] lg:text-6xl">
-                {agenda.sede.nombre}
-              </span>
+              <h2 class="display mt-4 text-4xl leading-[0.95] lg:text-5xl">
+                {sede.nombre}
+              </h2>
 
-              {/* La dirección en pequeño, al lado del nombre y no debajo: aquí
-                  se viene a elegir, y la calle exacta es cosa de la página de
-                  la sede, que la tiene con su botón de cómo llegar. */}
-              <span class="hidden text-sm leading-snug text-tinta/55 lg:block">
-                {agenda.sede.direccion}
-              </span>
-
-              <span class="meta ml-auto shrink-0 text-tinta/60 lg:ml-0 lg:text-right">
-                {programaPublicado ? agenda.resumen : 'Ver la sede'}
-                <span class="ml-4 inline-block" aria-hidden="true">→</span>
-              </span>
+              <address class="mt-5 min-h-[3.5rem] text-base leading-snug not-italic opacity-70">
+                {sede.direccion}
+              </address>
             </a>
+
+            {/* Antes esta barra era amarilla o negra según la sede tuviera
+                Instagram o no, y de la rejilla salía un damero que nadie
+                diseñó. Ahora cada acción tiene una forma fija: conocer es de
+                tinta y ubicar es de rojo, con Instagram o sin él. Catorce
+                marcas rojas repartidas por la rejilla son el grito de esta
+                página — el mismo papel que en la portada hace una banda a
+                sangre, aquí repartido en la unidad que se repite. */}
+            <div class="relative flex divide-x-2 divide-tinta border-t-2 border-tinta">
+              {sede.instagram && (
+                <a
+                  href={sede.instagram}
+                  target="_blank"
+                  rel="noopener"
+                  class="meta flex-1 bg-tinta px-4 py-4 text-center font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
+                >
+                  {sedes.acciones.conoce} ↗
+                </a>
+              )}
+              <a
+                href={enlaceMapa(sede)}
+                target="_blank"
+                rel="noopener"
+                class="meta flex-1 bg-rojo px-4 py-4 text-center font-bold text-papel transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
+              >
+                {sedes.acciones.ubicacion} ↗
+              </a>
+            </div>
           </li>
         ))
       }
     </ul>
   </section>
 
-  {/* El recorrido tiene casa propia, y una sola: pasa por las dieciséis, así
-      que repetirlo en cada renglón sería contarlo dieciséis veces. Dentro de
-      cada sede sí sale —marcado— porque ahí es parte de lo que pasa ese día. */}
-  {
-    programaPublicado && recorridos.length > 0 && (
-      <section class="border-b-2 border-tinta bg-tinta px-4 py-10 text-papel sm:px-6 lg:px-10">
-        <p class="meta text-amarillo">Y por las dieciséis</p>
-        <ul class="mt-4 flex flex-wrap gap-x-12 gap-y-5">
-          {recorridos.map((a) => (
-            <li>
-              <p class="display text-3xl leading-none text-amarillo">{a.titulo}</p>
-              <p class="meta mt-2 text-papel/70">
-                {['Jue', 'Vie', 'Sáb', 'Dom'][a.dia]} · {a.inicio}–{a.fin}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
-
-  {/* Rojo, amarillo, rojo: la página abre y cierra en la misma tinta. */}
+  {/* Rojo, amarillo, rojo: la página abre y cierra en la misma tinta y el
+      cuerpo va en la otra. La silla en marca de agua se cae — al 20% de rojo
+      sobre amarillo salía naranja, un tono que no está en el manual. La
+      estrella hace ese trabajo sin inventar ningún color. */}
   <section class="relative overflow-hidden border-t-2 border-tinta bg-rojo">
     <Estrella tinta="amarilla" alto="abajo" />
     <div class="relative px-4 py-20 sm:px-6 lg:px-10">
@@ -140,30 +177,6 @@ import { sedes, festival, agendaPorSede, programaPublicado, recorridos } from '.
       >
         {festival.fechas}
       </p>
-      <div class="mt-10 flex flex-wrap gap-4" data-reveal="arriba">
-        <a href={conBase('/programa')} class="boton boton--amarillo">Ver el programa</a>
-      </div>
     </div>
   </section>
 </Base>
-
-<style>
-  /* El renglón entero se enciende, como la fila del plano de la portada: lo
-     pulsable de este sitio no se subraya, se vuelca de color. */
-  .fila-sede {
-    transition:
-      background-color 0.35s var(--ease-salida),
-      color 0.35s var(--ease-salida);
-  }
-  .fila-sede:hover,
-  .fila-sede:focus-visible {
-    background-color: var(--color-tinta);
-    color: var(--color-amarillo);
-  }
-  .fila-sede:hover .meta,
-  .fila-sede:focus-visible .meta,
-  .fila-sede:hover span,
-  .fila-sede:focus-visible span {
-    color: var(--color-amarillo);
-  }
-</style>
