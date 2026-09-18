@@ -185,7 +185,8 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
         </div>
       </section>
 
-      {/* ── 4. El carril de los cuatro días ─────────────────────────────── */}
+      {/* ── 4. El carril de los cuatro días, que es el mando ───────────── */}
+      <div class="mando-dias" data-mando>
       <nav class="flex flex-wrap border-b-2 border-tinta bg-amarillo" aria-label="Los días">
         {programa.dias.map((d, i) => {
           const dia = porIndice.get(i);
@@ -214,11 +215,11 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
       </nav>
 
       {/* ── 5. El programa, por días ───────────────────────────────────── */}
-      <section class="bg-amarillo px-4 py-12 sm:px-6 lg:px-10 lg:py-14">
+      <section class="programa-sede bg-amarillo px-4 py-12 sm:px-6 lg:px-10 lg:py-14">
         {agenda.dias.map((dia) => (
           <div
             id={`dia-${dia.indice}`}
-            class="grid gap-x-8 gap-y-6 border-b-2 border-tinta py-8 first:pt-0 last:border-b-0 lg:grid-cols-[12rem_minmax(0,1fr)]"
+            class="dia gap-x-8 gap-y-6 lg:grid-cols-[12rem_minmax(0,1fr)]"
           >
             <div data-reveal="lado">
               <p class="display text-6xl leading-[0.85] text-rojo lg:text-7xl">
@@ -295,6 +296,7 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
           </div>
         ))}
       </section>
+      </div>
     </>
   )
 }
@@ -385,13 +387,57 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
   .carril-dia--vacio {
     opacity: 0.45;
   }
-  /* El día que corre hoy, marcado por el script. */
-  .carril-dia[data-hoy] {
+  /* El día que se está enseñando. Con JavaScript lo marca el script; sin él,
+     lo marca la propia dirección de la página. */
+  .carril-dia[data-dia-abierto],
+  .mando-dias:not([data-js]):has(#dia-0:target) [data-carril='0'],
+  .mando-dias:not([data-js]):has(#dia-1:target) [data-carril='1'],
+  .mando-dias:not([data-js]):has(#dia-2:target) [data-carril='2'],
+  .mando-dias:not([data-js]):has(#dia-3:target) [data-carril='3'] {
     background-color: var(--color-tinta);
     color: var(--color-amarillo);
   }
-  .carril-dia[data-hoy] .meta {
+  .carril-dia[data-dia-abierto] .meta,
+  .mando-dias:not([data-js]):has(#dia-0:target) [data-carril='0'] .meta,
+  .mando-dias:not([data-js]):has(#dia-1:target) [data-carril='1'] .meta,
+  .mando-dias:not([data-js]):has(#dia-2:target) [data-carril='2'] .meta,
+  .mando-dias:not([data-js]):has(#dia-3:target) [data-carril='3'] .meta {
     color: var(--color-amarillo);
+  }
+
+  /* Hoy, cuando no es el día que se está mirando: se dice en rojo, que es el
+     único acento que este cartel usa para «esto está pasando». */
+  .carril-dia[data-hoy]:not([data-dia-abierto]) .meta {
+    color: var(--color-rojo);
+  }
+
+  /* ── Un día a la vez ──────────────────────────────────────────────────
+     Los cuatro días de una sede como No Museo son dos pantallas y media de
+     scroll, y trece fichas para encontrar la de esta tarde. El carril deja de
+     ser un salto y pasa a ser un mando: enseña el día elegido y esconde los
+     otros, que siguen a un clic.
+
+     **Sin JavaScript también funciona.** `:target` es lo que lo mueve —los
+     renglones del carril son enlaces de verdad a `#dia-N`— y el `:has` de
+     abajo es el que quita el día por defecto cuando ya hay uno elegido. El
+     script sólo añade una cosa que el CSS no puede saber: cuál de los cuatro
+     es hoy. */
+  .dia {
+    display: none;
+  }
+  /* Con JavaScript manda el script, que es el único que sabe cuál es hoy. */
+  .dia[data-activo] {
+    display: grid;
+  }
+  /* Sin él manda la dirección: los renglones del carril son enlaces de verdad
+     a `#dia-N`. El script se anuncia con `data-js` para que las dos reglas no
+     puedan enseñar dos días a la vez. */
+  .mando-dias:not([data-js]) .dia:target {
+    display: grid;
+  }
+  /* Y si nadie eligió, el primero que tenga algo. */
+  .mando-dias:not(:has(.dia[data-activo])):not(:has(.dia:target)) .dia:first-of-type {
+    display: grid;
   }
 
   /* El estado que pone el reloj dentro de la ficha: «corriendo», «en 20 min». */
@@ -442,6 +488,72 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
    */
   type Punto = { inicio: string; fin: string; titulo: string; dia: number };
 
+  /** ── El mando de los días ───────────────────────────────────────────────
+   *
+   * Enseña uno y esconde los otros. Sin esto la página sigue funcionando —los
+   * renglones del carril son enlaces a `#dia-N` y el CSS hace el resto—; lo que
+   * añade el script son dos cosas que un enlace no puede: abrir el día de HOY
+   * al entrar, y cambiar de día sin que la página pegue el salto del ancla.
+   */
+  const mando = document.querySelector<HTMLElement>('[data-mando]');
+
+  /* Si el visitante ya eligió un día —pulsando el carril o llegando con un
+     `#dia-N`—, el reloj no se lo cambia por debajo treinta segundos después. */
+  let eligioAlguien = /^#dia-\d+$/.test(location.hash);
+
+  const abrir = (i: number) => {
+    if (!mando) return;
+    const dia = mando.querySelector<HTMLElement>(`#dia-${i}`);
+    if (!dia) return;
+
+    for (const otro of mando.querySelectorAll<HTMLElement>('.dia')) delete otro.dataset.activo;
+    dia.dataset.activo = '';
+
+    for (const celda of mando.querySelectorAll<HTMLElement>('[data-carril]')) {
+      if (celda.dataset.carril === String(i)) celda.dataset.diaAbierto = '';
+      else delete celda.dataset.diaAbierto;
+    }
+  };
+
+  if (mando) {
+    /* Lo primero, el día que pida la dirección: `/sedes/no-museo#dia-2` es un
+       enlace que alguien mandó por WhatsApp, y tiene que abrir ese día. */
+    const pedido = /^#dia-(\d+)$/.exec(location.hash)?.[1];
+    if (pedido !== undefined) abrir(Number(pedido));
+    else {
+      const primero = mando.querySelector<HTMLElement>('.dia');
+      if (primero) primero.dataset.activo = '';
+      const cual = primero?.id.replace('dia-', '');
+      if (cual) abrir(Number(cual));
+    }
+
+    /* Y desde aquí manda el script: el CSS deja de mirar `:target`, que no se
+       entera de los cambios que hace `replaceState`. */
+    mando.dataset.js = '';
+
+    mando.addEventListener('click', (e) => {
+      const enlace = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-carril]');
+      if (!enlace) return;
+      /* Los gestos de «abrir en otra pestaña» se respetan. */
+      if (e.metaKey || e.ctrlKey || e.shiftKey || (e as MouseEvent).button !== 0) return;
+
+      e.preventDefault();
+      eligioAlguien = true;
+      const i = Number(enlace.dataset.carril);
+      abrir(i);
+      /* La dirección se queda apuntando al día que se está viendo —para poder
+         compartirlo— pero sin mover la página, que es lo que haría el ancla. */
+      history.replaceState(null, '', `#dia-${i}`);
+    });
+
+    addEventListener('hashchange', () => {
+      const m = /^#dia-(\d+)$/.exec(location.hash)?.[1];
+      if (m === undefined) return;
+      eligioAlguien = true;
+      abrir(Number(m));
+    });
+  }
+
   const fuente = document.querySelector<HTMLScriptElement>('[data-reloj-sede]');
   const banda = document.querySelector<HTMLElement>('[data-ahora]');
 
@@ -458,8 +570,24 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
     const dosCifras = (n: number) => String(n).padStart(2, '0');
     const relojDe = (d: Date) => `${dosCifras(d.getHours())}:${dosCifras(d.getMinutes())}`;
 
+    /**
+     * El reloj de mentira, para poder ver la banda antes del festival.
+     *
+     * `?ahora=2026-09-26T13:40` y la página se comporta como si fuera ese
+     * momento. Existe porque esta banda sólo se pinta durante los cuatro días:
+     * sin esto, la única manera de revisarla —o de enseñársela a alguien— sería
+     * cambiarle la hora al ordenador.
+     *
+     * No es una puerta trasera: lo único que hace es adelantar el reloj de UNA
+     * visita, y la fecha sale de la URL que uno mismo escribe. Sin el
+     * parámetro, `Date.now()` y ya.
+     */
+    const finge = new URLSearchParams(location.search).get('ahora');
+    const desfase = finge ? new Date(finge).getTime() - Date.now() : 0;
+    const reloj = () => Date.now() + (Number.isFinite(desfase) ? desfase : 0);
+
     const pintar = () => {
-      const ahora = Date.now();
+      const ahora = reloj();
 
       const conFechas = puntos.map((p) => ({
         ...p,
@@ -494,6 +622,12 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
              qué comparar. */
           const rotulo = celda.querySelector('.meta');
           if (rotulo) rotulo.textContent = `${rotulo.textContent} · hoy`;
+
+          /* Y lo abre, que es lo que de verdad ahorra el viaje: quien entra
+             durante el festival ve el día que está viviendo, no los cuatro.
+             Una sola vez, y sólo si nadie eligió otro — un `#dia-N` compartido
+             por WhatsApp manda sobre el reloj. */
+          if (!eligioAlguien) abrir(hoy);
         }
       }
 
@@ -559,7 +693,8 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
     };
 
     pintar();
-    /* Cada minuto, que es la resolución de todo lo que se enseña. */
-    setInterval(pintar, 60_000);
+    /* Cada treinta segundos: lo que se enseña son minutos, pero el «en 20 min»
+       tiene que bajar a 19 cuando toca y no medio minuto tarde. */
+    setInterval(pintar, 30_000);
   }
 </script>
