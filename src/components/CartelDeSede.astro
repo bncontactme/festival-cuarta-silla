@@ -1,0 +1,685 @@
+---
+/**
+ * La sede como cartel: el nombre a tamaño pared, y debajo lo que pasa aquí.
+ *
+ * Es la forma que ganó frente al tablero de dos columnas y al pliegue dentro de
+ * la tarjeta. La razón no es que grite más: es que una sede es una portada —una
+ * puerta con un nombre pintado— y el resto del sitio ya está escrito así. Un
+ * panel lateral con el programa dentro convertía la sede en una fila de una
+ * tabla, que es lo que no es.
+ *
+ * El orden contesta las preguntas en el orden en que se hacen, que es lo que de
+ * verdad lo hace rápido:
+ *
+ *   1. ¿Dónde es y cómo llego?      — cabecera, con el mapa a un clic.
+ *   2. ¿Qué hay AHORA?              — la banda negra, sin scroll.
+ *   3. ¿Y el día que me interesa?   — el carril de los cuatro números.
+ *   4. ¿Qué hay en total?           — el programa entero, por días.
+ *   5. ¿A dónde sigo?               — las tres sedes más cercanas, con metros.
+ *
+ * Todo menos el punto 2 se construye en el build y se sirve como HTML quieto.
+ */
+import { conBase } from '../lib/base';
+import { tarjetaAlterna } from '../lib/campos';
+import Estrella from './Estrella.astro';
+import AvisoPrograma from './AvisoPrograma.astro';
+import BarraSede from './BarraSede.astro';
+import {
+  agendaPorSede,
+  cercaDe,
+  enlaceMapa,
+  enTodasLasSedes,
+  festival,
+  instanteDe,
+  programa,
+  programaPublicado,
+  rutaSala,
+  sedes,
+  abreEncima,
+} from '../data/site';
+import type { AgendaDeSede } from '../data/site';
+
+interface Props {
+  agenda: AgendaDeSede;
+}
+
+const { agenda } = Astro.props;
+const { sede } = agenda;
+
+const numero = String(agenda.indice + 1).padStart(2, '0');
+const total = agendaPorSede.length;
+
+/** El número del día suelto: «24 de septiembre» → «24». Es el que va en grande
+ *  en el carril y en el margen de cada día. */
+const diaNumero = (fecha: string) => fecha.match(/\d+/)?.[0] ?? '';
+
+const cerca = cercaDe(agenda);
+
+/* Los cuatro días del festival, tengan algo aquí o no: el carril es un carril y
+   un hueco en medio se lee como un error. Los vacíos no son enlaces. */
+const porIndice = new Map(agenda.dias.map((d) => [d.indice, d]));
+
+/** Lo que el script necesita para saber qué está pasando: cada actividad con su
+ *  instante real. Va en un `<script type="application/json">` y no en mil
+ *  atributos porque es una sola lectura y se ve de un vistazo en el inspector. */
+const paraElReloj = agenda.dias.flatMap((dia) =>
+  dia.actividades.map((a) => ({
+    inicio: instanteDe(dia.indice, a.inicio),
+    fin: instanteDe(dia.indice, a.fin),
+    titulo: a.titulo,
+    dia: dia.indice,
+  })),
+);
+---
+
+{/* ── 1. La barra: salir, y la de al lado sin volver al índice ──────────── */}
+<BarraSede agenda={agenda} />
+
+{/* ── 2. El cartel ──────────────────────────────────────────────────────── */}
+<section class="relative overflow-hidden border-b-2 border-tinta bg-rojo">
+  <div class="cuadricula absolute inset-0 opacity-70" aria-hidden="true"></div>
+  <Estrella tinta="amarilla" alto="arriba" />
+
+  <div class="relative px-4 pt-8 pb-8 sm:px-6 lg:px-10 lg:pt-10">
+    <p class="meta mb-6 flex items-center gap-4 font-bold text-tinta" data-reveal="lado">
+      <span class="inline-block h-[2px] w-12 bg-tinta"></span>
+      Sede {numero} / {total} · {festival.ciudad}
+    </p>
+
+    <h1
+      class="display text-[13vw] leading-[0.9] text-amarillo lg:text-[9vw]"
+      data-lineas
+      data-reveal="lineas"
+    >
+      {sede.nombre}
+    </h1>
+
+    <div
+      class="mt-8 flex flex-wrap items-end justify-between gap-x-10 gap-y-6"
+      data-reveal="arriba"
+    >
+      <div>
+        <address class="max-w-md text-lg leading-snug not-italic text-papel">
+          {sede.direccion}
+        </address>
+        {
+          programaPublicado && (
+            <p class="meta mt-3 font-bold text-tinta">{agenda.resumen}</p>
+          )
+        }
+      </div>
+
+      <div class="flex divide-x-2 divide-tinta border-2 border-tinta">
+        <a
+          href={enlaceMapa(sede)}
+          target="_blank"
+          rel="noopener"
+          class="meta bg-tinta px-6 py-5 font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
+        >
+          Cómo llegar ↗
+        </a>
+        {
+          sede.instagram && (
+            <a
+              href={sede.instagram}
+              target="_blank"
+              rel="noopener"
+              class="meta bg-amarillo px-6 py-5 font-bold text-tinta transition-colors duration-300 hover:bg-papel"
+            >
+              {sedes.acciones.instagram} ↗
+            </a>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+{
+  programaPublicado && agenda.dias.length > 0 && (
+    <>
+      {/* ── 3. Qué pasa AHORA ─────────────────────────────────────────────
+          Nace vacía y escondida. La rellena el script de abajo SÓLO si el
+          reloj cae dentro del festival; si no —y sin JavaScript— no existe, y
+          lo que queda es el cartel con su programa, que es lo que hay hoy. */}
+      <section class="banda-ahora border-b-2 border-tinta bg-tinta text-papel" data-ahora hidden>
+        <div class="grid gap-x-10 gap-y-6 px-4 py-7 sm:px-6 lg:grid-cols-[16rem_minmax(0,1fr)] lg:px-10">
+          <div>
+            <p class="meta text-amarillo" data-ahora-dia></p>
+            <p class="display mt-2 text-6xl leading-none text-amarillo lg:text-7xl" data-ahora-reloj />
+            <p class="meta mt-3 text-papel/60" data-ahora-cierre />
+          </div>
+
+          <div>
+            <p class="meta text-papel/60" data-ahora-rotulo />
+            <ul class="mt-3 space-y-2" data-ahora-lista />
+            <p class="banda-ahora-luego mt-5" data-ahora-luego hidden>
+              <span class="meta font-bold text-tinta" data-ahora-cuando />
+              <span class="display text-2xl leading-none text-amarillo" data-ahora-proxima />
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 4. El carril de los cuatro días, que es el mando ───────────── */}
+      <div class="mando-dias" data-mando>
+      <nav class="flex flex-wrap border-b-2 border-tinta bg-amarillo" aria-label="Los días">
+        {programa.dias.map((d, i) => {
+          const dia = porIndice.get(i);
+          /* Sin nada ese día no es un enlace: un carril que promete y no lleva
+             a ningún sitio es peor que un carril con un hueco. */
+          const Elemento = dia ? 'a' : 'span';
+          return (
+            <Elemento
+              href={dia ? `#dia-${i}` : undefined}
+              data-carril={i}
+              class:list={[
+                'carril-dia flex-1 border-r-2 border-tinta px-5 py-4 last:border-r-0',
+                !dia && 'carril-dia--vacio',
+              ]}
+            >
+              <span class="display block text-4xl leading-none lg:text-5xl">
+                {diaNumero(d.fecha)}
+              </span>
+              <span class="meta mt-2 block text-tinta/55">
+                {d.dia}
+                {dia ? ` · ${dia.actividades.length}` : ' · nada'}
+              </span>
+            </Elemento>
+          );
+        })}
+      </nav>
+
+      {/* ── 5. El programa, por días ───────────────────────────────────── */}
+      <section class="programa-sede bg-amarillo px-4 py-12 sm:px-6 lg:px-10 lg:py-14">
+        {agenda.dias.map((dia) => (
+          <div
+            id={`dia-${dia.indice}`}
+            class="dia gap-x-8 gap-y-6 lg:grid-cols-[12rem_minmax(0,1fr)]"
+          >
+            <div data-reveal="lado">
+              <p class="display text-6xl leading-[0.85] text-rojo lg:text-7xl">
+                {diaNumero(dia.fecha)}
+              </p>
+              <p class="display mt-2 text-2xl leading-none">{dia.dia}</p>
+              <p class="meta mt-3 text-tinta/55">
+                {dia.actividades.length === 1 ? '1 actividad' : `${dia.actividades.length} actividades`}
+              </p>
+            </div>
+
+            <ul class="grid gap-5 lg:grid-cols-2">
+              {dia.actividades.map((a, i) => {
+                const recorrido = enTodasLasSedes(a.sede);
+                const tarjeta = tarjetaAlterna(i, 'bloque');
+                return (
+                  <li
+                    class:list={[recorrido ? 'evento evento--bloque' : tarjeta.clase]}
+                    style={
+                      recorrido
+                        ? '--fondo:var(--color-papel);--texto:var(--color-tinta)'
+                        : tarjeta.estilo
+                    }
+                    data-inicio={instanteDe(dia.indice, a.inicio)}
+                    data-fin={instanteDe(dia.indice, a.fin)}
+                  >
+                    <p class="evento-hora">
+                      {a.inicio}–{a.fin}
+                      <span class="evento-tipo">
+                        {a.tipo}
+                        <span class="evento-estado" data-estado hidden></span>
+                      </span>
+                    </p>
+
+                    <div class="min-w-0">
+                      <h2 class="text-xl leading-snug font-bold lg:text-2xl">{a.titulo}</h2>
+                      {a.artista && <p class="evento-artista text-base">{a.artista}</p>}
+                    </div>
+
+                    {/* El recorrido dice que pasa por aquí: sin la marca, ocho
+                        horas de Marcha del Arte se leen como obra de la sede. */}
+                    {recorrido && (
+                      <p class="meta evento-sede">Pasa por aquí · todas las sedes</p>
+                    )}
+
+                    {a.registro ? (
+                      <a
+                        href={a.registro}
+                        target="_blank"
+                        rel="noopener"
+                        class="evento-puerta"
+                        data-registro={a.registro}
+                        aria-label={`Registrarme en ${a.titulo}`}
+                      >
+                        Registrarme{abreEncima(a.registro) ? '' : ' ↗'}
+                      </a>
+                    ) : a.libre && !recorrido ? (
+                      <p class="meta evento-sede">Entrada libre</p>
+                    ) : null}
+
+                    {a.sala?.publicado && (
+                      <a
+                        href={conBase(rutaSala(a.sala))}
+                        class="evento-lectura"
+                        aria-label={`Leer la descripción de ${a.titulo}`}
+                      >
+                        Descripción
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </section>
+      </div>
+    </>
+  )
+}
+
+{
+  !programaPublicado && (
+    <section class="bg-amarillo px-4 py-14 sm:px-6 lg:px-10">
+      <AvisoPrograma />
+    </section>
+  )
+}
+
+{/* ── 6. A dónde se sigue andando ───────────────────────────────────────── */}
+{
+  cerca.length > 0 && (
+    <section class="border-t-2 border-tinta bg-tinta px-4 py-10 text-papel sm:px-6 lg:px-10">
+      <div class="flex flex-wrap items-baseline justify-between gap-4">
+        <p class="meta text-amarillo">Al lado, andando</p>
+        <p class="meta text-papel/50">Distancia en línea recta</p>
+      </div>
+
+      <ul class="mt-6 grid gap-5 lg:grid-cols-3">
+        {cerca.map((c) => (
+          <li>
+            <a href={conBase(c.agenda.ruta)} class="cerca-ficha">
+              <p class="meta text-rojo">
+                {c.metros} m · {c.minutos} min
+              </p>
+              <p class="display mt-3 text-3xl leading-none">{c.agenda.sede.nombre}</p>
+              <p class="meta mt-3 text-tinta/60">{c.agenda.resumen}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  /* La línea de «lo que entra después», dentro de la banda negra. Es una chapa
+     roja y no otro renglón: es la única cosa de la banda que todavía no ha
+     pasado, y tiene que separarse de lo que ya está corriendo. */
+  .banda-ahora-luego {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+    background-color: var(--color-rojo);
+    border: var(--borde) solid var(--color-amarillo);
+    padding: 0.85rem 1.25rem;
+  }
+
+  /* El carril: cuatro celdas iguales que se encienden al pasar por encima,
+     como el resto de lo pulsable del sitio. */
+  .carril-dia {
+    transition:
+      background-color 0.25s var(--ease-salida),
+      color 0.25s var(--ease-salida);
+  }
+  a.carril-dia:hover,
+  a.carril-dia:focus-visible {
+    background-color: var(--color-tinta);
+    color: var(--color-amarillo);
+  }
+  a.carril-dia:hover .meta,
+  a.carril-dia:focus-visible .meta {
+    color: var(--color-amarillo);
+  }
+  /* El día sin nada no es pulsable y lo dice apagándose, no escondiéndose. */
+  .carril-dia--vacio {
+    opacity: 0.45;
+  }
+  /* El día que se está enseñando. Con JavaScript lo marca el script; sin él,
+     lo marca la propia dirección de la página. */
+  .carril-dia[data-dia-abierto],
+  .mando-dias:not([data-js]):has(#dia-0:target) [data-carril='0'],
+  .mando-dias:not([data-js]):has(#dia-1:target) [data-carril='1'],
+  .mando-dias:not([data-js]):has(#dia-2:target) [data-carril='2'],
+  .mando-dias:not([data-js]):has(#dia-3:target) [data-carril='3'] {
+    background-color: var(--color-tinta);
+    color: var(--color-amarillo);
+  }
+  .carril-dia[data-dia-abierto] .meta,
+  .mando-dias:not([data-js]):has(#dia-0:target) [data-carril='0'] .meta,
+  .mando-dias:not([data-js]):has(#dia-1:target) [data-carril='1'] .meta,
+  .mando-dias:not([data-js]):has(#dia-2:target) [data-carril='2'] .meta,
+  .mando-dias:not([data-js]):has(#dia-3:target) [data-carril='3'] .meta {
+    color: var(--color-amarillo);
+  }
+
+  /* Hoy, cuando no es el día que se está mirando: se dice en rojo, que es el
+     único acento que este cartel usa para «esto está pasando». */
+  .carril-dia[data-hoy]:not([data-dia-abierto]) .meta {
+    color: var(--color-rojo);
+  }
+
+  /* ── Un día a la vez ──────────────────────────────────────────────────
+     Los cuatro días de una sede como No Museo son dos pantallas y media de
+     scroll, y trece fichas para encontrar la de esta tarde. El carril deja de
+     ser un salto y pasa a ser un mando: enseña el día elegido y esconde los
+     otros, que siguen a un clic.
+
+     **Sin JavaScript también funciona.** `:target` es lo que lo mueve —los
+     renglones del carril son enlaces de verdad a `#dia-N`— y el `:has` de
+     abajo es el que quita el día por defecto cuando ya hay uno elegido. El
+     script sólo añade una cosa que el CSS no puede saber: cuál de los cuatro
+     es hoy. */
+  .dia {
+    display: none;
+  }
+  /* Con JavaScript manda el script, que es el único que sabe cuál es hoy. */
+  .dia[data-activo] {
+    display: grid;
+  }
+  /* Sin él manda la dirección: los renglones del carril son enlaces de verdad
+     a `#dia-N`. El script se anuncia con `data-js` para que las dos reglas no
+     puedan enseñar dos días a la vez. */
+  .mando-dias:not([data-js]) .dia:target {
+    display: grid;
+  }
+  /* Y si nadie eligió, el primero que tenga algo. */
+  .mando-dias:not(:has(.dia[data-activo])):not(:has(.dia:target)) .dia:first-of-type {
+    display: grid;
+  }
+
+  /* `.evento-estado` se mudó a `global.css` con el resto de la familia
+     `.evento`: lo pintan este cartel y el panel de `/sedes`. */
+
+  /* `.cerca-ficha` se mudó a `global.css`: la pintan este cartel y el panel de
+     `/sedes`, y dos copias de la misma tarjeta es la manera de acabar con dos
+     tarjetas distintas. */
+</style>
+
+<script type="application/json" data-reloj-sede set:html={JSON.stringify(paraElReloj)} is:inline />
+
+<script>
+  /**
+   * El reloj de la sede: qué está corriendo aquí, y qué entra después.
+   *
+   * Es lo único de esta página que no se puede construir en el build, porque
+   * depende de cuándo se mire. Y por eso está escrito para desaparecer: si no
+   * hay JavaScript, si el reloj cae fuera de las fechas del festival o si algo
+   * falla, la banda se queda escondida y lo que se ve es el cartel con su
+   * programa — que es exactamente lo que se ve hoy, en septiembre, antes de que
+   * empiece nada.
+   *
+   * Las horas llegan con el huso de Guadalajara puesto (`instanteDe` en
+   * `site.ts`), así que quien mire desde otro país ve bien qué está pasando
+   * ALLÁ, que es lo que preguntaba.
+   */
+  type Punto = { inicio: string; fin: string; titulo: string; dia: number };
+
+  /** ── El mando de los días ───────────────────────────────────────────────
+   *
+   * Enseña uno y esconde los otros. Sin esto la página sigue funcionando —los
+   * renglones del carril son enlaces a `#dia-N` y el CSS hace el resto—; lo que
+   * añade el script son dos cosas que un enlace no puede: abrir el día de HOY
+   * al entrar, y cambiar de día sin que la página pegue el salto del ancla.
+   */
+  const mando = document.querySelector<HTMLElement>('[data-mando]');
+
+  /* Si el visitante ya eligió un día —pulsando el carril o llegando con un
+     `#dia-N`—, el reloj no se lo cambia por debajo treinta segundos después. */
+  let eligioAlguien = /^#dia-\d+$/.test(location.hash);
+
+  const abrir = (i: number) => {
+    if (!mando) return;
+    const dia = mando.querySelector<HTMLElement>(`#dia-${i}`);
+    if (!dia) return;
+
+    for (const otro of mando.querySelectorAll<HTMLElement>('.dia')) delete otro.dataset.activo;
+    dia.dataset.activo = '';
+
+    for (const celda of mando.querySelectorAll<HTMLElement>('[data-carril]')) {
+      if (celda.dataset.carril === String(i)) celda.dataset.diaAbierto = '';
+      else delete celda.dataset.diaAbierto;
+    }
+  };
+
+  if (mando) {
+    /* Lo primero, el día que pida la dirección: `/sedes/no-museo#dia-2` es un
+       enlace que alguien mandó por WhatsApp, y tiene que abrir ese día. */
+    const pedido = /^#dia-(\d+)$/.exec(location.hash)?.[1];
+    if (pedido !== undefined) abrir(Number(pedido));
+    else {
+      const primero = mando.querySelector<HTMLElement>('.dia');
+      if (primero) primero.dataset.activo = '';
+      const cual = primero?.id.replace('dia-', '');
+      if (cual) abrir(Number(cual));
+    }
+
+    /* Y desde aquí manda el script: el CSS deja de mirar `:target`, que no se
+       entera de los cambios que hace `replaceState`. */
+    mando.dataset.js = '';
+
+    mando.addEventListener('click', (e) => {
+      const enlace = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-carril]');
+      if (!enlace) return;
+      /* Los gestos de «abrir en otra pestaña» se respetan. */
+      if (e.metaKey || e.ctrlKey || e.shiftKey || (e as MouseEvent).button !== 0) return;
+
+      e.preventDefault();
+      eligioAlguien = true;
+      const i = Number(enlace.dataset.carril);
+      abrir(i);
+      /* La dirección se queda apuntando al día que se está viendo —para poder
+         compartirlo— pero sin mover la página, que es lo que haría el ancla. */
+      history.replaceState(null, '', `#dia-${i}`);
+    });
+
+    addEventListener('hashchange', () => {
+      const m = /^#dia-(\d+)$/.exec(location.hash)?.[1];
+      if (m === undefined) return;
+      eligioAlguien = true;
+      abrir(Number(m));
+    });
+  }
+
+  const fuente = document.querySelector<HTMLScriptElement>('[data-reloj-sede]');
+  const banda = document.querySelector<HTMLElement>('[data-ahora]');
+
+  if (fuente && banda) {
+    let puntos: Punto[] = [];
+    try {
+      puntos = JSON.parse(fuente.textContent || '[]');
+    } catch {
+      puntos = [];
+    }
+
+    const $ = <T extends HTMLElement>(sel: string) => banda.querySelector<T>(sel);
+
+    const dosCifras = (n: number) => String(n).padStart(2, '0');
+    const relojDe = (d: Date) => `${dosCifras(d.getHours())}:${dosCifras(d.getMinutes())}`;
+
+    /**
+     * El reloj de mentira, para poder ver la banda antes del festival.
+     *
+     * `?ahora=2026-09-26T13:40` y la página se comporta como si fuera ese
+     * momento. Existe porque esta banda sólo se pinta durante los cuatro días:
+     * sin esto, la única manera de revisarla —o de enseñársela a alguien— sería
+     * cambiarle la hora al ordenador.
+     *
+     * No es una puerta trasera: lo único que hace es adelantar el reloj de UNA
+     * visita, y la fecha sale de la URL que uno mismo escribe. Sin el
+     * parámetro, `Date.now()` y ya.
+     */
+    const finge = new URLSearchParams(location.search).get('ahora');
+    const desfase = finge ? new Date(finge).getTime() - Date.now() : 0;
+    const reloj = () => Date.now() + (Number.isFinite(desfase) ? desfase : 0);
+
+    const pintar = () => {
+      const ahora = reloj();
+
+      const conFechas = puntos.map((p) => ({
+        ...p,
+        desde: new Date(p.inicio).getTime(),
+        hasta: new Date(p.fin).getTime(),
+      }));
+      if (!conFechas.length) return;
+
+      /* La banda contesta siempre lo mismo —«¿qué hay aquí?»— en los tres
+         momentos en que se puede preguntar: con algo corriendo, con el festival
+         en marcha pero esta sede parada, y antes de que empiece nada. Lo único
+         que no tiene respuesta es después: cuando la última actividad de la
+         sede ya terminó, no hay siguiente que anunciar y la banda se va. */
+      const arranca = Math.min(...conFechas.map((p) => p.desde));
+      const termina = Math.max(...conFechas.map((p) => p.hasta));
+      if (ahora > termina) return;
+
+      const corriendo = conFechas.filter((p) => p.desde <= ahora && p.hasta > ahora);
+      const siguiente = conFechas
+        .filter((p) => p.desde > ahora)
+        .sort((a, b) => a.desde - b.desde)[0];
+
+      /* Hoy, según el propio programa: el día de la primera actividad que
+         todavía no ha terminado. Así no hay que volver a escribir las fechas
+         del festival en el navegador.
+         **Sólo con el festival empezado.** Antes, la primera que queda por
+         pasar es la del jueves 24, y marcarla «hoy» un 17 de septiembre sería
+         que el carril mienta con todas las letras. */
+      const hoy = ahora >= arranca ? (corriendo[0] ?? siguiente)?.dia : undefined;
+      if (hoy !== undefined) {
+        const celda = document.querySelector<HTMLElement>(`[data-carril="${hoy}"]`);
+        if (celda && !('hoy' in celda.dataset)) {
+          celda.dataset.hoy = '';
+          /* Y que lo diga, no sólo que se encienda: el color por sí solo no es
+             una etiqueta, y quien llegue con el carril ya pintado no tiene con
+             qué comparar. */
+          const rotulo = celda.querySelector('.meta');
+          if (rotulo) rotulo.textContent = `${rotulo.textContent} · hoy`;
+
+          /* Y lo abre, que es lo que de verdad ahorra el viaje: quien entra
+             durante el festival ve el día que está viviendo, no los cuatro.
+             Una sola vez, y sólo si nadie eligió otro — un `#dia-N` compartido
+             por WhatsApp manda sobre el reloj. */
+          if (!eligioAlguien) abrir(hoy);
+        }
+      }
+
+      const d = new Date(ahora);
+      const rotulo = $('[data-ahora-rotulo]')!;
+      const lista = $('[data-ahora-lista]')!;
+      const cierre = $('[data-ahora-cierre]')!;
+      lista.textContent = '';
+
+      /** Cuándo es algo, contado desde ahora y dicho como lo diría uno:
+       *  dentro de hora y media, en minutos; hoy, a secas; y más allá, con su
+       *  día delante, porque «a las 18:30» sin día no sirve de nada un martes. */
+      const cuandoEs = (cuando: number) => {
+        const faltan = Math.round((cuando - ahora) / 60000);
+        if (faltan <= 90) return `En ${faltan} min`;
+        const fecha = new Date(cuando);
+        if (fecha.toDateString() === d.toDateString()) return `Hoy ${relojDe(fecha)}`;
+        return `${fecha.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' })} · ${relojDe(fecha)}`;
+      };
+
+      if (ahora < arranca) {
+        /* Todavía no empieza. Antes la banda no se pintaba y la mejor franja de
+           la página se quedaba en blanco durante los meses de espera; ahora
+           dice lo único que se puede decir, que es qué va a ser lo primero. */
+        const primera = new Date(arranca);
+        const manana = new Date(d);
+        manana.setDate(manana.getDate() + 1);
+
+        /* Cuánto falta se dice como lo diría uno: hoy y mañana por su nombre,
+           y de ahí para atrás en días. A diez minutos de abrir, «todavía no
+           empieza» suena a que falta un mes. */
+        const esHoy = primera.toDateString() === d.toDateString();
+        const esManana = primera.toDateString() === manana.toDateString();
+
+        $('[data-ahora-dia]')!.textContent = esHoy
+          ? 'Empieza hoy'
+          : esManana
+            ? 'Empieza mañana'
+            : 'Todavía no empieza';
+        $('[data-ahora-reloj]')!.textContent =
+          esHoy || esManana
+            ? relojDe(primera)
+            : `${Math.ceil((arranca - ahora) / 86_400_000)} días`;
+        cierre.textContent = 'Para lo primero de esta sede';
+        rotulo.textContent = 'Lo primero aquí';
+      } else {
+        $('[data-ahora-dia]')!.textContent = `Ahora · ${d.toLocaleDateString('es-MX', {
+          weekday: 'long',
+          day: 'numeric',
+        })}`;
+        $('[data-ahora-reloj]')!.textContent = relojDe(d);
+
+        if (corriendo.length) {
+          rotulo.textContent = `Corriendo aquí · ${corriendo.length}`;
+          const ultimo = Math.max(...corriendo.map((p) => p.hasta));
+          cierre.textContent = `Abierto hasta las ${relojDe(new Date(ultimo))}`;
+
+          for (const p of corriendo) {
+            const li = document.createElement('li');
+            li.className = 'flex flex-wrap items-baseline gap-x-4 gap-y-1';
+            const cuando = document.createElement('span');
+            cuando.className = 'meta text-amarillo';
+            cuando.textContent = `hasta ${relojDe(new Date(p.hasta))}`;
+            const que = document.createElement('span');
+            que.className = 'text-lg leading-snug font-bold';
+            que.textContent = p.titulo;
+            li.append(cuando, que);
+            lista.append(li);
+          }
+        } else {
+          /* El festival está en marcha pero esta sede está parada. Es un estado
+             de verdad —entre la charla de la tarde y la fiesta de la noche hay
+             cuatro horas— y lo que hace falta saber es cuándo vuelve a abrir. */
+          rotulo.textContent = 'Nada abierto ahora mismo';
+          cierre.textContent = '';
+        }
+      }
+
+      /* Lo siguiente, en los tres estados. Es la chapa roja: la única cosa de
+         la banda que todavía no ha pasado. */
+      const luego = $('[data-ahora-luego]')!;
+      if (siguiente) {
+        $('[data-ahora-cuando]')!.textContent = cuandoEs(siguiente.desde);
+        $('[data-ahora-proxima]')!.textContent = siguiente.titulo;
+        luego.hidden = false;
+      } else {
+        luego.hidden = true;
+      }
+
+      /* La misma verdad dentro de cada ficha, para que la banda y el programa
+         no puedan contradecirse. */
+      for (const ficha of document.querySelectorAll<HTMLElement>('[data-inicio][data-fin]')) {
+        const desde = new Date(ficha.dataset.inicio!).getTime();
+        const hasta = new Date(ficha.dataset.fin!).getTime();
+        const estado = ficha.querySelector<HTMLElement>('[data-estado]');
+        if (!estado) continue;
+
+        const faltan = Math.round((desde - ahora) / 60000);
+        if (desde <= ahora && hasta > ahora) estado.textContent = 'corriendo';
+        else if (faltan > 0 && faltan <= 60) estado.textContent = `en ${faltan} min`;
+        else continue;
+
+        estado.hidden = false;
+      }
+
+      banda.hidden = false;
+    };
+
+    pintar();
+    /* Cada treinta segundos: lo que se enseña son minutos, pero el «en 20 min»
+       tiene que bajar a 19 cuando toca y no medio minuto tarde. */
+    setInterval(pintar, 30_000);
+  }
+</script>

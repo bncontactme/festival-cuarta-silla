@@ -1,0 +1,51 @@
+---
+/**
+ * La barra de arriba de la página de una sede: salir, y la de al lado sin
+ * volver al índice.
+ *
+ * Son veinte líneas, y vive suelta por una razón: la sede tiene DOS formas —el
+ * cartel con su programa y la que no tiene nada, con el plano— y esta barra es
+ * lo único que no cambia entre las dos. Copiada en cada una, «Sede 14 / 16» y
+ * las flechas se separan el primer día que alguien toque una.
+ *
+ * La de al lado es la de al lado EN LA LISTA, no la más cercana: el orden del
+ * índice es el que trae el panel, y es el que la gente acaba de recorrer. Da la
+ * vuelta al final — las dieciséis en círculo, sin callejones.
+ */
+import { conBase } from '../lib/base';
+import { agendaPorSede, sedes } from '../data/site';
+import type { AgendaDeSede } from '../data/site';
+
+interface Props {
+  agenda: AgendaDeSede;
+}
+
+const { agenda } = Astro.props;
+
+const total = agendaPorSede.length;
+const numero = String(agenda.indice + 1).padStart(2, '0');
+const siguiente = agendaPorSede[(agenda.indice + 1) % total];
+const anterior = agendaPorSede[(agenda.indice - 1 + total) % total];
+---
+
+<nav
+  class="meta flex flex-wrap items-stretch border-b-2 border-tinta bg-tinta text-papel"
+  aria-label="Entre sedes"
+>
+  <a href={conBase('/sedes')} class="border-r-2 border-papel px-6 py-4 text-amarillo">
+    ← {sedes.titulo}
+  </a>
+  <span class="px-6 py-4 text-papel/60">Sede {numero} / {total}</span>
+  <a
+    href={conBase(anterior.ruta)}
+    class="ml-auto border-l-2 border-papel/30 px-6 py-4 transition-colors hover:text-amarillo"
+  >
+    ← {anterior.sede.nombre}
+  </a>
+  <a
+    href={conBase(siguiente.ruta)}
+    class="border-l-2 border-papel/30 px-6 py-4 transition-colors hover:text-amarillo"
+  >
+    {siguiente.sede.nombre} →
+  </a>
+</nav>

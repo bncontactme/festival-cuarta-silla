@@ -212,10 +212,12 @@ src/
   scripts/panel/      el panel: api, esquema, campos, tabla, previa, sala,
                       registro, festival (los dos textos del festival)
   layouts/Base.astro  head, SEO, JSON-LD, nav, pie, reparto móvil/escritorio
-  components/         Nav, Footer, Marquee, Silla, Encabezado, Analitica
+  components/         Nav, Footer, Marquee, Silla, Encabezado, Analitica,
+                      TableroSedes (las sedes y lo que pasa en cada una)
   components/movil/   Portada (con la entrada), Pantalla
   pages/              index, programa, artistas, sedes, archivo, registro,
                       privacidad, 404
+  pages/sedes/        una página por sede: `/sedes/<nombre-de-la-sede>`
   pages/admin/        el panel de edición (noindex, fuera del sitemap)
 scripts/instantanea.mjs   baja el contenido del panel antes de cada build
 workers/panel/            el Worker: KV, validación, Cloudinary, historial
@@ -259,6 +261,23 @@ botón que lleve a él, pero el enlace sigue vivo en `festival.convocatoriaPDF`)
 | `/lugar`                 | `/sedes`      |
 | `/event-list`            | `/registro`   |
 | `/política-de-privacidad`| `/privacidad` |
+
+**Cada sede tiene página propia**: `/sedes/no-museo`, `/sedes/ala-rota`… El
+trozo final sale del nombre de la sede en cada build —sin tildes, en minúsculas
+y con guiones—, así que manda el panel: se corrige el nombre en `/admin` y la
+dirección lo sigue sola, sin un segundo sitio que actualizar a mano.
+
+Lo que se paga por eso: **renombrar una sede cambia su dirección** y el enlace
+viejo deja de existir. Es asumible mientras esos enlaces vivan dentro del sitio.
+El día que se imprima un QR por puerta habrá que acuñar la dirección una vez y
+dejar de deducirla — la razón está escrita entera en `TextoDeSala`
+([`src/data/tipos.ts`](src/data/tipos.ts)): una dirección pegada a una pared ya
+no es un detalle de implementación.
+
+Si dos sedes caen en la misma dirección —«Casa Feria» y «Casa Feria.»— el build
+lo dice con los dos nombres delante y sirve sólo la primera. Con el contenido
+del repo revienta; con el del panel avisa y sigue, como el resto de la red de
+seguridad de `site.ts`.
 
 ## Publicación
 

@@ -1,0 +1,356 @@
+---
+/**
+ * El «Conoce más» de una sede, dentro de la propia lista.
+ *
+ * Es la segunda hoja del panel derecho de `/sedes`: la lista de las dieciséis
+ * se aparta y esto entra en su sitio, con el plano quieto al lado y la estrella
+ * de esta sede encendida. Nadie cambia de página, así que nadie pierde dónde
+ * estaba: al volver, la lista sigue en el mismo renglón.
+ *
+ * NO es `CartelDeSede` en pequeño, y sobre todo no es su misma imprenta. El
+ * cartel vive en una página que se recorre entera y ahí cada actividad puede
+ * permitirse ser un objeto: canto de 2 px, sombra dura y campo alterno, de dos
+ * en dos y con aire alrededor. Aquí no. En una columna, once objetos de ese
+ * peso, uno debajo de otro, son una pared de rectángulos.
+ *
+ * Así que aquí **pesa una sola cosa**: el nombre, sobre su campo rojo. Todo lo
+ * que va debajo se lee, no se mira: las actividades son renglones separados por
+ * un filete de un pelo —como la lista de las dieciséis que hay al lado— y las
+ * sedes de cerca son tres renglones más, no tres tarjetas.
+ *
+ * ── Y los días son el mando ───────────────────────────────────────────────
+ *
+ * Aquí estuvieron los cuatro días apilados en un scroll único, cada uno con su
+ * titular pegajoso. Se cae, con la cuenta delante: la sede más cargada medía
+ * 2.441 px en una caja de 795 —tres pantallas y pico—, de los que 259 eran
+ * barra y cabecera antes de la primera actividad y 296 eran titulares de día.
+ * Al abrir se veían tres actividades y media, y el día que se buscaba estaba
+ * dos pantallas más abajo.
+ *
+ * Ahora el día se pulsa: cuatro celdas con el número grande, y debajo sólo lo
+ * de ese día. Es **el carril del cartel** —mismas celdas, mismo número, misma
+ * nota «Jue · 5», mismo día vacío sin pulsar— traído a la columna, así que no
+ * se estrena ninguna forma: quien haya abierto una sede ya lo usó.
+ *
+ * Esto revisa a propósito la nota que decía que un carril de cuatro celdas
+ * dentro del panel era «un mando dentro de otro». Lo era cuando el carril se
+ * ponía ENCIMA de una lista que seguía entera debajo; aquí los días **son** el
+ * panel en su primer nivel, y debajo no queda ninguna lista que mandar.
+ */
+import { conBase } from '../lib/base';
+import Estrella from './Estrella.astro';
+import AvisoPrograma from './AvisoPrograma.astro';
+import {
+  abreEncima,
+  agendaPorSede,
+  cercaDe,
+  enlaceMapa,
+  instanteDe,
+  programa,
+  programaPublicado,
+  ranuraDeSede,
+  rutaSala,
+  sedes,
+} from '../data/site';
+import type { AgendaDeSede } from '../data/site';
+
+interface Props {
+  agenda: AgendaDeSede;
+}
+
+const { agenda } = Astro.props;
+const { sede } = agenda;
+
+const total = agendaPorSede.length;
+const numero = String(agenda.indice + 1).padStart(2, '0');
+const ranura = ranuraDeSede(sede.nombre);
+
+/* Dos, no tres: el pie es ahora un renglón y con tres se parte en dos. La
+   tercera no se pierde — está en el plano de al lado, con las otras quince. */
+const cerca = cercaDe(agenda, 2);
+
+/* Los cuatro días del festival, tengan algo aquí o no: el carril es un carril y
+   un hueco en medio se lee como un error. Es el mapa que usa el cartel, por lo
+   mismo y con el mismo nombre. */
+const porIndice = new Map(agenda.dias.map((d) => [d.indice, d]));
+
+/** Por qué día abre. El primero que tenga algo — y durante el festival lo
+ *  cambia el reloj por el de hoy, que es quien sabe qué día es. */
+const primerDia = agenda.dias[0]?.indice ?? 0;
+
+/** «24 de septiembre» → «24». El número suelto, que es el que va en grande. */
+const diaNumero = (fecha: string) => fecha.match(/\d+/)?.[0] ?? '';
+
+/**
+ * El tamaño del nombre, decidido por el nombre.
+ *
+ * «Ala Rota» aguanta tamaño de cartel y «Taller Industria Gráfica» a ese mismo
+ * tamaño se sale por el canto o se come la estrella. Un solo tamaño para los
+ * dieciséis significa elegir el que le sirve al más largo, y entonces las
+ * catorce sedes de nombre corto salen pequeñas sin motivo.
+ *
+ * Se decide aquí, en el build, con lo único que hace falta saber —cuántas
+ * letras tiene— y se dice en `cqw`: el panel mide 570 px con la lista puesta y
+ * 720 con él abierto, así que el tamaño tiene que medirse contra el hueco y no
+ * contra la ventana. Es el mecanismo de `FichaArtista`.
+ */
+const tamanoTitulo = sede.nombre.length <= 13 ? '7.4cqw' : '5.8cqw';
+---
+
+<article
+  class="panel-sede"
+  data-panel={sede.nombre}
+  data-ranura={ranura}
+  aria-label={`${sede.nombre}, sede ${numero} de ${total}`}
+  tabindex="-1"
+  hidden
+>
+  {/* ── La barra: el camino de vuelta ────────────────────────────────────
+      Pegajosa dentro del scroll del panel —el camino de vuelta no se puede
+      quedar tres pantallas más arriba— y con dos cosas y ninguna más: por
+      dónde se sale y de quién es esto. Aquí estuvieron las flechas a la sede
+      anterior y la siguiente; se caen porque ir a la de al lado ya tiene tres
+      caminos —la estrella del plano, los tres renglones del pie y la lista— y
+      porque tres flechas en una barra de cuatro centímetros son ruido. */}
+  <nav class="panel-barra meta" aria-label="Salir de la sede">
+    <button type="button" class="panel-volver" data-cerrar-panel>
+      ← {sedes.titulo}
+    </button>
+    <span class="panel-cuenta">
+      <span class="panel-numero">{numero}</span>
+      {/* El nombre va en la barra —y no sólo en la cabecera roja— porque la
+          barra es lo único que se queda puesto: en cuanto se baja al programa
+          la cabecera se va, y un panel con once actividades y ningún nombre a
+          la vista es un panel del que no se sabe de quién es. */}
+      <span class="panel-nombre display">{sede.nombre}</span>
+    </span>
+
+    {/* Qué pasa AHORA. Vivía en un renglón propio debajo de la cabecera y de
+        ahí se lo comía el scroll: durante el festival el panel abre en el día
+        de hoy, o sea ya por debajo de él, y lo único que caduca cada media
+        hora era lo único que no se veía. Aquí no se va nunca —la barra es
+        pegajosa—, y de paso el panel se queda con una franja menos. Nace
+        escondido: sin festival corriendo no hay nada que decir. */}
+    <span class="panel-ahora" data-panel-ahora hidden></span>
+  </nav>
+
+  {/* ── La cabecera: lo único que pesa ─────────────────────────────────────
+      El nombre sigue a tamaño de cartel; lo que se aprieta es todo lo demás.
+      La dirección y las dos puertas comparten renglón —eran dos franjas y son
+      una— porque cada franja de aquí arriba es una actividad menos a la vista,
+      y la cuenta de este panel se hace en renglones, no en centímetros. */}
+  <header class="panel-cabecera">
+    <div class="cuadricula absolute inset-0 opacity-60" aria-hidden="true"></div>
+    <Estrella tinta="amarilla" alto="esquina" medida="8.5rem" />
+
+    <div class="relative">
+      <h2 class="panel-titulo display text-amarillo" style={`--titulo:${tamanoTitulo}`}>
+        {sede.nombre}
+      </h2>
+
+      <div class="panel-datos">
+        <address class="panel-direccion">{sede.direccion}</address>
+
+        {/* Dos puertas, las dos macizas y en tintas contrarias: tinta con letra
+            amarilla y amarillo con letra tinta. Son EXACTAMENTE las dos puertas
+            del cartel de esta misma sede en su página, así que no se estrena
+            nada.
+
+            La segunda estuvo un rato en hueco —canto de tinta y letra de tinta
+            sobre el campo rojo— y se cae por lo que se cae todo en este sitio:
+            tinta sobre rojo son 4,2:1 y esta letra mide 11,5 px, que pide 4,5.
+            Sobre un campo rojo NO HAY manera de escribir chico: el amarillo da
+            3,7 y el papel 4,0. La única salida es que la puerta traiga su propio
+            campo, y entonces la letra se lee contra él —15:1— y no contra el
+            rojo. */}
+        <p class="panel-puertas">
+          <a href={enlaceMapa(sede)} target="_blank" rel="noopener" class="meta panel-puerta">
+            Cómo llegar ↗
+          </a>
+          {
+            sede.instagram && (
+              <a
+                href={sede.instagram}
+                target="_blank"
+                rel="noopener"
+                class="meta panel-puerta panel-puerta--clara"
+              >
+                {sedes.acciones.instagram} ↗
+              </a>
+            )
+          }
+        </p>
+      </div>
+    </div>
+  </header>
+
+  {
+    !programaPublicado ? (
+      <div class="panel-vacio">
+        <AvisoPrograma compacto />
+      </div>
+    ) : agenda.dias.length === 0 ? (
+      <p class="panel-vacio text-sm leading-relaxed opacity-70">
+        {sede.nombre} es sede del festival, pero todavía no tiene nada anunciado. Lo que
+        se programe aquí sale en este panel.
+      </p>
+    ) : (
+      <>
+        {/* ── El carril: los cuatro días, que son el mando ─────────────────
+            Pegajoso justo debajo de la barra —se cambia de día desde donde se
+            esté leyendo, sin volver arriba— y midiendo contra `--barra-panel`,
+            que el script del plano ya publica porque la barra no siempre mide
+            lo mismo.
+
+            Cuatro celdas a lo ancho mientras la columna da de sí, y 2×2 en
+            cuanto se estrecha: a menos de un palmo por celda el número grande
+            deja de tener sitio y el carril se lee como una barra de pestañas,
+            que es justo lo que no es. */}
+        <nav class="panel-carril" aria-label="Los días">
+          {programa.dias.map((d, i) => {
+            const dia = porIndice.get(i);
+            /* Sin nada ese día no se pulsa: un mando que promete y no lleva a
+               ningún sitio es peor que un mando con un hueco.
+
+               `data-fecha` es para el reloj: con eso sabe si esta celda es hoy
+               sin ir a buscar la primera actividad de su día, que es lo que
+               hacía cuando el día era un titular y vivía junto a las suyas.
+               (Y va aquí y no entre los atributos: un comentario ahí dentro lo
+               limpia Astro, pero `astro check` lo lee como cuatro atributos
+               inventados.) */
+            return (
+              <button
+                type="button"
+                class:list={['panel-celda', !dia && 'panel-celda--vacia']}
+                data-dia={i}
+                data-fecha={instanteDe(i, '12:00')}
+                disabled={!dia}
+                aria-pressed={dia ? (i === primerDia ? 'true' : 'false') : undefined}
+              >
+                <span class="display panel-celda-num">{diaNumero(d.fecha)}</span>
+                {/* «Jue», no «Jueves»: es el corte que ya hace `diaCorto` en
+                    los datos, y aquí decide si el carril cabe en cuatro. En una
+                    columna de 508 px —un portátil de 1024— la celda mide 127 y
+                    «Viernes · 2» se parte en dos renglones; con tres letras
+                    sobra sitio en las dieciséis pantallas. El número grande de
+                    encima ya dice qué día es; esto sólo dice cuál de la
+                    semana. */}
+                <span class="meta panel-celda-nota">
+                  {d.dia.slice(0, 3)}
+                  {dia ? ` · ${dia.actividades.length}` : ' · nada'}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div class="panel-programa">
+          {agenda.dias.map((dia) => (
+            /* Un día a la vez. Lo esconde y lo enseña el script del plano, que
+               es quien ya abre y cierra este panel; aquí sale del build con el
+               primero puesto para que no haya un parpadeo de cuatro días. */
+            <div class="dia-panel" data-indice={dia.indice} hidden={dia.indice !== primerDia}>
+              <ul class="panel-fichas">
+                {dia.actividades.map((a) => {
+                  const libre = a.libre && !a.registro;
+                  /* El pie sólo existe si tiene algo que decir: un párrafo
+                     vacío es un renglón de aire que se repite once veces. */
+                  const pie = a.registro || libre || a.sala?.publicado;
+                  return (
+                    <li
+                      class="evento evento--renglon"
+                      data-inicio={instanteDe(dia.indice, a.inicio)}
+                      data-fin={instanteDe(dia.indice, a.fin)}
+                    >
+                      <p class="evento-hora">
+                        {a.inicio}–{a.fin}
+                        <span class="evento-tipo">
+                          {a.tipo}
+                          <span class="evento-estado" data-estado hidden />
+                        </span>
+                      </p>
+
+                      <div class="min-w-0">
+                        <h4 class="panel-evento-titulo">{a.titulo}</h4>
+                        {a.artista && <p class="evento-artista text-[0.95rem]">{a.artista}</p>}
+
+                        {/* Todo lo que colgaba del título —la marca del
+                            recorrido, la entrada libre, las dos puertas— en un
+                            solo renglón. Eran hasta tres franjas apiladas por
+                            actividad, y tres franjas por once actividades son
+                            media pantalla gastada en cuatro palabras. */}
+                        {pie && (
+                          <p class="evento-pie">
+                            {a.registro && (
+                              <a
+                                href={a.registro}
+                                target="_blank"
+                                rel="noopener"
+                                class="evento-puerta"
+                                aria-label={`Registrarme en ${a.titulo}`}
+                              >
+                                Registrarme{abreEncima(a.registro) ? '' : ' ↗'}
+                              </a>
+                            )}
+
+                            {libre && <span class="meta evento-sede">Entrada libre</span>}
+
+                            {a.sala?.publicado && (
+                              <a
+                                href={conBase(rutaSala(a.sala))}
+                                class="evento-lectura"
+                                aria-label={`Leer la descripción de ${a.titulo}`}
+                              >
+                                Descripción
+                              </a>
+                            )}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </>
+    )
+  }
+
+  {/* ── A dónde se sigue andando ─────────────────────────────────────────
+      No son enlaces a otra página: cambian ESTE panel y mueven el plano. Es lo
+      que convierte las dieciséis sedes en un solo recorrido y no en dieciséis
+      visitas con su vuelta atrás.
+
+      Y es **la otra barra**. Fueron tres renglones con el nombre a tamaño de
+      titular —236 px al pie de un panel que ya no tenía sitio—, luego un
+      renglón amarillo que se iba con el scroll, y acaba aquí: pegado abajo,
+      en tinta, haciendo pareja con la barra de volver.
+
+      Las tres cosas salen de la misma decisión. **Se queda quieto** porque «a
+      dónde sigo» no es el final de un texto, es un mando, y un mando que hay
+      que ir a buscar tres pantallas abajo no está. **Es de tinta** porque en
+      este panel la tinta es el marco y no el contenido —lo dice la barra de
+      arriba—, y dos barras cierran la hoja por los dos cantos. Y de paso **se
+      lee**: el nombre pasa de tinta apagada sobre amarillo, que eran 4,6:1, a
+      amarillo sobre tinta, que son 15,3:1. */}
+  {
+    cerca.length > 0 && (
+      <nav class="panel-cerca meta" aria-label="Sedes de al lado">
+        <span class="panel-cerca-rotulo">Al lado, andando</span>
+        {cerca.map((c) => (
+          <button type="button" class="cerca-renglon" data-ir-sede={c.agenda.sede.nombre}>
+            <span class="cerca-nombre">{c.agenda.sede.nombre}</span>
+            <span class="cerca-metros">{c.metros} m</span>
+            {/* La misma punta que las filas de la lista de al lado: quien la
+                ve ya sabe que eso abre algo, porque acaba de usarla. */}
+            <span class="cerca-punta" aria-hidden="true">
+              ›
+            </span>
+          </button>
+        ))}
+      </nav>
+    )
+  }
+</article>
