@@ -169,7 +169,7 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
       <section class="banda-ahora border-b-2 border-tinta bg-tinta text-papel" data-ahora hidden>
         <div class="grid gap-x-10 gap-y-6 px-4 py-7 sm:px-6 lg:grid-cols-[16rem_minmax(0,1fr)] lg:px-10">
           <div>
-            <p class="meta text-amarillo">Ahora · <span data-ahora-dia /></p>
+            <p class="meta text-amarillo" data-ahora-dia></p>
             <p class="display mt-2 text-6xl leading-none text-amarillo lg:text-7xl" data-ahora-reloj />
             <p class="meta mt-3 text-papel/60" data-ahora-cierre />
           </div>
@@ -596,13 +596,14 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
       }));
       if (!conFechas.length) return;
 
-      /* Fuera de las fechas del festival la banda no aparece. No dice «no hay
-         nada»: la cuenta regresiva de la portada ya cuenta los días, y repetir
-         aquí que falta una semana es ocupar la mejor franja de la página con
-         una obviedad. */
+      /* La banda contesta siempre lo mismo —«¿qué hay aquí?»— en los tres
+         momentos en que se puede preguntar: con algo corriendo, con el festival
+         en marcha pero esta sede parada, y antes de que empiece nada. Lo único
+         que no tiene respuesta es después: cuando la última actividad de la
+         sede ya terminó, no hay siguiente que anunciar y la banda se va. */
       const arranca = Math.min(...conFechas.map((p) => p.desde));
       const termina = Math.max(...conFechas.map((p) => p.hasta));
-      if (ahora < arranca || ahora > termina) return;
+      if (ahora > termina) return;
 
       const corriendo = conFechas.filter((p) => p.desde <= ahora && p.hasta > ahora);
       const siguiente = conFechas
@@ -611,8 +612,11 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
 
       /* Hoy, según el propio programa: el día de la primera actividad que
          todavía no ha terminado. Así no hay que volver a escribir las fechas
-         del festival en el navegador. */
-      const hoy = (corriendo[0] ?? siguiente)?.dia;
+         del festival en el navegador.
+         **Sólo con el festival empezado.** Antes, la primera que queda por
+         pasar es la del jueves 24, y marcarla «hoy» un 17 de septiembre sería
+         que el carril mienta con todas las letras. */
+      const hoy = ahora >= arranca ? (corriendo[0] ?? siguiente)?.dia : undefined;
       if (hoy !== undefined) {
         const celda = document.querySelector<HTMLElement>(`[data-carril="${hoy}"]`);
         if (celda && !('hoy' in celda.dataset)) {
@@ -632,45 +636,89 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
       }
 
       const d = new Date(ahora);
-      $('[data-ahora-reloj]')!.textContent = relojDe(d);
-      $('[data-ahora-dia]')!.textContent = d.toLocaleDateString('es-MX', {
-        weekday: 'long',
-        day: 'numeric',
-      });
-
       const rotulo = $('[data-ahora-rotulo]')!;
       const lista = $('[data-ahora-lista]')!;
+      const cierre = $('[data-ahora-cierre]')!;
       lista.textContent = '';
 
-      if (corriendo.length) {
-        rotulo.textContent = `Corriendo aquí · ${corriendo.length}`;
-        const ultimo = Math.max(...corriendo.map((p) => p.hasta));
-        $('[data-ahora-cierre]')!.textContent = `Abierto hasta las ${relojDe(new Date(ultimo))}`;
+      /** Cuándo es algo, contado desde ahora y dicho como lo diría uno:
+       *  dentro de hora y media, en minutos; hoy, a secas; y más allá, con su
+       *  día delante, porque «a las 18:30» sin día no sirve de nada un martes. */
+      const cuandoEs = (cuando: number) => {
+        const faltan = Math.round((cuando - ahora) / 60000);
+        if (faltan <= 90) return `En ${faltan} min`;
+        const fecha = new Date(cuando);
+        if (fecha.toDateString() === d.toDateString()) return `Hoy ${relojDe(fecha)}`;
+        return `${fecha.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' })} · ${relojDe(fecha)}`;
+      };
 
-        for (const p of corriendo) {
-          const li = document.createElement('li');
-          li.className = 'flex flex-wrap items-baseline gap-x-4 gap-y-1';
-          const cuando = document.createElement('span');
-          cuando.className = 'meta text-amarillo';
-          cuando.textContent = `hasta ${relojDe(new Date(p.hasta))}`;
-          const que = document.createElement('span');
-          que.className = 'text-lg leading-snug font-bold';
-          que.textContent = p.titulo;
-          li.append(cuando, que);
-          lista.append(li);
-        }
+      if (ahora < arranca) {
+        /* Todavía no empieza. Antes la banda no se pintaba y la mejor franja de
+           la página se quedaba en blanco durante los meses de espera; ahora
+           dice lo único que se puede decir, que es qué va a ser lo primero. */
+        const primera = new Date(arranca);
+        const manana = new Date(d);
+        manana.setDate(manana.getDate() + 1);
+
+        /* Cuánto falta se dice como lo diría uno: hoy y mañana por su nombre,
+           y de ahí para atrás en días. A diez minutos de abrir, «todavía no
+           empieza» suena a que falta un mes. */
+        const esHoy = primera.toDateString() === d.toDateString();
+        const esManana = primera.toDateString() === manana.toDateString();
+
+        $('[data-ahora-dia]')!.textContent = esHoy
+          ? 'Empieza hoy'
+          : esManana
+            ? 'Empieza mañana'
+            : 'Todavía no empieza';
+        $('[data-ahora-reloj]')!.textContent =
+          esHoy || esManana
+            ? relojDe(primera)
+            : `${Math.ceil((arranca - ahora) / 86_400_000)} días`;
+        cierre.textContent = 'Para lo primero de esta sede';
+        rotulo.textContent = 'Lo primero aquí';
       } else {
-        rotulo.textContent = 'Ahora mismo no hay nada abierto aquí';
-        $('[data-ahora-cierre]')!.textContent = '';
+        $('[data-ahora-dia]')!.textContent = `Ahora · ${d.toLocaleDateString('es-MX', {
+          weekday: 'long',
+          day: 'numeric',
+        })}`;
+        $('[data-ahora-reloj]')!.textContent = relojDe(d);
+
+        if (corriendo.length) {
+          rotulo.textContent = `Corriendo aquí · ${corriendo.length}`;
+          const ultimo = Math.max(...corriendo.map((p) => p.hasta));
+          cierre.textContent = `Abierto hasta las ${relojDe(new Date(ultimo))}`;
+
+          for (const p of corriendo) {
+            const li = document.createElement('li');
+            li.className = 'flex flex-wrap items-baseline gap-x-4 gap-y-1';
+            const cuando = document.createElement('span');
+            cuando.className = 'meta text-amarillo';
+            cuando.textContent = `hasta ${relojDe(new Date(p.hasta))}`;
+            const que = document.createElement('span');
+            que.className = 'text-lg leading-snug font-bold';
+            que.textContent = p.titulo;
+            li.append(cuando, que);
+            lista.append(li);
+          }
+        } else {
+          /* El festival está en marcha pero esta sede está parada. Es un estado
+             de verdad —entre la charla de la tarde y la fiesta de la noche hay
+             cuatro horas— y lo que hace falta saber es cuándo vuelve a abrir. */
+          rotulo.textContent = 'Nada abierto ahora mismo';
+          cierre.textContent = '';
+        }
       }
 
+      /* Lo siguiente, en los tres estados. Es la chapa roja: la única cosa de
+         la banda que todavía no ha pasado. */
+      const luego = $('[data-ahora-luego]')!;
       if (siguiente) {
-        const faltan = Math.round((siguiente.desde - ahora) / 60000);
-        const luego = $('[data-ahora-luego]')!;
-        $('[data-ahora-cuando]')!.textContent =
-          faltan <= 90 ? `En ${faltan} min` : `A las ${relojDe(new Date(siguiente.desde))}`;
+        $('[data-ahora-cuando]')!.textContent = cuandoEs(siguiente.desde);
         $('[data-ahora-proxima]')!.textContent = siguiente.titulo;
         luego.hidden = false;
+      } else {
+        luego.hidden = true;
       }
 
       /* La misma verdad dentro de cada ficha, para que la banda y el programa

@@ -42,23 +42,13 @@ import { sedes, festival, enlaceMapa, rutaDeSede } from '../data/site';
                 {sede.direccion}
               </address>
 
-              <a
-                href={conBase(rutaDeSede(sede.nombre))}
-                class="meta mt-3 inline-block text-[0.55rem] underline decoration-2 underline-offset-4"
-              >
-                Qué pasa aquí →
-              </a>
               <div class="mt-4 flex divide-x-2 divide-tinta border-2 border-tinta">
-                {sede.instagram && (
-                  <a
-                    href={sede.instagram}
-                    target="_blank"
-                    rel="noopener"
-                    class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
-                  >
-                    {sedes.acciones.conoce} ↗
-                  </a>
-                )}
+                <a
+                  href={conBase(rutaDeSede(sede.nombre))}
+                  class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
+                >
+                  {sedes.acciones.conoce}
+                </a>
                 <a
                   href={enlaceMapa(sede)}
                   target="_blank"
@@ -135,16 +125,21 @@ import { sedes, festival, enlaceMapa, rutaDeSede } from '../data/site';
                 página — el mismo papel que en la portada hace una banda a
                 sangre, aquí repartido en la unidad que se repite. */}
             <div class="relative flex divide-x-2 divide-tinta border-t-2 border-tinta">
-              {sede.instagram && (
-                <a
-                  href={sede.instagram}
-                  target="_blank"
-                  rel="noopener"
-                  class="meta flex-1 bg-tinta px-4 py-4 text-center font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
-                >
-                  {sedes.acciones.conoce} ↗
-                </a>
-              )}
+              {/* «Conoce más» lleva a la página de la sede, no a Instagram. Es el
+                  cambio que ordena la tarjeta: lo que alguien quiere saber de
+                  una sede del festival es qué pasa en ella, y eso ahora tiene
+                  página. La cuenta de Instagram no se pierde — vive arriba del
+                  todo en esa misma página, junto al cómo llegar.
+
+                  Y va SIN flecha: en este sitio la flechita significa «esto te
+                  saca de aquí», y ésta no saca a nadie. La de al lado sí, que
+                  abre el mapa en otra pestaña. */}
+              <a
+                href={conBase(rutaDeSede(sede.nombre))}
+                class="meta flex-1 bg-tinta px-4 py-4 text-center font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
+              >
+                {sedes.acciones.conoce}
+              </a>
               <a
                 href={enlaceMapa(sede)}
                 target="_blank"
