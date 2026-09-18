@@ -542,6 +542,72 @@ export const agendaDeSede = (sede: Sede, indice: number): AgendaDeSede => {
 export const agendaPorSede: AgendaDeSede[] = sedes.lista.map((s, i) => agendaDeSede(s, i));
 
 /**
+ * El instante exacto de una hora del programa, con el huso de Guadalajara.
+ *
+ * Las actividades guardan `dia` (0…3) y `'HH:MM'`, que es lo que se escribe en
+ * el panel y lo único que hace falta para pintarlas. Pero para saber si algo
+ * **está pasando ahora** hace falta una fecha de verdad, y tiene que llevar el
+ * huso puesto: sin él, el navegador de quien mire desde Madrid interpretaría
+ * «19:00» en su hora y diría que la inauguración terminó hace rato.
+ *
+ * Sale de `festival.inicioISO` —la misma fecha que ya mueve la cuenta regresiva
+ * de la portada— así que el día que el festival se mueva, se mueve en un sitio.
+ */
+const HUSO = festival.inicioISO.slice(-6);
+const DIA_UNO = festival.inicioISO.slice(0, 10);
+
+export const instanteDe = (dia: number, hhmm: string) => {
+  const d = new Date(`${DIA_UNO}T12:00:00${HUSO}`);
+  d.setUTCDate(d.getUTCDate() + dia);
+  return `${d.toISOString().slice(0, 10)}T${hhmm}:00${HUSO}`;
+};
+
+/** ── Qué tengo cerca ──────────────────────────────────────────────────────
+ *
+ * Las dieciséis caben en 2,8 km y hay dos que están a 31 metros una de otra:
+ * a esa escala, «al lado» no es un adorno, es la mitad de la decisión de la
+ * noche. Sale de las coordenadas que cada sede ya trae para el plano de la
+ * portada, así que no hay dato nuevo que mantener.
+ *
+ * **En línea recta, y se dice.** Andando por calles siempre es más, y pedirle
+ * rutas a un servicio de mapas rompería la regla de la casa: este sitio no le
+ * pide nada a nadie. A 90 metros la diferencia no existe; a 800 sí, y por eso
+ * el rótulo la nombra en vez de prometer una caminata que no midió.
+ */
+const RADIO = 6371000;
+const enRadianes = (g: number) => (g * Math.PI) / 180;
+
+const metrosEntre = (a: [number, number], b: [number, number]) => {
+  const dLat = enRadianes(b[0] - a[0]);
+  const dLon = enRadianes(b[1] - a[1]);
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(enRadianes(a[0])) * Math.cos(enRadianes(b[0])) * Math.sin(dLon / 2) ** 2;
+  return Math.round(2 * RADIO * Math.asin(Math.sqrt(x)));
+};
+
+export type SedeCerca = { agenda: AgendaDeSede; metros: number; minutos: number };
+
+/** Las más cercanas a una sede, de la más próxima en adelante. Una sede sin
+ *  coordenada no empareja con nadie: antes que inventarle un punto, no sale. */
+export const cercaDe = (agenda: AgendaDeSede, cuantas = 3): SedeCerca[] => {
+  const desde = agenda.sede.coord;
+  if (!desde) return [];
+
+  return agendaPorSede
+    .filter((o) => o.sede.nombre !== agenda.sede.nombre && o.sede.coord)
+    .map((o) => {
+      const metros = metrosEntre(desde, o.sede.coord!);
+      /* 75 m por minuto: el paso de alguien que va mirando escaparates, no el
+         de una app de fitness. Redondeado hacia arriba, que es como se cuenta
+         el tiempo que falta para llegar. */
+      return { agenda: o, metros, minutos: Math.max(1, Math.ceil(metros / 75)) };
+    })
+    .sort((a, b) => a.metros - b.metros)
+    .slice(0, cuantas);
+};
+
+/**
  * Lo que se lee al lado del rótulo «Programa»: en la marquesina de `/programa`,
  * en su cabecera de móvil y en el índice de la portada del móvil.
  *

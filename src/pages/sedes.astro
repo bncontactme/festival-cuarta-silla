@@ -1,28 +1,23 @@
 ---
 /**
- * Las sedes.
+ * Las sedes: el índice.
  *
- * Lo que había era una rejilla de tarjetas: dieciséis nombres con su dirección
- * y dos botones —Instagram y el mapa—. Contestaba «dónde es el festival» y no
- * tenía dónde contestar «qué pasa aquí», que es la otra mitad de la pregunta y
- * la que se hace uno cuando ya sabe que hay catorce sitios y cuatro días.
+ * Esta página contesta «cuáles son y dónde»; la de cada sede contesta «qué pasa
+ * aquí». Se separaron a propósito. Lo que había era una rejilla de tarjetas con
+ * la dirección y dos botones, y no tenía dónde meter el programa de cada una
+ * —se probaron el pliegue dentro de la tarjeta y un tablero de dos columnas, y
+ * los dos convertían la sede en la fila de una tabla—. Ahora cada sede es un
+ * cartel entero en su propia dirección, y esto es la lista que lleva a ellos.
  *
- * Ahora la página es un tablero: las dieciséis a la izquierda y el programa de
- * la elegida a la derecha, cada sede con su propia dirección
- * (`/sedes/<ranura>`). En el teléfono no hay dos columnas, así que son dos
- * pantallas: ésta es el índice —los dieciséis nombres con lo que hay en cada
- * uno— y cada nombre lleva a la suya.
- *
- * Por qué el tablero y no un pliegue dentro de la tarjeta: No Museo tiene once
- * actividades y cuatro sedes no tienen ninguna. Un pliegue abierto estira su
- * fila de la rejilla hasta mil quinientos píxeles y deja dos columnas de
- * amarillo vacío al lado — se probó, se ve en la maqueta de la que salió esto.
+ * Por eso aquí no hay tarjetas: son dieciséis renglones a lo ancho, con el
+ * nombre a tamaño de titular y, a la derecha, lo que hay dentro. La rejilla de
+ * tres columnas repartía el mismo nombre en tres tamaños distintos según lo
+ * largo que fuera; en un renglón todos pesan lo mismo, que es lo que son.
  */
 import Base from '../layouts/Base.astro';
 import Encabezado from '../components/Encabezado.astro';
 import Estrella from '../components/Estrella.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
-import TableroSedes from '../components/TableroSedes.astro';
 import { conBase } from '../lib/base';
 import { sedes, festival, agendaPorSede, programaPublicado, recorridos } from '../data/site';
 ---
@@ -73,10 +68,63 @@ import { sedes, festival, agendaPorSede, programaPublicado, recorridos } from '.
     fondo="rojo"
   />
 
-  {/* Sin `activa`, el tablero abre la primera. Es lo que hace que esta página
-      conteste algo desde el primer píxel en vez de pedir un clic para empezar
-      a servir. */}
-  <TableroSedes />
+  <section class="border-t-2 border-tinta bg-amarillo">
+    <ul>
+      {
+        agendaPorSede.map((agenda, i) => (
+          <li>
+            <a
+              href={conBase(agenda.ruta)}
+              class="fila-sede flex flex-wrap items-baseline gap-x-6 gap-y-2 border-b-2 border-tinta px-4 py-5 sm:px-6 lg:grid lg:grid-cols-[3rem_minmax(0,1fr)_15rem_18rem] lg:items-baseline lg:px-10"
+              data-reveal="lado"
+              data-retraso={Math.min(i, 8) * 40}
+            >
+              <span class="meta w-8 shrink-0 text-tinta/45">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+
+              <span class="display text-4xl leading-[0.95] lg:text-6xl">
+                {agenda.sede.nombre}
+              </span>
+
+              {/* La dirección en pequeño, al lado del nombre y no debajo: aquí
+                  se viene a elegir, y la calle exacta es cosa de la página de
+                  la sede, que la tiene con su botón de cómo llegar. */}
+              <span class="hidden text-sm leading-snug text-tinta/55 lg:block">
+                {agenda.sede.direccion}
+              </span>
+
+              <span class="meta ml-auto shrink-0 text-tinta/60 lg:ml-0 lg:text-right">
+                {programaPublicado ? agenda.resumen : 'Ver la sede'}
+                <span class="ml-4 inline-block" aria-hidden="true">→</span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {/* El recorrido tiene casa propia, y una sola: pasa por las dieciséis, así
+      que repetirlo en cada renglón sería contarlo dieciséis veces. Dentro de
+      cada sede sí sale —marcado— porque ahí es parte de lo que pasa ese día. */}
+  {
+    programaPublicado && recorridos.length > 0 && (
+      <section class="border-b-2 border-tinta bg-tinta px-4 py-10 text-papel sm:px-6 lg:px-10">
+        <p class="meta text-amarillo">Y por las dieciséis</p>
+        <ul class="mt-4 flex flex-wrap gap-x-12 gap-y-5">
+          {recorridos.map((a) => (
+            <li>
+              <p class="display text-3xl leading-none text-amarillo">{a.titulo}</p>
+              <p class="meta mt-2 text-papel/70">
+                {['Jue', 'Vie', 'Sáb', 'Dom'][a.dia]} · {a.inicio}–{a.fin}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
 
   {/* Rojo, amarillo, rojo: la página abre y cierra en la misma tinta. */}
   <section class="relative overflow-hidden border-t-2 border-tinta bg-rojo">
@@ -92,17 +140,30 @@ import { sedes, festival, agendaPorSede, programaPublicado, recorridos } from '.
       >
         {festival.fechas}
       </p>
-
-      {/* El recorrido se dice también aquí, una vez y en su sitio: dentro de
-          cada sede sale marcado —pasa por todas—, pero quien mira la página
-          entera tiene que poder enterarse de que existe sin abrir ninguna. */}
-      {
-        programaPublicado && recorridos.length > 0 && (
-          <p class="meta mt-8 max-w-xl text-amarillo/80" data-reveal="arriba">
-            {recorridos[0].titulo} · pasa por todas las sedes
-          </p>
-        )
-      }
+      <div class="mt-10 flex flex-wrap gap-4" data-reveal="arriba">
+        <a href={conBase('/programa')} class="boton boton--amarillo">Ver el programa</a>
+      </div>
     </div>
   </section>
 </Base>
+
+<style>
+  /* El renglón entero se enciende, como la fila del plano de la portada: lo
+     pulsable de este sitio no se subraya, se vuelca de color. */
+  .fila-sede {
+    transition:
+      background-color 0.35s var(--ease-salida),
+      color 0.35s var(--ease-salida);
+  }
+  .fila-sede:hover,
+  .fila-sede:focus-visible {
+    background-color: var(--color-tinta);
+    color: var(--color-amarillo);
+  }
+  .fila-sede:hover .meta,
+  .fila-sede:focus-visible .meta,
+  .fila-sede:hover span,
+  .fila-sede:focus-visible span {
+    color: var(--color-amarillo);
+  }
+</style>

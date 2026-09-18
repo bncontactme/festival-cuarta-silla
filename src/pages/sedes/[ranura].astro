@@ -14,10 +14,8 @@
  * panel manda: lo que el festival escriba en `/admin` es lo que sirve el sitio.
  */
 import Base from '../../layouts/Base.astro';
-import Encabezado from '../../components/Encabezado.astro';
-import Estrella from '../../components/Estrella.astro';
 import Pantalla from '../../components/movil/Pantalla.astro';
-import TableroSedes from '../../components/TableroSedes.astro';
+import CartelDeSede from '../../components/CartelDeSede.astro';
 import AvisoPrograma from '../../components/AvisoPrograma.astro';
 import { conBase } from '../../lib/base';
 import { tarjetaAlterna } from '../../lib/campos';
@@ -180,31 +178,9 @@ const numero = String(agenda.indice + 1).padStart(2, '0');
     </Pantalla>
   </Fragment>
 
-  <Encabezado indice={`Sedes / ${numero}`} titulo={sede.nombre} fondo="rojo" />
-
-  {/* En escritorio no hay página de sede aparte: es el mismo tablero con esta
-      abierta. La única diferencia es que el nombre no se repite dentro —ya está
-      arriba, a tamaño cartel—. */}
-  <TableroSedes activa={agenda} titular={false} />
-
-  {/* El mismo remate que el resto de las páginas: rojo, con las fechas. */}
-  <section class="relative overflow-hidden border-t-2 border-tinta bg-rojo">
-    <Estrella tinta="amarilla" alto="abajo" />
-    <div class="relative px-4 py-20 sm:px-6 lg:px-10">
-      <p class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta" data-reveal="lado">
-        {festival.ciudad}
-      </p>
-      <p
-        class="display max-w-4xl text-[9vw] leading-[0.95] text-amarillo lg:text-[5.5vw]"
-        data-lineas
-        data-reveal="lineas"
-      >
-        {festival.fechas}
-      </p>
-      <div class="mt-10 flex flex-wrap gap-4" data-reveal="arriba">
-        <a href={conBase('/programa')} class="boton boton--amarillo">Ver el programa</a>
-        <a href={conBase('/sedes')} class="boton boton--papel">Todas las sedes</a>
-      </div>
-    </div>
-  </section>
+  {/* En escritorio la sede es un cartel entero: su propio encabezado, la banda
+      de lo que pasa ahora, el carril de días y el programa. No lleva
+      `Encabezado` porque el cartel ya ES el encabezado — dos titulares del
+      mismo nombre, uno debajo del otro, es la única manera de estropearlo. */}
+  <CartelDeSede agenda={agenda} />
 </Base>
