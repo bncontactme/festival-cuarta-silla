@@ -1,6 +1,15 @@
 ---
 import { conBase } from '../lib/base';
-import { sedes, festival, enlaceMapa, rutaDeSede, agendaPorSede, programaPublicado } from '../data/site';
+import {
+  sedes,
+  festival,
+  enlaceMapa,
+  rutaDeSede,
+  agendaPorSede,
+  programaPublicado,
+  actividades,
+  instanteDe,
+} from '../data/site';
 import { plano, proyecta } from '../data/mapa';
 
 /**
@@ -84,6 +93,27 @@ const lista = sedes.lista.map((sede, i) => ({
   cuantas: agendaPorSede.find((a) => a.sede.nombre === sede.nombre)?.total ?? 0,
 }));
 const conEstrella = lista.filter((s) => s.punto);
+
+/**
+ * Cuándo abre y cierra cada sede, en instantes de verdad.
+ *
+ * Es lo que deja que el plano diga qué está pasando AHORA: la estrella roja no
+ * es una decoración, es una sede con la luz encendida. Se calcula en el build
+ * —`instanteDe` le pone el huso de Guadalajara— y el reloj del navegador sólo
+ * compara.
+ *
+ * **Sólo las suyas.** El recorrido pasa por las dieciséis, así que contarlo
+ * aquí encendería el plano entero durante ocho horas el sábado y el domingo, y
+ * un plano donde todo está abierto no dice nada.
+ */
+const relojSedes = programaPublicado
+  ? sedes.lista.map((sede) => ({
+      nombre: sede.nombre,
+      horas: actividades
+        .filter((a) => a.sede === sede.nombre)
+        .map((a) => ({ desde: instanteDe(a.dia, a.inicio), hasta: instanteDe(a.dia, a.fin) })),
+    }))
+  : [];
 ---
 
 <div
@@ -279,6 +309,11 @@ const conEstrella = lista.filter((s) => s.punto);
     class:list={[
       'lista-sedes bg-amarillo',
       !aSangre && 'border-t-2 border-tinta',
+      /* A sangre la lista toca los cantos de la ventana, así que el aire tiene
+         que ponerlo ella: sin esto el número se pega al filete del plano y la
+         cuenta se queda a cuatro píxeles del borde de la pantalla. Es la misma
+         medida que usan todas las secciones del sitio. */
+      aSangre && 'px-6 lg:px-10',
       alto === 'corta' && 'h-[48vh] pr-3 lg:h-[52vh]',
     ]}
     data-lista-sedes
@@ -310,7 +345,11 @@ const conEstrella = lista.filter((s) => s.punto);
             <span class="meta w-8 shrink-0 text-tinta/45 transition-colors group-hover:text-rojo">
               {sede.indice}
             </span>
-            <span class="display truncate text-2xl leading-none text-tinta transition-colors group-hover:text-rojo">
+            {/* El nombre parte en dos antes que cortarse. Con el estado al lado
+                —«abierto · 14:00»— «Estallido Art Project» no cabe en una línea
+                en una pantalla de 1.024, y una sede con el nombre comido por
+                unos puntos suspensivos es peor que un renglón de dos líneas. */}
+            <span class="display min-w-0 text-2xl leading-[0.95] text-tinta transition-colors group-hover:text-rojo">
               {sede.nombre}
             </span>
             {!sede.punto && (
@@ -323,9 +362,10 @@ const conEstrella = lista.filter((s) => s.punto);
             {programaPublicado && (
               <span
                 class:list={[
-                  'meta ml-auto shrink-0 tabular-nums',
+                  'meta estado-sede ml-auto shrink-0 tabular-nums',
                   sede.cuantas > 0 ? 'text-tinta/55' : 'text-tinta/35',
                 ]}
+                data-estado-sede={sede.nombre}
               >
                 {sede.cuantas > 0 ? sede.cuantas : 'sin programa'}
               </span>
@@ -338,7 +378,24 @@ const conEstrella = lista.filter((s) => s.punto);
   </ul>
 </div>
 
+{
+  relojSedes.length > 0 && (
+    <script
+      type="application/json"
+      data-reloj-sedes
+      set:html={JSON.stringify(relojSedes)}
+      is:inline
+    />
+  )
+}
+
 <style>
+  /* El renglón de una sede abierta: el estado en rojo, como su estrella. */
+  .estado-sede[data-abierta] {
+    color: var(--color-rojo);
+    font-weight: 700;
+  }
+
   /* ── La caja ───────────────────────────────────────────────────────────
      Recorta el dibujo, que es más grande que ella por los cuatro costados, y
      es contra su tamaño contra lo que se calcula el encaje. */
@@ -493,6 +550,17 @@ const conEstrella = lista.filter((s) => s.punto);
     fill: var(--color-tinta);
     opacity: 0.55;
   }
+  /* Abierta AHORA: la estrella se enciende. Es el mismo rojo que marca la
+     elegida —y no se pisan: la elegida además crece y saca su nombre—, porque
+     en este sitio el rojo significa una sola cosa, «esto está pasando», y una
+     sede abierta es exactamente eso. */
+  .pin[data-abierta] .pin-cara {
+    fill: var(--color-rojo);
+  }
+  .pin[data-abierta] .pin-estrella {
+    transform: scale(1.2);
+  }
+
   .pin[aria-pressed='true'] .pin-cara {
     fill: var(--color-rojo);
     stroke: var(--color-amarillo);
@@ -1071,6 +1139,111 @@ const conEstrella = lista.filter((s) => s.punto);
       accion();
       if (!e.key.match(/[+=-]/)) pintar();
     });
+
+    /** ── Qué está abierto ahora ─────────────────────────────────────────
+     *
+     * Lo único del plano que no se puede construir en el build, porque depende
+     * de cuándo se mire. Enciende la estrella de la sede que tiene algo
+     * corriendo y escribe su estado en el renglón de la lista.
+     *
+     * Se apaga sola: fuera de las fechas del festival —o sin este dato, o si
+     * algo falla— no toca nada, y lo que queda es el plano con sus dieciséis
+     * estrellas iguales y la cuenta de actividades de cada una. Que es lo que
+     * se ve hoy, en septiembre.
+     *
+     * `?ahora=2026-09-26T13:40` adelanta el reloj de una visita para poder
+     * verlo, igual que en el cartel de cada sede.
+     */
+    (() => {
+      const fuente = document.querySelector<HTMLScriptElement>('[data-reloj-sedes]');
+      if (!fuente) return;
+
+      type Sede = { nombre: string; horas: { desde: string; hasta: string }[] };
+      let sedesReloj: Sede[] = [];
+      try {
+        sedesReloj = JSON.parse(fuente.textContent || '[]');
+      } catch {
+        return;
+      }
+
+      const finge = new URLSearchParams(location.search).get('ahora');
+      const desfase = finge ? new Date(finge).getTime() - Date.now() : 0;
+      const dos = (n: number) => String(n).padStart(2, '0');
+      const hhmm = (t: number) => {
+        const d = new Date(t);
+        return `${dos(d.getHours())}:${dos(d.getMinutes())}`;
+      };
+
+      const conFechas = sedesReloj.map((s) => ({
+        nombre: s.nombre,
+        horas: s.horas.map((h) => ({
+          desde: new Date(h.desde).getTime(),
+          hasta: new Date(h.hasta).getTime(),
+        })),
+      }));
+      const todas = conFechas.flatMap((s) => s.horas);
+      if (!todas.length) return;
+      const arranca = Math.min(...todas.map((h) => h.desde));
+      const termina = Math.max(...todas.map((h) => h.hasta));
+
+      const barra = document.querySelector<HTMLElement>('[data-barra-ahora]');
+
+      const repintar = () => {
+        const ahora = Date.now() + (Number.isFinite(desfase) ? desfase : 0);
+        if (ahora < arranca || ahora > termina) return;
+
+        let abiertas = 0;
+
+        for (const sede of conFechas) {
+          const corriendo = sede.horas.filter((h) => h.desde <= ahora && h.hasta > ahora);
+          const proxima = sede.horas
+            .filter((h) => h.desde > ahora)
+            .sort((a, b) => a.desde - b.desde)[0];
+          const hoy =
+            proxima && new Date(proxima.desde).toDateString() === new Date(ahora).toDateString();
+
+          const estado = document.querySelector<HTMLElement>(
+            `[data-estado-sede="${CSS.escape(sede.nombre)}"]`,
+          );
+          const pin = pines.find((p) => p.dataset.nombre === sede.nombre);
+
+          if (corriendo.length) {
+            abiertas += 1;
+            const cierra = Math.max(...corriendo.map((h) => h.hasta));
+            if (estado) {
+              /* Corto a propósito: al lado va el nombre de la sede en display,
+                 y «abierto · hasta las 14:00» le comía tres palabras —«CUERPOS
+                 PARL…»—. Lo que hace falta saber es que está abierto y hasta
+                 cuándo; el resto es prosa. */
+              estado.textContent =
+                corriendo.length > 1
+                  ? `abierto · ${corriendo.length}`
+                  : `abierto · ${hhmm(cierra)}`;
+              estado.dataset.abierta = '';
+            }
+            if (pin) pin.dataset.abierta = '';
+          } else {
+            if (estado) {
+              delete estado.dataset.abierta;
+              if (hoy) estado.textContent = `hoy ${hhmm(proxima.desde)}`;
+            }
+            if (pin) delete pin.dataset.abierta;
+          }
+        }
+
+        if (barra) {
+          const d = new Date(ahora);
+          const dia = d.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' });
+          barra.textContent = `${dia} · ${hhmm(ahora)} · ${
+            abiertas === 1 ? '1 abierta' : `${abiertas} abiertas`
+          }`;
+          barra.hidden = false;
+        }
+      };
+
+      repintar();
+      setInterval(repintar, 60_000);
+    })();
 
     // ── Puesta en marcha ──────────────────────────────────────────────────
     medir();

@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import Encabezado from '../components/Encabezado.astro';
 import Estrella from '../components/Estrella.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import Mapa from '../components/Mapa.astro';
@@ -92,11 +91,26 @@ const paseos = recorridos.reduce<{ titulo: string; dias: string[]; horario: stri
     </Pantalla>
   </Fragment>
 
-  <Encabezado
-    indice={`${sedes.titulo} / Guadalajara`}
-    titulo={sedes.titulo}
-    fondo="rojo"
-  />
+  {/* ── La barra ────────────────────────────────────────────────────────
+      Aquí estaba el encabezado de cartel —SEDES a 11vw sobre rojo—, el mismo
+      que llevan todas las páginas. Se va sólo de ésta, y por una razón: en el
+      resto del sitio el titular ES la página hasta que empieza el contenido;
+      aquí el contenido es un instrumento que se mira entero de una vez, y
+      trescientos píxeles de rótulo antes de poder verlo lo parten en dos.
+
+      El rótulo no se pierde, se aprieta: el nombre, de qué va la página y —a
+      la derecha— el reloj del festival cuando hay algo que contar. */}
+  <div
+    class="meta flex flex-wrap items-baseline gap-x-6 gap-y-2 border-b-2 border-tinta bg-tinta px-4 py-4 text-papel sm:px-6 lg:px-10"
+  >
+    <span class="display text-2xl leading-none text-amarillo">{sedes.titulo}</span>
+    <span class="text-papel/60">
+      {sedes.lista.length} lugares · {festival.ciudad} · todo en 2,8 km
+    </span>
+    {/* Lo rellena el reloj del plano cuando el festival está corriendo; hasta
+        entonces no existe, como la banda del cartel de cada sede. */}
+    <span class="ml-auto text-rojo" data-barra-ahora hidden></span>
+  </div>
 
   {/* ── El plano, antes de la rejilla ──────────────────────────────────────
       El mismo instrumento que la portada, sin una línea nueva: plano a la
