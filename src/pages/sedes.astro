@@ -5,7 +5,33 @@ import Estrella from '../components/Estrella.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import Mapa from '../components/Mapa.astro';
 import { conBase } from '../lib/base';
-import { sedes, festival, enlaceMapa, rutaDeSede } from '../data/site';
+import {
+  sedes,
+  festival,
+  enlaceMapa,
+  rutaDeSede,
+  recorridos,
+  programaPublicado,
+} from '../data/site';
+
+/**
+ * El recorrido, una vez y con sus días juntos.
+ *
+ * En el programa son dos actividades —sábado y domingo— porque en la rejilla
+ * son dos barras. Aquí, puestas una al lado de la otra, el mismo título dos
+ * veces no se lee como dos pases: se lee como un error del sitio. Así que se
+ * agrupan por título y lo que cambia —el día— se dice en el renglón de abajo.
+ */
+const paseos = recorridos.reduce<{ titulo: string; dias: string[]; horario: string }[]>(
+  (juntos, a) => {
+    const dia = ['Jue', 'Vie', 'Sáb', 'Dom'][a.dia];
+    const ya = juntos.find((p) => p.titulo === a.titulo);
+    if (ya) ya.dias.push(dia);
+    else juntos.push({ titulo: a.titulo, dias: [dia], horario: `${a.inicio}–${a.fin}` });
+    return juntos;
+  },
+  [],
+);
 ---
 
 <Base
@@ -82,9 +108,31 @@ import { sedes, festival, enlaceMapa, rutaDeSede } from '../data/site';
       contestar: las sedes están a diez minutos andando unas de otras y eso
       sólo se ve con las dieciséis en el mismo papel. La rejilla de abajo es la
       otra mitad: el directorio, con la dirección escrita y sus dos puertas. */}
-  <section class="border-b-2 border-tinta bg-amarillo px-4 py-14 sm:px-6 lg:px-10">
-    <Mapa lista="entera" />
+  <section class="border-b-2 border-tinta bg-amarillo">
+    <Mapa lista="entera" marco="sangre" />
   </section>
+
+  {/* El recorrido, al pie del instrumento y una sola vez: pasa por las
+      dieciséis, así que no es de ninguna y ponerlo en cada renglón sería
+      contarlo dieciséis veces. Dentro de cada sede sí sale —marcado— porque
+      allí es parte de lo que pasa ese día. */}
+  {
+    programaPublicado && paseos.length > 0 && (
+      <section class="border-b-2 border-tinta bg-tinta px-4 py-8 text-papel sm:px-6 lg:px-10">
+        <p class="meta text-amarillo">Y por las dieciséis</p>
+        <ul class="mt-4 flex flex-wrap gap-x-12 gap-y-4">
+          {paseos.map((p) => (
+            <li>
+              <p class="display text-2xl leading-none text-amarillo">{p.titulo}</p>
+              <p class="meta mt-2 text-papel/70">
+                {p.dias.join(' y ')} · {p.horario}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
 
   {/* Aquí estuvo la rejilla de dieciséis tarjetas —número, nombre, dirección
       y dos botones—, y se va con el plano puesto. No por ahorrar: es que las
