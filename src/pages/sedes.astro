@@ -1,47 +1,60 @@
 ---
+/**
+ * Las sedes: un tablero de una sola pantalla.
+ *
+ * No es una página que se recorre, es un instrumento que se mira entero: nada
+ * de scroll de página, el plano quieto a la izquierda y, a la derecha, una
+ * columna que son dos hojas —la lista de las dieciséis y el «Conoce más» de la
+ * elegida—. Elegir una sede no cambia de página, así que nadie pierde dónde
+ * estaba: al volver, la lista sigue en el mismo renglón.
+ *
+ * La página de cada sede sigue existiendo y no es un duplicado: es lo que abre
+ * sin JavaScript, lo que indexa Google y lo que se comparte por WhatsApp. Ésta
+ * es para decidir a dónde se va esta tarde; aquélla, para contarlo.
+ *
+ * Lo que tenía la página anterior y aquí no está, con su razón:
+ *   · la rejilla de dieciséis tarjetas con nombre, dirección y dos botones —el
+ *     plano contesta lo mismo y además contesta «qué cae cerca de qué», que es
+ *     lo que una lista de direcciones no puede;
+ *   · el encabezado de cartel a 11vw — trescientos píxeles de rótulo antes de
+ *     poder ver el instrumento lo partían en dos. El nombre se aprieta en la
+ *     cabecera de la lista, que es donde además dice algo;
+ *   · el cierre rojo con la ciudad y las fechas — la barra de arriba ya lo dice
+ *     y era lo único que obligaba a hacer scroll;
+ *   · el pie del sitio — el móvil ya lo esconde en sus pantallas por lo mismo:
+ *     una aplicación de una pantalla no tiene pie. Lo imprescindible se queda
+ *     en la franja de abajo;
+ *   · el recorrido, que estaba en una sección propia: sale dentro del panel de
+ *     cada sede, en su día y marcado, que es donde se necesita.
+ */
 import Base from '../layouts/Base.astro';
-import Estrella from '../components/Estrella.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
 import Mapa from '../components/Mapa.astro';
+import PanelDeSede from '../components/PanelDeSede.astro';
 import { conBase } from '../lib/base';
 import {
-  sedes,
+  agendaPorSede,
   festival,
-  enlaceMapa,
+  privacidad,
   rutaDeSede,
-  recorridos,
-  programaPublicado,
+  sedes,
 } from '../data/site';
-
-/**
- * El recorrido, una vez y con sus días juntos.
- *
- * En el programa son dos actividades —sábado y domingo— porque en la rejilla
- * son dos barras. Aquí, puestas una al lado de la otra, el mismo título dos
- * veces no se lee como dos pases: se lee como un error del sitio. Así que se
- * agrupan por título y lo que cambia —el día— se dice en el renglón de abajo.
- */
-const paseos = recorridos.reduce<{ titulo: string; dias: string[]; horario: string }[]>(
-  (juntos, a) => {
-    const dia = ['Jue', 'Vie', 'Sáb', 'Dom'][a.dia];
-    const ya = juntos.find((p) => p.titulo === a.titulo);
-    if (ya) ya.dias.push(dia);
-    else juntos.push({ titulo: a.titulo, dias: [dia], horario: `${a.inicio}–${a.fin}` });
-    return juntos;
-  },
-  [],
-);
 ---
 
 <Base
   titulo={sedes.titulo}
   descripcion={`Las ${sedes.lista.length} sedes del ${festival.nombre} en ${festival.ciudad}.`}
 >
-  {/* ── Móvil: las ocho a la vez, la dirección a un toque ──────────────── */}
-  {/* La cuadrícula de tarjetas de escritorio, en una columna, eran ocho
-      pantallas. Aquí lo primero que hace falta es el nombre — «¿cuáles
-      son?» —; la dirección y los enlaces sólo importan de la que te
-      interesa. */}
+  {/* ── Móvil: dieciséis puertas, y nada entre el dedo y la sede ────────
+      Esto fue un acordeón. Tocar una sede la abría en el sitio y enseñaba su
+      dirección y dos botones, y uno de los dos —«Conoce más»— llevaba a la
+      página de esa sede… donde está esa misma dirección, ese mismo mapa y
+      además el programa. O sea: dos toques, y un desvío por un resumen, para
+      llegar a lo que el primer toque ya podía dar entero.
+
+      Ahora la fila ES el enlace. Se toca el nombre y se está en la sede. La
+      dirección y el «Cómo llegar» no se pierden —abren allí, en la cabecera
+      de la pantalla, que es donde alguien de pie en la calle los busca—. */}
   <Fragment slot="movil">
     <Pantalla
       titulo={sedes.titulo}
@@ -52,125 +65,61 @@ const paseos = recorridos.reduce<{ titulo: string; dias: string[]; horario: stri
     >
       {
         sedes.lista.map((sede) => (
-          <details class="plegable">
-            <summary>
-              {/* Sin numerar, como los días del programa: aquí no hay plano al
-                  lado al que remita el número —ése es el del escritorio— y
-                  cuántas son ya lo dice la nota del titular. */}
-              <span class="display text-2xl leading-none">{sede.nombre}</span>
-              <span class="plegable-signo" aria-hidden="true">
-                +
-              </span>
-            </summary>
-
-            <div class="bg-amarillo px-4 py-4 text-tinta">
-              <address class="text-sm leading-snug not-italic opacity-70">
-                {sede.direccion}
-              </address>
-
-              <div class="mt-4 flex divide-x-2 divide-tinta border-2 border-tinta">
-                <a
-                  href={conBase(rutaDeSede(sede.nombre))}
-                  class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
-                >
-                  {sedes.acciones.conoce}
-                </a>
-                <a
-                  href={enlaceMapa(sede)}
-                  target="_blank"
-                  rel="noopener"
-                  class="meta flex-1 bg-rojo px-3 py-3 text-center text-[0.55rem] font-bold text-papel"
-                >
-                  {sedes.acciones.ubicacion} ↗
-                </a>
-              </div>
-            </div>
-          </details>
+          <a href={conBase(rutaDeSede(sede.nombre))} class="sede-fila">
+            <span class="display sede-fila-nombre">{sede.nombre}</span>
+            {/* La misma punta que la lista del tablero y que el pie del panel:
+                quien la ve ya sabe que eso abre algo. */}
+            <span class="sede-fila-punta" aria-hidden="true">
+              ›
+            </span>
+          </a>
         ))
       }
     </Pantalla>
   </Fragment>
 
-  {/* ── La barra ────────────────────────────────────────────────────────
-      Aquí estaba el encabezado de cartel —SEDES a 11vw sobre rojo—, el mismo
-      que llevan todas las páginas. Se va sólo de ésta, y por una razón: en el
-      resto del sitio el titular ES la página hasta que empieza el contenido;
-      aquí el contenido es un instrumento que se mira entero de una vez, y
-      trescientos píxeles de rótulo antes de poder verlo lo parten en dos.
+  {/* ── El tablero ───────────────────────────────────────────────────────
+      El plano ocupa la izquierda ENTERA: de debajo de la barra de navegación
+      a la franja de abajo, sin banda de rótulo que le corte la cabeza ni pie
+      amarillo que le corte los pies. El rótulo de la página se fue a la
+      columna de la derecha, encima de la lista, que es donde dice algo. */}
+  <div class="tablero-sedes" data-tablero>
+    <div class="tablero-cuerpo">
+      <Mapa lista="entera" marco="sangre" rotulos="siempre" panel class="h-full">
+        {/* El rótulo, ahora cabecera de la lista. Se queda pegado arriba
+            mientras corren las dieciséis, y el panel lo tapa entero al
+            abrirse porque el panel trae la suya. */}
+        <Fragment slot="cabecera">
+          <div class="cabecera-lista">
+            <p class="flex items-baseline gap-4">
+              <span class="display text-3xl leading-none text-amarillo">{sedes.titulo}</span>
+              <span class="meta ml-auto text-rojo" data-barra-ahora hidden></span>
+            </p>
+            <p class="meta mt-2 text-papel/60">
+              {sedes.lista.length} lugares · {festival.ciudad} · todo en 2,8 km
+            </p>
+          </div>
+        </Fragment>
 
-      El rótulo no se pierde, se aprieta: el nombre, de qué va la página y —a
-      la derecha— el reloj del festival cuando hay algo que contar. */}
-  <div
-    class="meta flex flex-wrap items-baseline gap-x-6 gap-y-2 border-b-2 border-tinta bg-tinta px-4 py-4 text-papel sm:px-6 lg:px-10"
-  >
-    <span class="display text-2xl leading-none text-amarillo">{sedes.titulo}</span>
-    <span class="text-papel/60">
-      {sedes.lista.length} lugares · {festival.ciudad} · todo en 2,8 km
-    </span>
-    {/* Lo rellena el reloj del plano cuando el festival está corriendo; hasta
-        entonces no existe, como la banda del cartel de cada sede. */}
-    <span class="ml-auto text-rojo" data-barra-ahora hidden></span>
-  </div>
+        <Fragment slot="panel">
+          {agendaPorSede.map((agenda) => <PanelDeSede agenda={agenda} />)}
+        </Fragment>
+      </Mapa>
+    </div>
 
-  {/* ── El plano, antes de la rejilla ──────────────────────────────────────
-      El mismo instrumento que la portada, sin una línea nueva: plano a la
-      izquierda, lista a la derecha, y la ficha de abajo llevando a la sede.
+    {/* La franja: lo que no se puede perder del pie, y nada más. Cuarenta
+        píxeles a cambio de que la página no scrollee.
 
-      Va ARRIBA de las tarjetas y no debajo porque contesta la pregunta que se
-      hace primero —«¿dónde está todo esto?», y sobre todo «¿qué cae cerca de
-      qué?»—, que es la que una rejilla de dieciséis direcciones no puede
-      contestar: las sedes están a diez minutos andando unas de otras y eso
-      sólo se ve con las dieciséis en el mismo papel. La rejilla de abajo es la
-      otra mitad: el directorio, con la dirección escrita y sus dos puertas. */}
-  <section class="border-b-2 border-tinta bg-amarillo">
-    <Mapa lista="entera" marco="sangre" />
-  </section>
-
-  {/* El recorrido, al pie del instrumento y una sola vez: pasa por las
-      dieciséis, así que no es de ninguna y ponerlo en cada renglón sería
-      contarlo dieciséis veces. Dentro de cada sede sí sale —marcado— porque
-      allí es parte de lo que pasa ese día. */}
-  {
-    programaPublicado && paseos.length > 0 && (
-      <section class="border-b-2 border-tinta bg-tinta px-4 py-8 text-papel sm:px-6 lg:px-10">
-        <p class="meta text-amarillo">Y por las dieciséis</p>
-        <ul class="mt-4 flex flex-wrap gap-x-12 gap-y-4">
-          {paseos.map((p) => (
-            <li>
-              <p class="display text-2xl leading-none text-amarillo">{p.titulo}</p>
-              <p class="meta mt-2 text-papel/70">
-                {p.dias.join(' y ')} · {p.horario}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
-
-  {/* Aquí estuvo la rejilla de dieciséis tarjetas —número, nombre, dirección
-      y dos botones—, y se va con el plano puesto. No por ahorrar: es que las
-      dos contestaban lo mismo, la una debajo de la otra, y la que lo contesta
-      mejor es el plano. La dirección no se pierde: sale en la ficha al elegir
-      una sede, y entera en su página. */}
-
-  {/* Rojo, amarillo, rojo: la página abre y cierra en la misma tinta y el
-      cuerpo va en la otra. La silla en marca de agua se cae — al 20% de rojo
-      sobre amarillo salía naranja, un tono que no está en el manual. La
-      estrella hace ese trabajo sin inventar ningún color. */}
-  <section class="relative overflow-hidden border-t-2 border-tinta bg-rojo">
-    <Estrella tinta="amarilla" alto="abajo" />
-    <div class="relative px-4 py-20 sm:px-6 lg:px-10">
-      <p class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta" data-reveal="lado">
-        {festival.ciudad}
-      </p>
-      <p
-        class="display max-w-4xl text-[9vw] leading-[0.95] text-amarillo lg:text-[5.5vw]"
-        data-lineas
-        data-reveal="lineas"
-      >
-        {festival.fechas}
+        Aquí estuvo «Y por las dieciséis» con el recorrido. Se cae: la Marcha
+        del Arte sale ya DENTRO del panel de cada sede, en su día y marcada
+        «Pasa por aquí · todas las sedes», que es donde sirve —cuando estás
+        mirando el sábado de Ánima Galería— y no en una banda al pie que se lee
+        una vez y estorba dieciséis. */}
+    <div class="tablero-franja meta">
+      <p class="tablero-legal">
+        <a href={conBase('/privacidad')} class="hover:text-amarillo">{privacidad.subtitulo}</a>
+        <span class="text-papel/60">{festival.creditoFooter}</span>
       </p>
     </div>
-  </section>
+  </div>
 </Base>

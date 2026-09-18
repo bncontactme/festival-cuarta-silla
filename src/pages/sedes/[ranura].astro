@@ -72,6 +72,12 @@ const numero = String(agenda.indice + 1).padStart(2, '0');
       <div class="border-b-2 border-tinta px-4 py-4">
         <address class="text-sm leading-snug not-italic opacity-70">{sede.direccion}</address>
 
+        {/* Las dos puertas dicen a dónde van, cada una por su nombre: la
+            cuenta se llama Instagram y el mapa, Ubicación. «Conoce más», que
+            es lo que ponía la primera, no decía a dónde llevaba —y estando
+            ya DENTRO de la página de la sede, además prometía algo que esta
+            misma pantalla ya estaba dando. Es el mismo rótulo que usan el
+            cartel de escritorio y el panel del plano. */}
         <div class="mt-4 flex divide-x-2 divide-tinta border-2 border-tinta">
           {
             sede.instagram && (
@@ -81,7 +87,7 @@ const numero = String(agenda.indice + 1).padStart(2, '0');
                 rel="noopener"
                 class="meta flex-1 bg-tinta px-3 py-3 text-center text-[0.55rem] font-bold text-amarillo"
               >
-                {sedes.acciones.conoce} ↗
+                {sedes.acciones.instagram} ↗
               </a>
             )
           }

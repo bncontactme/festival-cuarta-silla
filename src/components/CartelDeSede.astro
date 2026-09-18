@@ -23,6 +23,7 @@ import { conBase } from '../lib/base';
 import { tarjetaAlterna } from '../lib/campos';
 import Estrella from './Estrella.astro';
 import AvisoPrograma from './AvisoPrograma.astro';
+import BarraSede from './BarraSede.astro';
 import {
   agendaPorSede,
   cercaDe,
@@ -48,11 +49,6 @@ const { sede } = agenda;
 const numero = String(agenda.indice + 1).padStart(2, '0');
 const total = agendaPorSede.length;
 
-/* La de al lado en la lista —no la más cercana— para las flechas de la barra:
-   son el orden del índice, y el orden del índice es el que trae el panel. */
-const siguiente = agendaPorSede[(agenda.indice + 1) % total];
-const anterior = agendaPorSede[(agenda.indice - 1 + total) % total];
-
 /** El número del día suelto: «24 de septiembre» → «24». Es el que va en grande
  *  en el carril y en el margen de cada día. */
 const diaNumero = (fecha: string) => fecha.match(/\d+/)?.[0] ?? '';
@@ -77,27 +73,7 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
 ---
 
 {/* ── 1. La barra: salir, y la de al lado sin volver al índice ──────────── */}
-<nav
-  class="meta flex flex-wrap items-stretch border-b-2 border-tinta bg-tinta text-papel"
-  aria-label="Entre sedes"
->
-  <a href={conBase('/sedes')} class="border-r-2 border-papel px-6 py-4 text-amarillo">
-    ← {sedes.titulo}
-  </a>
-  <span class="px-6 py-4 text-papel/60">Sede {numero} / {total}</span>
-  <a
-    href={conBase(anterior.ruta)}
-    class="ml-auto border-l-2 border-papel/30 px-6 py-4 transition-colors hover:text-amarillo"
-  >
-    ← {anterior.sede.nombre}
-  </a>
-  <a
-    href={conBase(siguiente.ruta)}
-    class="border-l-2 border-papel/30 px-6 py-4 transition-colors hover:text-amarillo"
-  >
-    {siguiente.sede.nombre} →
-  </a>
-</nav>
+<BarraSede agenda={agenda} />
 
 {/* ── 2. El cartel ──────────────────────────────────────────────────────── */}
 <section class="relative overflow-hidden border-b-2 border-tinta bg-rojo">
@@ -302,24 +278,6 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
 }
 
 {
-  programaPublicado && agenda.dias.length === 0 && (
-    /* El hueco honesto. No dice «próximamente»: dice que no hay nada y, justo
-       debajo, las sedes de al lado que sí tienen. La página deja de ser un
-       callejón sin dejar de decir la verdad. */
-    <section class="bg-amarillo px-4 py-14 sm:px-6 lg:px-10">
-      <p class="display text-5xl leading-[0.95] lg:text-6xl" data-reveal="arriba">
-        Aquí no hay<br />nada programado
-      </p>
-      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-tinta/70">
-        {sede.nombre} es sede del {festival.nombre}, pero todavía no tiene actividades
-        anunciadas. Lo que se programe aquí sale en esta página.
-      </p>
-      <a href={conBase('/programa')} class="boton mt-8 inline-flex">Ver el programa</a>
-    </section>
-  )
-}
-
-{
   !programaPublicado && (
     <section class="bg-amarillo px-4 py-14 sm:px-6 lg:px-10">
       <AvisoPrograma />
@@ -440,33 +398,12 @@ const paraElReloj = agenda.dias.flatMap((dia) =>
     display: grid;
   }
 
-  /* El estado que pone el reloj dentro de la ficha: «corriendo», «en 20 min». */
-  .evento-estado {
-    display: inline;
-  }
-  .evento-estado::before {
-    content: ' · ';
-  }
+  /* `.evento-estado` se mudó a `global.css` con el resto de la familia
+     `.evento`: lo pintan este cartel y el panel de `/sedes`. */
 
-  /* Las sedes de al lado: la misma ficha de papel del resto del sitio, con el
-     canto rojo porque vive sobre campo de tinta. */
-  .cerca-ficha {
-    display: block;
-    height: 100%;
-    background-color: var(--color-amarillo);
-    color: var(--color-tinta);
-    border: var(--borde) solid var(--color-tinta);
-    box-shadow: 6px 6px 0 var(--color-rojo);
-    padding: 1.25rem 1.4rem;
-    transition:
-      translate 0.25s var(--ease-salida),
-      box-shadow 0.25s var(--ease-salida);
-  }
-  .cerca-ficha:hover,
-  .cerca-ficha:focus-visible {
-    translate: -3px -3px;
-    box-shadow: 9px 9px 0 var(--color-rojo);
-  }
+  /* `.cerca-ficha` se mudó a `global.css`: la pintan este cartel y el panel de
+     `/sedes`, y dos copias de la misma tarjeta es la manera de acabar con dos
+     tarjetas distintas. */
 </style>
 
 <script type="application/json" data-reloj-sede set:html={JSON.stringify(paraElReloj)} is:inline />

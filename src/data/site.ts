@@ -461,6 +461,47 @@ export const recorridos = actividades
   .filter((a) => enTodasLasSedes(a.sede))
   .sort((a, b) => a.dia - b.dia || a.inicio.localeCompare(b.inicio));
 
+/**
+ * El mismo recorrido, una vez y con sus días juntos.
+ *
+ * En el programa son dos actividades —sábado y domingo— porque en la rejilla son
+ * dos barras. Fuera de la rejilla, el mismo título dos veces seguidas no se lee
+ * como dos pases: se lee como un error del sitio. Así que se agrupa por título y
+ * lo que cambia —el día— se dice al lado.
+ *
+ * Vivía suelto en la cabecera de `/sedes`. Está aquí porque ahora lo pide
+ * también la sede que no tiene nada: allí el recorrido es lo ÚNICO que pasa, y
+ * dos sitios calculando lo mismo es el primer paso para que digan cosas
+ * distintas.
+ */
+export type Paseo = {
+  titulo: string;
+  /** «Sáb», «Dom»: los días a secas, que es lo que cabe en `/sedes`. */
+  dias: string[];
+  /** «Sáb 26», «Dom 27»: con el número, para cuando el recorrido es lo único
+   *  que pasa y hay que poder apuntarlo en la agenda sin abrir otra página. */
+  fechados: string[];
+  horario: string;
+};
+
+export const paseos = recorridos.reduce<Paseo[]>((juntos, a) => {
+  const dia = programa.dias[a.dia].dia.slice(0, 3);
+  const fechado = `${dia} ${programa.dias[a.dia].fecha.match(/\d+/)?.[0] ?? ''}`.trim();
+  const ya = juntos.find((p) => p.titulo === a.titulo);
+  if (ya) {
+    ya.dias.push(dia);
+    ya.fechados.push(fechado);
+  } else {
+    juntos.push({
+      titulo: a.titulo,
+      dias: [dia],
+      fechados: [fechado],
+      horario: `${a.inicio}–${a.fin}`,
+    });
+  }
+  return juntos;
+}, []);
+
 /** Un día de una sede. Sólo existe si tiene algo: un día vacío con su titular
  *  y nada debajo se lee como un error del sitio. */
 export type DiaDeSede = {
@@ -589,13 +630,23 @@ const metrosEntre = (a: [number, number], b: [number, number]) => {
 export type SedeCerca = { agenda: AgendaDeSede; metros: number; minutos: number };
 
 /** Las más cercanas a una sede, de la más próxima en adelante. Una sede sin
- *  coordenada no empareja con nadie: antes que inventarle un punto, no sale. */
-export const cercaDe = (agenda: AgendaDeSede, cuantas = 3): SedeCerca[] => {
+ *  coordenada no empareja con nadie: antes que inventarle un punto, no sale.
+ *
+ *  `conPrograma` deja fuera a las que tampoco tienen nada. Lo pide la página de
+ *  una sede vacía, donde la lista se llama «lo más cerca que SÍ tiene programa»
+ *  y tiene que ser verdad: sin el filtro, Casa Feria mandaría a quien la lea a
+ *  Estallido Art Project, a 338 metros, que está igual de vacía. */
+export const cercaDe = (
+  agenda: AgendaDeSede,
+  cuantas = 3,
+  { conPrograma = false } = {},
+): SedeCerca[] => {
   const desde = agenda.sede.coord;
   if (!desde) return [];
 
   return agendaPorSede
     .filter((o) => o.sede.nombre !== agenda.sede.nombre && o.sede.coord)
+    .filter((o) => !conPrograma || o.total > 0)
     .map((o) => {
       const metros = metrosEntre(desde, o.sede.coord!);
       /* 75 m por minuto: el paso de alguien que va mirando escaparates, no el
@@ -605,6 +656,51 @@ export const cercaDe = (agenda: AgendaDeSede, cuantas = 3): SedeCerca[] => {
     })
     .sort((a, b) => a.metros - b.metros)
     .slice(0, cuantas);
+};
+
+/**
+ * Qué hay en una sede, en un renglón, para quien está mirando OTRA.
+ *
+ * `resumen` —«1 actividad · Vie»— es el rótulo de una sede en su propia página,
+ * donde el programa está justo debajo. Aquí no: aquí es lo único que se va a
+ * saber de ella antes de decidir si se anda hasta allá, y una cuenta no decide
+ * nada. Así que cuando hay una sola actividad se la nombra con su día y su hora,
+ * que es exactamente lo que hace falta para decir que sí o que no.
+ *
+ * Con varias no se nombran todas —tres títulos en una fila de una lista son un
+ * párrafo—: se dice cuándo y cuántas, y el enlace lleva al resto.
+ */
+export const quePasaEn = (agenda: AgendaDeSede) => {
+  const suyas = actividades
+    .filter((a) => a.sede === agenda.sede.nombre)
+    .sort((a, b) => a.dia - b.dia || a.inicio.localeCompare(b.inicio));
+
+  if (suyas.length === 0) return agenda.resumen;
+
+  /* «Vie 25», sin el mes: los cuatro días son de septiembre y decirlo cuatro
+     veces en una lista de tres renglones es ruido. `diaCorto` sí lo lleva
+     porque vive en la cabecera de un día, donde es la única fecha a la vista. */
+  const conNumero = (i: number) =>
+    `${programa.dias[i].dia.slice(0, 3)} ${programa.dias[i].fecha.match(/\d+/)?.[0] ?? ''}`.trim();
+
+  if (suyas.length === 1) {
+    const a = suyas[0];
+    return `${conNumero(a.dia)}, ${a.inicio} · ${a.titulo}`;
+  }
+
+  const dias = [...new Set(suyas.map((a) => a.dia))].sort((x, y) => x - y);
+  const cuando =
+    dias.length === programa.dias.length
+      ? programa.dias.length === 4
+        ? 'Los cuatro días'
+        : 'Todos los días'
+      : /* Dos días se leen con «y»; tres o más con el punto medio del sitio,
+           que es lo que ya hace `resumen`. «Jue y Vie y Sáb» no lo dice nadie. */
+        dias
+          .map((i) => programa.dias[i].dia.slice(0, 3))
+          .join(dias.length === 2 ? ' y ' : ' · ');
+
+  return `${cuando} · ${cuantasActividades(suyas.length)}`;
 };
 
 /**

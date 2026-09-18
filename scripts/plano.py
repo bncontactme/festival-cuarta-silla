@@ -6,7 +6,7 @@ en `src/data/mapa.ts`.
 Por qué un plano propio y no un mapa de terceros: el iframe de Google que
 había antes enseñaba una sede a la vez, pintaba el mapa con la paleta de
 Google encima de una sección que es negra y amarilla, y metía una petición
-a un tercero en la portada. Aquí las catorce se ven juntas, el dibujo se
+a un tercero en la portada. Aquí las dieciséis se ven juntas, el dibujo se
 hereda de la identidad del festival y no sale del sitio ni un byte.
 
 De dónde salen los datos: OpenStreetMap, vía Overpass. Se bajan las calles,
@@ -32,25 +32,34 @@ import urllib.request
 # El recuadro que se le pide a Overpass es más ancho que lo que se ve: el
 # sobrante es lo que rellena los márgenes cuando la caja del mapa es más
 # cuadrada que el dibujo, y lo que queda por descubrir al arrastrar.
-BBOX = (20.6675, -103.3715, 20.6865, -103.3430)
+BBOX = (20.6665, -103.3780, 20.6865, -103.3430)
 
-# Las sedes con coordenada, tal y como están en `src/data/site.ts`. Aquí sólo
-# sirven para encuadrar: el dibujo tiene que caber alrededor de todas ellas.
+# Las sedes con coordenada, tal y como están en `src/data/contenido.json`. Aquí
+# sólo sirven para encuadrar: el dibujo tiene que caber alrededor de todas.
+#
+# Estuvieron catorce mientras las sedes eran catorce, y ahí había un fallo con
+# el que se podía tropezar: al entrar Estampa Café y Casa ITESO Clavijero, ni
+# el encuadre ni el recuadro que se le pide a Overpass se enteraron. Clavijero
+# cae en -103.3726 y el recuadro llegaba a -103.3715, así que a su izquierda no
+# había callejero que dibujar — un hueco negro donde tenía que haber calles.
+# Si se añade una sede, esta lista y `BBOX` van con ella.
 SEDES = [
-    (20.678024, -103.357493),  # Cuerpos Parlante
+    (20.678024, -103.357493),  # Cuerpos Parlantes
     (20.681676, -103.348404),  # Foro AM
-    (20.675938, -103.350449),  # Temporal
-    (20.674647, -103.357670),  # Estudio Arrechiga
+    (20.675938, -103.350449),  # Días Feriados
+    (20.674647, -103.357670),  # Estudio Arechiga
     (20.679379, -103.354601),  # Casa Dos Guayabos
     (20.679340, -103.356823),  # Taller Industria Gráfica
-    (20.674100, -103.358570),  # No Museo — andador Palestina Libre
+    (20.674385, -103.358732),  # No Museo — andador Palestina Libre
     (20.681953, -103.348427),  # Casa Feria
     (20.678578, -103.354777),  # Ala Rota
     (20.674168, -103.357894),  # Staditche
     (20.678963, -103.347828),  # Estallido Art Project
-    (20.678033, -103.354007),  # Salón Liminal
+    (20.677201, -103.356465),  # Salón Liminal
     (20.672186, -103.357879),  # Ánima Galería
     (20.673916, -103.366453),  # Palma Galería
+    (20.677849, -103.363478),  # Estampa Café
+    (20.670145, -103.372631),  # Casa ITESO Clavijero
 ]
 
 ANCHO, ALTO = 1000.0, 720.0   # unidades del viewBox

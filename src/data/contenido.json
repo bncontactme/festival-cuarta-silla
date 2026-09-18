@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 142,
-  "actualizado": "2026-09-15T07:21:39.448Z",
+  "version": 161,
+  "actualizado": "2026-09-18T05:26:18.590Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -179,7 +179,12 @@
         "sede": "No Museo",
         "tipo": "charla",
         "artista": "Equipo del festival",
-        "libre": true
+        "libre": true,
+        "sala": {
+          "id": "palabras-de-inauguracion",
+          "cuerpo": "Palabras que darán el equipo de la cuarta silla para agradecer a todxs los involucradxs",
+          "publicado": true
+        }
       },
       {
         "titulo": "¨El coro de las familias buscadoras de Jalisco¨",
@@ -189,7 +194,12 @@
         "sede": "No Museo",
         "tipo": "muestra",
         "artista": "El Coro Inolvidable",
-        "libre": true
+        "libre": true,
+        "sala": {
+          "id": "el-coro-de-las-familias-buscadoras-de-ja",
+          "cuerpo": "El coro Inolvidable es un proyecto artístico y de sanación integrado por cerca de 20 familiares y Buscadoras de Jalisco que transforma el dolor de la desaparición forzada en música, memoria y exigencia de justicia.",
+          "publicado": true
+        }
       },
       {
         "titulo": "Oratorio Político",
@@ -199,7 +209,12 @@
         "sede": "No Museo",
         "tipo": "escena",
         "artista": "Oratorio Político",
-        "libre": true
+        "libre": true,
+        "sala": {
+          "id": "oratorio-politico",
+          "cuerpo": "Oratorio II es la deconstrucción de un recital de flamenco desde un lugar\ndonde el quejido del cante jondo es transmutado a una prosa litúrgica contra\nel despojo territorial y donde las palmas, jaleos y taconeo se interpretan con\nel noise, drum n’bass, y el post punk.\nEsta propuesta cultural se alimenta de las luchas por la defensa del territorio\nde diversos colectivos en Jalisco. Un dispositivo donde convergen la oratoria,\nla música, las artes plásticas y la política. Una experiencia que pretende\nregenerar el tejido entre la memoria y diversas texturas audiovisuales,\nbuscando alcanzar una cierta coherencia conceptual para la defensa del\nterritorio ante los ataques continuados por el desarrollo del sistema\ncapitalista.\nLa palabra escrita se materializa en la lectura pública, una voz que es\nacompañada y amplificada por el sonido, la música y el ruido, todo esto\nenvuelto en un despliegue escénico compuesto de video, escultura y\nperformance.\nLos elementos sonoros constitutivos de este Oratorio Político son la voz, el\nradio, el motor y herramientas de albañilería. La intersección de estos cuatro\nelementos son la semilla que crece en conjunto con otros instrumentos y\ngestos sonoros.",
+          "publicado": true
+        }
       },
       {
         "titulo": "Fiesta de Inauguración",
@@ -209,7 +224,12 @@
         "sede": "Staditche",
         "tipo": "escena",
         "artista": "Territorio hostil, dsgstng677, Kalbox",
-        "libre": true
+        "libre": true,
+        "sala": {
+          "id": "fiesta-de-inauguracion",
+          "cuerpo": "Fiesta de inauguración en Staditche donde se disfrutará de música latinoamericana tales como la cumbia, reggaeton, salsa, guaracha, etc...",
+          "publicado": true
+        }
       },
       {
         "titulo": "Presentación del manga “Carmen caracol & Tello cucaracho: Agentes secretos del arte contemporáneo”",
@@ -309,7 +329,12 @@
         "sede": "No Museo",
         "tipo": "muestra",
         "artista": "Colectiva Hilos",
-        "libre": true
+        "libre": true,
+        "sala": {
+          "id": "entretejiendo-arrullos-una-ofrenda-a-las",
+          "cuerpo": "Entretejiendo arrullos nace de la necesidad de dar voz y poner el cuerpo ante la\nsituación de violencia que se vive en la actualidad en México.\nSurge como una colaboración con la Colectiva hilos y la acción artística participativa\ny de resistencia social “Sangre de mi sangre”, la cual consiste en la elaboración de\nun tejido colectivo a gran escala. La red que se va construyendo con hilo rojo\nrepresenta la mancha de sangre generada por la violencia y al mismo tiempo la\nposibilidad de unirnos en este gran tejido.\nDirección, creación e interpretación: Liz Mercado\nPaisajes sonoros, voz e interpretación: Pedro Delgadillo, Sinclair Castro\nDiseño de iluminación: Nano Cano\nVestuario: Pájaro muerto\nTejido Sangre de mi sangre, Colectiva Hilos\nCharla: Claudia Rodriguez, Liz Mercado\nArrullo náhuatl\nManokoxteka pitelontsin\nmakochi kochi noxokoyo manokoxteka\nnoxokoyotzin manokoxteka nopitelontsin makochi kochi pitentsin\n“Que duerma mi niño,\nque no despierte mi pequeñito, mi niño, niño, mi niñito.\nQue no despierte mi pequeñito, que no despierte del dulce sueño mi niño, niño, mi\nniñito.”\nEl arrullo de la madre llama a una paz silenciosa, a un sueño dulce y la calma suave\nde sus hijos; cubriéndoles con el manto de sus brazos y de su corazón. Este arrullo\nalza la voz y clama por sosiego, por el sereno de la noche que reunirá a madres e\nhijos en el mismo sueño..\nLiz Mercado\nArtista escénica, Licenciada en Artes, bailarina, maestra y creadora.\nHa incursionando en distintas formas de expresión y movimiento a través de la\ndanza contemporánea, experimental y butoh integrando a su danza prácticas de\nmovimiento somático, danza terapia, danza ritual así como una gran variedad de\nexploraciones sobre cómo plasmar el amor y cultivar el espíritu desde la que es su\nmayor inspiración, la naturaleza.\nSu danza la ha llevado a presentarse en México, Argentina, Cuba, Bolivia, Estados\nUnidos, España y Francia. Ha colaborado en distintos proyectos de carácter social,\ncomunitario y educativo, forma parte de la Colectiva Hilos con quienes realiza\ndiferentes actividades interpretativas como búsqueda por aportar al gran tejido que\nformamos como sociedad y compartir también su visión de generar comunidad a\ntravés de las manifestaciones artísticas.",
+          "publicado": true
+        }
       },
       {
         "titulo": "Poesía y performance",
@@ -352,7 +377,7 @@
         "libre": true
       },
       {
-        "titulo": "Metro cuadrado (rebasadito por los bordes) 2023",
+        "titulo": "Galería Jaime Nunó Metro cuadrado (rebasadito por los bordes)",
         "dia": 2,
         "inicio": "13:00",
         "fin": "18:00",
@@ -382,13 +407,13 @@
         "registro": "https://forms.gle/2YNFXExX9UvyG8qB6"
       },
       {
-        "titulo": "Performance ambient inmersivo",
+        "titulo": "Performance oráculo bacterializar la sombra",
         "dia": 2,
         "inicio": "20:00",
         "fin": "22:00",
         "sede": "Ala Rota",
         "tipo": "muestra",
-        "artista": "Ascandra",
+        "artista": "Ascandra, Sofía Carvajal & Cris Meneses",
         "libre": true
       },
       {
@@ -423,9 +448,9 @@
       },
       {
         "titulo": "Proyecciones / 45 días en Harvard / Tapatixtriste Flores",
-        "dia": 3,
-        "inicio": "14:00",
-        "fin": "18:00",
+        "dia": 1,
+        "inicio": "19:00",
+        "fin": "21:00",
         "sede": "Estudio Arechiga",
         "tipo": "muestra",
         "artista": "Expositores",
@@ -549,6 +574,34 @@
         "sede": "No Museo",
         "tipo": "muestra",
         "artista": "DocualParque"
+      },
+      {
+        "titulo": "Performance Xenoremas",
+        "dia": 1,
+        "inicio": "20:30",
+        "fin": "21:30",
+        "sede": "Taller Industria Gráfica",
+        "tipo": "escena",
+        "artista": "Neofantasías x Pasajeras o Testigo ft. Dis-föria",
+        "libre": true
+      },
+      {
+        "titulo": "Performance \"Tratados de agua\"",
+        "dia": 2,
+        "inicio": "17:00",
+        "fin": "18:00",
+        "sede": "Estudio Arechiga",
+        "tipo": "muestra",
+        "artista": "Cheapqueen2000",
+        "libre": true
+      },
+      {
+        "titulo": "Inauguración Casa Feria",
+        "dia": 2,
+        "inicio": "10:00",
+        "fin": "11:00",
+        "sede": "Casa Feria",
+        "tipo": "muestra"
       }
     ],
     "esEjemplo": false
@@ -1459,6 +1512,12 @@
       "sede": "Días Feriados"
     },
     {
+      "nombre": "Valentina",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789456837/cuartasilla/artistas/lksn8sxf3mlem6vmodxr.jpg",
+      "instagram": "https://www.instagram.com/valvaldez.a?stkn=MXJjb2plNnV5Zmg2bw==",
+      "sede": "Estudio Arechiga"
+    },
+    {
       "nombre": "Karen Serrato Trejo",
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161191/cuartasilla/artistas/xm6o7hxb7dzgf7pyuhz4.jpg",
       "instagram": "https://www.instagram.com/h4da_caid4/",
@@ -1481,6 +1540,12 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789161675/cuartasilla/artistas/tpblaqapoqbaiz111h4b.jpg",
       "instagram": "https://www.instagram.com/cast_0104/",
       "sede": "Días Feriados"
+    },
+    {
+      "nombre": "Tetépetl 107",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789505048/cuartasilla/artistas/y5tsbh961zjxbknenlmh.jpg",
+      "instagram": "https://www.instagram.com/tetepetl_107/",
+      "sede": "Cuerpos Parlantes"
     },
     {
       "nombre": "Mariluz Robles Farias",
@@ -1537,10 +1602,118 @@
       "sede": "Taller Industria Gráfica"
     },
     {
-      "nombre": "Valentina",
-      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789456837/cuartasilla/artistas/lksn8sxf3mlem6vmodxr.jpg",
-      "instagram": "https://www.instagram.com/valvaldez.a?stkn=MXJjb2plNnV5Zmg2bw==",
+      "nombre": "Ham",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789503965/cuartasilla/artistas/e4jydklwnjprewtzuqz6.jpg",
+      "instagram": "https://www.instagram.com/pasajera_o_testigo",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Neofantasías",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504247/cuartasilla/artistas/neofantasias/x5nywxoinckjfa6jhh5t.jpg",
+      "instagram": "https://www.instagram.com/neofantasias",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "David R",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504291/cuartasilla/artistas/david-r/znl0n94fcb1p7tntyaas.jpg",
+      "instagram": "https://www.instagram.com/nekrocrust",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Ana Vázquez de la Torre",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504345/cuartasilla/artistas/ana-vazquez-de-la-torre/xwncbjynsfwizbhzk2l5.jpg",
+      "instagram": "https://www.instagram.com/delatorrevazquezana",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Sophia B. Heredia",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504386/cuartasilla/artistas/x1sdvw3tostw9shlptbj.jpg",
+      "instagram": "https://www.instagram.com/sophiabheredia",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Elizabeth Mejía",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789504452/cuartasilla/artistas/qycl7g6r7nsc9rfkuezi.jpg",
+      "instagram": "https://www.instagram.com/lady.fuego/",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Ale Hernández",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789511150/cuartasilla/artistas/g8t7y9kwka8m0pec3un6.jpg",
+      "instagram": "https://www.instagram.com/alejandrahrosas",
       "sede": "Estudio Arechiga"
+    },
+    {
+      "nombre": "Abigail Arias",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789511219/cuartasilla/artistas/nvym1mqfg9dbla3eaup1.jpg",
+      "instagram": "https://www.instagram.com/abigail.ujrm",
+      "sede": "Estudio Arechiga"
+    },
+    {
+      "nombre": "Ximena Contreras",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789511266/cuartasilla/artistas/aezezxulis6zwotmzcof.jpg",
+      "instagram": "https://www.instagram.com/xim_.c_",
+      "sede": "Estudio Arechiga"
+    },
+    {
+      "nombre": "Lied Jarán",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789517346/cuartasilla/artistas/clhpgoxcusbgt0kcx821.jpg",
+      "instagram": "https://www.instagram.com/liedjaran/",
+      "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Pedro A.C.",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789517399/cuartasilla/artistas/lnldvnwsm8sapehs2el8.jpg",
+      "instagram": "https://www.instagram.com/pedrocarbvajal/",
+      "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Octopus",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789522720/cuartasilla/artistas/octopus/wuwye2vnjepko6y0nndl.jpg",
+      "instagram": "https://www.instagram.com/tavocuadros",
+      "sede": "Casa Dos Guayabos"
+    },
+    {
+      "nombre": "Topiz",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789522798/cuartasilla/artistas/topiz/bi0qbtocvc9gvber09zh.jpg",
+      "instagram": "https://www.instagram.com/topiztopiz",
+      "sede": "Casa Dos Guayabos"
+    },
+    {
+      "nombre": "Mar M.",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789522856/cuartasilla/artistas/mar-m/dsldiqpjkjhtaqtoa8y5.jpg",
+      "instagram": "https://www.instagram.com/mrafrnda",
+      "sede": "Casa Dos Guayabos"
+    },
+    {
+      "nombre": "Itzel Martinez",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789522892/cuartasilla/artistas/gmxpewacb2e0vtaeixde.jpg",
+      "instagram": "https://www.instagram.com/bocadealgodon",
+      "sede": "Casa Dos Guayabos"
+    },
+    {
+      "nombre": "Ann Barba",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789619895/cuartasilla/artistas/ann-barba/m1hijjssmsk8fsemwq3h.jpg",
+      "instagram": "https://www.instagram.com/annnbarba/",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Medusa Río Santiago",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789617080/cuartasilla/artistas/zu8mnnrb2w7ltx9afozy.jpg",
+      "instagram": "https://www.instagram.com/medusa.riosantiago/",
+      "sede": "Taller Industria Gráfica"
+    },
+    {
+      "nombre": "Sofía Carvajal",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789708894/cuartasilla/artistas/i8p99vuzna4x4kdshooy.jpg",
+      "instagram": "https://www.instagram.com/sofiacarvajal____/",
+      "sede": "Ala Rota"
+    },
+    {
+      "nombre": "Cris Meneses",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789708934/cuartasilla/artistas/yfm464sa2cx123pofhfe.jpg",
+      "instagram": "https://www.instagram.com/lifeteller_/",
+      "sede": "Ala Rota"
     }
   ],
   "archivo": [],

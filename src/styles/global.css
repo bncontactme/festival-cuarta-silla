@@ -33,6 +33,30 @@
      ya no visten ninguna superficie. */
   --color-papel: #ffffff;
 
+  /* ── Los dos apagados ──────────────────────────────────────────────────
+     No son tintas nuevas: son las dos maneras de apagar las que hay. La letra
+     secundaria de este sitio se apagaba a ojo y en dieciséis niveles
+     distintos —del 25 % al 85 %—, y la mitad no se leía. Medido contra los
+     campos de la casa:
+
+       tinta sobre amarillo   55 % → 3,74:1 ✗    62 % → 4,53:1 ✓
+       papel sobre tinta      40 % → 3,78:1 ✗    60 % → 6,77:1 ✓
+
+     Así que quedan dos, y sólo dos:
+
+       apagado → lo secundario que HAY que poder leer (4,5:1)
+       tenue   → lo que dice «aquí no hay nada» —un día sin programa, una sede
+                 sin anunciar—: se ve menos que lo demás y aun así se ve (3:1,
+                 el listón de lo que no es letra)
+
+     Viven aquí y no en `:root` para que Tailwind genere sus utilidades:
+     `text-apagado` y `text-tenue` son las que usa el marcado. De momento
+     visten el tablero de sedes, que es donde se midió; el resto del sitio
+     sigue con sus dieciséis niveles y le toca su vuelta. */
+  --color-apagado: color-mix(in srgb, var(--color-tinta) 62%, transparent);
+  --color-tenue: color-mix(in srgb, var(--color-tinta) 48%, transparent);
+  --color-apagado-papel: color-mix(in srgb, var(--color-papel) 60%, transparent);
+
   --font-display: 'Anton', 'Arial Narrow', sans-serif;
   --font-texto: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
   --font-mono: 'Courier Prime', ui-monospace, monospace;
@@ -46,6 +70,7 @@
   :root {
     --borde: 2px;
     color-scheme: light;
+
 
     /* Alto de la barra de navegación, que va pegada arriba (`sticky top-0`).
        Lo necesita cualquier cosa que también quiera quedarse pegada y no
@@ -343,6 +368,68 @@
     margin-top: 0.55rem;
   }
 
+  /* ── Renglón: la forma del panel ──────────────────────────────────────
+     Sin caja. Once actividades apiladas en una columna, cada una con su canto
+     de 2 px, su sombra dura y una de cada dos en campo rojo, son una pared de
+     rectángulos: el panel se lee apretado aunque le sobre sitio, y el nombre
+     de la sede —que es lo que manda ahí dentro— tiene que competir con once
+     objetos del mismo peso.
+
+     Aquí la hora manda en una columna propia, como en la forma de fila, y lo
+     demás cuelga de ella; lo que separa una actividad de la siguiente es un
+     filete de un pelo. No es una forma nueva: es exactamente como se lee la
+     lista de las dieciséis sedes que hay al lado, y por eso el panel y la
+     lista se leen como la misma cosa abierta y cerrada.
+
+     El campo alterno se cae con la caja. Servía para que dos tarjetas seguidas
+     no se fundieran en una mancha; sin tarjetas no hay nada que separar y lo
+     que quedaba era un semáforo. */
+  .evento--renglon {
+    --fondo: var(--color-amarillo);
+    --texto: var(--color-tinta);
+    display: grid;
+    /* Columna fija y no `auto`: con `auto` cada renglón mide su propia hora y
+       los títulos arrancan en verticales distintas por dos píxeles. Una lista
+       que no está alineada se lee inquieta aunque nadie sepa decir por qué.
+       7,5 rem es «18:30–19:00» en mono a 1,05 rem, con holgura. */
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 0.15rem 1.25rem;
+    /* Apretado, y medido: con el día puesto en el carril de arriba, lo que
+       decide si la jornada cabe en una pantalla es lo que mide un renglón.
+       Eran 1,15/1,3 rem de relleno para doce palabras —123 px de alto— y el
+       aire que sobraba estaba arriba y abajo, no entre las letras. */
+    padding: 0.6rem 0 0.65rem;
+    border: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-tinta) 22%, transparent);
+    box-shadow: none;
+  }
+  .evento--renglon:last-child {
+    border-bottom: 0;
+  }
+  /* La hora baja de 19,2 px: los 19,2 son por el contraste del amarillo sobre
+     el campo rojo, y aquí no hay campo rojo — es tinta sobre amarillo. */
+  .evento--renglon .evento-hora {
+    font-size: 1.05rem;
+  }
+  .evento--renglon .evento-tipo {
+    margin-top: 0.4rem;
+  }
+  .evento--renglon .evento-artista {
+    margin-top: 0.25rem;
+  }
+  .evento--renglon .evento-sede {
+    margin-top: 0.45rem;
+  }
+  .evento--renglon .evento-puerta {
+    margin-top: 0.75rem;
+  }
+  /* El recorrido no lleva campo de papel porque ya no hay campos: lo dice su
+     renglón, en rojo, que es el acento de «esto no es de esta sede». */
+  .evento--renglon.evento--recorrido .evento-hora,
+  .evento--renglon.evento--recorrido .evento-sede {
+    color: var(--color-rojo);
+  }
+
   /* ── Bloque: la forma de la pantalla ancha ────────────────────────────
      De pie y de dos en dos. A lo largo de 1.200 px la fila dejaba el título
      solo en medio del campo y la puerta a un palmo, al otro extremo; en
@@ -382,6 +469,18 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
     opacity: 0.7;
+  }
+
+  /* El estado que pone el reloj dentro de la ficha: «corriendo», «en 20 min».
+     Cuelga del tipo —«muestra · corriendo»— y por eso trae el punto medio
+     puesto. Vive aquí, con el resto de la familia, y no en el cartel de una
+     sede: lo pintan el cartel y el panel de `/sedes`, y desde un `<style>` con
+     alcance el panel no lo veía —«MUESTRACORRIENDO», sin separación. */
+  .evento-estado {
+    display: inline;
+  }
+  .evento-estado::before {
+    content: ' · ';
   }
 
   .evento-artista {
@@ -489,6 +588,32 @@
   .evento-lectura:hover,
   .evento-lectura:focus-visible {
     text-decoration-thickness: 2px;
+  }
+
+  /* ── El pie del renglón ────────────────────────────────────────────────
+     La marca del recorrido, la entrada libre y las dos puertas, en una línea.
+     Colgaban del título de tres en tres, cada una con su margen de arriba, y
+     eso son hasta tres franjas por actividad: en una sede de once, media
+     pantalla gastada en cuatro palabras. En fila se leen igual —son cosas del
+     mismo rango— y el renglón deja de crecer por abajo.
+
+     Va aquí abajo, después de las clases que anula, y no donde se declara el
+     renglón: las mismas puertas siguen apilándose en el cartel de la sede, que
+     tiene sitio de sobra, así que lo que se toca es su margen DENTRO del pie y
+     hace falta llegar después que ellas. */
+  .evento-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.9rem;
+    margin-top: 0.35rem;
+  }
+  .evento--renglon .evento-pie > * {
+    margin-top: 0;
+  }
+  /* El hueco ya lo pone el `gap`; ese margen era para cuando iban pegadas. */
+  .evento-pie .evento-puerta + .evento-lectura {
+    margin-left: 0;
   }
 
   /* ── Enlace subrayado que se dibuja ─────────────────────────────────── */
@@ -992,6 +1117,29 @@
   }
 }
 
+/* — Ficha de «al lado»: la sede vecina, sobre campo de tinta —————————— */
+/* La misma tarjeta de papel del resto del sitio, con el canto rojo porque vive
+   sobre negro. La pintan el cartel de una sede —«Al lado, andando»— y el panel
+   de `/sedes`, que enseña lo mismo dentro de la columna. Vivía en el cartel,
+   en un `<style>` con alcance, y desde allí el panel no la veía. */
+.cerca-ficha {
+  display: block;
+  height: 100%;
+  background-color: var(--color-amarillo);
+  color: var(--color-tinta);
+  border: var(--borde) solid var(--color-tinta);
+  box-shadow: 6px 6px 0 var(--color-rojo);
+  padding: 1.25rem 1.4rem;
+  transition:
+    translate 0.25s var(--ease-salida),
+    box-shadow 0.25s var(--ease-salida);
+}
+.cerca-ficha:hover,
+.cerca-ficha:focus-visible {
+  translate: -3px -3px;
+  box-shadow: 9px 9px 0 var(--color-rojo);
+}
+
 /* — Conmutador: el mando de burbuja ———————————————————————————————— */
 /* Dos o cuatro opciones y una burbuja de tinta que se desliza a la elegida.
    Sin una sola esquina redonda, que en este sitio no hay ninguna: lo que lo
@@ -1445,5 +1593,509 @@
   }
   @view-transition {
     navigation: none;
+  }
+}
+
+/* — El tablero de /sedes ————————————————————————————————————————————
+   El plano y la lista dejan de estar EN una página y pasan a SER la página:
+   una pantalla exacta, sin scroll de documento, con el scroll dentro de la
+   columna. Vive aquí y no en la página porque es un sistema —alto, columnas,
+   cabecera y franja se sostienen entre sí— y porque `Mapa.astro` pinta parte
+   de lo que estas reglas colocan. */
+/* ── El tablero es una pantalla, no un documento ───────────────────────
+   Es la misma decisión que ya está tomada en el sitio móvil —«el móvil es
+   una aplicación de pantallas: no hay scroll de página»— y por la misma
+   razón: lo que se mira aquí es un instrumento entero, y un instrumento que
+   se sale por abajo deja de ser un instrumento.
+
+   Sólo de 64rem para arriba: por debajo manda el sitio móvil, que ya hace
+   esto por su cuenta. */
+@media (width >= 64rem) {
+  body:has([data-tablero]) {
+    overflow: hidden;
+  }
+  /* El pie del sitio no cabe en una pantalla que no scrollea. Lo suyo se
+     queda en la franja de abajo del tablero. */
+  body:has([data-tablero]) > footer {
+    display: none;
+  }
+  /* Y la barra de progreso de lectura de la barra de navegación tampoco: mide
+     cuánto llevas scrolleado de la página, y esta página no scrollea. Un
+     indicador clavado en cero es un indicador roto. */
+  body:has([data-tablero]) .progreso {
+    display: none;
+  }
+}
+
+.tablero-sedes {
+  display: flex;
+  flex-direction: column;
+  /* Lo que queda de ventana debajo de la barra de navegación, que va pegada
+     arriba y mide `--alto-barra`. */
+  min-height: calc(100dvh - var(--alto-barra));
+  height: calc(100dvh - var(--alto-barra));
+}
+
+.tablero-cuerpo {
+  flex: 1;
+  min-height: 0;
+}
+.tablero-cuerpo > [data-mapa-sedes] {
+  height: 100%;
+}
+
+/* La cabecera de la lista: el rótulo de la página, pegado arriba de su
+   columna. Sobre tinta, como la barra que era antes —el material no
+   cambia—, pero midiendo lo que mide la columna y no la ventana. */
+.cabecera-lista {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--color-tinta);
+  color: var(--color-papel);
+  border-bottom: var(--borde) solid var(--color-tinta);
+  padding: 1.15rem 1.5rem;
+}
+@media (width >= 64rem) {
+  .cabecera-lista {
+    padding: 1.25rem 2.5rem;
+  }
+}
+
+/* ── La franja de abajo ────────────────────────────────────────────────
+   Un solo renglón de tinta con lo que no se puede perder del pie. A la
+   izquierda estuvo el recorrido y ya no: se lo llevó el panel de cada sede,
+   que es donde hace falta. */
+.tablero-franja {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 2rem;
+  border-top: var(--borde) solid var(--color-tinta);
+  background-color: var(--color-tinta);
+  color: var(--color-papel);
+  padding: 0.7rem 1rem;
+  font-size: 0.6rem;
+}
+@media (width >= 64rem) {
+  .tablero-franja {
+    padding: 0.7rem 2.5rem;
+  }
+}
+.tablero-legal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1.25rem;
+}
+
+/* — El panel de una sede ————————————————————————————————————————————
+   El «Conoce más» que se abre dentro de la lista de `/sedes`. Las reglas viven
+   aquí y no en un `<style>` del componente por lo mismo que las del tablero:
+   son un sistema con tres dueños —el componente pinta el panel, `Mapa.astro`
+   lo abre y lo cierra desde su script, y la página decide el alto— y porque
+   los nombres ya son de la casa, como `.evento--renglon` o `.lista-sedes`. */
+/* ── La hoja ───────────────────────────────────────────────────────────
+   El panel es una hoja de papel amarillo dentro de la columna: el mismo
+   campo que la lista que sustituye, para que el cambio se lea como que la
+   lista se abrió y no como que llegó otra página. */
+.panel-sede {
+  /* El panel se mide a sí mismo, como la ficha de un artista: la misma
+     columna vale 570 px con la lista puesta y 720 con el panel abierto, y
+     en dos pantallas distintas son cuatro anchos. Con `cqw` el titular se
+     mide contra el hueco que tiene, no contra la ventana — que es lo que
+     dejaba «TALLER INDUSTRIA GRÁFICA» saliéndose por el canto. */
+  container-type: inline-size;
+  /* El margen lateral del panel, en un solo sitio: lo comparten la cabecera,
+     el renglón de ahora, los titulares de día, los renglones y el pie. Que
+     todo arranque en la misma vertical es la mitad de que no se lea
+     apretado; la otra mitad es que haya bastante. */
+  --aire: 1.75rem;
+  background-color: var(--color-amarillo);
+  /* Columna, y alta como la caja: es lo que deja al pie irse al canto de
+     abajo con `margin-top: auto` cuando el programa no llega a llenar la
+     hoja. Una sede de una actividad tenía su barra de «al lado» colgando a
+     media página, con medio palmo de amarillo debajo. */
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+/* Desde 64 rem, el mismo margen que `lg:px-10` de la lista que sustituye: sin
+   esto, al entrar el panel todo el contenido daba un salto de doce píxeles a
+   la izquierda — dos cosas que se turnan en el mismo hueco tienen que arrancar
+   en la misma vertical. */
+@media (width >= 64rem) {
+  .panel-sede {
+    --aire: 2.5rem;
+  }
+}
+.panel-sede:focus {
+  outline: none;
+}
+
+/* ── La barra de volver ────────────────────────────────────────────────
+   La única cosa de tinta del panel, y por eso funciona: es el marco, no el
+   contenido. */
+.panel-barra {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: stretch;
+  /* Envuelve en vez de apretar: en una columna angosta el reloj del festival
+     se va a un segundo renglón entero antes que dejar el nombre de la sede en
+     tres letras. Que la barra cambie de alto ya no rompe nada — el titular de
+     día se pega a `--barra-panel`, que se mide. */
+  flex-wrap: wrap;
+  background-color: var(--color-tinta);
+  color: var(--color-papel);
+}
+.panel-volver {
+  white-space: nowrap;
+  padding: 0.9rem 1.4rem;
+  color: var(--color-amarillo);
+  font-weight: 700;
+  border-right: var(--borde) solid color-mix(in srgb, var(--color-papel) 30%, transparent);
+  transition: background-color 0.25s var(--ease-salida);
+}
+.panel-volver:hover,
+.panel-volver:focus-visible {
+  background-color: var(--color-rojo);
+  color: var(--color-amarillo);
+}
+.panel-cuenta {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem;
+}
+.panel-numero {
+  flex-shrink: 0;
+  color: var(--color-apagado-papel);
+}
+/* Una línea y sin puntos suspensivos: la barra mide lo que mide, y un nombre
+   largo se recorta contra el canto. */
+.panel-nombre {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 1.05rem;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--color-papel);
+}
+
+/* ── La cabecera ───────────────────────────────────────────────────────
+   Campo rojo con la estrella asomando, igual que el cartel de la sede y que
+   el cierre de todas las páginas. Es lo ÚNICO que pesa en el panel, y por
+   eso el nombre se lee desde el otro lado de la mesa. */
+.panel-cabecera {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-rojo);
+  border-bottom: var(--borde) solid var(--color-tinta);
+  /* Apretado a propósito, y una vuelta de tuerca más desde que el día se pulsa:
+     la barra y la cabecera se llevaban 259 px de una caja de 795 —un tercio del
+     panel gastado en tres datos, antes de la primera actividad— y ahora debajo
+     tienen que caber el carril y su jornada entera. */
+  padding: 1.1rem var(--aire) 1.2rem;
+}
+
+/* El nombre. Tope arriba para que «Ala Rota» no salga a tamaño pared en un
+   panel ancho, tope abajo para que quepa en uno angosto, y el 78% es la
+   parte del renglón que NO se le deja a la estrella: amarillo sobre amarillo
+   no se lee, y la estrella es amarilla. Lo que no quepa parte en dos líneas,
+   que es como parte un cartel. */
+.panel-titulo {
+  max-width: 78%;
+  font-size: clamp(1.7rem, var(--titulo, 6.4cqw), 3.2rem);
+  line-height: 0.9;
+}
+
+/* La dirección y las dos puertas, en el mismo renglón. Eran dos franjas, una
+   debajo de otra, y cada franja de la cabecera es una actividad menos a la
+   vista: la cuenta de este panel se hace en renglones. Se parten en dos sólo
+   cuando la columna se estrecha y la dirección deja de caber al lado. */
+.panel-datos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem 1.4rem;
+  margin-top: 0.75rem;
+}
+
+.panel-direccion {
+  flex: 1 1 16rem;
+  max-width: 32rem;
+  font-size: 0.98rem;
+  line-height: 1.35;
+  font-style: normal;
+  color: var(--color-papel);
+}
+
+/* Aquí estuvo «11 actividades · Jue · Vie · Sáb». Se cae: los titulares de
+   día que vienen justo debajo dicen lo mismo repartido —24 Jueves 3, 25
+   Viernes 4—, que es más y ocupa menos. */
+.panel-puertas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem 1.4rem;
+}
+.panel-puerta {
+  padding: 0.6rem 1rem;
+  border: var(--borde) solid var(--color-tinta);
+  background-color: var(--color-tinta);
+  color: var(--color-amarillo);
+  font-weight: 700;
+  transition:
+    background-color 0.25s var(--ease-salida),
+    color 0.25s var(--ease-salida);
+}
+.panel-puerta:hover,
+.panel-puerta:focus-visible {
+  background-color: var(--color-amarillo);
+  color: var(--color-tinta);
+}
+/* La segunda puerta: el mismo botón en la tinta contraria. Mismo canto, mismo
+   tamaño y mismo sitio donde pulsar; lo que cambia es el campo, y con él la
+   letra. Es el par del cartel de la sede —tinta con amarillo, amarillo con
+   tinta—, y es lo que hace que las dos se lean sobre campo rojo: la letra se
+   mide contra su propio botón (15:1) y no contra el rojo de detrás, donde no
+   hay ningún color del manual que llegue a 4,5. */
+.panel-puerta--clara {
+  background-color: var(--color-amarillo);
+  color: var(--color-tinta);
+}
+.panel-puerta--clara:hover,
+.panel-puerta--clara:focus-visible {
+  background-color: var(--color-papel);
+  color: var(--color-tinta);
+}
+
+/* El estado de ahora, al fondo de la barra: en rojo, que es el único acento
+   que este sitio usa para «esto está pasando», y con su estrella delante.
+   Es el mismo rojo sobre tinta que ya usa el reloj de la cabecera de la
+   lista. Cuando la sede está parada baja a papel apagado: es un dato, no un
+   aviso. */
+.panel-ahora {
+  display: flex;
+  /* Ni se encoge ni se corta: o cabe al final de la barra, o se baja entero a
+     un renglón propio. Una hora a medias —«hasta 18…»— no es un dato. */
+  flex: 0 0 auto;
+  align-items: center;
+  margin-left: auto;
+  padding: 0.9rem 1.25rem;
+  color: var(--color-rojo);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.panel-ahora::before {
+  content: '★';
+  margin-right: 0.5rem;
+}
+.panel-ahora[data-parada] {
+  color: var(--color-apagado-papel);
+  font-weight: 400;
+}
+.panel-ahora[data-parada]::before {
+  content: none;
+}
+
+/* ── El carril: los cuatro días, que son el mando ──────────────────────
+   Aquí estuvieron los cuatro titulares de día, pegajosos, dentro de un scroll
+   único de tres pantallas: 296 px de mobiliario para decir cuatro veces qué
+   día se está leyendo, y el día que uno buscaba dos pantallas más abajo.
+
+   Ahora el día se pulsa. Es el carril del cartel de la sede —mismas celdas,
+   número grande arriba, «Jue · 5» debajo, el día sin nada apagado— en las
+   proporciones de la columna. No lleva sus clases: las del cartel viven en su
+   `<style>` con alcance, y copiar el nombre aquí sería pintar dos sitios desde
+   uno sin querer. */
+.panel-carril {
+  position: sticky;
+  /* Justo debajo de la barra de volver: se cambia de día desde donde se esté
+     leyendo, sin volver arriba. La medida la pone el script al abrir el panel
+     —y la vuelve a poner si cambia el ancho—, porque la barra no mide siempre
+     lo mismo: con el festival corriendo y la columna angosta, el reloj se le va
+     a un segundo renglón. El 3,2 rem es sólo la red de seguridad. */
+  top: var(--barra-panel, 3.2rem);
+  z-index: 2;
+  display: grid;
+  /* Cuatro a lo ancho, siempre. Estuvo un rato plegándose a 2×2 en columna
+     angosta —parecía lo obvio— y la cuenta dice que no: en un portátil de
+     1024 la caja del panel mide 593 px y el carril de dos filas se llevaba
+     172, o sea dos actividades de las tres que caben. En cuatro mide 87 en
+     todos los anchos, y lo que se aprieta es el nombre del día, que pasa a
+     tres letras. */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  background-color: var(--color-tinta);
+  gap: var(--borde);
+  border-bottom: var(--borde) solid var(--color-tinta);
+  border-top: var(--borde) solid var(--color-tinta);
+}
+.panel-celda {
+  background-color: var(--color-amarillo);
+  padding: 0.85rem 1rem 0.9rem;
+  text-align: left;
+  transition:
+    background-color 0.2s var(--ease-salida),
+    color 0.2s var(--ease-salida);
+}
+.panel-celda-num {
+  display: block;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: 0;
+}
+.panel-celda-nota {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--color-apagado);
+}
+/* El día abierto es el negativo de los otros tres: campo de tinta y letra
+   amarilla, que es como este sitio dice «estás aquí» desde la primera página.
+   No hay subrayado ni filete: la celda entera cambia de tinta. */
+.panel-celda[aria-pressed='true'] {
+  background-color: var(--color-tinta);
+  color: var(--color-amarillo);
+}
+.panel-celda[aria-pressed='true'] .panel-celda-nota {
+  color: color-mix(in srgb, var(--color-papel) 70%, transparent);
+}
+.panel-celda:not([aria-pressed='true'], :disabled):hover,
+.panel-celda:not([aria-pressed='true'], :disabled):focus-visible {
+  background-color: var(--color-rojo);
+  color: var(--color-amarillo);
+}
+.panel-celda:not([aria-pressed='true'], :disabled):hover .panel-celda-nota,
+.panel-celda:not([aria-pressed='true'], :disabled):focus-visible .panel-celda-nota {
+  color: color-mix(in srgb, var(--color-papel) 75%, transparent);
+}
+/* El día sin nada: se ve —un hueco en el carril se lee como un error— pero ni
+   se pulsa ni se enciende. Se apaga la celda entera y no cada letra por su
+   lado, que es el mecanismo de `.carril-dia--vacio` en el cartel de la sede,
+   y al 45 % igual que allí: con el color propio que tenía antes, el número
+   del día se quedaba en 1,92:1 y no se veía. */
+/* 0,5 y no el 0,45 del cartel: cinco puntos, y son los que separan 2,78:1 de
+   3,05:1, que es el listón. Mismo mecanismo, puesto donde se lee. */
+.panel-celda--vacia {
+  opacity: 0.5;
+  cursor: default;
+}
+/* Y aquí la nota deja de apagarse por su cuenta: apagado (62 %) por opacidad
+   (45 %) son 28 %, o sea 1,8:1 — dos apagados encima del mismo texto no se
+   suman, se multiplican. Apaga la celda y nada más, que es lo que hace el
+   cartel: así la nota y el número se quedan los dos en 3:1, que es el listón
+   de lo que está apagado a propósito. */
+.panel-celda--vacia .panel-celda-nota {
+  color: inherit;
+}
+/* Hoy, que lo marca el reloj. Dos cosas, y por lo mismo: el rojo sobre el
+   amarillo son 3,67:1 y a 11,5 px eso no se lee, pero un filete de 3 px SÍ
+   —a lo que no es letra le basta con 3:1—. Así que el día de hoy se dice con
+   la nota en rojo, como en el cartel, y con una raya roja encima de la celda,
+   que es lo que se ve desde el otro lado de la mesa.
+   Sólo mientras ese día no sea el abierto: abierto ya lo dice el campo de
+   tinta, y el acento se mueve, no se suma. */
+.panel-celda[data-hoy]:not([aria-pressed='true']) {
+  box-shadow: inset 0 3px 0 var(--color-rojo);
+}
+.panel-celda[data-hoy]:not([aria-pressed='true']) .panel-celda-nota {
+  color: var(--color-rojo);
+  font-weight: 700;
+}
+
+.panel-fichas {
+  padding: 0.35rem var(--aire) 0.6rem;
+}
+
+.panel-evento-titulo {
+  font-size: 1.1rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.panel-vacio {
+  padding: 2rem var(--aire) 2.5rem;
+}
+
+/* ── Al lado, andando: la otra barra ───────────────────────────────────
+   Pegada abajo y de tinta, haciendo pareja con la barra de volver. La hoja
+   amarilla queda cerrada por los dos cantos —tinta arriba, tinta abajo—, que
+   es como este sitio enmarca lo que se lee.
+
+   `margin-top: auto` dentro de la columna y `sticky bottom: 0`: las dos cosas,
+   y cada una para un caso. Con poco programa —una sede de una actividad— el
+   margen la empuja al canto de abajo en vez de dejarla flotando a media hoja;
+   con mucho, el `sticky` la mantiene a la vista mientras el programa corre por
+   debajo. En los dos casos está donde se la busca sin buscarla.
+
+   Fueron tres renglones con el nombre a tamaño de titular —236 px— y luego un
+   renglón amarillo que se iba con el scroll. Esto mide 43 y no se va. */
+.panel-cerca {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  background-color: var(--color-tinta);
+  color: var(--color-papel);
+  border-top: var(--borde) solid var(--color-tinta);
+}
+/* El mismo relleno que la barra de arriba, y no el `--aire` del contenido:
+   estas dos son el marco y arrancan en su propia vertical. */
+.panel-cerca-rotulo {
+  display: flex;
+  align-items: center;
+  padding: 0.85rem 1.4rem;
+  color: var(--color-apagado-papel);
+}
+.cerca-renglon {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  padding: 0.85rem 1.1rem;
+  text-align: left;
+  /* El mismo filete que separa «← Sedes» de lo que viene detrás. */
+  border-left: var(--borde) solid color-mix(in srgb, var(--color-papel) 30%, transparent);
+  color: var(--color-amarillo);
+  font-weight: 700;
+  transition:
+    background-color 0.25s var(--ease-salida),
+    color 0.25s var(--ease-salida);
+}
+.cerca-metros {
+  font-weight: 400;
+  color: var(--color-apagado-papel);
+}
+.cerca-punta {
+  font-family: var(--font-display);
+  line-height: 1;
+}
+/* Se enciende volcándose, como las dos puertas de la cabecera y como todo lo
+   pulsable de la casa: el campo se vuelve amarillo y la letra, tinta. */
+.cerca-renglon:hover,
+.cerca-renglon:focus-visible {
+  background-color: var(--color-amarillo);
+  color: var(--color-tinta);
+}
+.cerca-renglon:hover .cerca-metros,
+.cerca-renglon:focus-visible .cerca-metros {
+  color: var(--color-tinta);
+}
+/* En columna angosta, una sola. Con las dos —«Palma Galería 767 m» y «Estampa
+   Café 1281 m»— la barra se parte en dos renglones, y en un portátil de 1024
+   eso son 91 px de los 615 que tiene la caja: el marco comiéndose el cuadro.
+   Se queda la más cercana, que es la que contesta la pregunta; la otra sigue
+   en la lista y en el plano, como las dieciséis. */
+@container (width < 34rem) {
+  .panel-cerca button:nth-of-type(2) {
+    display: none;
   }
 }

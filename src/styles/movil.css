@@ -668,6 +668,55 @@
   }
 
   /* ═════════════════════════════════════════════════════════════════════
+     LA LISTA DE SEDES
+     Aquí no hay acordeón, y es a propósito. Un acordeón sirve cuando lo que
+     se despliega ES la respuesta —los días del programa, las actividades con
+     formulario—. Una sede no: lo que hay detrás de su nombre es una pantalla
+     entera con la dirección, el cómo llegar, su Instagram y el programa de
+     los cuatro días. Plegarla dejaba un resumen de dos botones en medio del
+     camino, y uno de los dos era «ir a lo que acabas de pedir».
+
+     Así que la fila es el enlace entero, con la punta a la derecha diciendo
+     que sale de aquí. La geometría es la del `summary` que había —misma
+     altura, mismo filete, mismo tamaño de nombre— para que la pantalla no
+     cambie de aspecto al cambiar de mecanismo.
+     ═════════════════════════════════════════════════════════════════════ */
+
+  .sede-fila {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.8rem 1rem;
+    border-bottom: var(--borde) solid var(--color-tinta);
+    transition: background-color 0.25s var(--ease-salida);
+  }
+
+  .sede-fila-nombre {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .sede-fila-punta {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    opacity: 0.55;
+  }
+
+  /* El mismo rojo con el que se encendía el acordeón al abrirse: el dedo ya
+     sabe de qué color es tocar en esta pantalla. */
+  .sede-fila:active {
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
+  }
+
+  .sede-fila:active .sede-fila-punta {
+    opacity: 1;
+  }
+
+  /* ═════════════════════════════════════════════════════════════════════
      LA REJA DE ARTISTAS
      Era una columna: una cara por pantalla, y dieciocho caras son trece
      pantallas de scroll con cero visión del conjunto. La foto se veía —que es

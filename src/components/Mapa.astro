@@ -11,16 +11,17 @@ import {
   instanteDe,
 } from '../data/site';
 import { plano, proyecta } from '../data/mapa';
+import { ESTRELLA } from '../lib/estrella';
 
 /**
- * El plano de las sedes: las catorce a la vez, cada una con su estrella.
+ * El plano de las sedes: las dieciséis a la vez, cada una con su estrella.
  *
  * Antes aquí había un iframe de Google que enseñaba una sede cada vez —había
  * que elegir para que apareciera algo—, pintado con la paleta de Google
  * encima de una sección que es negra y amarilla. La pregunta de esta
  * sección no es «¿dónde está Temporal?», es «¿dónde está todo esto?»: si las
  * sedes caen a diez minutos andando unas de otras, eso sólo se ve con las
- * catorce puestas en el mismo papel.
+ * dieciséis puestas en el mismo papel.
  *
  * El dibujo es nuestro y viaja en el HTML: `src/data/mapa.ts`, que sale de
  * OpenStreetMap con `scripts/plano.py`. Ni una petición a un tercero.
@@ -46,6 +47,11 @@ interface Props {
    * scroll suave que no se meta, y con la lista entera —que ya no scrollea por
    * dentro— lo único que conseguía era que la rueda encima de los dieciséis
    * renglones no moviera la página.
+   *
+   * En el tablero vuelve a hacer falta aunque la lista sea `entera`, y por la
+   * razón contraria: allí la página NO scrollea, así que sin ese atributo
+   * Lenis se queda la rueda para mover algo que no se mueve y la lista no se
+   * entera de nada. Por eso lo pone también `panel`.
    */
   lista?: 'corta' | 'entera';
   /**
@@ -62,22 +68,53 @@ interface Props {
    * ni margen, separadas por el mismo filete de 2 px que separa todo aquí.
    */
   marco?: 'tarjeta' | 'sangre';
+  /**
+   * Si los nombres están puestos o salen al señalar.
+   *
+   * `al-senalar` (por defecto) es lo de la portada: dieciséis estrellas y el
+   * nombre de la que se señala. Allí el plano es un adelanto —«esto está todo
+   * junto»— y la lista de al lado, que se lee de arriba abajo, es la que dice
+   * quién es quién.
+   *
+   * `siempre` es lo de `/sedes`, donde el plano ES la página: allí no hay
+   * adelanto de nada y dieciséis estrellas anónimas obligan a pasar el ratón
+   * por las dieciséis para enterarse de cuál es cuál. Los nombres vienen
+   * puestos, y el script los reparte alrededor de su estrella —cada uno atado
+   * al suyo con un filete— para que no se pisen.
+   */
+  rotulos?: 'al-senalar' | 'siempre';
+  /**
+   * Si la columna de la derecha es una pila de dos hojas —la lista y el
+   * «Conoce más» de la sede elegida— en vez de sólo la lista.
+   *
+   * Apagado por defecto, que es lo que necesita la portada: allí la lista es
+   * un adelanto y el sitio al que lleva es la página de la sede.
+   *
+   * Encendido es el tablero de `/sedes`: elegir una sede no cambia de página,
+   * aparta la lista y mete su panel en el mismo hueco, con el plano quieto al
+   * lado. El componente se queda con las dos hojas —y no la página con una y
+   * el componente con otra— por lo mismo que se quedó con la lista: quien
+   * manda sobre el plano y quien manda sobre el panel tienen que ser el mismo
+   * script, o hay dos verdades sobre cuál es la sede elegida.
+   *
+   * Los paneles no los pinta él: llegan por `<slot name="panel">`, uno por
+   * sede, desde la página que sabe qué va dentro.
+   */
+  panel?: boolean;
 }
-const { class: clase = '', lista: alto = 'corta', marco = 'tarjeta' } = Astro.props;
+const {
+  class: clase = '',
+  lista: alto = 'corta',
+  marco = 'tarjeta',
+  rotulos = 'al-senalar',
+  panel = false,
+} = Astro.props;
 const aSangre = marco === 'sangre';
+const rotulados = rotulos === 'siempre';
+/* La fila de la lista: enlace donde hay panel —y por tanto una página detrás a
+   la que caer sin JavaScript—, botón donde sólo manda el plano. */
+const Fila = panel ? 'a' : 'button';
 
-/** La estrellita, dibujada y no copiada: cinco puntas, radio 10, valle 4.1.
- *  Sale de aquí para poder tocarle el filo sin pelearse con una ristra de
- *  decimales pegada en el HTML. */
-const estrella = (puntas: number, radio: number, valle: number) =>
-  'M' +
-  Array.from({ length: puntas * 2 }, (_, i) => {
-    const angulo = (Math.PI / puntas) * i - Math.PI / 2;
-    const r = i % 2 ? valle : radio;
-    return `${(Math.cos(angulo) * r).toFixed(2)} ${(Math.sin(angulo) * r).toFixed(2)}`;
-  }).join(' L') +
-  'Z';
-const ESTRELLA = estrella(5, 10, 4.1);
 
 /** Cada sede con su número de orden y su punto en el dibujo. Las que no
  *  tienen coordenada se quedan sin punto: salen en la lista, no en el papel. */
@@ -119,14 +156,25 @@ const relojSedes = programaPublicado
 <div
   class:list={[
     'grid',
-    aSangre
+    /* En el tablero las columnas las reparte la hoja de abajo, que además las
+       mueve al abrir el panel. */
+    panel
+      ? null
+      : aSangre
       /* Tres quintos para el plano: el dibujo es apaisado —1000 × 720— y en una
          columna a medias se queda con medio panel negro vacío arriba y abajo. */
       ? 'lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start'
       : 'gap-10 lg:grid-cols-2 lg:items-start lg:gap-12',
+    /* En el tablero el instrumento mide lo que mide la pantalla y ni un píxel
+       más: las dos columnas se estiran a la fila y el scroll vive DENTRO de
+       cada una. `min-h-0` no es un adorno —sin él una celda de rejilla se
+       niega a encoger por debajo de su contenido y el panel empujaría la
+       página hasta devolverle el scroll que se le acaba de quitar. */
+    panel && 'lg:h-full lg:min-h-0 lg:items-stretch',
     clase,
   ]}
   data-mapa-sedes
+  data-panel-modo={panel ? 'si' : undefined}
 >
   {/* ── El plano ───────────────────────────────────────────────────────── */}
   {/* El plano se queda negro, pero ahora es una TARJETA sobre el campo
@@ -137,7 +185,11 @@ const relojSedes = programaPublicado
   <div
     class:list={[
       'flex flex-col',
-      aSangre
+      /* En el tablero no hace falta que se quede quieto: nada se mueve por al
+         lado. Ocupa su columna entera y se acabó. */
+      panel
+        ? 'h-[62vh] border-b-2 border-tinta lg:h-full lg:min-h-0 lg:border-r-2 lg:border-b-0'
+        : aSangre
         /* Se queda quieto mientras la lista corre por al lado: pegado justo
            debajo de la barra de arriba, que también es pegajosa y mide 66 px.
            Estirarlo hasta el alto de las dieciséis filas era lo otro, y eso es
@@ -193,7 +245,7 @@ const relojSedes = programaPublicado
         {/* Las estrellas van en HTML y no dentro del SVG: así el rótulo de
             cada una es tipografía del sitio —Anton, filete de 2 px— y no un
             `<text>` al que hay que dibujarle la caja a mano. */}
-        <div class="mapa-pines" data-pines>
+        <div class="mapa-pines" data-pines data-rotulos={rotulados ? 'siempre' : undefined}>
           {
             conEstrella.map((sede, i) => (
               <button
@@ -204,6 +256,8 @@ const relojSedes = programaPublicado
                 aria-label={`${sede.indice} — ${sede.nombre}`}
                 data-pin
                 data-nombre={sede.nombre}
+                data-x={sede.punto!.x}
+                data-y={sede.punto!.y}
               >
                 <svg class="pin-estrella" viewBox="-16 -16 32 32" aria-hidden="true">
                   {/* Dos tintas mal registradas, como un cartel mal impreso:
@@ -212,6 +266,10 @@ const relojSedes = programaPublicado
                   <path class="pin-cara" d={ESTRELLA} />
                   <circle class="pin-aro" r="14.5" />
                 </svg>
+                {/* El filete que ata el nombre a su estrella. Sólo existe
+                    cuando los nombres vienen puestos: si salen al señalar,
+                    salen pegados a la estrella y no hay nada que atar. */}
+                {rotulados && <span class="pin-tallo" aria-hidden="true" />}
                 <span class="pin-num">{sede.indice}</span>
                 <span class="pin-nombre">{sede.nombre}</span>
               </button>
@@ -226,7 +284,7 @@ const relojSedes = programaPublicado
         <p class="mapa-fuera-nota" data-fuera-nota></p>
       </div>
 
-      <div class="mapa-mandos">
+      <div class="mapa-mandos" data-estorbo>
         <button type="button" data-zoom="mas" aria-label={sedes.acciones.acercar}>
           +
         </button>
@@ -239,15 +297,23 @@ const relojSedes = programaPublicado
       </div>
 
       <div class="mapa-abajo">
-        <div class="mapa-escala" aria-hidden="true">
+        <div class="mapa-escala" aria-hidden="true" data-estorbo>
           <span class="mapa-escala-barra" data-escala-barra></span>
           <span data-escala-texto></span>
         </div>
-        <p class="mapa-credito">{sedes.acciones.credito}</p>
+        <p class="mapa-credito" data-estorbo>{sedes.acciones.credito}</p>
       </div>
     </div>
 
-    {/* ── Pie: qué se está viendo ─────────────────────────────────────── */}
+    {/* ── Pie: qué se está viendo ───────────────────────────────────────
+        No existe en el tablero, y ahí está media reforma: en `/sedes` el
+        plano va a sangre y de arriba abajo, y este pie amarillo le cortaba
+        cien píxeles por abajo para decir dos cosas que ya están dichas —el
+        nombre y la dirección de la sede elegida están en la cabecera del
+        panel, a un palmo a la derecha, y «Ubicación ↗» es el mismo botón que
+        allí se llama «Cómo llegar ↗»—. En la portada se queda entero: allí no
+        hay panel al lado y este pie ES la respuesta. */}
+    {!panel && (
     <div class="mapa-pie">
       <p class="meta mapa-pie-vacio" data-pie-vacio>
         {sedes.acciones.sinMapa}
@@ -286,6 +352,7 @@ const relojSedes = programaPublicado
         </div>
       </div>
     </div>
+    )}
   </div>
 
   {/* ── La lista ───────────────────────────────────────────────────────────
@@ -293,11 +360,11 @@ const relojSedes = programaPublicado
       la barra pintada a un lado se ve que la caja se mueve, que era lo que
       antes había que explicar bloqueándola.
 
-      Las filas entran escalonadas, una detrás de otra, pero las catorce a la
+      Las filas entran escalonadas, una detrás de otra, pero las dieciséis a la
       vez: quien dispara la cascada es la lista, no cada fila por su cuenta.
       El observador de `motion.ts` mide contra la ventana y no contra esta
       caja, así que las sedes que caen por debajo del recorte no entraban
-      nunca en cuadro y se quedaban invisibles —catorce sedes de las que se
+      nunca en cuadro y se quedaban invisibles —dieciséis sedes de las que se
       veían seis—. Del disparo se encarga el script de abajo; aquí sólo va el
       retraso de cada una.
 
@@ -305,6 +372,32 @@ const relojSedes = programaPublicado
       página: Lenis captura el scroll de toda la ventana y sin eso esta caja
       no se entera. `overscroll-behavior: contain`, en la hoja, es lo que
       evita que al llegar al final el gesto siga y arrastre la portada. */}
+  {/* La pila: la lista y el panel, uno encima del otro en el mismo hueco.
+      Fuera del tablero no existe —`display: contents`— y la lista sigue
+      siendo la segunda columna de la rejilla, sin una caja de más en medio. */}
+  <div
+    class:list={['columna-sedes', panel && 'pila-sedes']}
+    data-pila={panel ? 'si' : undefined}
+  >
+  {/* La hoja de la lista. En el tablero es ella la que scrollea —y no el
+      `<ul>`— porque lleva encima su propio rótulo, que se queda pegado
+      arriba. Fuera del tablero desaparece igual que la pila. */}
+  {/* Ojo con la clase: en el tablero es UNA hoja de la pila —una caja de
+      verdad, con su scroll— y fuera del tablero tiene que desaparecer
+      (`display: contents`) para que la segunda columna de la rejilla siga
+      siendo el `<ul>` y no esta caja. Las dos a la vez se pisan: `contents`
+      gana y la hoja se queda sin caja que posicionar. */}
+  <div
+    class:list={[panel ? 'hoja hoja--lista' : 'columna-sedes']}
+    data-hoja-lista={panel ? 'si' : undefined}
+    data-lenis-prevent={panel ? true : undefined}
+  >
+    {/* El rótulo de la página, que en el tablero vive AQUÍ y no en una banda
+        a todo lo ancho: esa banda le robaba al plano la franja de arriba, y
+        el plano es lo que tiene que ocupar la izquierda entera. Encima de la
+        lista es además donde dice algo —cuántas son y cuánto miden—, que es
+        justo lo que se pregunta antes de mirarlas. */}
+    <slot name="cabecera" />
   <ul
     class:list={[
       'lista-sedes bg-amarillo',
@@ -327,11 +420,18 @@ const relojSedes = programaPublicado
           data-retraso={i * 45}
         >
           {/* La fila entera elige la sede: el objetivo es la franja, no un
-              enlace de dos palabras. */}
-          <button
-            type="button"
+              enlace de dos palabras.
+
+              En el tablero es un enlace de verdad a `/sedes/<sede>` y no un
+              botón, aunque el script se lo quede casi siempre: así el panel es
+              una mejora y no un requisito —sin JavaScript la fila sigue
+              llevando a la página de la sede, que existe— y el ctrl+clic de
+              toda la vida sigue abriendo esa página en otra pestaña. */}
+          <Fila
+            type={panel ? undefined : 'button'}
+            href={panel ? sede.ruta : undefined}
             class="group flex flex-1 items-baseline gap-x-5 py-3.5 text-left"
-            aria-pressed="false"
+            aria-pressed={panel ? undefined : 'false'}
             data-sede
             data-nombre={sede.nombre}
             data-direccion={sede.direccion}
@@ -342,7 +442,8 @@ const relojSedes = programaPublicado
             data-x={sede.punto?.x}
             data-y={sede.punto?.y}
           >
-            <span class="meta w-8 shrink-0 text-tinta/45 transition-colors group-hover:text-rojo">
+            {/* El número, apagado pero legible: en `/45` eran 2,78:1. */}
+            <span class="meta w-8 shrink-0 text-apagado transition-colors group-hover:text-rojo">
               {sede.indice}
             </span>
             {/* El nombre parte en dos antes que cortarse. Con el estado al lado
@@ -363,19 +464,44 @@ const relojSedes = programaPublicado
               <span
                 class:list={[
                   'meta estado-sede ml-auto shrink-0 tabular-nums',
-                  sede.cuantas > 0 ? 'text-tinta/55' : 'text-tinta/35',
+                  /* Los dos apagados de la casa. Eran `/55` y `/35`, que sobre
+                     el amarillo son 3,74:1 y 2,15:1: el primero no llegaba al
+                     listón y el segundo no se veía. */
+                  sede.cuantas > 0 ? 'text-apagado' : 'text-tenue',
                 ]}
                 data-estado-sede={sede.nombre}
               >
                 {sede.cuantas > 0 ? sede.cuantas : 'sin programa'}
               </span>
             )}
-          </button>
+
+            {/* La punta de flecha: lo único que dice que esta fila ABRE algo y
+                no sólo enciende una estrella. Sale al pasar por encima, como
+                la cortina de las fichas. */}
+            {panel && (
+              <span class="fila-punta" aria-hidden="true">
+                ›
+              </span>
+            )}
+          </Fila>
 
         </li>
       ))
     }
   </ul>
+  </div>
+
+  {/* La segunda hoja: los dieciséis paneles, que los pinta la página. Están
+      todos en el HTML —son 43 actividades en total, no hay nada que ir a
+      buscar— y el script enseña el de la sede elegida. */}
+  {
+    panel && (
+      <div class="hoja hoja--panel" data-hoja-panel data-lenis-prevent inert>
+        <slot name="panel" />
+      </div>
+    )
+  }
+  </div>
 </div>
 
 {
@@ -394,6 +520,161 @@ const relojSedes = programaPublicado
   .estado-sede[data-abierta] {
     color: var(--color-rojo);
     font-weight: 700;
+  }
+
+  /* ── Las columnas del tablero ──────────────────────────────────────────
+     Tres quintos para el plano mientras se elige —el dibujo es apaisado y en
+     media columna se queda con panel negro vacío arriba y abajo— y la mitad
+     justa cuando hay una sede abierta: ahí lo que se lee es el programa, y
+     una ficha de actividad en una columna de 570 px sale con el título en
+     tres renglones. El plano se aparta, no se va: sigue enseñando dónde cae
+     lo que se está leyendo.
+
+     Se mueve la propia rejilla y no el ancho del panel, que era lo otro: un
+     panel que se sale por encima del plano lo tapa a medias y deja la sede
+     elegida debajo del papel.
+
+     ── Las pistas van escritas, y saltan ────────────────────────────────
+     Aquí estuvo `minmax(0, var(--col-plano, 3fr))` con una transición de
+     0,34 s encima, y las dos cosas estaban mal:
+
+     · **Con `var()` no transicionaba, y además se quedaba clavada.** Medido en
+       la página: al abrir una sede las variables pasaban a `1fr` y la rejilla
+       seguía contestando `864px 576px` —el 3:2 de partida— hasta que algo
+       ajeno forzara una maqueta nueva. O sea que el plano NUNCA se apartaba y
+       el panel abría a 576 px en vez de a los 720 para los que está hecho.
+       Con las pistas literales la transición sí animaba; se deja escrito por
+       si alguien quiere volver a intentarlo.
+
+     · **Y aun animando, sobra.** `grid-template-columns` es una propiedad de
+       maqueta: cada cuadro rehace la rejilla entera con un SVG de 1000×720
+       dentro. El movimiento que se ve —y el único que hace falta— es la hoja
+       del panel entrando por la derecha, que va con `translate` y no toca la
+       maqueta de nadie. La columna salta debajo de ella, en el mismo instante
+       del clic, y se lee como «ha cambiado porque he pulsado».
+
+     Que salten es además lo que permite medir el plano en el mismo cuadro
+     —ver `asentarColumnas`— y volar una sola vez en vez de dar un tirón a los
+     400 ms. */
+  @media (width >= 64rem) {
+    [data-panel-modo] {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
+    [data-panel-modo]:has(> .pila-sedes[data-abierto]) {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
+  /* ── La pila: la lista y el panel en el mismo hueco ────────────────────
+     Fuera del tablero no hay pila: la caja desaparece y la lista vuelve a ser
+     la segunda columna de la rejilla, que es lo que es en la portada. */
+  .columna-sedes {
+    display: contents;
+  }
+
+  .pila-sedes {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* Dentro de la pila el que scrollea es la hoja, no el `<ul>`: la lista
+     lleva su rótulo encima y los dos tienen que correr juntos. */
+  .pila-sedes .lista-sedes {
+    overflow: visible;
+  }
+
+  /* Y ninguna fila se para debajo del rótulo. `--tope-lista` es lo que mide esa
+     cabecera pegajosa, y lo pone el script: sin este margen, llevar una fila a
+     la vista la clava en el canto de arriba de la caja, que es exactamente
+     donde está el rótulo, y la fila se queda detrás de él. */
+  .pila-sedes .fila-sede {
+    scroll-margin-top: var(--tope-lista, 0px);
+  }
+
+  /* Las dos hojas ocupan el mismo hueco y cada una scrollea por dentro. El
+     scroll de la lista NO se toca al abrir el panel —la caja no se desmonta—,
+     y por eso al volver la lista sigue en el renglón donde se quedó. Eso es
+     todo el truco de la vuelta atrás. */
+  .pila-sedes > .hoja {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* El movimiento: el panel entra tapando, como una hoja que se pone encima
+     de otra. **Opaco, no un fundido.** Cruzar dos hojas a media opacidad deja
+     un cuarto de segundo de puré —el rótulo rojo de la cabecera encima de los
+     renglones amarillos de la lista— y este sitio es de tintas planas: aquí
+     nada es medio transparente.
+
+     Entra por la derecha porque es de donde vendría si fueran dos páginas, y
+     sale por el mismo sitio: la vuelta es exactamente esto del revés, que es
+     lo que la hace entenderse sin explicarla.
+
+     0,34 s y la curva de siempre. Los 0,9 s de las entradas del sitio son para
+     lo que llega solo; esto se pulsa, y a esa velocidad se sentiría averiado. */
+  .pila-sedes > .hoja--lista {
+    transition: translate 0.34s var(--ease-salida);
+  }
+  .pila-sedes > .hoja--panel {
+    background-color: var(--color-amarillo);
+    translate: 100% 0;
+    pointer-events: none;
+    transition: translate 0.34s var(--ease-salida);
+  }
+
+  /* La lista se va un poco antes de quedar tapada: el pelo de paralaje es lo
+     que dice que sigue ahí debajo y no que se borró. */
+  .pila-sedes[data-abierto] > .hoja--lista {
+    translate: -1.5rem 0;
+    pointer-events: none;
+  }
+  .pila-sedes[data-abierto] > .hoja--panel {
+    translate: 0 0;
+    pointer-events: auto;
+  }
+
+  /* La misma barra de scroll de la lista, que es la del sitio: carril de un
+     pelo y pulgar rojo, puesta desde el principio. */
+  .pila-sedes > .hoja::-webkit-scrollbar {
+    width: 4px;
+  }
+  .pila-sedes > .hoja::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--color-tinta) 12%, transparent);
+  }
+  .pila-sedes > .hoja::-webkit-scrollbar-thumb {
+    background: var(--color-rojo);
+  }
+  @supports not selector(::-webkit-scrollbar) {
+    .pila-sedes > .hoja {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-rojo) color-mix(in srgb, var(--color-tinta) 12%, transparent);
+    }
+  }
+
+  /* La punta de la fila: aparece al pasar por encima, y se queda puesta en la
+     que está elegida. */
+  .fila-punta {
+    margin-left: 0.75rem;
+    flex-shrink: 0;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--color-rojo);
+    opacity: 0;
+    translate: -0.5rem 0;
+    transition:
+      opacity 0.25s var(--ease-salida),
+      translate 0.25s var(--ease-salida);
+  }
+  .fila-sede:hover .fila-punta,
+  .fila-sede:focus-within .fila-punta,
+  .fila-sede.sede-activa .fila-punta {
+    opacity: 1;
+    translate: 0 0;
   }
 
   /* ── La caja ───────────────────────────────────────────────────────────
@@ -625,7 +906,7 @@ const relojSedes = programaPublicado
     left: calc(100% + 9px);
   }
 
-  /* El nombre no está siempre: catorce rótulos a la vez sobre el centro de
+  /* El nombre no está siempre: dieciséis rótulos a la vez sobre el centro de
      Guadalajara no se leen. Sale el de la que se señala. */
   .pin-nombre {
     position: absolute;
@@ -664,6 +945,100 @@ const relojSedes = programaPublicado
     color: var(--color-amarillo);
   }
 
+  /* ── Los dieciséis nombres puestos ───────────────────────────────────────
+     Lo de `/sedes`. El rótulo es el mismo bloque amarillo con canto de tinta
+     que sale al señalar en la portada —el trato que reciben aquí la ficha,
+     los botones y todo lo demás—; lo único que cambia es que ya no espera a
+     que nadie lo señale, y que un poco más grande, porque ahora es lo que se
+     lee del plano y no una etiqueta que asoma un segundo.
+
+     Dónde cae cada uno lo reparte el script: `--rx`/`--ry` es a cuántos
+     píxeles de su estrella se va, `--ax`/`--ay` por qué esquina lo agarra, y
+     `--giro`/`--tallo` de dónde a dónde va el filete que lo ata. Los valores
+     de reserva —debajo, pegado— son los que valen mientras no haya corrido
+     el reparto, o si no hay quien lo corra. */
+  .mapa-pines[data-rotulos='siempre'] .pin-nombre {
+    left: calc(50% + var(--rx, 13px));
+    top: calc(50% + var(--ry, 13px));
+    transform: translate(var(--ax, 0%), var(--ay, 0%));
+    padding: 0.32rem 0.5rem 0.28rem;
+    font-size: 0.78rem;
+  }
+  /* Con los nombres puestos, el nombre ES el botón: se puede señalar y se
+     puede pulsar, que es lo que se intenta hacer con un cartel que dice
+     «Ánima Galería» al lado de una estrella. Antes no recibía el ratón —era
+     una etiqueta que salía al pasar por encima de la estrella, y una etiqueta
+     que se pone debajo del cursor y se come el clic es una trampa—, pero
+     puesto de fábrica eso ya no vale: la estrella son 34 px y el nombre,
+     cinco veces más.
+
+     Y al señalarlo se invierte a tinta, que es el hover de todos los botones
+     del sitio. El rojo no: aquí el rojo es «ésta es la que estás viendo», y
+     lo pone la elegida un poco más abajo.
+
+     El `top` y el `transform` hay que repetirlos porque las reglas de la
+     señalada y de la elegida —las que bajan el rótulo a `calc(100% + 7px)` y
+     le quitan la escala de entrada— pesan más que la de arriba, y con los
+     nombres repartidos ese sitio ya no es el suyo. */
+  .mapa-pines[data-rotulos='siempre'] .pin-nombre {
+    pointer-events: auto;
+  }
+  .mapa-pines[data-rotulos='siempre'] .pin:hover .pin-nombre,
+  .mapa-pines[data-rotulos='siempre'] .pin:focus-visible .pin-nombre,
+  .mapa-pines[data-rotulos='siempre'] .pin[aria-pressed='true'] .pin-nombre {
+    top: calc(50% + var(--ry, 13px));
+    transform: translate(var(--ax, 0%), var(--ay, 0%));
+  }
+  .mapa-pines[data-rotulos='siempre'] .pin:hover .pin-nombre,
+  .mapa-pines[data-rotulos='siempre'] .pin:focus-visible .pin-nombre {
+    background-color: var(--color-tinta);
+    border-color: var(--color-amarillo);
+    color: var(--color-amarillo);
+  }
+  /* El filete se pone macizo al señalar: es el cabo que dice de qué estrella
+     estamos hablando, y es justo cuando hace falta que lo diga. */
+  .mapa-pines[data-rotulos='siempre'] .pin:hover .pin-tallo,
+  .mapa-pines[data-rotulos='siempre'] .pin:focus-visible .pin-tallo {
+    height: 3px;
+    margin-top: -1.5px;
+  }
+  /* Y la elegida manda sobre el hover: rojo. */
+  .mapa-pines[data-rotulos='siempre'] .pin[aria-pressed='true'] .pin-nombre {
+    background-color: var(--color-rojo);
+    border-color: var(--color-amarillo);
+    color: var(--color-amarillo);
+  }
+  /* El número se va: el nombre dice más, y los dos juntos alrededor de una
+     estrella de 34 px se estorban. Sigue en la lista de al lado y en el
+     `aria-label` del botón, que es quien lo necesita. */
+  .mapa-pines[data-rotulos='siempre'] .pin-num {
+    display: none;
+  }
+
+  /* El filete. Ocho píxeles cuando el nombre cabe al lado y sesenta cuando
+     ha habido que sacarlo del racimo: es lo que dice de quién es un nombre
+     que ha tenido que irse lejos, así que va en amarillo macizo y con el
+     mismo grosor que el canto del rótulo —2 px, como todo aquí—. En un
+     amarillo a medio gas se perdía sobre el damero de calles, que es
+     exactamente donde tiene que leerse.
+
+     Arranca a 9 px del centro —ya fuera de la estrella, que mide 10,6 de
+     radio— y de ahí lo que le mande el script. Se gira primero y se aparta
+     después: así el `translateX` corre por el eje ya girado y el filete sale
+     en la dirección que toca. */
+  .pin-tallo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--tallo, 9px);
+    height: 2px;
+    margin-top: -1px;
+    background-color: var(--color-amarillo);
+    transform-origin: 0 50%;
+    transform: rotate(var(--giro, 45deg)) translateX(9px);
+    pointer-events: none;
+  }
+
   /* Entrada: las estrellas se clavan una detrás de otra cuando el plano
      asoma. Antes de eso no están —ni encogidas ni transparentes: no están—,
      que es lo que hace que se vea el gesto de clavarlas. */
@@ -684,9 +1059,40 @@ const relojSedes = programaPublicado
       transform 0.35s var(--ease-salida);
   }
 
+  /* Los nombres y sus filetes entran detrás de la estrella que los trae: si
+     están puestos desde el principio, se ven dieciséis rótulos flotando sobre
+     un plano vacío mientras las estrellas se clavan debajo. */
+  .mapa-pines[data-rotulos='siempre'] .pin-nombre,
+  .mapa-pines[data-rotulos='siempre'] .pin-tallo {
+    opacity: 0;
+  }
+  .mapa-pines[data-rotulos='siempre'][data-dentro] .pin-nombre,
+  .mapa-pines[data-rotulos='siempre'][data-dentro] .pin-tallo {
+    opacity: 1;
+    transition:
+      opacity 0.45s var(--ease-salida) calc(var(--retraso) + 240ms),
+      background-color 0.25s var(--ease-salida),
+      border-color 0.25s var(--ease-salida),
+      color 0.25s var(--ease-salida);
+  }
+  @media (scripting: none) {
+    .mapa-pines[data-rotulos='siempre'] .pin-nombre,
+    .mapa-pines[data-rotulos='siempre'] .pin-tallo {
+      opacity: 1;
+    }
+  }
+  /* Fuera del papel, sin nombre. Y sin el retraso de la entrada: esto pasa
+     mientras se arrastra el plano, y ahí un rótulo que tarda un cuarto de
+     segundo en irse va siempre por detrás de la mano. */
+  .mapa-pines[data-rotulos='siempre'] .pin[data-fuera] .pin-nombre,
+  .mapa-pines[data-rotulos='siempre'] .pin[data-fuera] .pin-tallo {
+    opacity: 0;
+    transition: opacity 0.2s var(--ease-salida);
+  }
+
   /* ── Mandos ───────────────────────────────────────────────────────────
      Arriba a la izquierda, que es la esquina que queda vacía cuando se ven
-     las catorce: a la derecha se sentaban justo encima de Foro AM y Casa
+     las dieciséis: a la derecha se sentaban justo encima de Foro AM y Casa
      Feria, las dos de Pedro Loza.
 
      Y en hueco, no en bloque: tres cuadrados de blanco macizo sobre el plano
@@ -821,9 +1227,35 @@ const relojSedes = programaPublicado
     min-width: 0;
   }
 
+  /* El contenido del panel, cuando se cambia de sede sin volver a la lista:
+     la hoja ya está puesta, así que lo que se mueve es lo de dentro. Corto —
+     es un cambio de contenido, no una llegada. */
+  @keyframes panel-entra {
+    from {
+      opacity: 0;
+      translate: 0 0.75rem;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+  .hoja--panel :global(.panel-sede.entra) {
+    animation: panel-entra 0.3s var(--ease-salida);
+  }
+
   /* Sin animación no hay ni vuelo ni aro ni entrada: el plano se coloca de
      golpe y las estrellas están desde el principio. */
   @media (prefers-reduced-motion: reduce) {
+    /* `[data-panel-modo]` ya no está en esta lista: sus columnas saltan
+       siempre, para todo el mundo, así que no hay transición que apagar. */
+    .pila-sedes > .hoja,
+    .fila-punta {
+      transition: none;
+    }
+    .hoja--panel :global(.panel-sede.entra) {
+      animation: none;
+    }
     .mapa-plano,
     .pin,
     .pin-estrella,
@@ -836,6 +1268,10 @@ const relojSedes = programaPublicado
     }
     .mapa-pines .pin-estrella {
       scale: 1;
+    }
+    .mapa-pines[data-rotulos='siempre'][data-dentro] .pin-nombre,
+    .mapa-pines[data-rotulos='siempre'][data-dentro] .pin-tallo {
+      transition: none;
     }
   }
 </style>
@@ -860,18 +1296,22 @@ const relojSedes = programaPublicado
   for (const raiz of document.querySelectorAll<HTMLElement>('[data-mapa-sedes]')) {
     const caja = raiz.querySelector<HTMLElement>('[data-caja]')!;
     const plano = raiz.querySelector<HTMLElement>('[data-plano]')!;
+    const cajaPines = raiz.querySelector<HTMLElement>('[data-pines]')!;
+    const rotulados = cajaPines.dataset.rotulos === 'siempre';
     const pines = [...raiz.querySelectorAll<HTMLElement>('[data-pin]')];
     const filas = [...raiz.querySelectorAll<HTMLElement>('[data-sede]')];
 
     const fuera = raiz.querySelector<HTMLElement>('[data-fuera]')!;
     const fueraNombre = raiz.querySelector<HTMLElement>('[data-fuera-nombre]')!;
     const fueraNota = raiz.querySelector<HTMLElement>('[data-fuera-nota]')!;
-    const pieVacio = raiz.querySelector<HTMLElement>('[data-pie-vacio]')!;
-    const pieFicha = raiz.querySelector<HTMLElement>('[data-pie-ficha]')!;
-    const pieNombre = raiz.querySelector<HTMLElement>('[data-pie-nombre]')!;
-    const pieDireccion = raiz.querySelector<HTMLElement>('[data-pie-direccion]')!;
-    const pieEnlace = raiz.querySelector<HTMLAnchorElement>('[data-pie-enlace]')!;
-    const pieSede = raiz.querySelector<HTMLAnchorElement>('[data-pie-sede]')!;
+    /* Todos sin `!`: en el tablero el pie del plano no se pinta —lo que decía
+       está en la cabecera del panel— y aquí llegan `null` que son legítimos. */
+    const pieVacio = raiz.querySelector<HTMLElement>('[data-pie-vacio]');
+    const pieFicha = raiz.querySelector<HTMLElement>('[data-pie-ficha]');
+    const pieNombre = raiz.querySelector<HTMLElement>('[data-pie-nombre]');
+    const pieDireccion = raiz.querySelector<HTMLElement>('[data-pie-direccion]');
+    const pieEnlace = raiz.querySelector<HTMLAnchorElement>('[data-pie-enlace]');
+    const pieSede = raiz.querySelector<HTMLAnchorElement>('[data-pie-sede]');
     const escalaBarra = raiz.querySelector<HTMLElement>('[data-escala-barra]')!;
     const escalaTexto = raiz.querySelector<HTMLElement>('[data-escala-texto]')!;
 
@@ -884,12 +1324,146 @@ const relojSedes = programaPublicado
     const ZOOM_MAX = 5;
     const ZOOM_SEDE = 2.2;
 
+    /**
+     * ── El encuadre de casa ────────────────────────────────────────────────
+     *
+     * El rectángulo que tiene que verse entero mientras no haya ninguna sede
+     * elegida. Lo dictan **las estrellas**, no el `viewBox`.
+     *
+     * Antes lo dictaba el viewBox —1000 × 720—, que es una medida del script
+     * que generó el dibujo y no dice nada de dónde están las sedes. Casa ITESO
+     * Clavijero cae en x = −217, o sea doscientos diecisiete a la izquierda de
+     * ese rectángulo: estaba dibujada —las calles llegan hasta −616— pero no
+     * se veía nunca, y la única manera de llegar a ella era arrastrar el plano
+     * a ciegas hacia el oeste. Una sede que no sale en el plano de las sedes
+     * es una sede que no existe.
+     *
+     * Y de paso arregla los rótulos. El reparto de nombres se calcula en esta
+     * vista, y a un nombre cuya estrella cae fuera del papel no le queda NINGÚN
+     * sitio limpio: se conforma con el menos malo, que es pisar al vecino. Los
+     * dos solapes que había —Cuerpos Parlantes con Salón Liminal, Casa Dos
+     * Guayabos con Ala Rota— eran de ahí.
+     *
+     * El margen va en píxeles de pantalla y no en unidades del dibujo porque
+     * lo que hay que dejar libre es sitio para un rótulo, y un rótulo mide lo
+     * mismo a cualquier acercamiento. Son 72: el filete más largo que reparte
+     * `colocarRotulos` mide 86 y un rótulo, 22 de alto — con esto, a la
+     * estrella del canto le queda sitio para tirar el nombre hacia dentro.
+     *
+     * ── Y por eso son dos números y no uno ─────────────────────────────────
+     *
+     * Esos 72 los pide **el rótulo puesto**, y el rótulo puesto sólo existe en
+     * `/sedes`. En la portada los nombres salen al señalar: allí el margen
+     * estaba guardando sitio para algo que no está, y cobrándolo dos veces por
+     * cada lado, sobre una caja que además es la mitad de grande.
+     *
+     * La cuenta, en la portada de un portátil de 1440: la caja del plano mide
+     * 652 × 413 y el racimo de las dieciséis, 862 × 439 unidades. Con 72 de
+     * margen quedaban 508 px útiles de 652, el plano entraba a 0,548 y las
+     * estrellas ocupaban 472 × 240 — setenta y tres píxeles de calle muerta
+     * por cada costado y setenta por arriba y por abajo. Y cuanto más pequeña
+     * la caja, peor: en 1024 la caja baja a 444 × 344, los 144 px de margen se
+     * comen el 42 % del alto y el plano se quedaba en 0,324. Eso es lo que se
+     * veía — un plano lejísimos dentro de un marco casi vacío.
+     *
+     * Sin rótulos, lo que hay que dejar libre es lo que ocupa **la estrella**
+     * y lo que le cuelga: 34 px de lado —17 desde su punto—, el número a la
+     * derecha y, al señalarla, el nombre que le cae debajo, que son otros 20.
+     * De ahí 30: es el número más pequeño con el que ese nombre sigue cabiendo
+     * dentro del papel en la caja más corta que existe aquí. Medido: a 1024 el
+     * plano pasa a 0,414 y le quedan 33 px por los costados y 71 por arriba y
+     * abajo; a 1440, 0,639 con 35 y 51; a 1920, 0,898 con 37 y 34, y el rótulo
+     * al señalar todavía acaba 9 px dentro. Ninguna estrella cae debajo de los
+     * mandos, que ocupan 47 × 107 en la esquina de arriba.
+     *
+     * `/sedes` no se entera de nada: allí `rotulados` es cierto, el número
+     * sigue siendo 72 —el mismo con el que están calculados los dieciséis
+     * sitios que reparte `colocarRotulos`— y el encaje sale clavado al de
+     * antes, 0,77458 en ese mismo portátil.
+     */
+    const MARGEN_CASA = rotulados ? 72 : 30;
+    /** Y un respiro encima del encaje justo: el plano de casa sale un 7 % más
+     *  lejos de lo que cabría clavado. Con el encuadre al milímetro las sedes
+     *  del canto quedan pegadas al borde y sus nombres no tienen para dónde
+     *  tirar; un poco de calle alrededor es además lo que dice que esto es un
+     *  barrio y no una lista de puntos. */
+    const RESPIRO = 0.93;
+    const CASA = (() => {
+      const xs = pines.map((p) => Number(p.dataset.x)).filter(Number.isFinite);
+      const ys = pines.map((p) => Number(p.dataset.y)).filter(Number.isFinite);
+      // Sin estrellas —no debería pasar— manda el dibujo, como antes.
+      if (!xs.length) return { cx: ANCHO / 2, cy: ALTO / 2, ancho: ANCHO, alto: ALTO };
+      const x0 = Math.min(...xs);
+      const x1 = Math.max(...xs);
+      const y0 = Math.min(...ys);
+      const y1 = Math.max(...ys);
+      return {
+        cx: (x0 + x1) / 2,
+        cy: (y0 + y1) / 2,
+        // Una sola sede daría un rectángulo de cero y un encaje infinito.
+        ancho: Math.max(x1 - x0, 1),
+        alto: Math.max(y1 - y0, 1),
+      };
+    })();
+
     let encaje = 1;
     let zoom = 1;
     let tx = 0;
     let ty = 0;
     let ancho = 0;
     let alto = 0;
+
+    /** Si el plano sigue en su encuadre de casa o si alguien lo ha movido —ha
+     *  elegido una sede, lo ha arrastrado o lo ha acercado—. Sirve para una
+     *  cosa: al cambiar de tamaño la caja, el encuadre de casa se vuelve a
+     *  calcular con la medida nueva, y lo que alguien haya elegido se respeta
+     *  donde está. */
+    let enCasa = true;
+
+    /* Dónde está la sede que se está enseñando, para poder volver a centrarla
+       cuando el plano cambia de ancho —que en el tablero pasa cada vez que se
+       abre o se cierra el panel—. */
+    let ultimoPunto: { x: number; y: number } | null = null;
+    /** Y cuál es, que no es lo mismo: el punto sirve para el plano y el nombre
+     *  para saber a qué fila hay que devolver el foco al cerrar. */
+    let sedeElegida: string | null = null;
+
+    /* El observador de tamaño no tiene que repetir lo que acabamos de hacer a
+       mano: mientras dura el asentamiento se apunta el plano y se suelta en el
+       cuadro siguiente. */
+    let apuntalado = false;
+
+    /**
+     * Las columnas acaban de cambiar: se vuelve a encajar el plano.
+     *
+     * Aquí hubo un `setTimeout` de 380 ms, y era el tirón. La rejilla tardaba
+     * 0,34 s en moverse, así que había que esperarla; al despertar, esto
+     * medía, daba un salto seco —`pintar(false)` apaga la transición—,
+     * recolocaba los dieciséis rótulos y arrancaba un SEGUNDO vuelo. Desde
+     * fuera: un movimiento, cuatro décimas de pausa y un tirón con los
+     * nombres saltando en medio.
+     *
+     * Con las columnas saltando no hay nada que esperar. `medir()` lee la caja
+     * —lo que fuerza la maqueta nueva ahí mismo, antes de pintar— y el vuelo
+     * sale ya con el encaje definitivo, una sola vez. Lo de después es un
+     * cuadro y no dos porque ya no hay ninguna transición corriendo por
+     * debajo.
+     */
+    function asentarColumnas(alAsentarse?: () => void) {
+      apuntalado = true;
+      /* Suave: esto siempre va seguido de un vuelo en el mismo cuadro —a la
+         sede al abrir, a las dieciséis al cerrar—, y las dos escrituras se
+         resuelven en un solo deslizamiento. */
+      medir(true);
+      requestAnimationFrame(() => {
+        apuntalado = false;
+      });
+      /* Llevar una fila a la vista es de esto: la columna acaba de cambiar de
+         ancho, los nombres largos se reparten en otro número de líneas y el
+         sitio al que hay que llegar se mueve por debajo. `medir()` acaba de
+         escribir estilos en el plano, así que se lee en el cuadro siguiente. */
+      if (alAsentarse) requestAnimationFrame(alAsentarse);
+    }
 
     const entre = (v: number, min: number, max: number) =>
       Math.min(Math.max(v, min), max);
@@ -900,20 +1474,27 @@ const relojSedes = programaPublicado
       y: ALTO / 2 - ty / z,
     });
 
-    /** Topa el arrastre contra los bordes de lo dibujado. Si de un lado cabe
-     *  todo, ese lado se centra en vez de toparse. */
-    function topar(z: number) {
+    /** El centro que de verdad se puede enseñar: el que se pide, topado contra
+     *  los bordes de lo dibujado. Si de un lado cabe todo, ese lado se centra
+     *  en vez de toparse.
+     *
+     *  Está partido en dos —esto y `topar`— porque hay quien necesita saber
+     *  dónde acabará el plano ANTES de moverlo: el reparto de rótulos calcula
+     *  contra el encuadre de casa, y si el tope lo corriera medio centímetro,
+     *  los nombres saldrían repartidos contra un plano que no es el que se ve. */
+    function centroTopado(z: number, px: number, py: number) {
       const mediaX = ancho / 2 / z;
       const mediaY = alto / 2 / z;
+      return {
+        x: LX1 - LX0 <= mediaX * 2 ? (LX0 + LX1) / 2 : entre(px, LX0 + mediaX, LX1 - mediaX),
+        y: LY1 - LY0 <= mediaY * 2 ? (LY0 + LY1) / 2 : entre(py, LY0 + mediaY, LY1 - mediaY),
+      };
+    }
+
+    /** Topa el arrastre contra los bordes de lo dibujado. */
+    function topar(z: number) {
       const c = centroVisible(z);
-      const x =
-        LX1 - LX0 <= mediaX * 2
-          ? (LX0 + LX1) / 2
-          : entre(c.x, LX0 + mediaX, LX1 - mediaX);
-      const y =
-        LY1 - LY0 <= mediaY * 2
-          ? (LY0 + LY1) / 2
-          : entre(c.y, LY0 + mediaY, LY1 - mediaY);
+      const { x, y } = centroTopado(z, c.x, c.y);
       tx = (ANCHO / 2 - x) * z;
       ty = (ALTO / 2 - y) * z;
     }
@@ -937,15 +1518,408 @@ const relojSedes = programaPublicado
       plano.style.setProperty('--tx', `${tx}px`);
       plano.style.setProperty('--ty', `${ty}px`);
       pintarEscala(z);
+
+      // Un nombre cuya estrella se ha ido del papel es un cartel colgando de
+      // nada: se queda pegado al canto del recorte con el filete saliéndose
+      // por él. Mientras la estrella no está a la vista, el nombre tampoco.
+      // Le pasa a Casa ITESO Clavijero, que cae al oeste del encuadre y sólo
+      // asoma si se arrastra el plano hasta allí.
+      if (rotulados) {
+        for (const pin of pines) {
+          const ex = ancho / 2 + tx + (Number(pin.dataset.x) - ANCHO / 2) * z;
+          const ey = alto / 2 + ty + (Number(pin.dataset.y) - ALTO / 2) * z;
+          if (ex > 8 && ex < ancho - 8 && ey > 8 && ey < alto - 8) delete pin.dataset.fuera;
+          else pin.dataset.fuera = 'si';
+        }
+      }
     }
 
-    function medir() {
+    /**
+     * @param suave Si el reencaje se desliza o se pone de golpe. De golpe es
+     *   lo normal —al cambiar de tamaño la ventana nadie quiere ver el plano
+     *   persiguiendo al borde—, pero cuando lo que ha cambiado son las
+     *   columnas del tablero, esto va seguido de un vuelo en el MISMO cuadro:
+     *   dos escrituras seguidas de `--z`/`--tx`/`--ty` de las que sólo cuenta
+     *   la última, así que dejándola suave sale un solo deslizamiento desde
+     *   donde estaba el plano hasta donde tiene que acabar. En duro salía el
+     *   reencaje como un salto y el vuelo detrás.
+     */
+    function medir(suave = false) {
       const r = caja.getBoundingClientRect();
       ancho = r.width;
       alto = r.height;
-      // El encaje es el que hace que quepa entero: el lado que peor va manda.
-      encaje = Math.min(ancho / ANCHO, alto / ALTO);
-      pintar(false);
+      /* El encaje es el que hace que quepan enteras: el lado que peor va
+         manda, y el margen se descuenta antes de repartir porque es sitio que
+         no es para el dibujo, es para los nombres. El tope de abajo es la red
+         de una caja diminuta, donde el margen se comería la caja entera. */
+      encaje = Math.max(
+        0.05,
+        Math.min(
+          (ancho - MARGEN_CASA * 2) / CASA.ancho,
+          (alto - MARGEN_CASA * 2) / CASA.alto,
+        ) * RESPIRO,
+      );
+      // Y si nadie lo ha movido, se vuelve a centrar con la medida nueva.
+      if (enCasa) centrarEnCasa();
+      pintar(suave);
+      colocarRotulos();
+    }
+
+    /** Poner el encuadre de casa: las dieciséis a la vista, sin acercar. */
+    function centrarEnCasa() {
+      enCasa = true;
+      zoom = 1;
+      const z = encaje;
+      const c = centroTopado(z, CASA.cx, CASA.cy);
+      tx = (ANCHO / 2 - c.x) * z;
+      ty = (ALTO / 2 - c.y) * z;
+    }
+
+    /** ── Repartir los nombres ────────────────────────────────────────────
+     *
+     * Sólo en `/sedes`, que es donde vienen puestos los dieciséis. Y hay que
+     * repartirlos: en la vista de «todas», el racimo de Santa Teresita
+     * —Arechiga, No Museo y Staditche— cae en treinta píxeles de pantalla, y
+     * Foro AM y Casa Feria, que son vecinas de puerta, en ocho. Tres nombres
+     * uno encima de otro no son tres nombres, son una mancha.
+     *
+     * Cada rótulo se prueba en ocho sitios y a cuatro distancias, y se queda
+     * en el primero donde no pise otro rótulo, no tape una estrella, no se
+     * salga del papel, no se meta debajo de los mandos y no lleve el filete
+     * cruzando por encima de lo que ya está puesto. Si no hay ninguno limpio
+     * —pasa con la sede que cae fuera del encuadre—, se queda en el menos
+     * malo.
+     *
+     * Se resuelve una vez, y otra si cambia de tamaño la caja; NO en cada
+     * zoom, y por dos razones. Una, que se calcula en la vista más apretada
+     * que existe —el plano entero, sin acercar—: al acercarlo las sedes se
+     * separan y los rótulos siguen midiendo lo mismo, así que lo que no se
+     * pisa ahí no se pisa en ninguna. Y dos, que unos nombres que se cambian
+     * de lado mientras se arrastra el plano marean.
+     */
+    type Caja = { x0: number; y0: number; x1: number; y1: number };
+
+    /** Por dónde sale el filete, en orden de preferencia.
+     *
+     * Todos en diagonal, y el rótulo siempre agarrado por una esquina: un
+     * filete recto que entra por el medio del lado de arriba parece una
+     * chincheta clavada en el rótulo, y dieciséis chinchetas verticales sobre
+     * el mismo plano se leen como una reja. En diagonal es lo que hace un
+     * plano de verdad —la letra a un lado y un cabo que apunta al sitio—, y
+     * de paso el filete cruza menos calles.
+     *
+     * Cuarenta y cinco grados por los cuatro rincones primero, que es el
+     * gesto que se repite; las otras dos inclinaciones sólo para quien no
+     * cabe ahí. `ax`/`ay` es la esquina que se clava en la punta, la que mira
+     * a la estrella, en porcentaje de la caja del rótulo. */
+    const LADOS = [
+      45, 135, -45, -135,
+      30, 60, 150, 120, -30, -60, -150, -120,
+      18, 72, 162, 108, -18, -72, -162, -108,
+    ].map((grados) => {
+      const a = (grados * Math.PI) / 180;
+      const dx = Math.cos(a);
+      const dy = Math.sin(a);
+      return { dx, dy, ax: dx > 0 ? 0 : -100, ay: dy > 0 ? 0 : -100 };
+    });
+    /** Lo que se aparta del centro de la estrella. El primero es «al lado»;
+     *  el último es «te he tenido que sacar del racimo». Llegan lejos porque
+     *  el rótulo es un bloque, no una línea de letra: en el racimo de Santa
+     *  Teresita —Arechiga, No Museo y Staditche en treinta píxeles— tres
+     *  bloques de treinta de alto no caben a menos.
+     *
+     *  Llegaban a 86 y ahora a 124: al entrar Casa ITESO Clavijero en el
+     *  encuadre, el plano se aleja un cuarto y el racimo se aprieta otro
+     *  tanto. Un filete largo no es un defecto en un plano —es lo que hace
+     *  cualquier carta náutica—; dos nombres pisándose, sí. */
+    const LARGOS = [18, 26, 34, 44, 56, 70, 86, 104, 124];
+    /** Lo que se le respeta a una estrella: mide 10,6 px de radio, y tres
+     *  más de aire para que ningún rótulo le pase rozando la punta. Y dónde
+     *  arranca el filete, ya fuera de ella. */
+    const RADIO = 14;
+    const SALE = 9;
+    /** A qué distancia de una estrella ajena se le consiente pasar al
+     *  filete. Más corto que el radio: Foro AM y Casa Feria son vecinas de
+     *  puerta —ocho píxeles con el plano entero a la vista— y con la medida
+     *  de la estrella no había filete posible para ninguna de las dos. */
+    const ROCE = 9;
+    /** Un pelo de aire entre rótulo y rótulo. */
+    const AIRE = 3;
+    /** Lo que cuesta que dos filetes se crucen. Menos que pisar un rótulo
+     *  —una raya cruzando otra se entiende, media palabra tapada no— y más
+     *  que rozar una estrella ajena. Antes no se cobraba de ninguna manera, y
+     *  por eso el filete de Staditche se iba cruzando el de su vecina. */
+    const CRUCE = 45;
+
+    function colocarRotulos() {
+      if (!rotulados || !ancho || !alto) return;
+
+      const z = encaje;
+      // El centro del encuadre de casa, ya topado: es contra ESE plano contra
+      // el que hay que repartir, no contra el centro del viewBox —que es un
+      // punto que no se enseña nunca—.
+      const centro = centroTopado(z, CASA.cx, CASA.cy);
+      const fichas = pines.map((pin) => {
+        const rotulo = pin.querySelector<HTMLElement>('.pin-nombre')!;
+        return {
+          pin,
+          // Dónde cae su estrella en la vista de «todas», en píxeles de
+          // pantalla. El rótulo mide lo que mide sea cual sea el zoom —el pin
+          // se descuenta la escala del plano—, así que las dos medidas están
+          // en las mismas unidades y se pueden comparar.
+          x: ancho / 2 + (Number(pin.dataset.x) - centro.x) * z,
+          y: alto / 2 + (Number(pin.dataset.y) - centro.y) * z,
+          w: rotulo.offsetWidth,
+          h: rotulo.offsetHeight,
+        };
+      });
+      // `offsetWidth` a cero es una caja que todavía no existe: sin medida no
+      // hay reparto que valga, y ya volverá `document.fonts.ready`.
+      if (!fichas.length || fichas.some((f) => !f.w || !f.h)) return;
+
+      // Los mandos, la escala y el crédito son sitio ocupado desde el
+      // principio: un nombre debajo del botón de acercar no se lee.
+      const marco = caja.getBoundingClientRect();
+      const estorbos: Caja[] = [...raiz.querySelectorAll<HTMLElement>('[data-estorbo]')].map(
+        (estorbo) => {
+          const r = estorbo.getBoundingClientRect();
+          return {
+            x0: r.left - marco.left,
+            y0: r.top - marco.top,
+            x1: r.right - marco.left,
+            y1: r.bottom - marco.top,
+          };
+        },
+      );
+
+      /** Dónde ha quedado el rótulo de cada uno, por su estrella. */
+      const puestos = new Map<
+        HTMLElement,
+        { caja: Caja; dx: number; dy: number; lado: (typeof LADOS)[number]; mal: number }
+      >();
+
+      const solapan = (a: Caja, b: Caja) =>
+        a.x0 - AIRE < b.x1 && b.x0 < a.x1 + AIRE && a.y0 - AIRE < b.y1 && b.y0 < a.y1 + AIRE;
+
+      /** Si la caja de un rótulo le cae encima a una estrella. */
+      const tapa = (c: Caja, x: number, y: number) =>
+        Math.hypot(Math.max(c.x0 - x, 0, x - c.x1), Math.max(c.y0 - y, 0, y - c.y1)) < RADIO;
+
+      /** A qué distancia le pasa el filete a una estrella ajena. */
+      const roza = (px: number, py: number, x0: number, y0: number, x1: number, y1: number) => {
+        const vx = x1 - x0;
+        const vy = y1 - y0;
+        const largo = vx * vx + vy * vy;
+        const t = largo ? Math.max(0, Math.min(1, ((px - x0) * vx + (py - y0) * vy) / largo)) : 0;
+        return Math.hypot(px - (x0 + vx * t), py - (y0 + vy * t));
+      };
+
+      /** Si dos filetes se cruzan. Los dos segmentos se cruzan cuando cada uno
+       *  deja los extremos del otro a lados distintos de su recta, que es lo
+       *  que dicen estos cuatro signos. */
+      const ladoDe = (ax: number, ay: number, bx: number, by: number, px: number, py: number) =>
+        Math.sign((bx - ax) * (py - ay) - (by - ay) * (px - ax));
+      const seCruzan = (
+        a: [number, number, number, number],
+        b: [number, number, number, number],
+      ) => {
+        const d1 = ladoDe(a[0], a[1], a[2], a[3], b[0], b[1]);
+        const d2 = ladoDe(a[0], a[1], a[2], a[3], b[2], b[3]);
+        const d3 = ladoDe(b[0], b[1], b[2], b[3], a[0], a[1]);
+        const d4 = ladoDe(b[0], b[1], b[2], b[3], a[2], a[3]);
+        return d1 !== d2 && d3 !== d4;
+      };
+
+      /** Si el filete cruza una caja. Es el recorte de Liang–Barsky: se va
+       *  metiendo el segmento entre los cuatro bordes y si queda algo dentro,
+       *  la cruza. */
+      const cruza = (x0: number, y0: number, x1: number, y1: number, c: Caja) => {
+        const dx = x1 - x0;
+        const dy = y1 - y0;
+        let t0 = 0;
+        let t1 = 1;
+        const bordes: [number, number][] = [
+          [-dx, x0 - c.x0],
+          [dx, c.x1 - x0],
+          [-dy, y0 - c.y0],
+          [dy, c.y1 - y0],
+        ];
+        for (const [p, q] of bordes) {
+          if (p === 0) {
+            if (q < 0) return false;
+            continue;
+          }
+          const r = q / p;
+          if (p < 0) {
+            if (r > t1) return false;
+            if (r > t0) t0 = r;
+          } else {
+            if (r < t0) return false;
+            if (r < t1) t1 = r;
+          }
+        }
+        return true;
+      };
+
+      /** Lo que cuesta ponerle el rótulo ahí. Cero es limpio. */
+      const coste = (
+        f: (typeof fichas)[number],
+        c: Caja,
+        dx: number,
+        dy: number,
+        ocupado: Caja[],
+        filetes: [number, number, number, number][] = [],
+      ) => {
+        let mal = 0;
+        // El solape se cobra por lo que solapa: si al final no hay más
+        // remedio que pisar a alguien, que sea por una esquina y no por media
+        // palabra.
+        for (const otro of ocupado) {
+          if (!solapan(c, otro)) continue;
+          const anchoComun = Math.min(c.x1, otro.x1) - Math.max(c.x0, otro.x0) + AIRE;
+          const altoComun = Math.min(c.y1, otro.y1) - Math.max(c.y0, otro.y0) + AIRE;
+          mal += 100 + (anchoComun * altoComun) / 20;
+        }
+        for (const o of fichas) if (tapa(c, o.x, o.y)) mal += 60;
+        for (const o of fichas) {
+          if (o !== f && roza(o.x, o.y, f.x, f.y, f.x + dx, f.y + dy) < ROCE) mal += 40;
+        }
+        for (const otro of ocupado) if (cruza(f.x, f.y, f.x + dx, f.y + dy, otro)) mal += 30;
+        // Y que no se cruce con el filete de otra: dos rayas en aspa sobre el
+        // plano se leen como que el nombre es del otro sitio.
+        const mio: [number, number, number, number] = [f.x, f.y, f.x + dx, f.y + dy];
+        for (const suyo of filetes) if (seCruzan(mio, suyo)) mal += CRUCE;
+        // Y salirse del papel es lo peor: al canto de la caja lo recorta, o
+        // sea que no es que se lea mal, es que le falta media palabra. Cuesta
+        // más que pisar a otro rótulo a propósito —lo de Casa Feria, que
+        // tiene a Foro AM a ocho píxeles y la lista al lado: antes se iba al
+        // recorte y se quedaba en «CASA FE»—. El resto, píxel a píxel, para
+        // que entre dos malas gane la que se sale menos: alguna sede cae
+        // fuera del encuadre y ahí no hay sitio bueno.
+        const sale =
+          Math.max(0, 4 - c.x0) +
+          Math.max(0, c.x1 - (ancho - 4)) +
+          Math.max(0, 4 - c.y0) +
+          Math.max(0, c.y1 - (alto - 4));
+        if (sale > 0) mal += 250 + sale;
+        return mal;
+      };
+
+      /** El sitio ocupado por los demás: el mobiliario y los rótulos que ya
+       *  tienen sitio, menos el suyo. */
+      const losDemas = (f: (typeof fichas)[number]) => {
+        const ocupado = [...estorbos];
+        for (const [pin, sitio] of puestos) if (pin !== f.pin) ocupado.push(sitio.caja);
+        return ocupado;
+      };
+
+      /** Y sus filetes, que también son sitio ocupado aunque no sean cajas. */
+      const filetesDeLosDemas = (f: (typeof fichas)[number]) => {
+        const filetes: [number, number, number, number][] = [];
+        for (const o of fichas) {
+          if (o === f) continue;
+          const sitio = puestos.get(o.pin);
+          if (sitio) filetes.push([o.x, o.y, o.x + sitio.dx, o.y + sitio.dy]);
+        }
+        return filetes;
+      };
+
+      /** El mejor sitio para uno, con todos los demás donde estén ahora. */
+      const buscarSitio = (f: (typeof fichas)[number]) => {
+        const ocupado = losDemas(f);
+        const filetes = filetesDeLosDemas(f);
+        let elegido: {
+          caja: Caja;
+          dx: number;
+          dy: number;
+          lado: (typeof LADOS)[number];
+          mal: number;
+        } | null = null;
+
+        for (const largo of LARGOS) {
+          for (const lado of LADOS) {
+            const dx = lado.dx * largo;
+            const dy = lado.dy * largo;
+            const x0 = f.x + dx + (lado.ax / 100) * f.w;
+            const y0 = f.y + dy + (lado.ay / 100) * f.h;
+            const c: Caja = { x0, y0, x1: x0 + f.w, y1: y0 + f.h };
+            const mal = coste(f, c, dx, dy, ocupado, filetes);
+            if (!elegido || mal < elegido.mal) elegido = { caja: c, dx, dy, lado, mal };
+            if (!mal) break;
+          }
+          if (elegido && !elegido.mal) break;
+        }
+        return elegido!;
+      };
+
+      // Primero los apretados: son los que tienen menos sitio donde caer, y
+      // aquí el que llega antes elige. Las sedes sueltas se colocan igual de
+      // bien al final, porque a su alrededor no hay nadie.
+      const vecinos = (f: (typeof fichas)[number]) =>
+        fichas.filter((o) => o !== f && Math.hypot(o.x - f.x, o.y - f.y) < 90).length;
+      const orden = [...fichas].sort((a, b) => vecinos(b) - vecinos(a));
+
+      for (const f of orden) puestos.set(f.pin, buscarSitio(f));
+
+      // Y luego se le vuelve a preguntar al que haya quedado mal, ahora con
+      // todos los demás ya puestos. El que elige primero no sabe dónde van a
+      // caer los de detrás: Ala Rota se quedaba con un sitio limpio y a
+      // Estallido Art Project —que tiene el canto de la caja a cuarenta
+      // píxeles y sólo puede tirar hacia dentro— no le quedaba más que
+      // ponerse encima. Preguntado otra vez, el que se corre es Ala Rota, que
+      // tiene campo, y caben los dos.
+      //
+      // Se mira lo que cuesta su sitio AHORA, no lo que costaba cuando lo
+      // eligió: el que llegó primero lo eligió limpio y quien se le puso
+      // encima llegó después. Tres vueltas como mucho, y en cuanto una no
+      // mueve a nadie se acabó.
+      for (let vuelta = 0; vuelta < 6; vuelta += 1) {
+        let movido = false;
+        for (const f of orden) {
+          const suyo = puestos.get(f.pin)!;
+          const ahora = coste(f, suyo.caja, suyo.dx, suyo.dy, losDemas(f), filetesDeLosDemas(f));
+          if (!ahora) continue;
+          const otro = buscarSitio(f);
+          if (otro.mal < ahora - 0.5) {
+            puestos.set(f.pin, otro);
+            movido = true;
+          }
+        }
+        if (!movido) break;
+      }
+
+      for (const f of fichas) {
+        const { dx, dy, lado } = puestos.get(f.pin)!;
+        f.pin.style.setProperty('--rx', `${Math.round(dx)}px`);
+        f.pin.style.setProperty('--ry', `${Math.round(dy)}px`);
+        f.pin.style.setProperty('--ax', `${lado.ax}%`);
+        f.pin.style.setProperty('--ay', `${lado.ay}%`);
+        f.pin.style.setProperty('--giro', `${Math.round((Math.atan2(dy, dx) * 180) / Math.PI)}deg`);
+        f.pin.style.setProperty('--tallo', `${Math.max(2, Math.round(Math.hypot(dx, dy) - SALE))}px`);
+      }
+    }
+
+    /* Los rótulos se reparten con la letra puesta: con la de repuesto miden
+       hasta diecinueve píxeles más —medido: «Cuerpos Parlantes» son 131 en
+       Arial Narrow y 112 en Anton—, y un reparto hecho con esas medidas ya no
+       vale cuando entran las buenas.
+
+       `document.fonts.ready` sola NO basta, y ahí estaban los cinco solapes de
+       la vista de casa: una fuente se pide cuando algo la usa, así que si en
+       el instante en que se pregunta no hay ninguna petición en marcha,
+       «ready» contesta que sí y el reparto se queda hecho con la de repuesto
+       para siempre. Comprobado en la página: recién cargada salían cinco
+       nombres pisándose y, forzando un reparto nuevo sin tocar nada más
+       —misma caja, mismo encaje—, ninguno.
+
+       Así que no se pregunta por la fuente: se mira el rótulo. En cuanto su
+       caja cambia de medida —que es lo que pasa cuando la letra entra— se
+       reparte otra vez. Es el mismo observador que ya vigila la caja del
+       plano, y se dispara una vez al ponerlo y otra al cambiar la letra. */
+    document.fonts?.ready.then(() => colocarRotulos());
+    const primerRotulo = pines[0]?.querySelector<HTMLElement>('.pin-nombre');
+    if (rotulados && primerRotulo) {
+      new ResizeObserver(() => colocarRotulos()).observe(primerRotulo);
     }
 
     /** Acercar o alejar dejando quieto un punto de la pantalla —el del dedo,
@@ -955,6 +1929,8 @@ const relojSedes = programaPublicado
       const z1 = encaje * entre(nuevoZoom, ZOOM_MIN, ZOOM_MAX);
       if (z1 === z0) return;
       const r = caja.getBoundingClientRect();
+      // Acercar es moverlo: a partir de aquí el encuadre es suyo, no de casa.
+      enCasa = false;
       const px = (pantallaX ?? r.left + r.width / 2) - r.left - ancho / 2;
       const py = (pantallaY ?? r.top + r.height / 2) - r.top - alto / 2;
       // El punto del dibujo que hay bajo ese píxel no se mueve de sitio.
@@ -966,6 +1942,7 @@ const relojSedes = programaPublicado
 
     /** Lleva una sede al centro. */
     function volarA(x: number, y: number) {
+      enCasa = false;
       zoom = ZOOM_SEDE;
       const z = encaje * zoom;
       tx = (ANCHO / 2 - x) * z;
@@ -977,7 +1954,16 @@ const relojSedes = programaPublicado
     function elegir(nombre: string | null, opciones: { volar?: boolean } = {}) {
       for (const fila of filas) {
         const suya = fila.dataset.nombre === nombre;
-        fila.setAttribute('aria-pressed', String(suya));
+        // En el tablero la fila es un enlace, y un enlace no se «aprieta»:
+        // `aria-pressed` es de los botones que se quedan hundidos. Y lo que
+        // dice un enlace que lleva a lo que ya se está enseñando —
+        // `aria-current`— lo ponen `mostrarPanel` y `cerrarPanel`, no esto:
+        // aquí una sede puede quedar marcada en rojo con el panel cerrado, y
+        // entonces el enlace sigue llevando a algún sitio. El rojo dice
+        // «elegida»; `aria-current` dice «lo estás viendo», y no son lo mismo.
+        if (!(fila instanceof HTMLAnchorElement)) {
+          fila.setAttribute('aria-pressed', String(suya));
+        }
         fila.closest('.fila-sede')?.classList.toggle('sede-activa', suya);
       }
       for (const pin of pines) {
@@ -986,29 +1972,41 @@ const relojSedes = programaPublicado
 
       const fila = filas.find((f) => f.dataset.nombre === nombre);
       if (!fila) {
-        pieFicha.hidden = true;
-        pieVacio.hidden = false;
+        if (pieFicha) pieFicha.hidden = true;
+        if (pieVacio) pieVacio.hidden = false;
         fuera.hidden = true;
+        /* Y se olvida dónde estaba la última: si no, «Todas» abría el plano a
+           las dieciséis y el re-encaje de las columnas volvía a volar a la
+           sede de antes un tercio de segundo después — el botón deshaciéndose
+           a sí mismo. */
+        ultimoPunto = null;
+        sedeElegida = null;
         return;
       }
 
-      pieVacio.hidden = true;
-      pieFicha.hidden = false;
-      pieNombre.textContent = fila.dataset.nombre ?? '';
-      pieDireccion.textContent = fila.dataset.direccion ?? '';
-      pieEnlace.href = fila.dataset.enlace ?? '';
+      sedeElegida = nombre;
+
+      if (pieVacio) pieVacio.hidden = true;
+      if (pieFicha) pieFicha.hidden = false;
+      if (pieNombre) pieNombre.textContent = fila.dataset.nombre ?? '';
+      if (pieDireccion) pieDireccion.textContent = fila.dataset.direccion ?? '';
+      if (pieEnlace) pieEnlace.href = fila.dataset.enlace ?? '';
 
       // Todas las sedes tienen página, así que este botón no se esconde nunca
       // —al revés que el de Instagram, que vivía aquí y no siempre existía—.
-      pieSede.href = fila.dataset.ruta ?? '';
-      pieSede.setAttribute('aria-label', `Ver ${fila.dataset.nombre ?? 'la sede'}`);
+      if (pieSede) {
+        pieSede.href = fila.dataset.ruta ?? '';
+        pieSede.setAttribute('aria-label', `Ver ${fila.dataset.nombre ?? 'la sede'}`);
+      }
 
       const x = Number(fila.dataset.x);
       const y = Number(fila.dataset.y);
       if (Number.isFinite(x) && Number.isFinite(y)) {
         fuera.hidden = true;
+        ultimoPunto = { x, y };
         if (opciones.volar !== false) volarA(x, y);
       } else {
+        ultimoPunto = null;
         // Sin punto: se cuenta por qué en vez de mover el plano a ninguna
         // parte.
         fueraNombre.textContent = fila.dataset.nombre ?? '';
@@ -1022,12 +2020,313 @@ const relojSedes = programaPublicado
       }
     }
 
+    // ── El panel: la segunda hoja de la columna ───────────────────────────
+    //
+    // Sólo existe en el tablero de `/sedes`. Todo lo de aquí abajo cuelga de
+    // que haya pila: en la portada `pila` es `null` y el plano se comporta
+    // exactamente como antes.
+    const pila = raiz.querySelector<HTMLElement>('[data-pila]');
+    const hojaPanel = raiz.querySelector<HTMLElement>('[data-hoja-panel]');
+    const paneles = hojaPanel
+      ? [...hojaPanel.querySelectorAll<HTMLElement>('[data-panel]')]
+      : [];
+    /** La hoja de la lista, para apagarla mientras el panel está encima: sin
+     *  `inert` sigue siendo tabulable y el teclado se cuela por debajo del
+     *  panel, a dieciséis filas que no se ven. */
+    const hojaLista = raiz.querySelector<HTMLElement>('[data-hoja-lista]');
+
+    /** Quién abrió el panel, para devolverle el foco al cerrarlo. */
+    let abridora: HTMLElement | null = null;
+    /** Si la entrada de historia que se está viendo la empujamos nosotros. Es
+     *  lo que decide si «← Sedes» puede hacer `history.back()` —y devolver el
+     *  navegador al estado que ya tenía— o si hay que limpiar la dirección a
+     *  mano. Llegar de fuera con `/sedes#no-museo` es el caso que obliga a
+     *  distinguirlo: ahí el atrás del navegador sale del sitio. */
+    let empujada = false;
+
+    const panelDe = (nombre: string | null) =>
+      paneles.find((p) => p.dataset.panel === nombre) ?? null;
+
+    /**
+     * Cuánto mide la barra de volver del panel abierto, publicado como
+     * `--barra-panel`.
+     *
+     * De ahí cuelga el titular de día, que se pega justo debajo de ella. El
+     * número estaba escrito a mano en la hoja de estilos —2,9 rem— y la barra
+     * mide 3,16: el titular se pegaba cuatro píxeles demasiado arriba y su
+     * primera raya quedaba tapada. Y además la barra ya no mide siempre lo
+     * mismo: en una columna angosta el reloj del festival se va a un segundo
+     * renglón. Se mide, y se acabó la coincidencia.
+     */
+    function medirBarraDelPanel() {
+      const activo = paneles.find((p) => !p.hidden);
+      const barraPanel = activo?.querySelector<HTMLElement>('.panel-barra');
+      if (!activo || !barraPanel) return;
+      activo.style.setProperty('--barra-panel', `${barraPanel.offsetHeight}px`);
+    }
+
+    /**
+     * Lo mismo para la lista: cuánto tapa su cabecera pegajosa, publicado como
+     * `--tope-lista`, del que cuelga el `scroll-margin-top` de las filas.
+     *
+     * Sin esto, llevar una fila a la vista la dejaba DEBAJO del rótulo: el
+     * navegador la pega al canto de arriba de la caja, que es justo donde está
+     * la cabecera, y la fila desaparecía detrás. Se nota al cerrar el panel de
+     * una de las primeras sedes, y le pasaría igual a cualquiera que recorra
+     * la lista con el tabulador.
+     *
+     * No se busca por su clase: la cabecera la pone la página por un `slot` y
+     * el componente no tiene por qué saber cómo se llama. Se busca lo que es
+     * —el hijo pegajoso de la hoja—, que es lo único que importa aquí.
+     */
+    function medirCabeceraDeLista() {
+      if (!hojaLista) return;
+      const pegajosa = [...hojaLista.children].find(
+        (el) => getComputedStyle(el).position === 'sticky',
+      ) as HTMLElement | undefined;
+      hojaLista.style.setProperty('--tope-lista', `${pegajosa?.offsetHeight ?? 0}px`);
+    }
+
+    /**
+     * Qué día del panel se está viendo.
+     *
+     * El panel enseña una jornada a la vez y el carril de arriba es su mando.
+     * Vive aquí, con el resto del gobierno del panel —quién lo abre, quién lo
+     * cierra, a qué sede salta—, y no en un `<script>` del componente: el panel
+     * lo pinta `PanelDeSede` y lo maneja este script, y partir eso en dos
+     * significaría que dos ficheros escriben el mismo atributo.
+     *
+     * Esconder y enseñar con `hidden` y no con una regla por día: la enumeración
+     * en CSS —una regla por cada uno de los cuatro— es exactamente lo que hay
+     * que tocar el día que el festival dure cinco.
+     */
+    function abrirJornada(panel: HTMLElement, indice: number) {
+      const jornadas = [...panel.querySelectorAll<HTMLElement>('.dia-panel')];
+      if (!jornadas.some((j) => Number(j.dataset.indice) === indice)) return;
+
+      for (const j of jornadas) j.hidden = Number(j.dataset.indice) !== indice;
+      for (const celda of panel.querySelectorAll<HTMLElement>('.panel-celda')) {
+        if (celda.hasAttribute('disabled')) continue;
+        celda.setAttribute('aria-pressed', String(Number(celda.dataset.dia) === indice));
+      }
+    }
+
+    function mostrarPanel(nombre: string, { animar = true } = {}) {
+      if (!pila || !hojaPanel) return;
+      const activo = panelDe(nombre);
+      if (!activo) return;
+
+      const yaEstaba = 'abierto' in pila.dataset;
+      /* Cuál se estaba enseñando, para no repetir la entrada cuando se vuelve
+         a pulsar la sede que ya está abierta. */
+      const visibleAntes = paneles.find((p) => !p.hidden) ?? null;
+      for (const p of paneles) p.hidden = p !== activo;
+
+      pila.dataset.abierto = 'si';
+      hojaPanel.inert = false;
+      if (hojaLista) hojaLista.inert = true;
+      if (!yaEstaba) asentarColumnas();
+      medirBarraDelPanel();
+
+      /* La fila que lleva aquí dice que lleva AQUÍ. Se pone al abrir y se
+         quita al cerrar; mientras tanto la marca roja va por su cuenta. */
+      for (const f of filas) {
+        if (f instanceof HTMLAnchorElement) f.removeAttribute('aria-current');
+      }
+      const fila = filas.find((f) => f.dataset.nombre === nombre);
+      if (fila instanceof HTMLAnchorElement) fila.setAttribute('aria-current', 'true');
+      // Arriba del todo: se entra a una sede por su cabecera, no por donde se
+      // quedó el scroll de la anterior.
+      hojaPanel.scrollTop = 0;
+
+      /* Y por su primer día: quien vuelve a una sede que dejó abierta por el
+         sábado entra otra vez por el principio, como entraría a su página. */
+      const primera = activo.querySelector<HTMLElement>('.dia-panel');
+      if (primera) abrirJornada(activo, Number(primera.dataset.indice));
+
+      /* Salvo durante el festival: entonces se entra por el día que se está
+         viviendo, que es lo que hace el cartel de una sede al abrir el día de
+         hoy. Antes esto era un cálculo de `scrollTop` hasta el titular del día;
+         con el carril puesto, abrir hoy es encender su celda.
+         Quien la marca es el reloj de abajo; si no hay festival corriendo no
+         hay ninguna marcada y esto no hace nada. */
+      const hoy = activo.querySelector<HTMLElement>('[data-dia][data-hoy]');
+      if (hoy?.dataset.dia) abrirJornada(activo, Number(hoy.dataset.dia));
+
+      // Cambiar de sede con el panel ya abierto no vuelve a meter la hoja
+      // —ya está puesta—, así que lo que se mueve es lo de dentro. Volver a
+      // pulsar la que ya está abierta no mueve nada: un parpadeo que no
+      // contesta a nada se lee como un fallo.
+      if (animar && yaEstaba && visibleAntes !== activo) {
+        activo.classList.remove('entra');
+        void activo.offsetWidth; // reinicia la animación
+        activo.classList.add('entra');
+      }
+      activo.focus({ preventScroll: true });
+    }
+
+    function cerrarPanel() {
+      if (!pila || !hojaPanel) return;
+      delete pila.dataset.abierto;
+      hojaPanel.inert = true;
+      if (hojaLista) hojaLista.inert = false;
+
+      /* A dónde vuelven el ojo y el foco: la fila de la sede que se estaba
+         viendo, y si no la hay, aquella por la que se entró. No son la misma:
+         quien entra por Ala Rota y salta a Casa Dos Guayabos desde «Al lado,
+         andando» sale por Casa Dos Guayabos. Se apunta ANTES de soltar la
+         sede, que es lo siguiente que pasa. */
+      const destino = filas.find((f) => f.dataset.nombre === sedeElegida) ?? abridora;
+
+      /* Y se suelta: cerrar el panel es dejar de elegir la sede. El plano
+         vuelve a las dieciséis —que es la pregunta que contesta la lista— y la
+         estrella se apaga. Es, letra por letra, lo que hace «Todas», porque es
+         lo mismo dicho por otra puerta. */
+      centrarEnCasa();
+      pintar();
+      elegir(null);
+
+      /* Y que se vea dónde se estuvo: si se entró desde una estrella del plano,
+         esa fila puede estar diez renglones por debajo del recorte. Se hace
+         cuando las columnas ya pararon, no antes. */
+      asentarColumnas(() => {
+        destino?.closest('.fila-sede')?.scrollIntoView({ block: 'nearest' });
+      });
+
+      for (const f of filas) {
+        if (f instanceof HTMLAnchorElement) f.removeAttribute('aria-current');
+      }
+
+      destino?.focus({ preventScroll: true });
+      abridora = null;
+    }
+
+    /** Elegir una sede Y abrir su panel: es lo mismo en el tablero. */
+    function irASede(
+      nombre: string | null,
+      { historia = true, animar = true, desde = null as HTMLElement | null } = {},
+    ) {
+      /* Abrir el panel por primera vez estrecha la columna del plano, y con
+         ella cambia el encaje. Volar antes de eso es volar con la cuenta
+         vieja: es lo que obligaba a corregir 400 ms después, con un salto seco
+         y un segundo vuelo. Así que en la primera apertura se elige sin volar,
+         se abre —que es cuando las columnas saltan y `asentarColumnas` mide—,
+         y se vuela al final, ya con el encaje bueno. Cambiar de sede con el
+         panel abierto no mueve ninguna columna, así que ahí vuela `elegir`
+         como siempre. */
+      const primeraApertura = !!pila && !('abierto' in pila.dataset);
+      elegir(nombre, { volar: !primeraApertura });
+      if (!pila || !nombre) return;
+      const panel = panelDe(nombre);
+      if (!panel) return;
+
+      if (desde) abridora = desde;
+      const ranura = panel.dataset.ranura ?? '';
+      if (historia && ranura) {
+        // Una sola entrada para todo el panel: saltar de sede a sede no apila
+        // dieciséis pasos que luego hay que deshacer uno a uno. El atrás del
+        // navegador hace lo que se espera de él aquí, que es volver a la lista.
+        const estado = { sede: ranura, nuestro: true };
+        if (empujada) history.replaceState(estado, '', `#${ranura}`);
+        else {
+          history.pushState(estado, '', `#${ranura}`);
+          empujada = true;
+        }
+      }
+      mostrarPanel(nombre, { animar });
+
+      // Y ahora el vuelo, con las columnas ya puestas y el plano ya medido.
+      if (primeraApertura && ultimoPunto) volarA(ultimoPunto.x, ultimoPunto.y);
+    }
+
+    /** Volver a la lista. Por el botón, por Escape o por el atrás de siempre:
+     *  los tres caminos pasan por aquí para que el navegador y la página nunca
+     *  cuenten cosas distintas. */
+    function volverALista() {
+      if (empujada) {
+        // El atrás del navegador dispara `popstate`, y allí se cierra: así
+        // cerrar con el botón deja la historia como si nunca se hubiera
+        // abierto, en vez de añadir un paso más.
+        history.back();
+        return;
+      }
+      history.replaceState(null, '', location.pathname + location.search);
+      cerrarPanel();
+    }
+
+    if (pila && hojaPanel) {
+      addEventListener('popstate', () => {
+        empujada = (history.state as { nuestro?: boolean } | null)?.nuestro === true;
+        const panel = paneles.find((p) => p.dataset.ranura === location.hash.slice(1));
+        if (panel) irASede(panel.dataset.panel ?? null, { historia: false });
+        else cerrarPanel();
+      });
+
+      hojaPanel.addEventListener('click', (e) => {
+        const objetivo = e.target as HTMLElement;
+        if (objetivo.closest('[data-cerrar-panel]')) {
+          volverALista();
+          return;
+        }
+        // El carril: cambiar de día es cambiar de día, no de sede. Ni toca el
+        // plano ni mueve el scroll — el carril es pegajoso, así que la celda
+        // que se acaba de pulsar sigue justo donde estaba el dedo.
+        const celda = objetivo.closest<HTMLElement>('.panel-celda');
+        const panel = celda?.closest<HTMLElement>('.panel-sede');
+        if (celda?.dataset.dia && panel) {
+          abrirJornada(panel, Number(celda.dataset.dia));
+          return;
+        }
+
+        // Las de al lado —la anterior, la siguiente y las tres que se andan—
+        // cambian el panel en el sitio y mueven el plano. Nadie vuelve a la
+        // lista para ir a la sede de enfrente.
+        const salto = objetivo.closest<HTMLElement>('[data-ir-sede]');
+        if (salto?.dataset.irSede) irASede(salto.dataset.irSede);
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape' || !('abierto' in pila.dataset)) return;
+        volverALista();
+      });
+
+    }
+
+    /** El panel que pide la dirección —`/sedes#no-museo`, un enlace que alguien
+     *  mandó por WhatsApp—. Abre sin animación: nadie ha pulsado nada.
+     *
+     *  Se llama al final del arranque y no aquí, que sería lo natural: volar
+     *  hasta la sede necesita el encaje del plano, y el encaje no existe hasta
+     *  que `medir()` sabe cuánto mide la caja. Llamándolo antes, el plano se
+     *  iba a un punto calculado con un encaje que todavía era cero — un trozo
+     *  de mapa sin ninguna estrella. */
+    const panelDeLaDireccion = () => {
+      if (!pila) return;
+      const inicial = paneles.find((p) => p.dataset.ranura === location.hash.slice(1));
+      if (inicial) irASede(inicial.dataset.panel ?? null, { historia: false, animar: false });
+    };
+
     for (const fila of filas) {
-      fila.addEventListener('click', () => elegir(fila.dataset.nombre ?? null));
+      fila.addEventListener('click', (e) => {
+        if (!pila) {
+          elegir(fila.dataset.nombre ?? null);
+          return;
+        }
+        // La fila es un enlace de verdad a la página de la sede: los gestos de
+        // «ábremelo en otra pestaña» se respetan y esa página sale entera.
+        const raton = e as MouseEvent;
+        if (raton.metaKey || raton.ctrlKey || raton.shiftKey || raton.altKey) return;
+        e.preventDefault();
+        irASede(fila.dataset.nombre ?? null, { desde: fila });
+      });
     }
     for (const pin of pines) {
       pin.addEventListener('click', () => {
         if (arrastrado) return; // veníamos de mover el plano, no de elegir
+        if (pila) {
+          irASede(pin.dataset.nombre ?? null, { desde: pin });
+          return;
+        }
         elegir(pin.dataset.nombre ?? null);
         const fila = filas.find((f) => f.dataset.nombre === pin.dataset.nombre);
         // La lista es larga y scrollea por dentro: si la elegida está fuera
@@ -1040,11 +2339,13 @@ const relojSedes = programaPublicado
     }
 
     raiz.querySelector('[data-todas]')?.addEventListener('click', () => {
-      zoom = 1;
-      tx = 0;
-      ty = 0;
+      centrarEnCasa();
       pintar();
       elegir(null);
+      // «Todas» es, literalmente, volver a las dieciséis: el plano se abre y la
+      // lista vuelve. Un plano enseñando las dieciséis con el panel de una sola
+      // abierto al lado son dos respuestas a la vez.
+      if (pila && 'abierto' in pila.dataset) volverALista();
     });
     raiz
       .querySelector('[data-zoom="mas"]')
@@ -1079,12 +2380,13 @@ const relojSedes = programaPublicado
         // La captura se pide aquí y no al apretar: con el puntero capturado
         // por la caja, el clic que viene detrás se lo lleva la caja y la
         // estrella de debajo no se entera. O sea que capturar de entrada
-        // dejaba las catorce estrellas sin poder pulsarse. Se captura cuando
+        // dejaba las dieciséis estrellas sin poder pulsarse. Se captura cuando
         // ya sabemos que esto es un arrastre y no un clic.
         caja.setPointerCapture(e.pointerId);
         caja.dataset.arrastrando = 'si';
         arrastrado = true;
       }
+      enCasa = false;
       tx += dx;
       ty += dy;
       x0 = e.clientX;
@@ -1120,18 +2422,14 @@ const relojSedes = programaPublicado
       if (e.target !== caja) return;
       const paso = 60;
       const teclas: Record<string, () => void> = {
-        ArrowUp: () => (ty += paso),
-        ArrowDown: () => (ty -= paso),
-        ArrowLeft: () => (tx += paso),
-        ArrowRight: () => (tx -= paso),
+        ArrowUp: () => ((enCasa = false), (ty += paso)),
+        ArrowDown: () => ((enCasa = false), (ty -= paso)),
+        ArrowLeft: () => ((enCasa = false), (tx += paso)),
+        ArrowRight: () => ((enCasa = false), (tx -= paso)),
         '+': () => acercar(zoom * 1.6),
         '=': () => acercar(zoom * 1.6),
         '-': () => acercar(zoom / 1.6),
-        Home: () => {
-          zoom = 1;
-          tx = 0;
-          ty = 0;
-        },
+        Home: () => centrarEnCasa(),
       };
       const accion = teclas[e.key];
       if (!accion) return;
@@ -1207,6 +2505,44 @@ const relojSedes = programaPublicado
           );
           const pin = pines.find((p) => p.dataset.nombre === sede.nombre);
 
+          /* El renglón de ahora del panel de esta sede. Lo escribe este mismo
+             reloj y no uno suyo: la lista, las estrellas y el panel tienen que
+             decir lo mismo a la misma hora, y para eso hay una sola cuenta. */
+          const renglon = panelDe(sede.nombre)?.querySelector<HTMLElement>(
+            '[data-panel-ahora]',
+          );
+          if (renglon) {
+            /* Corto a propósito. Esto vive al fondo de la barra del panel, al
+               lado del nombre de la sede, y en una columna de 400 px las dos
+               cosas no caben: «Ahora · 2 corriendo · hasta las 18:00» dejaba
+               el nombre en tres letras. Lo que hace falta saber es si está
+               abierto y hasta cuándo; «ahora» ya lo dice el sitio donde está
+               escrito, y la estrella roja de delante. */
+            if (corriendo.length) {
+              const cierra = Math.max(...corriendo.map((h) => h.hasta));
+              renglon.textContent =
+                corriendo.length > 1
+                  ? `${corriendo.length} corriendo · hasta ${hhmm(cierra)}`
+                  : `Abierto hasta las ${hhmm(cierra)}`;
+              delete renglon.dataset.parada;
+              renglon.hidden = false;
+            } else if (proxima) {
+              /* Parada, que es un estado de verdad: entre la charla de la tarde
+                 y la fiesta de la noche hay cuatro horas y lo que hace falta
+                 saber es cuándo vuelve a abrir. */
+              renglon.textContent = hoy
+                ? `Abre a las ${hhmm(proxima.desde)}`
+                : `Vuelve ${new Date(proxima.desde).toLocaleDateString('es-MX', {
+                    weekday: 'short',
+                    day: 'numeric',
+                  })} · ${hhmm(proxima.desde)}`;
+              renglon.dataset.parada = '';
+              renglon.hidden = false;
+            } else {
+              renglon.hidden = true;
+            }
+          }
+
           if (corriendo.length) {
             abiertas += 1;
             const cierra = Math.max(...corriendo.map((h) => h.hasta));
@@ -1239,6 +2575,43 @@ const relojSedes = programaPublicado
           }`;
           barra.hidden = false;
         }
+
+        /* La misma verdad dentro de cada ficha del panel, para que el renglón
+           de arriba y el programa de abajo no puedan contradecirse. Es lo que
+           ya hace el cartel de la sede, con las mismas dos etiquetas. */
+        for (const ficha of raiz.querySelectorAll<HTMLElement>('[data-inicio][data-fin]')) {
+          const desde = new Date(ficha.dataset.inicio!).getTime();
+          const hasta = new Date(ficha.dataset.fin!).getTime();
+          const marca = ficha.querySelector<HTMLElement>('[data-estado]');
+          if (!marca) continue;
+
+          const faltan = Math.round((desde - ahora) / 60000);
+          if (desde <= ahora && hasta > ahora) marca.textContent = 'corriendo';
+          else if (faltan > 0 && faltan <= 60) marca.textContent = `en ${faltan} min`;
+          else {
+            marca.hidden = true;
+            continue;
+          }
+          marca.hidden = false;
+        }
+
+        /* Y qué día es hoy en el carril. Se saca de un instante con el huso ya
+           puesto y no de la fecha escrita, que es texto («24 de septiembre»).
+
+           Cada celda trae el suyo en `data-fecha`. Antes se iba a buscar a la
+           primera ficha del día —`parentElement`, porque el titular vivía junto
+           a sus actividades—, y la celda de un carril no vive junto a nada: su
+           vecina es la celda del día siguiente. El `??` deja en pie cualquier
+           otro `[data-dia]` que siga midiéndose contra sus fichas. */
+        const diaDeHoy = new Date(ahora).toDateString();
+        for (const barraDia of raiz.querySelectorAll<HTMLElement>('[data-dia]')) {
+          const cuando =
+            barraDia.dataset.fecha ??
+            barraDia.parentElement?.querySelector<HTMLElement>('[data-inicio]')?.dataset.inicio;
+          const suyo = cuando && new Date(cuando).toDateString() === diaDeHoy;
+          if (suyo) barraDia.dataset.hoy = '';
+          else delete barraDia.dataset.hoy;
+        }
       };
 
       repintar();
@@ -1247,12 +2620,22 @@ const relojSedes = programaPublicado
 
     // ── Puesta en marcha ──────────────────────────────────────────────────
     medir();
-    new ResizeObserver(medir).observe(caja);
+    new ResizeObserver(() => {
+      /* La barra del panel sí se remide siempre: es una lectura de nada y es
+         justo al cambiar de ancho cuando el reloj se le va a un segundo
+         renglón. */
+      medirBarraDelPanel();
+      medirCabeceraDeLista();
+      if (apuntalado) return;
+      medir();
+    }).observe(caja);
+    medirCabeceraDeLista();
+    // Con el plano ya encajado: sólo entonces se puede volar a una sede.
+    panelDeLaDireccion();
 
     // Las estrellas se clavan cuando el plano asoma, no al cargar la página:
     // si la sección está a tres pantallas, la entrada se la pierde todo el
     // mundo.
-    const cajaPines = raiz.querySelector<HTMLElement>('[data-pines]')!;
     const ojo = new IntersectionObserver(
       ([entrada], observador) => {
         if (!entrada.isIntersecting) return;
@@ -1266,7 +2649,7 @@ const relojSedes = programaPublicado
     // La cascada de la lista: las filas llevan `data-reveal`, pero el
     // observador de `motion.ts` mide contra la ventana y dentro de una caja
     // recortada las de abajo no entran en cuadro nunca. Se destapan las
-    // catorce de una vez, cada una con su retraso.
+    // dieciséis de una vez, cada una con su retraso.
     const lista = raiz.querySelector<HTMLElement>('[data-lista-sedes]');
     if (lista) {
       const reveladas = [...lista.querySelectorAll<HTMLElement>('[data-reveal]')];
