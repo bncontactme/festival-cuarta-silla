@@ -1,6 +1,6 @@
 ---
 import { conBase } from '../lib/base';
-import { sedes, festival, enlaceMapa, rutaDeSede } from '../data/site';
+import { sedes, festival, enlaceMapa, rutaDeSede, agendaPorSede, programaPublicado } from '../data/site';
 import { plano, proyecta } from '../data/mapa';
 
 /**
@@ -22,8 +22,20 @@ import { plano, proyecta } from '../data/mapa';
  */
 interface Props {
   class?: string;
+  /**
+   * Cuánto mide la lista.
+   *
+   * `corta` (por defecto) la topa a media pantalla y le da scroll propio: en
+   * la portada esto es un adelanto y dieciséis renglones enteros empujarían
+   * el resto de la página hasta la semana que viene.
+   *
+   * `entera` la deja crecer. Es lo que quiere `/sedes`, donde el plano y la
+   * lista SON la página: ahí una lista que hace scroll dentro de otra que
+   * hace scroll es una trampa, y las dieciséis caben de sobra.
+   */
+  lista?: 'corta' | 'entera';
 }
-const { class: clase = '' } = Astro.props;
+const { class: clase = '', lista: alto = 'corta' } = Astro.props;
 
 /** La estrellita, dibujada y no copiada: cinco puntas, radio 10, valle 4.1.
  *  Sale de aquí para poder tocarle el filo sin pelearse con una ristra de
@@ -47,6 +59,9 @@ const lista = sedes.lista.map((sede, i) => ({
   enlace: enlaceMapa(sede),
   /** Su cartel: `/sedes/<sede>`, que es donde está el programa. */
   ruta: conBase(rutaDeSede(sede.nombre)),
+  /** Cuántas actividades tiene. La lista deja de ser sólo el mando del plano
+   *  y pasa a decir dónde hay bulto, que es por lo que se recorre. */
+  cuantas: agendaPorSede.find((a) => a.sede.nombre === sede.nombre)?.total ?? 0,
 }));
 const conEstrella = lista.filter((s) => s.punto);
 ---
@@ -224,7 +239,10 @@ const conEstrella = lista.filter((s) => s.punto);
       no se entera. `overscroll-behavior: contain`, en la hoja, es lo que
       evita que al llegar al final el gesto siga y arrastre la portada. */}
   <ul
-    class="lista-sedes h-[48vh] border-t-2 border-tinta bg-amarillo pr-3 lg:h-[52vh]"
+    class:list={[
+      'lista-sedes border-t-2 border-tinta bg-amarillo pr-3',
+      alto === 'corta' && 'h-[48vh] lg:h-[52vh]',
+    ]}
     data-lista-sedes
     data-lenis-prevent
   >
@@ -258,22 +276,24 @@ const conEstrella = lista.filter((s) => s.punto);
               {sede.nombre}
             </span>
             {!sede.punto && (
-              <span class="meta ml-auto shrink-0 text-[0.55rem] text-rojo">
-                ✳
+              <span class="meta shrink-0 text-[0.55rem] text-rojo">✳</span>
+            )}
+
+            {/* Lo que hay dentro, en dato. Sin programa publicado no se cuenta
+                nada: enseñar aquí un número de una rejilla que el sitio todavía
+                esconde sería publicarla por la puerta de atrás. */}
+            {programaPublicado && (
+              <span
+                class:list={[
+                  'meta ml-auto shrink-0 tabular-nums',
+                  sede.cuantas > 0 ? 'text-tinta/55' : 'text-tinta/35',
+                ]}
+              >
+                {sede.cuantas > 0 ? sede.cuantas : 'sin programa'}
               </span>
             )}
           </button>
 
-          {sede.instagram && (
-            <a
-              href={sede.instagram}
-              target="_blank"
-              rel="noopener"
-              class="meta shrink-0 text-[0.6rem] text-tinta/45 transition-colors duration-300 hover:text-rojo"
-            >
-              IG ↗
-            </a>
-          )}
         </li>
       ))
     }
