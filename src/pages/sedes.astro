@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Encabezado from '../components/Encabezado.astro';
 import Estrella from '../components/Estrella.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
+import Mapa from '../components/Mapa.astro';
 import { conBase } from '../lib/base';
 import { sedes, festival, enlaceMapa, rutaDeSede } from '../data/site';
 ---
@@ -70,6 +71,20 @@ import { sedes, festival, enlaceMapa, rutaDeSede } from '../data/site';
     titulo={sedes.titulo}
     fondo="rojo"
   />
+
+  {/* ── El plano, antes de la rejilla ──────────────────────────────────────
+      El mismo instrumento que la portada, sin una línea nueva: plano a la
+      izquierda, lista a la derecha, y la ficha de abajo llevando a la sede.
+
+      Va ARRIBA de las tarjetas y no debajo porque contesta la pregunta que se
+      hace primero —«¿dónde está todo esto?», y sobre todo «¿qué cae cerca de
+      qué?»—, que es la que una rejilla de dieciséis direcciones no puede
+      contestar: las sedes están a diez minutos andando unas de otras y eso
+      sólo se ve con las dieciséis en el mismo papel. La rejilla de abajo es la
+      otra mitad: el directorio, con la dirección escrita y sus dos puertas. */}
+  <section class="border-b-2 border-tinta bg-amarillo px-4 py-14 sm:px-6 lg:px-10">
+    <Mapa />
+  </section>
 
   {/* El campo pasa a amarillo. Tinta sobre amarillo son 15,3:1 — se leen
       mejor que como estaban, en tinta sobre blanco justo debajo de un

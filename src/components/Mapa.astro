@@ -1,5 +1,6 @@
 ---
-import { sedes, festival, enlaceMapa } from '../data/site';
+import { conBase } from '../lib/base';
+import { sedes, festival, enlaceMapa, rutaDeSede } from '../data/site';
 import { plano, proyecta } from '../data/mapa';
 
 /**
@@ -44,6 +45,8 @@ const lista = sedes.lista.map((sede, i) => ({
   indice: String(i + 1).padStart(2, '0'),
   punto: sede.coord ? proyecta(sede.coord[0], sede.coord[1]) : null,
   enlace: enlaceMapa(sede),
+  /** Su cartel: `/sedes/<sede>`, que es donde está el programa. */
+  ruta: conBase(rutaDeSede(sede.nombre)),
 }));
 const conEstrella = lista.filter((s) => s.punto);
 ---
@@ -175,19 +178,20 @@ const conEstrella = lista.filter((s) => s.punto);
             class="mt-2 text-sm leading-snug not-italic opacity-70"
             data-pie-direccion></address>
         </div>
-        {/* Dos acciones, y en este orden: Instagram primero porque es la que
-            se lee —quién es esta sede— y Ubicación después, que es la que se
-            usa. La de Instagram sale en hueco para que el peso siga estando
-            en la maciza; y no todas las sedes tienen cuenta, así que esa se
-            esconde cuando no la hay en vez de dejar un botón muerto. */}
+        {/* Dos acciones, y en este orden: primero la sede —quién es y qué pasa
+            en ella— y Ubicación después, que es la que se usa. Aquí estuvo
+            Instagram hasta que las sedes tuvieron página propia; ahora esa
+            cuenta vive dentro de la página, junto al cómo llegar, y sigue a
+            mano en el renglón de la lista de la derecha.
+
+            La de la sede sale en hueco para que el peso siga estando en la
+            maciza, y va sin flecha: no saca a nadie del sitio. */}
         <div class="flex shrink-0 items-stretch gap-2">
           <a
-            class="meta hidden border-2 border-tinta px-4 py-2.5 text-[0.6rem] font-bold text-tinta transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
-            target="_blank"
-            rel="noopener"
-            data-pie-instagram
+            class="meta border-2 border-tinta px-4 py-2.5 text-[0.6rem] font-bold text-tinta transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
+            data-pie-sede
           >
-            {sedes.acciones.instagram} ↗
+            {sedes.acciones.conoce}
           </a>
           <a
             class="meta border-2 border-tinta bg-tinta px-4 py-2.5 text-[0.6rem] font-bold text-amarillo transition-colors duration-300 hover:bg-amarillo hover:text-tinta"
@@ -241,6 +245,7 @@ const conEstrella = lista.filter((s) => s.punto);
             data-nombre={sede.nombre}
             data-direccion={sede.direccion}
             data-enlace={sede.enlace}
+            data-ruta={sede.ruta}
             data-instagram={sede.instagram}
             data-nota={sede.notaMapa}
             data-x={sede.punto?.x}
@@ -740,7 +745,7 @@ const conEstrella = lista.filter((s) => s.punto);
     const pieNombre = raiz.querySelector<HTMLElement>('[data-pie-nombre]')!;
     const pieDireccion = raiz.querySelector<HTMLElement>('[data-pie-direccion]')!;
     const pieEnlace = raiz.querySelector<HTMLAnchorElement>('[data-pie-enlace]')!;
-    const pieInstagram = raiz.querySelector<HTMLAnchorElement>('[data-pie-instagram]')!;
+    const pieSede = raiz.querySelector<HTMLAnchorElement>('[data-pie-sede]')!;
     const escalaBarra = raiz.querySelector<HTMLElement>('[data-escala-barra]')!;
     const escalaTexto = raiz.querySelector<HTMLElement>('[data-escala-texto]')!;
 
@@ -867,16 +872,10 @@ const conEstrella = lista.filter((s) => s.punto);
       pieDireccion.textContent = fila.dataset.direccion ?? '';
       pieEnlace.href = fila.dataset.enlace ?? '';
 
-      // `hidden` no basta: la clase `flex` de la ficha le gana al atributo, y
-      // el botón se quedaba puesto sin dirección. Se conmuta la utilidad.
-      const ig = fila.dataset.instagram;
-      pieInstagram.classList.toggle('hidden', !ig);
-      if (ig) {
-        pieInstagram.href = ig;
-        pieInstagram.setAttribute('aria-label', `Instagram de ${fila.dataset.nombre ?? 'la sede'}`);
-      } else {
-        pieInstagram.removeAttribute('href');
-      }
+      // Todas las sedes tienen página, así que este botón no se esconde nunca
+      // —al revés que el de Instagram, que vivía aquí y no siempre existía—.
+      pieSede.href = fila.dataset.ruta ?? '';
+      pieSede.setAttribute('aria-label', `Ver ${fila.dataset.nombre ?? 'la sede'}`);
 
       const x = Number(fila.dataset.x);
       const y = Number(fila.dataset.y);
