@@ -65,8 +65,6 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     };
   }),
 );
-
-const rutaPrograma = conBase('/programa');
 ---
 
 <section class="ahora" data-ahora hidden aria-label="Qué está pasando ahora">
@@ -95,10 +93,6 @@ const rutaPrograma = conBase('/programa');
           mismo que en el panel de `/sedes`: con las dieciséis sedes abiertas a
           la vez, seis tarjetas apiladas son una pared. */}
       <ul class="ahora-lista" data-ahora-lista></ul>
-
-      {/* Y si hay más de las que caben, la puerta al programa entero: cortar
-          la lista en seis sin decirlo sería mentir por omisión. */}
-      <a class="meta ahora-mas" href={rutaPrograma} data-ahora-mas hidden></a>
 
       {/* La chapa roja: lo único de la banda que todavía no ha pasado, y por
           eso se separa de lo que ya está corriendo con su propio campo. */}
@@ -282,14 +276,6 @@ const rutaPrograma = conBase('/programa');
     padding-top: 0;
   }
 
-  .ahora-mas {
-    display: inline-block;
-    margin-top: 0.85rem;
-    color: var(--color-amarillo);
-    text-decoration: underline;
-    text-underline-offset: 0.3em;
-  }
-
   /* ── La chapa roja ───────────────────────────────────────────────────
      Es la misma de la banda del cartel de sede: campo rojo, canto amarillo.
      Lo que cambia es que aquí lleva tres cosas —cuándo, qué y quién— porque
@@ -359,9 +345,15 @@ const rutaPrograma = conBase('/programa');
     dia: number;
   };
 
-  /** Cuántas caben antes de mandar al programa. Seis es lo que cabe sin que la
-   *  banda pase de alto de pantalla en un portátil; con dieciséis sedes, un
-   *  sábado por la tarde puede haber más. */
+  /** Cuántas se enseñan. Seis es lo que cabe sin que la banda pase de alto de
+   *  pantalla en un portátil; con dieciséis sedes, un sábado por la tarde hay
+   *  más, y las demás se quedan fuera sin decir nada.
+   *
+   *  Aquí hubo un «Y 37 más en el programa →» al pie de la lista, y se cae. El
+   *  botón «Ver el programa» está en la cabecera de esta misma sección, a dos
+   *  dedos y a tamaño de botón: la segunda puerta no añadía un camino, añadía
+   *  un renglón de letra pequeña al final de una banda que se lee de un golpe,
+   *  y encima lo último que decía era cuánto NO estaba enseñando. */
   const CABEN = 6;
 
   const fuente = document.querySelector<HTMLScriptElement>('[data-reloj-portada]');
@@ -457,9 +449,7 @@ const rutaPrograma = conBase('/programa');
       const rotulo = $('[data-ahora-rotulo]')!;
       const lista = $('[data-ahora-lista]')!;
       const cierre = $('[data-ahora-cierre]')!;
-      const mas = $<HTMLAnchorElement>('[data-ahora-mas]')!;
       lista.textContent = '';
-      mas.hidden = true;
 
       /**
        * Cuándo es algo, contado desde ahora y dicho como lo diría uno.
@@ -521,19 +511,12 @@ const rutaPrograma = conBase('/programa');
 
       const pintarLista = () => {
         lista.textContent = '';
-        mas.hidden = true;
 
         if (corriendo.length) {
           /* Todo lo que corre es de hoy por definición, así que aquí no hay
              días que separar: la fecha la lleva el rótulo del reloj. */
           for (const p of corriendo.slice(0, CABEN))
             lista.append(renglon(p, `hasta ${relojDe(new Date(p.hasta))}`));
-
-          const sobran = corriendo.length - CABEN;
-          if (sobran > 0) {
-            mas.textContent = `Y ${sobran} más en el programa →`;
-            mas.hidden = false;
-          }
           return;
         }
 
@@ -550,12 +533,6 @@ const rutaPrograma = conBase('/programa');
           }
           const faltan = Math.round((p.desde - ahora) / 60000);
           lista.append(renglon(p, faltan <= 90 ? `En ${faltan} min` : relojDe(f)));
-        }
-
-        const sobran = proximas.length - CABEN;
-        if (sobran > 0) {
-          mas.textContent = `Y ${sobran} más en el programa →`;
-          mas.hidden = false;
         }
       };
 
@@ -593,7 +570,13 @@ const rutaPrograma = conBase('/programa');
           : esManana
             ? `Abre mañana a las ${relojDe(primera)}`
             : `Abre el ${primera.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric' })} a las ${relojDe(primera)}`;
-        rotulo.textContent = 'Lo primero';
+
+        /* Sin rótulo. Aquí puso «Lo primero» y no decía nada que no estuviera
+           ya dicho: el renglón de la fecha que abre la lista —«Jueves 24 de
+           septiembre»— la encabeza igual de bien, y el renglón de encima ya
+           avisa de que el festival no ha empezado. Un rótulo que repite a sus
+           dos vecinos es una franja gastada. */
+        rotulo.textContent = '';
       } else {
         $('[data-ahora-dia]')!.textContent = `Ahora · ${d.toLocaleDateString('es-MX', {
           weekday: 'long',
@@ -622,6 +605,10 @@ const rutaPrograma = conBase('/programa');
           cierre.textContent = siguiente ? `Vuelve a abrir ${cuandoEs(siguiente.desde).dicho.toLowerCase()}` : '';
         }
       }
+
+      /* Y si no hay rótulo, no hay franja: un `<p>` vacío mide un renglón
+         igual, y ese renglón se ve. */
+      rotulo.hidden = !rotulo.textContent;
 
       pintarLista();
 
