@@ -71,18 +71,15 @@ const rutaPrograma = conBase('/programa');
 
 <section class="ahora" data-ahora hidden aria-label="Qué está pasando ahora">
   <div class="ahora-reja">
-    {/* ── La hora, que es el objeto ────────────────────────────────────────
-        Grande y centrada, y no una columna de dieciséis rem al canto
-        izquierdo. Es lo único de la portada que caduca: quien llega y ve
-        «13:40» a tamaño de reloj de estación ya sabe, antes de leer una sola
-        palabra, que lo de abajo es de verdad y está pasando ahora mismo.
-
-        `display-centro` y no sólo `text-align`: la clase `.display` aprieta la
-        Anton un 8 % con un `scaleX` anclado a la izquierda, así que centrar el
-        texto sin mover el ancla deja el bloque descuadrado a la derecha. */}
+    {/* ── La hora ──────────────────────────────────────────────────────────
+        Es lo único de la portada que caduca: quien llega y ve «13:40» ya sabe,
+        antes de leer una sola palabra, que lo de al lado es de verdad y está
+        pasando ahora mismo. Y es SIEMPRE la hora —nunca el día—: un reloj que
+        unas veces marca las 13:40 y otras pone «JUE 24» deja de ser un reloj,
+        y lo que se mira ahí se mira sin leer. */}
     <div class="ahora-reloj">
       <p class="meta text-amarillo" data-ahora-dia></p>
-      <p class="display display-centro ahora-hora" data-ahora-reloj></p>
+      <p class="display ahora-hora" data-ahora-reloj></p>
       <p class="meta ahora-cierre" data-ahora-cierre></p>
     </div>
 
@@ -120,49 +117,42 @@ const rutaPrograma = conBase('/programa');
     color: var(--color-papel);
   }
 
-  /* El reloj arriba y centrado, y lo demás debajo.
-     Fueron dos columnas —16rem para la hora y el resto para la lista— y el
-     reloj salía del tamaño de un titular cualquiera, apoyado en un canto. Si
-     es el objeto principal no puede medirse contra una columna: se mide contra
-     la banda entera, y eso pide que no haya nada a su lado. */
+  /* Dos columnas: la hora manda a la izquierda con un ancho fijo —16rem, que
+     es lo que mide «13:40» a este cuerpo— y lo que pasa ocupa el resto. Es la
+     banda del cartel de sede, y es de izquierda a derecha por lo mismo que
+     allá: primero cuándo, después qué. Una banda compacta que se entiende de
+     una pasada, no un bloque alto con la hora de cartel encima.
+
+     En cuanto la ventana se estrecha, una encima de la otra: la hora en una
+     columna de ocho centímetros deja de ser un titular y pasa a ser un estorbo
+     al lado de los títulos. */
   .ahora-reja {
-    padding: 2rem 1.5rem 1.75rem;
+    display: grid;
+    gap: 1.5rem 2.5rem;
+    padding: 1.75rem 1.5rem;
   }
   @media (min-width: 1024px) {
     .ahora-reja {
-      padding: 2.75rem 2.25rem 2.25rem;
+      grid-template-columns: 16rem minmax(0, 1fr);
+      padding: 2rem 2.25rem;
     }
   }
 
-  .ahora-reloj {
-    text-align: center;
-  }
-
-  /* De 5.5rem a 11: es el objeto de la sección, y a tamaño de reloj de
-     estación se lee cruzando la habitación. En `vw` para que crezca con la
-     ventana, con tope para que en un monitor de 27 pulgadas no se coma la
-     banda entera. */
   .ahora-hora {
-    margin-top: 0.35rem;
-    font-size: clamp(4.5rem, 11vw, 11rem);
-    line-height: 0.82;
+    margin-top: 0.5rem;
+    font-size: clamp(3.5rem, 6vw, 5.5rem);
+    line-height: 0.85;
     color: var(--color-amarillo);
   }
 
-  /* La lista y lo que la acompaña, separadas del reloj por un filete: sin él
-     el rótulo se lee como el pie de la hora y no como la cabecera de lo que
-     viene debajo. */
   .ahora-cuerpo {
     min-width: 0;
-    margin-top: 1.75rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid color-mix(in srgb, var(--color-papel) 22%, transparent);
   }
 
   /* Sobre negro, el papel al 60 % da 9:1 de sobra: es el gris de este sitio
      para lo que acompaña sin mandar. */
   .ahora-cierre {
-    margin-top: 0.6rem;
+    margin-top: 0.75rem;
     color: var(--color-apagado-papel);
   }
   .ahora-rotulo {
@@ -552,18 +542,23 @@ const rutaPrograma = conBase('/programa');
             ? 'Empieza mañana'
             : 'Todavía no empieza';
 
-        /* El día, y no los días que faltan.
-           La cuenta regresiva ya existe y está dos pantallas más arriba, en el
-           mismo scroll: dos relojes contando a lo mismo en una sola página se
-           contradicen el primer día —aquél cuenta al arranque del festival y
-           redondea hacia abajo, éste contaba a la primera actividad y
-           redondeaba hacia arriba, así que el 22 de septiembre uno decía «2» y
-           el otro «3»—. Aquí la respuesta útil es otra: qué día hay que venir. */
-        $('[data-ahora-reloj]')!.textContent =
-          esHoy || esManana
-            ? relojDe(primera)
-            : primera.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' });
-        cierre.textContent = 'Abre el festival';
+        /* La hora, como en los otros dos estados.
+           Aquí estuvo el día al que abre —«JUE 24»— metido en el sitio del
+           reloj, y antes de eso los días que faltaban. Las dos cosas hacen lo
+           mismo: convierten en una etiqueta el único sitio de la banda que se
+           mira sin leer. Un reloj que unas veces marca las 13:40 y otras pone
+           «JUE 24» ya no es un reloj.
+
+           Cuándo abre no se pierde: baja al renglón de debajo, que es donde
+           vive lo que acompaña a la hora en los tres estados. Y los días que
+           faltan siguen sin decirse — la cuenta regresiva del hero está dos
+           pantallas más arriba contando a lo mismo. */
+        $('[data-ahora-reloj]')!.textContent = relojDe(d);
+        cierre.textContent = esHoy
+          ? `Abre a las ${relojDe(primera)}`
+          : esManana
+            ? `Abre mañana a las ${relojDe(primera)}`
+            : `Abre el ${primera.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric' })} a las ${relojDe(primera)}`;
         rotulo.textContent = 'Lo primero';
       } else {
         $('[data-ahora-dia]')!.textContent = `Ahora · ${d.toLocaleDateString('es-MX', {
