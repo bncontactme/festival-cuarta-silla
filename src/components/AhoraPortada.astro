@@ -183,6 +183,14 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     min-width: 0;
   }
 
+  /* Cuando la chapa va delante de la lista, el aire cambia de lado: el margen
+     que la separaba de lo que tenía encima tiene que separarla de lo que ahora
+     tiene debajo. */
+  .ahora-luego[data-primero] {
+    margin-top: 0.5rem;
+    margin-bottom: 0.9rem;
+  }
+
   /* Sobre negro, el papel al 60 % da 9:1 de sobra: es el gris de este sitio
      para lo que acompaña sin mandar. */
   .ahora-cierre {
@@ -526,11 +534,15 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
           return;
         }
 
-        /* Lo que viene, por días. La fecha se escribe una vez y encima del
-           grupo, y entonces cada renglón sólo tiene que decir su hora — o los
-           minutos que faltan, si ya está encima. */
+        /* Lo que viene DESPUÉS de la chapa, por días. La primera no se pone
+           aquí porque la lleva la chapa roja, y escribirla en los dos sitios
+           la convierte en dos actividades distintas para quien lee rápido.
+
+           La fecha se escribe una vez y encima del grupo, y entonces cada
+           renglón sólo tiene que decir su hora — o los minutos que faltan, si
+           ya está encima. */
         let ultimo = '';
-        for (const p of proximas.slice(0, CABEN)) {
+        for (const p of proximas.slice(1, CABEN + 1)) {
           const f = new Date(p.desde);
           const suyo = f.toDateString();
           if (suyo !== ultimo) {
@@ -618,12 +630,37 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
 
       pintarLista();
 
-      /* La chapa roja: lo siguiente, y sólo cuando la lista de arriba es lo
-         que está corriendo. Sin nada corriendo la lista YA es lo que viene, y
-         la chapa estaría repitiendo su primer renglón. */
+      /**
+       * La chapa roja: lo siguiente, siempre.
+       *
+       * Estuvo atada a que hubiera algo corriendo, y era una atadura falsa:
+       * el momento en que más falta hace saber qué es lo próximo es
+       * justamente cuando no hay nada abierto. Da igual que falten veinte
+       * minutos o dos días — si hay un siguiente, se enseña.
+       *
+       * Y cambia de sitio según el caso, porque una banda se lee en orden de
+       * reloj. Con cosas corriendo va DEBAJO de la lista: lo que está abierto
+       * primero, lo que entra después. Sin nada corriendo va ENCIMA, porque
+       * entonces es lo más cercano de todo y la lista son las que vienen
+       * detrás de ella.
+       *
+       * Se mueve en el DOM y no con `order`. Reordenar por CSS cambia lo que
+       * se ve y deja quieto lo que se lee: quien escuche la banda con un
+       * lector de pantalla oiría «lo siguiente» al final, después de las seis
+       * actividades que van detrás de ello. Moverlo de verdad cuesta una
+       * línea y las dos lecturas dicen lo mismo.
+       */
       const luego = $('[data-ahora-luego]')!;
       const quien = $('[data-ahora-artista]')!;
-      if (siguiente && corriendo.length) {
+      if (siguiente) {
+        if (corriendo.length) {
+          delete luego.dataset.primero;
+          lista.after(luego);
+        } else {
+          luego.dataset.primero = '';
+          lista.before(luego);
+        }
+
         const cuando = cuandoEs(siguiente.desde);
         $('[data-ahora-cuando]')!.textContent = cuando.dicho;
         /* Con la hora delante del título cuando la chapa sólo dice minutos:
