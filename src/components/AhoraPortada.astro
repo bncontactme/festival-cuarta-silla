@@ -71,17 +71,22 @@ const rutaPrograma = conBase('/programa');
 
 <section class="ahora" data-ahora hidden aria-label="Qué está pasando ahora">
   <div class="ahora-reja">
-    {/* ── La hora, que es el titular ──────────────────────────────────────
-        A tamaño de cartel y en amarillo, porque es lo único de esta sección
-        que caduca: quien llega y ve «13:40» ya sabe, antes de leer una sola
-        palabra, que lo de al lado es de verdad y está pasando. */}
+    {/* ── La hora, que es el objeto ────────────────────────────────────────
+        Grande y centrada, y no una columna de dieciséis rem al canto
+        izquierdo. Es lo único de la portada que caduca: quien llega y ve
+        «13:40» a tamaño de reloj de estación ya sabe, antes de leer una sola
+        palabra, que lo de abajo es de verdad y está pasando ahora mismo.
+
+        `display-centro` y no sólo `text-align`: la clase `.display` aprieta la
+        Anton un 8 % con un `scaleX` anclado a la izquierda, así que centrar el
+        texto sin mover el ancla deja el bloque descuadrado a la derecha. */}
     <div class="ahora-reloj">
       <p class="meta text-amarillo" data-ahora-dia></p>
-      <p class="display ahora-hora" data-ahora-reloj></p>
+      <p class="display display-centro ahora-hora" data-ahora-reloj></p>
       <p class="meta ahora-cierre" data-ahora-cierre></p>
     </div>
 
-    <div class="min-w-0">
+    <div class="ahora-cuerpo">
       <p class="meta ahora-rotulo" data-ahora-rotulo></p>
 
       {/* Los renglones los escribe el script. Son renglones y no fichas por lo
@@ -115,39 +120,53 @@ const rutaPrograma = conBase('/programa');
     color: var(--color-papel);
   }
 
-  /* Dos columnas: la hora manda a la izquierda con un ancho fijo —16rem, que
-     es lo que mide «13:40» a este cuerpo— y lo que pasa ocupa el resto. En
-     cuanto la ventana se estrecha, una encima de la otra: la hora en una
-     columna de ocho centímetros deja de ser un titular y pasa a ser un estorbo
-     al lado de los títulos. */
+  /* El reloj arriba y centrado, y lo demás debajo.
+     Fueron dos columnas —16rem para la hora y el resto para la lista— y el
+     reloj salía del tamaño de un titular cualquiera, apoyado en un canto. Si
+     es el objeto principal no puede medirse contra una columna: se mide contra
+     la banda entera, y eso pide que no haya nada a su lado. */
   .ahora-reja {
-    display: grid;
-    gap: 1.5rem 2.5rem;
-    padding: 1.75rem 1.5rem;
+    padding: 2rem 1.5rem 1.75rem;
   }
   @media (min-width: 1024px) {
     .ahora-reja {
-      grid-template-columns: 16rem minmax(0, 1fr);
-      padding: 2rem 2.25rem;
+      padding: 2.75rem 2.25rem 2.25rem;
     }
   }
 
+  .ahora-reloj {
+    text-align: center;
+  }
+
+  /* De 5.5rem a 11: es el objeto de la sección, y a tamaño de reloj de
+     estación se lee cruzando la habitación. En `vw` para que crezca con la
+     ventana, con tope para que en un monitor de 27 pulgadas no se coma la
+     banda entera. */
   .ahora-hora {
-    margin-top: 0.5rem;
-    font-size: clamp(3.5rem, 6vw, 5.5rem);
-    line-height: 0.85;
+    margin-top: 0.35rem;
+    font-size: clamp(4.5rem, 11vw, 11rem);
+    line-height: 0.82;
     color: var(--color-amarillo);
+  }
+
+  /* La lista y lo que la acompaña, separadas del reloj por un filete: sin él
+     el rótulo se lee como el pie de la hora y no como la cabecera de lo que
+     viene debajo. */
+  .ahora-cuerpo {
+    min-width: 0;
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-papel) 22%, transparent);
   }
 
   /* Sobre negro, el papel al 60 % da 9:1 de sobra: es el gris de este sitio
      para lo que acompaña sin mandar. */
-  .ahora-cierre,
-  .ahora-rotulo {
-    margin-top: 0.75rem;
+  .ahora-cierre {
+    margin-top: 0.6rem;
     color: var(--color-apagado-papel);
   }
   .ahora-rotulo {
-    margin-top: 0;
+    color: var(--color-apagado-papel);
   }
 
   /* ── Los renglones ───────────────────────────────────────────────────
@@ -175,8 +194,8 @@ const rutaPrograma = conBase('/programa');
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 0.35rem 1.25rem;
-    padding: 0.7rem 0;
+    gap: 0.3rem 1.25rem;
+    padding: 0.5rem 0;
     border-bottom: 1px solid color-mix(in srgb, var(--color-papel) 22%, transparent);
   }
   .ahora-lista :global(li:last-child .ahora-fila) {
@@ -202,14 +221,17 @@ const rutaPrograma = conBase('/programa');
      renglones se leen de un barrido vertical y no uno por uno. */
   .ahora-lista :global(.ahora-hasta) {
     flex: 0 0 auto;
-    min-width: 6.5rem;
+    min-width: 5.5rem;
     color: var(--color-amarillo);
   }
+  /* Un punto por debajo de lo que era: con el reloj mandando a tamaño de
+     cartel, la lista no tiene que competir con él. Es lo que se lee después,
+     no a la vez. */
   .ahora-lista :global(.ahora-que) {
     flex: 1 1 14rem;
     min-width: 0;
-    font-size: 1.25rem;
-    line-height: 1.1;
+    font-size: 1rem;
+    line-height: 1.2;
     color: var(--color-papel);
     transition: color 0.2s var(--ease-salida);
   }
@@ -217,6 +239,23 @@ const rutaPrograma = conBase('/programa');
     flex: 0 0 auto;
     color: var(--color-apagado-papel);
     transition: color 0.2s var(--ease-salida);
+  }
+
+  /* ── La fecha, entre un día y el siguiente ───────────────────────────
+     Cuando la lista es lo que viene, seis renglones pueden cruzar de un día a
+     otro. Sin esto, «11:00» y «19:00» seguidos se leen como la misma tarde, y
+     no lo son. Con la fecha delante, cada renglón puede decir sólo su hora y
+     dejar de repetir el día seis veces.
+
+     Es un renglón de la lista y no un titular: un pelo de aire por encima, la
+     fecha en amarillo y nada más. El primero no lleva el aire de arriba, que
+     lo pondría a flotar debajo del filete del cuerpo. */
+  .ahora-lista :global(.ahora-dia) {
+    padding-top: 1rem;
+    color: var(--color-amarillo);
+  }
+  .ahora-lista :global(li:first-child.ahora-dia) {
+    padding-top: 0;
   }
 
   .ahora-mas {
@@ -255,8 +294,8 @@ const rutaPrograma = conBase('/programa');
   .ahora-proxima {
     flex: 1 1 12rem;
     min-width: 0;
-    font-size: 1.5rem;
-    line-height: 1;
+    font-size: 1.25rem;
+    line-height: 1.05;
     color: var(--color-amarillo);
   }
   /* El artista, al otro canto: es de quien es, no qué es, y por eso no compite
@@ -434,11 +473,35 @@ const rutaPrograma = conBase('/programa');
        * renglón y repetirlo dos veces en el mismo bloque se lee como dos
        * cosas.
        */
+      /**
+       * El renglón de la fecha que abre cada día.
+       *
+       * «Jueves 24 de septiembre», sin la coma que mete `toLocaleDateString`
+       * cuando se le piden el día de la semana y la fecha de una vez: es como
+       * escribe las fechas el resto del sitio, y sale de juntar dos llamadas
+       * en vez de limpiar la coma a posteriori.
+       *
+       * Y si es hoy, «Hoy» a secas: el reloj que está justo encima ya dice
+       * «Ahora · jueves 24», y repetirlo entero dos renglones más abajo es
+       * gastar el único sitio donde cabe algo que no se sabe.
+       */
+      const diaSuelto = (f: Date) => {
+        const li = document.createElement('li');
+        li.className = 'meta ahora-dia';
+        li.textContent =
+          f.toDateString() === d.toDateString()
+            ? 'Hoy'
+            : `${f.toLocaleDateString('es-MX', { weekday: 'long' })} ${f.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}`;
+        return li;
+      };
+
       const pintarLista = () => {
         lista.textContent = '';
         mas.hidden = true;
 
         if (corriendo.length) {
+          /* Todo lo que corre es de hoy por definición, así que aquí no hay
+             días que separar: la fecha la lleva el rótulo del reloj. */
           for (const p of corriendo.slice(0, CABEN))
             lista.append(renglon(p, `hasta ${relojDe(new Date(p.hasta))}`));
 
@@ -450,8 +513,26 @@ const rutaPrograma = conBase('/programa');
           return;
         }
 
-        for (const p of proximas.slice(0, CABEN))
-          lista.append(renglon(p, cuandoEs(p.desde).dicho));
+        /* Lo que viene, por días. La fecha se escribe una vez y encima del
+           grupo, y entonces cada renglón sólo tiene que decir su hora — o los
+           minutos que faltan, si ya está encima. */
+        let ultimo = '';
+        for (const p of proximas.slice(0, CABEN)) {
+          const f = new Date(p.desde);
+          const suyo = f.toDateString();
+          if (suyo !== ultimo) {
+            lista.append(diaSuelto(f));
+            ultimo = suyo;
+          }
+          const faltan = Math.round((p.desde - ahora) / 60000);
+          lista.append(renglon(p, faltan <= 90 ? `En ${faltan} min` : relojDe(f)));
+        }
+
+        const sobran = proximas.length - CABEN;
+        if (sobran > 0) {
+          mas.textContent = `Y ${sobran} más en el programa →`;
+          mas.hidden = false;
+        }
       };
 
       if (ahora < arranca) {
