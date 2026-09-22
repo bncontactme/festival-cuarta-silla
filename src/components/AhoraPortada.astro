@@ -183,14 +183,6 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     min-width: 0;
   }
 
-  /* Cuando la chapa va delante de la lista, el aire cambia de lado: el margen
-     que la separaba de lo que tenía encima tiene que separarla de lo que ahora
-     tiene debajo. */
-  .ahora-luego[data-primero] {
-    margin-top: 0.5rem;
-    margin-bottom: 0.9rem;
-  }
-
   /* Sobre negro, el papel al 60 % da 9:1 de sobra: es el gris de este sitio
      para lo que acompaña sin mandar. */
   .ahora-cierre {
@@ -466,6 +458,28 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
       lista.textContent = '';
 
       /**
+       * Cuánto falta para algo, en horas y minutos.
+       *
+       * Es lo que dice la chapa roja, y es una cuenta atrás de verdad: «En 24
+       * h 26 min», no «Jue 24 · 11:00». La diferencia no es de estilo. La hora
+       * a la que es ya está escrita dos renglones más arriba, en su sitio de
+       * la lista; lo que la chapa añade —lo único que añade— es cuánto queda,
+       * que es lo que hay que saber para decidir si sales de casa.
+       *
+       * Y no se corta a las hora y media. Faltando dos días sigue contando en
+       * horas, porque el día al que es tampoco dice cuánto falta: entre «jue
+       * 24» y «en 24 h» hay una cuenta que si no la hace la banda la tiene que
+       * hacer quien lee.
+       */
+      const faltaPara = (cuando: number) => {
+        const minutos = Math.max(0, Math.round((cuando - ahora) / 60000));
+        if (minutos < 60) return `En ${minutos} min`;
+        const horas = Math.floor(minutos / 60);
+        const resto = minutos % 60;
+        return resto ? `En ${horas} h ${resto} min` : `En ${horas} h`;
+      };
+
+      /**
        * Cuándo es algo, contado desde ahora y dicho como lo diría uno.
        *
        * Es la única regla de horas de la banda, y la usan los renglones y la
@@ -534,15 +548,17 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
           return;
         }
 
-        /* Lo que viene DESPUÉS de la chapa, por días. La primera no se pone
-           aquí porque la lleva la chapa roja, y escribirla en los dos sitios
-           la convierte en dos actividades distintas para quien lee rápido.
+        /* Lo que viene, por días y desde la primera. La primera sale también
+           en la chapa de abajo, y no es repetirla: arriba está en su sitio de
+           la lista, con su hora, entre las otras; abajo está la cuenta de lo
+           que falta para ella, que es lo único que la chapa dice y que en un
+           renglón de lista no cabe.
 
            La fecha se escribe una vez y encima del grupo, y entonces cada
            renglón sólo tiene que decir su hora — o los minutos que faltan, si
            ya está encima. */
         let ultimo = '';
-        for (const p of proximas.slice(1, CABEN + 1)) {
+        for (const p of proximas.slice(0, CABEN)) {
           const f = new Date(p.desde);
           const suyo = f.toDateString();
           if (suyo !== ultimo) {
@@ -638,37 +654,17 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
        * justamente cuando no hay nada abierto. Da igual que falten veinte
        * minutos o dos días — si hay un siguiente, se enseña.
        *
-       * Y cambia de sitio según el caso, porque una banda se lee en orden de
-       * reloj. Con cosas corriendo va DEBAJO de la lista: lo que está abierto
-       * primero, lo que entra después. Sin nada corriendo va ENCIMA, porque
-       * entonces es lo más cercano de todo y la lista son las que vienen
-       * detrás de ella.
-       *
-       * Se mueve en el DOM y no con `order`. Reordenar por CSS cambia lo que
-       * se ve y deja quieto lo que se lee: quien escuche la banda con un
-       * lector de pantalla oiría «lo siguiente» al final, después de las seis
-       * actividades que van detrás de ello. Moverlo de verdad cuesta una
-       * línea y las dos lecturas dicen lo mismo.
+       * Va SIEMPRE debajo de la lista, corra algo o no: es el remate de la
+       * banda, y un remate no se cambia de sitio según el día.
        */
       const luego = $('[data-ahora-luego]')!;
       const quien = $('[data-ahora-artista]')!;
       if (siguiente) {
-        if (corriendo.length) {
-          delete luego.dataset.primero;
-          lista.after(luego);
-        } else {
-          luego.dataset.primero = '';
-          lista.before(luego);
-        }
-
-        const cuando = cuandoEs(siguiente.desde);
-        $('[data-ahora-cuando]')!.textContent = cuando.dicho;
-        /* Con la hora delante del título cuando la chapa sólo dice minutos:
-           «en 20 min» dice cuándo salir de casa y «14:00» dice qué apuntar. Y
-           sin ella cuando la chapa ya la trae. */
-        $('[data-ahora-proxima]')!.textContent = cuando.llevaHora
-          ? siguiente.titulo
-          : `${relojDe(new Date(siguiente.desde))} · ${siguiente.titulo}`;
+        $('[data-ahora-cuando]')!.textContent = faltaPara(siguiente.desde);
+        /* Y la hora delante del título, siempre: la chapa ya no la dice —dice
+           lo que falta—, así que si no va aquí no está en ningún sitio. */
+        $('[data-ahora-proxima]')!.textContent =
+          `${relojDe(new Date(siguiente.desde))} · ${siguiente.titulo}`;
         quien.textContent = siguiente.artista || siguiente.sede;
         quien.hidden = false;
         luego.hidden = false;
