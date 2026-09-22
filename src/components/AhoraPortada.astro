@@ -107,7 +107,13 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
 
 <style>
   /* La banda entera: negra dentro del campo rojo de la sección, con su canto
-     de 2 px como cualquier otro objeto del sitio. El negro es lo que la separa
+     de 2 px como cualquier otro objeto del sitio.
+
+     Y apretada a propósito. El aire de aquí dentro estaba puesto con la mano
+     del resto del sitio —secciones que respiran, con una cosa cada una—, y
+     esto no es una sección: es un tablero de salidas. Lo que se le pide es
+     que quepa de una pasada, y cada renglón de aire que se le quita es media
+     actividad más a la vista sin tocar un solo cuerpo de letra. El negro es lo que la separa
      del rojo sin inventar un color nuevo — es el mismo trato que recibe en el
      cartel de sede, donde el campo de al lado también es rojo. */
   .ahora {
@@ -127,13 +133,13 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
      al lado de los títulos. */
   .ahora-reja {
     display: grid;
-    gap: 1.5rem 2.5rem;
-    padding: 1.75rem 1.5rem;
+    gap: 1.25rem 2rem;
+    padding: 1.25rem 1.25rem;
   }
   @media (min-width: 1024px) {
     .ahora-reja {
       grid-template-columns: 18rem minmax(0, 1fr);
-      padding: 2rem 2.25rem;
+      padding: 1.4rem 1.75rem;
     }
   }
 
@@ -159,7 +165,7 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding-right: 2.5rem;
+      padding-right: 2rem;
       border-right: 1px solid color-mix(in srgb, var(--color-papel) 22%, transparent);
     }
   }
@@ -167,7 +173,7 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
   /* Y un punto más grande, que para eso tiene la columna entera: es el objeto
      al que se le mira primero. */
   .ahora-hora {
-    margin-top: 0.5rem;
+    margin-top: 0.3rem;
     font-size: clamp(3.5rem, 7vw, 6.5rem);
     line-height: 0.85;
     color: var(--color-amarillo);
@@ -180,7 +186,7 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
   /* Sobre negro, el papel al 60 % da 9:1 de sobra: es el gris de este sitio
      para lo que acompaña sin mandar. */
   .ahora-cierre {
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
     color: var(--color-apagado-papel);
   }
   .ahora-rotulo {
@@ -193,7 +199,7 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
      marco. El último no lleva filete — un canto suelto al aire se lee como que
      la lista sigue y se cortó. */
   .ahora-lista {
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
   }
 
   /* ── Y por qué estos van en `:global` ─────────────────────────────────
@@ -213,7 +219,7 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     flex-wrap: wrap;
     align-items: baseline;
     gap: 0.3rem 1.25rem;
-    padding: 0.5rem 0;
+    padding: 0.38rem 0;
     border-bottom: 1px solid color-mix(in srgb, var(--color-papel) 22%, transparent);
   }
   .ahora-lista :global(li:last-child .ahora-fila) {
@@ -269,7 +275,7 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
      fecha en amarillo y nada más. El primero no lleva el aire de arriba, que
      lo pondría a flotar debajo del filete del cuerpo. */
   .ahora-lista :global(.ahora-dia) {
-    padding-top: 1rem;
+    padding-top: 0.75rem;
     color: var(--color-amarillo);
   }
   .ahora-lista :global(li:first-child.ahora-dia) {
@@ -285,10 +291,10 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     flex-wrap: wrap;
     align-items: center;
     gap: 0.75rem 1.25rem;
-    margin-top: 1.25rem;
+    margin-top: 0.9rem;
     background-color: var(--color-rojo);
     border: var(--borde) solid var(--color-amarillo);
-    padding: 0.85rem 1.25rem;
+    padding: 0.6rem 1rem;
   }
 
   /* El «en 20 min» trae su propio campo, y no va suelto sobre el rojo. Es la
