@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 161,
-  "actualizado": "2026-09-18T05:26:18.590Z",
+  "version": 162,
+  "actualizado": "2026-09-22T18:15:38.640Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1714,6 +1714,36 @@
       "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1789708934/cuartasilla/artistas/yfm464sa2cx123pofhfe.jpg",
       "instagram": "https://www.instagram.com/lifeteller_/",
       "sede": "Ala Rota"
+    },
+    {
+      "nombre": "Liz Mercado",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1790100716/cuartasilla/artistas/tsgpnvyjfyz4qvhjrvwl.jpg",
+      "instagram": "https://www.instagram.com/lizmercadoes/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Pedro Delgadillo",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1790100763/cuartasilla/artistas/bdf3cwgshxcrs9eyyrdz.jpg",
+      "instagram": "https://www.instagram.com/nemoinkartist/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Sinclair Castro",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1790100801/cuartasilla/artistas/bvqpjlvqels2joj5emdt.jpg",
+      "instagram": "https://www.instagram.com/sinclaircastro2022/",
+      "sede": "No Museo"
+    },
+    {
+      "nombre": "Mia Amelie",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1790100866/cuartasilla/artistas/c4r4kitpppsjmmgkbeh9.jpg",
+      "instagram": "https://www.instagram.com/Mia.Efimera/",
+      "sede": "Cuerpos Parlantes"
+    },
+    {
+      "nombre": "Isabel Jauregui",
+      "foto": "https://res.cloudinary.com/duog120j4/image/upload/v1790100920/cuartasilla/artistas/hfdi8n9xbxvppd6awjvl.jpg",
+      "instagram": "https://www.instagram.com/is0bel_/",
+      "sede": "Cuerpos Parlantes"
     }
   ],
   "archivo": [],
