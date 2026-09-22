@@ -1,0 +1,352 @@
+---
+/**
+ * Las dos maneras de mirar un día, en la portada: por horas y en rejilla.
+ *
+ * La rejilla contesta «¿qué se pisa con qué?» —dónde está el hueco de la
+ * tarde, qué dos cosas caen a la misma hora en dos sedes distintas— y lo
+ * contesta con una forma, sin una palabra dentro. Es buenísima para eso y no
+ * sirve para nada más: no dice cómo se llama lo que uno está mirando.
+ *
+ * Y «cómo se llama» es lo que se pregunta primero. Por eso la lista por horas
+ * es la vista de arranque y la rejilla la segunda: quien llega quiere leer qué
+ * hay el sábado, y sólo después —si acaso— quiere ver cómo se reparte.
+ *
+ * ── Un mando, no dos vistas apiladas ──────────────────────────────────────
+ *
+ * Es el conmutador de burbuja de `global.css`, el mismo que reparte los días
+ * en `/programa` y el mismo que reparten las vistas del panel. No se estrena
+ * ninguna forma: dos celdas, canto que las abraza y una burbuja de tinta que
+ * se desliza a la elegida.
+ *
+ * ── Y los dos siguen al mismo día ────────────────────────────────────────
+ *
+ * El día lo manda el carril de la portada, que ya existía y que es quien manda
+ * sobre la rejilla. Esta lista no se lo pregunta a nadie: mira el
+ * `aria-pressed` de las celdas del carril y se pone donde se ponga la rejilla.
+ * Así no hay dos ideas de «qué día se está viendo» que puedan separarse — y de
+ * paso hereda gratis la que la rejilla sabe y la lista no, que es cuál de los
+ * cuatro es hoy.
+ */
+import { conBase } from '../lib/base';
+import {
+  agendaPorDia,
+  enTodasLasSedes,
+  rutaDeSede,
+  sedeDe,
+} from '../data/site';
+
+/** Por qué día arranca: el primero. Durante el festival lo corrige el carril
+ *  —la rejilla lo abre en hoy— y esta lista le sigue el paso. */
+const primerDia = 0;
+
+/** Cuántas sedes toca un día. Es la segunda mitad del rótulo, y es la misma
+ *  cuenta que hace la rejilla para el suyo: las dos vistas comparten cabecera,
+ *  así que tienen que compartir también lo que dice. */
+const cuantasSedes = (sedes: string[]) => new Set(sedes).size;
+---
+
+<div class="vistas" data-vistas>
+  {/* El mando. A la derecha del todo y no centrado: la sección se lee por el
+      canto izquierdo —rótulo, titular, carril— y un mando en medio sería una
+      tercera columna de peso en una sección que ya tiene dos cosas que mirar. */}
+  <div class="conmutador vistas-mando" role="tablist" aria-label="Cómo ver el día">
+    <span class="conmutador-burbuja" aria-hidden="true"></span>
+    <button
+      type="button"
+      role="tab"
+      class="conmutador-opcion"
+      data-vista="horas"
+      id="vista-horas"
+      aria-controls="panel-horas"
+      aria-selected="true"
+    >
+      Por horas
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="conmutador-opcion"
+      data-vista="rejilla"
+      id="vista-rejilla"
+      aria-controls="panel-rejilla"
+      aria-selected="false"
+      tabindex="-1"
+    >
+      Rejilla
+    </button>
+  </div>
+
+  {/* ── La lista por horas ───────────────────────────────────────────────
+      Dentro de una ficha y con el mismo rótulo que la rejilla —día y cuenta,
+      en Courier y al canto— para que al cambiar de vista no se mueva el marco:
+      lo único que cambia es lo de dentro. */}
+  <div
+    class="panel-vista"
+    id="panel-horas"
+    role="tabpanel"
+    aria-labelledby="vista-horas"
+    data-panel-vista="horas"
+  >
+    {agendaPorDia.map((dia) => (
+      <div class="ficha" data-dia-horas={dia.indice} hidden={dia.indice !== primerDia}>
+        <p class="vistas-rotulo">
+          <span>
+            {dia.dia} {dia.fecha}
+          </span>
+          <span class="vistas-rotulo-nota">
+            {dia.actividades.length === 0
+              ? 'Por anunciar'
+              : `${dia.actividades.length} actividades · ${cuantasSedes(dia.actividades.map((a) => a.sede))} sedes`}
+          </span>
+        </p>
+
+        {dia.actividades.length === 0 ? (
+          <p class="meta vistas-vacio">Todavía no hay nada anunciado este día</p>
+        ) : (
+          <ul>
+            {dia.actividades.map((a) => {
+              /* El renglón entero es la puerta a su sede, igual que en la banda
+                 del ahora. Y por lo mismo de allá: la ruta sólo se escribe si
+                 la sede está en la lista, porque `rutaDeSede` la deduce del
+                 nombre y un nombre tecleado a mano en el panel daría un 404. */
+              const suya = enTodasLasSedes(a.sede) ? undefined : sedeDe(a.sede);
+              const Fila = suya ? 'a' : 'div';
+              return (
+                <li>
+                  <Fila
+                    class="hora-fila"
+                    href={suya ? conBase(rutaDeSede(suya.nombre)) : undefined}
+                    aria-label={suya ? `${a.titulo}, en ${a.sede}` : undefined}
+                  >
+                    {/* De inicio a fin, y no sólo la hora de empezar: en una
+                        lista de diecinueve renglones lo que se busca es el
+                        hueco, y el hueco no se ve sin el final. */}
+                    <span class="meta hora-cuando">
+                      {a.inicio}–{a.fin}
+                    </span>
+                    <span class="hora-que">{a.titulo}</span>
+                    <span class="meta hora-donde">{a.sede}</span>
+                  </Fila>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    ))}
+  </div>
+
+  {/* ── La rejilla ───────────────────────────────────────────────────────
+      Entra por la ranura porque es de quien la usa: la portada la monta con
+      sus propias opciones —mini, resumen, atada al carril— y este componente
+      no tiene por qué conocerlas. */}
+  <div
+    class="panel-vista"
+    id="panel-rejilla"
+    role="tabpanel"
+    aria-labelledby="vista-rejilla"
+    data-panel-vista="rejilla"
+    hidden
+  >
+    <slot />
+  </div>
+</div>
+
+<style>
+  /* ── La pista del conmutador ─────────────────────────────────────────
+     En papel, y ésta es la única decisión del mando que importa.
+
+     El conmutador de `global.css` nace con la pista transparente: vive sobre
+     campos claros, así que la celda apagada es letra de tinta sobre el propio
+     campo y la burbuja es lo único macizo. Aquí el campo es rojo y tinta sobre
+     rojo son 4,2:1 para una letra de 11 px, así que la pista tiene que traer
+     campo propio.
+
+     Fue amarilla y era un error: sobre rojo, el amarillo es el color con el
+     que este sitio dice «mira esto». La celda APAGADA salía gritando más que
+     la burbuja de tinta, y el mando se leía como dos cosas encendidas a la vez
+     en vez de como una elegida entre dos. En papel la pista se calla, la
+     burbuja vuelve a ser lo único macizo, y se ve de un golpe cuál de las dos
+     está puesta. */
+  .vistas-mando {
+    display: inline-grid;
+    margin-bottom: 1.25rem;
+    background-color: var(--color-papel);
+  }
+
+  /* Y la apagada, además, más tenue que la puesta: el color hace la mitad del
+     trabajo y la burbuja la otra mitad. */
+  .vistas-mando .conmutador-opcion:not([aria-selected='true']) {
+    color: var(--color-apagado);
+  }
+
+  /* ── El rótulo de la ficha ───────────────────────────────────────────
+     Día y cuenta, en Courier y repartidos a los dos cantos. Es letra por letra
+     el `.gantt-rotulo` de la rejilla, y se copia porque no se puede heredar:
+     aquél es un estilo con ámbito dentro de `Gantt.astro` y fuera de ese
+     componente no pinta. Copiarlo es el precio de que las dos vistas compartan
+     cabecera; el día que se toque una, hay que tocar la otra. */
+  .vistas-rotulo {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+  .vistas-rotulo-nota {
+    font-weight: 400;
+    color: color-mix(in srgb, var(--color-tinta) 45%, transparent);
+  }
+
+  /* ── Los renglones de la lista por horas ─────────────────────────────
+     Un filete de un pelo entre uno y otro y nada más: es la misma gramática
+     que la banda del ahora y que la lista de las dieciséis sedes. Con
+     diecinueve actividades un sábado, cualquier caja por renglón sería una
+     pared de rectángulos. */
+  .hora-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.3rem 1.25rem;
+    padding: 0.62rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-tinta) 18%, transparent);
+  }
+  li:last-child .hora-fila {
+    border-bottom: 0;
+  }
+
+  a.hora-fila {
+    transition: color 0.2s var(--ease-salida);
+  }
+  a.hora-fila:hover .hora-que,
+  a.hora-fila:focus-visible .hora-que {
+    color: var(--color-rojo);
+  }
+  a.hora-fila:hover .hora-donde,
+  a.hora-fila:focus-visible .hora-donde {
+    color: var(--color-tinta);
+  }
+
+  /* La hora a ancho fijo: con las once alineadas en columna, el día se lee de
+     un barrido vertical y no renglón por renglón. */
+  .hora-cuando {
+    flex: 0 0 auto;
+    min-width: 7.5rem;
+    color: var(--color-rojo);
+  }
+  .hora-que {
+    flex: 1 1 16rem;
+    min-width: 0;
+    font-weight: 700;
+    line-height: 1.25;
+    transition: color 0.2s var(--ease-salida);
+  }
+  .hora-donde {
+    flex: 0 0 auto;
+    color: var(--color-tenue);
+    transition: color 0.2s var(--ease-salida);
+  }
+
+  .vistas-vacio {
+    color: var(--color-tenue);
+  }
+</style>
+
+<script>
+  /**
+   * El mando de las dos vistas, y el día que las dos siguen.
+   *
+   * Sin JavaScript no hay mando —los `hidden` salen del build— y lo que queda
+   * es la lista por horas del primer día, que es la vista de arranque: se
+   * pierde poder cambiar, no se pierde el programa.
+   */
+  const marco = document.querySelector<HTMLElement>('[data-vistas]');
+
+  if (marco) {
+    const mando = marco.querySelector<HTMLElement>('.conmutador')!;
+    const pestanas = [...marco.querySelectorAll<HTMLElement>('[data-vista]')];
+    const paneles = [...marco.querySelectorAll<HTMLElement>('[data-panel-vista]')];
+
+    const verVista = (cual: string) => {
+      pestanas.forEach((p, i) => {
+        const suya = p.dataset.vista === cual;
+        p.setAttribute('aria-selected', String(suya));
+        /* Una sola parada de tabulador para el mando entero, que es como se
+           recorre un grupo de pestañas: dentro se cambia con las flechas. */
+        p.tabIndex = suya ? 0 : -1;
+        /* Y dónde se para la burbuja. El conmutador de `global.css` la mueve
+           en múltiplos exactos de una celda, así que aquí sólo va el número. */
+        if (suya) mando.style.setProperty('--activa', String(i));
+      });
+
+      for (const panel of paneles) {
+        const suyo = panel.dataset.panelVista === cual;
+        panel.hidden = !suyo;
+        /* La vista que entra sube desde abajo, como las cortinas del resto del
+           sitio. El estado se quita al acabar para que la próxima vez vuelva a
+           dispararse. */
+        if (suyo) {
+          panel.dataset.estado = 'entrando';
+          panel.addEventListener('animationend', () => delete panel.dataset.estado, {
+            once: true,
+          });
+        }
+      }
+    };
+
+    mando.addEventListener('click', (e) => {
+      const boton = (e.target as HTMLElement).closest<HTMLElement>('[data-vista]');
+      if (boton?.dataset.vista) verVista(boton.dataset.vista);
+    });
+
+    /* Flechas dentro del mando, que es lo que un grupo de pestañas tiene que
+       hacer con el teclado. */
+    mando.addEventListener('keydown', (e) => {
+      const paso = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!paso) return;
+      e.preventDefault();
+      const ahora = pestanas.findIndex((p) => p.getAttribute('aria-selected') === 'true');
+      const siguiente = pestanas[(ahora + paso + pestanas.length) % pestanas.length];
+      verVista(siguiente.dataset.vista!);
+      siguiente.focus();
+    });
+
+    /* ── Y el día ──────────────────────────────────────────────────────
+       No lo manda esta lista: lo manda el carril de la portada, que es quien
+       ya manda sobre la rejilla. Aquí sólo se mira cuál está pulsado.
+
+       Con un observador y no con un `click`: la rejilla cambia el carril
+       también por su cuenta —al arrancar, para abrir el día de hoy—, y eso no
+       es un clic de nadie. Mirando el atributo se cubren los dos casos con una
+       sola regla, y el orden en que carguen los dos scripts deja de importar. */
+    const carril = document.querySelector<HTMLElement>('[data-dias-portada]');
+    const fichas = [...marco.querySelectorAll<HTMLElement>('[data-dia-horas]')];
+
+    const verDia = (cual: string) => {
+      for (const ficha of fichas) ficha.hidden = ficha.dataset.diaHoras !== cual;
+    };
+
+    if (carril && fichas.length) {
+      const puesto = () =>
+        carril.querySelector<HTMLElement>('[data-dia][aria-pressed="true"]')?.dataset.dia;
+
+      const hoy = puesto();
+      if (hoy !== undefined) verDia(hoy);
+
+      new MutationObserver(() => {
+        const cual = puesto();
+        if (cual !== undefined) verDia(cual);
+      }).observe(carril, {
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['aria-pressed'],
+      });
+    }
+  }
+</script>

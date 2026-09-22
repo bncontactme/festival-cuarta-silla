@@ -8,6 +8,7 @@ import Mosaico from '../components/Mosaico.astro';
 import Portada from '../components/movil/Portada.astro';
 import Gantt from '../components/Gantt.astro';
 import AhoraPortada from '../components/AhoraPortada.astro';
+import VistasDelDia from '../components/VistasDelDia.astro';
 import AvisoPrograma from '../components/AvisoPrograma.astro';
 import Mapa from '../components/Mapa.astro';
 import {
@@ -504,11 +505,18 @@ const sillasSedes = [
             ))}
           </nav>
 
-          {/* El mini: la silueta del día, sin texto en las barras. No es para
-              leer qué hay —eso está en la banda y en el programa—, es para ver
-              de un golpe cómo se reparte la jornada entre las sedes. */}
+          {/* Las dos maneras de mirar el día que manda el carril, con el
+              conmutador de burbuja del sitio: por horas —que es la de
+              arranque, porque «cómo se llama lo que hay» se pregunta antes que
+              «cómo se reparte»— y la rejilla, que es la que estaba.
+
+              La rejilla entra por la ranura y no dentro del componente: la
+              monta la portada con sus propias opciones —mini, resumen, atada
+              al carril—, y `VistasDelDia` no tiene por qué conocerlas. */}
           <div class="mt-8" data-reveal="arriba" data-retraso="120">
-            <Gantt agrupar="sede" resumen mini selector="[data-dias-portada]" />
+            <VistasDelDia>
+              <Gantt agrupar="sede" resumen mini selector="[data-dias-portada]" />
+            </VistasDelDia>
           </div>
         </div>
         ) : (
