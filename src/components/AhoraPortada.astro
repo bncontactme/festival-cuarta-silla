@@ -76,10 +76,15 @@ const rutaPrograma = conBase('/programa');
         antes de leer una sola palabra, que lo de al lado es de verdad y está
         pasando ahora mismo. Y es SIEMPRE la hora —nunca el día—: un reloj que
         unas veces marca las 13:40 y otras pone «JUE 24» deja de ser un reloj,
-        y lo que se mira ahí se mira sin leer. */}
+        y lo que se mira ahí se mira sin leer.
+
+        `display-centro` y no sólo el `text-align` de la columna: la clase
+        `.display` aprieta la Anton un 8 % con un `scaleX` anclado a la
+        izquierda, así que centrar el texto sin mover el ancla deja el bloque
+        descuadrado hacia la derecha. */}
     <div class="ahora-reloj">
       <p class="meta text-amarillo" data-ahora-dia></p>
-      <p class="display ahora-hora" data-ahora-reloj></p>
+      <p class="display display-centro ahora-hora" data-ahora-reloj></p>
       <p class="meta ahora-cierre" data-ahora-cierre></p>
     </div>
 
@@ -117,11 +122,11 @@ const rutaPrograma = conBase('/programa');
     color: var(--color-papel);
   }
 
-  /* Dos columnas: la hora manda a la izquierda con un ancho fijo —16rem, que
-     es lo que mide «13:40» a este cuerpo— y lo que pasa ocupa el resto. Es la
-     banda del cartel de sede, y es de izquierda a derecha por lo mismo que
-     allá: primero cuándo, después qué. Una banda compacta que se entiende de
-     una pasada, no un bloque alto con la hora de cartel encima.
+  /* Dos columnas: la hora manda a la izquierda con un ancho fijo —18rem, que
+     es lo que mide «13:40» a este cuerpo con aire a los dos lados— y lo que
+     pasa ocupa el resto. Es la banda del cartel de sede, y es de izquierda a
+     derecha por lo mismo que allá: primero cuándo, después qué. Una banda
+     compacta que se entiende de una pasada.
 
      En cuanto la ventana se estrecha, una encima de la otra: la hora en una
      columna de ocho centímetros deja de ser un titular y pasa a ser un estorbo
@@ -133,14 +138,43 @@ const rutaPrograma = conBase('/programa');
   }
   @media (min-width: 1024px) {
     .ahora-reja {
-      grid-template-columns: 16rem minmax(0, 1fr);
+      grid-template-columns: 18rem minmax(0, 1fr);
       padding: 2rem 2.25rem;
     }
   }
 
+  /* ── La columna del reloj ────────────────────────────────────────────
+     Centrada, y centrada de las dos maneras.
+
+     El reloj se apoyaba en el canto de arriba de su columna, y la columna mide
+     lo que mida la lista de al lado: con cuatro actividades corriendo eso son
+     tres dedos de hueco negro debajo de la hora, y la mitad izquierda de la
+     banda se lee como una caja a medio llenar. Centrado en vertical, el hueco
+     se reparte arriba y abajo y deja de ser un socavón.
+
+     Y el filete que la cierra por la derecha es lo que la convierte en una
+     columna: sin él, la hora y los renglones flotan en el mismo campo negro y
+     no hay nada que diga dónde acaba una cosa y empieza la otra. Es de un pelo
+     y del mismo papel al 22 % que separa los renglones — la misma familia de
+     filetes, no una raya nueva. */
+  .ahora-reloj {
+    text-align: center;
+  }
+  @media (min-width: 1024px) {
+    .ahora-reloj {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-right: 2.5rem;
+      border-right: 1px solid color-mix(in srgb, var(--color-papel) 22%, transparent);
+    }
+  }
+
+  /* Y un punto más grande, que para eso tiene la columna entera: es el objeto
+     al que se le mira primero. */
   .ahora-hora {
     margin-top: 0.5rem;
-    font-size: clamp(3.5rem, 6vw, 5.5rem);
+    font-size: clamp(3.5rem, 7vw, 6.5rem);
     line-height: 0.85;
     color: var(--color-amarillo);
   }
