@@ -351,16 +351,11 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     dia: number;
   };
 
-  /** Cuántas se enseñan. Seis es lo que cabe sin que la banda pase de alto de
-   *  pantalla en un portátil; con dieciséis sedes, un sábado por la tarde hay
-   *  más, y las demás se quedan fuera sin decir nada.
-   *
-   *  Aquí hubo un «Y 37 más en el programa →» al pie de la lista, y se cae. El
-   *  botón «Ver el programa» está en la cabecera de esta misma sección, a dos
-   *  dedos y a tamaño de botón: la segunda puerta no añadía un camino, añadía
-   *  un renglón de letra pequeña al final de una banda que se lee de un golpe,
-   *  y encima lo último que decía era cuánto NO estaba enseñando. */
-  const CABEN = 6;
+  /** Cuántos renglones tiene la guía. Cinco: es lo que cabe sin que la banda
+   *  pase de alto de pantalla en un portátil, y lo que se lee de una pasada
+   *  sin contar. Lo que no entra no se anuncia — el botón «Ver el programa»
+   *  está en la cabecera de esta misma sección. */
+  const CABEN = 5;
 
   const fuente = document.querySelector<HTMLScriptElement>('[data-reloj-portada]');
   const banda = document.querySelector<HTMLElement>('[data-ahora]');
@@ -390,6 +385,27 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     const finge = new URLSearchParams(location.search).get('ahora');
     const desfase = finge ? new Date(finge).getTime() - Date.now() : 0;
     const reloj = () => Date.now() + (Number.isFinite(desfase) ? desfase : 0);
+
+    /**
+     * Cuánto falta para algo, en horas y minutos.
+     *
+     * Es lo que dice la chapa roja, y es una cuenta atrás de verdad: «En 48 h
+     * 22 min», no «Jue 24 · 11:00». La hora a la que es ya está escrita en su
+     * renglón de la lista; lo que la chapa añade —lo único que añade— es
+     * cuánto queda, que es lo que hay que saber para decidir si sales de casa.
+     *
+     * Y no se corta a la hora y media. Faltando dos días sigue contando en
+     * horas, porque el día al que es tampoco dice cuánto falta: entre «jue 24»
+     * y «en 48 h» hay una cuenta que, si no la hace la banda, la tiene que
+     * hacer quien lee.
+     */
+    const faltaPara = (cuando: number) => {
+      const minutos = Math.max(0, Math.round((cuando - reloj()) / 60000));
+      if (minutos < 60) return `En ${minutos} min`;
+      const horas = Math.floor(minutos / 60);
+      const resto = minutos % 60;
+      return resto ? `En ${horas} h ${resto} min` : `En ${horas} h`;
+    };
 
     const conFechas = puntos.map((p) => ({
       ...p,
@@ -429,6 +445,65 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
       li.append(fila);
       return li;
     };
+
+    /**
+     * ── La chapa roja: lo siguiente ──────────────────────────────────────
+     *
+     * Lleva la palabra escrita. Decía sólo «En 20 min», y un tiempo suelto no
+     * dice de qué es: el resto de la banda son horas por todas partes —«hasta
+     * 18:00», «11:00»— y una más no se distinguía. «Siguiente · en 20 min» sí.
+     *
+     * ── Y si hay varias a la misma hora, se van turnando ────────────────
+     *
+     * A las 19:00 del viernes arrancan tres cosas a la vez en tres sedes. No
+     * hay una que sea «la siguiente»: son tres, y quedarse con la primera de
+     * la lista es elegir por orden de fichero y dejar las otras dos sin
+     * anunciar. La chapa las va pasando, y dice cuál de cuántas enseña para
+     * que el cambio se lea como un turno y no como un fallo.
+     */
+    const luego = banda.querySelector<HTMLElement>('[data-ahora-luego]')!;
+    const quien = banda.querySelector<HTMLElement>('[data-ahora-artista]')!;
+    const cuandoChapa = banda.querySelector<HTMLElement>('[data-ahora-cuando]')!;
+    const proximaChapa = banda.querySelector<HTMLElement>('[data-ahora-proxima]')!;
+
+    let empatadas: { desde: number; titulo: string; artista: string; sede: string }[] = [];
+    let giro = 0;
+
+    const pintarChapa = () => {
+      if (!empatadas.length) {
+        luego.hidden = true;
+        return;
+      }
+
+      const p = empatadas[giro % empatadas.length];
+      const turno = empatadas.length > 1 ? ` · ${(giro % empatadas.length) + 1}/${empatadas.length}` : '';
+      cuandoChapa.textContent = `Siguiente · ${faltaPara(p.desde).toLowerCase()}${turno}`;
+      /* El título y nada más. Aquí estuvo la hora a la que es, delante —«11:00
+         · Conversatorio…»—, y sobra por los dos lados: la chapa ya dice cuánto
+         falta, y la hora exacta está en el renglón de esa misma actividad
+         dentro de la lista. Puesta aquí partía el titular en dos. */
+      proximaChapa.textContent = p.titulo;
+      quien.textContent = p.artista || p.sede;
+      quien.hidden = false;
+      luego.hidden = false;
+    };
+
+    /**
+     * El turno, cada cinco segundos.
+     *
+     * Sólo con empate —con una sola siguiente no hay nada que turnar— y no
+     * con `prefers-reduced-motion`: para quien pidió que las cosas se estén
+     * quietas, un bloque que se cambia solo cada cinco segundos es justo lo
+     * que pidió no tener. Ahí se queda la primera, y el «1/3» sigue diciendo
+     * que hay tres.
+     */
+    const quieto = matchMedia('(prefers-reduced-motion: reduce)');
+    setInterval(() => {
+      if (empatadas.length > 1 && !quieto.matches) {
+        giro += 1;
+        pintarChapa();
+      }
+    }, 5_000);
 
     const pintar = () => {
       const ahora = reloj();
@@ -505,37 +580,62 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
        * «Ahora · jueves 24», y repetirlo entero dos renglones más abajo es
        * gastar el único sitio donde cabe algo que no se sabe.
        */
-      const diaSuelto = (f: Date) => {
+      const diaSuelto = (f: Date, rotulo?: string) => {
         const li = document.createElement('li');
         li.className = 'meta ahora-dia';
         li.textContent =
-          f.toDateString() === d.toDateString()
+          rotulo ??
+          (f.toDateString() === d.toDateString()
             ? 'Hoy'
-            : `${f.toLocaleDateString('es-MX', { weekday: 'long' })} ${f.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}`;
+            : `${f.toLocaleDateString('es-MX', { weekday: 'long' })} ${f.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}`);
         return li;
       };
 
+      /**
+       * La guía: lo que está puesto y lo que entra después, en un solo carril.
+       *
+       * Es una guía de televisión y se comporta como una. Antes era una cosa o
+       * la otra —con algo corriendo, SÓLO lo que corre; sin nada, sólo lo que
+       * viene—, y con cuatro actividades abiertas la banda se quedaba sin
+       * decir qué entraba luego. Una guía no hace eso: enseña la franja de
+       * ahora y sigue hacia abajo hasta llenar el hueco que tiene.
+       *
+       * Y se mueve sola. Cada minuto se rehace con el reloj nuevo, así que lo
+       * que termina se cae por arriba y lo que se acerca entra por abajo, sin
+       * que nadie toque nada.
+       */
       const pintarLista = () => {
         lista.textContent = '';
 
-        if (corriendo.length) {
-          /* Todo lo que corre es de hoy por definición, así que aquí no hay
-             días que separar: la fecha la lleva el rótulo del reloj. */
-          for (const p of corriendo.slice(0, CABEN))
-            lista.append(renglon(p, `hasta ${relojDe(new Date(p.hasta))}`));
-          return;
-        }
+        /* Lo que está puesto, dicho por cuándo ACABA: es lo que hay que saber
+           para decidir si da tiempo a llegar. Todo lo que corre es de hoy por
+           definición, así que aquí no hay días que separar. */
+        for (const p of corriendo.slice(0, CABEN))
+          lista.append(renglon(p, `hasta ${relojDe(new Date(p.hasta))}`));
 
-        /* Lo que viene, por días. La fecha se escribe una vez y encima del
-           grupo, y entonces cada renglón sólo tiene que decir su hora — o los
-           minutos que faltan, si ya está encima. */
+        const hueco = CABEN - Math.min(corriendo.length, CABEN);
+        if (hueco <= 0) return;
+
+        /* Y detrás, lo que entra, hasta llenar. La fecha se escribe una vez y
+           encima de su grupo, y entonces cada renglón sólo tiene que decir su
+           hora — o los minutos que faltan, si ya está encima.
+
+           El primer grupo se llama «A continuación» cuando es de hoy y hay
+           algo corriendo: ahí el separador no está diciendo qué día es —eso ya
+           se sabe—, está marcando dónde acaba lo que está puesto y empieza lo
+           que no. */
         let ultimo = '';
-        for (const p of proximas.slice(0, CABEN)) {
+        let primero = true;
+        for (const p of proximas.slice(0, hueco)) {
           const f = new Date(p.desde);
           const suyo = f.toDateString();
           if (suyo !== ultimo) {
-            lista.append(diaSuelto(f));
+            const hoy = suyo === d.toDateString();
+            lista.append(
+              diaSuelto(f, primero && hoy && corriendo.length > 0 ? 'A continuación' : undefined),
+            );
             ultimo = suyo;
+            primero = false;
           }
           const faltan = Math.round((p.desde - ahora) / 60000);
           lista.append(renglon(p, faltan <= 90 ? `En ${faltan} min` : relojDe(f)));
@@ -618,26 +718,12 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
 
       pintarLista();
 
-      /* La chapa roja: lo siguiente, y sólo cuando la lista de arriba es lo
-         que está corriendo. Sin nada corriendo la lista YA es lo que viene, y
-         la chapa estaría repitiendo su primer renglón. */
-      const luego = $('[data-ahora-luego]')!;
-      const quien = $('[data-ahora-artista]')!;
-      if (siguiente && corriendo.length) {
-        const cuando = cuandoEs(siguiente.desde);
-        $('[data-ahora-cuando]')!.textContent = cuando.dicho;
-        /* Con la hora delante del título cuando la chapa sólo dice minutos:
-           «en 20 min» dice cuándo salir de casa y «14:00» dice qué apuntar. Y
-           sin ella cuando la chapa ya la trae. */
-        $('[data-ahora-proxima]')!.textContent = cuando.llevaHora
-          ? siguiente.titulo
-          : `${relojDe(new Date(siguiente.desde))} · ${siguiente.titulo}`;
-        quien.textContent = siguiente.artista || siguiente.sede;
-        quien.hidden = false;
-        luego.hidden = false;
-      } else {
-        luego.hidden = true;
-      }
+      /* La chapa roja la pinta `pintarChapa`, que además es quien la gira
+         cuando hay un empate. Aquí sólo se le dice a qué mirar: todas las que
+         arrancan en el mismo instante que la primera que queda. */
+      empatadas = siguiente ? proximas.filter((p) => p.desde === siguiente.desde) : [];
+      giro = 0;
+      pintarChapa();
 
       banda.hidden = false;
     };
