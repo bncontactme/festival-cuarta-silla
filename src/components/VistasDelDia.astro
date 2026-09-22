@@ -88,7 +88,7 @@ const cuantasSedes = (sedes: string[]) => new Set(sedes).size;
     data-panel-vista="horas"
   >
     {agendaPorDia.map((dia) => (
-      <div class="ficha" data-dia-horas={dia.indice} hidden={dia.indice !== primerDia}>
+      <div class="horas-bloque" data-dia-horas={dia.indice} hidden={dia.indice !== primerDia}>
         <p class="vistas-rotulo">
           <span>
             {dia.dia} {dia.fecha}
@@ -180,12 +180,26 @@ const cuantasSedes = (sedes: string[]) => new Set(sedes).size;
     color: var(--color-apagado);
   }
 
-  /* ── El rótulo de la ficha ───────────────────────────────────────────
-     Día y cuenta, en Courier y repartidos a los dos cantos. Es letra por letra
-     el `.gantt-rotulo` de la rejilla, y se copia porque no se puede heredar:
-     aquél es un estilo con ámbito dentro de `Gantt.astro` y fuera de ese
-     componente no pinta. Copiarlo es el precio de que las dos vistas compartan
-     cabecera; el día que se toque una, hay que tocar la otra. */
+  /* ── El bloque: la misma imprenta que la banda del ahora ─────────────
+     Campo de tinta, títulos en Anton a tamaño de leerse de lejos y la hora en
+     amarillo. No es una ficha blanca con letra chica: es la banda de arriba
+     contando el día entero en vez de contando este minuto, y las dos tienen
+     que leerse como una sola cosa partida en dos — si no, la portada tiene dos
+     maneras distintas de escribir lo mismo. */
+  .horas-bloque {
+    background-color: var(--color-tinta);
+    border: var(--borde) solid var(--color-tinta);
+    color: var(--color-papel);
+    padding: 1.75rem 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    .horas-bloque {
+      padding: 2rem 2.25rem;
+    }
+  }
+
+  /* El rótulo, con el mismo reparto que el de la banda: el día en amarillo al
+     canto izquierdo y la cuenta apagada al derecho. */
   .vistas-rotulo {
     display: flex;
     align-items: baseline;
@@ -198,63 +212,72 @@ const cuantasSedes = (sedes: string[]) => new Set(sedes).size;
     letter-spacing: 0.14em;
     line-height: 1.4;
     text-transform: uppercase;
+    color: var(--color-amarillo);
   }
   .vistas-rotulo-nota {
     font-weight: 400;
-    color: color-mix(in srgb, var(--color-tinta) 45%, transparent);
+    color: var(--color-apagado-papel);
   }
 
-  /* ── Los renglones de la lista por horas ─────────────────────────────
-     Un filete de un pelo entre uno y otro y nada más: es la misma gramática
-     que la banda del ahora y que la lista de las dieciséis sedes. Con
-     diecinueve actividades un sábado, cualquier caja por renglón sería una
-     pared de rectángulos. */
+  /* ── Los renglones ───────────────────────────────────────────────────
+     Letra por letra los de la banda: un filete de un pelo entre uno y otro,
+     la hora a ancho fijo al canto izquierdo, el título mandando en medio y la
+     sede apagada al derecho. */
   .hora-fila {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 0.3rem 1.25rem;
-    padding: 0.62rem 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-tinta) 18%, transparent);
+    gap: 0.35rem 1.25rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-papel) 22%, transparent);
   }
   li:last-child .hora-fila {
     border-bottom: 0;
   }
 
   a.hora-fila {
-    transition: color 0.2s var(--ease-salida);
+    width: 100%;
+    text-align: left;
   }
   a.hora-fila:hover .hora-que,
   a.hora-fila:focus-visible .hora-que {
-    color: var(--color-rojo);
+    color: var(--color-amarillo);
   }
   a.hora-fila:hover .hora-donde,
   a.hora-fila:focus-visible .hora-donde {
-    color: var(--color-tinta);
+    color: var(--color-papel);
   }
 
-  /* La hora a ancho fijo: con las once alineadas en columna, el día se lee de
-     un barrido vertical y no renglón por renglón. */
+  /* La hora a ancho fijo: con todas alineadas en columna, el día se lee de un
+     barrido vertical y no renglón por renglón. */
   .hora-cuando {
     flex: 0 0 auto;
-    min-width: 7.5rem;
-    color: var(--color-rojo);
+    min-width: 8rem;
+    color: var(--color-amarillo);
   }
+
+  /* En Anton y en caja alta, como en la banda. Es lo que hace que esto se lea
+     de pie en la calle y no con la nariz pegada a la pantalla. */
   .hora-que {
     flex: 1 1 16rem;
     min-width: 0;
-    font-weight: 700;
-    line-height: 1.25;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.35rem;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--color-papel);
     transition: color 0.2s var(--ease-salida);
   }
   .hora-donde {
     flex: 0 0 auto;
-    color: var(--color-tenue);
+    color: var(--color-apagado-papel);
     transition: color 0.2s var(--ease-salida);
   }
 
   .vistas-vacio {
-    color: var(--color-tenue);
+    color: var(--color-apagado-papel);
   }
 </style>
 
