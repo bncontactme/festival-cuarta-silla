@@ -661,10 +661,12 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
       const quien = $('[data-ahora-artista]')!;
       if (siguiente) {
         $('[data-ahora-cuando]')!.textContent = faltaPara(siguiente.desde);
-        /* Y la hora delante del título, siempre: la chapa ya no la dice —dice
-           lo que falta—, así que si no va aquí no está en ningún sitio. */
-        $('[data-ahora-proxima]')!.textContent =
-          `${relojDe(new Date(siguiente.desde))} · ${siguiente.titulo}`;
+        /* El título y nada más. Aquí estuvo la hora a la que es, delante —«11:00
+           · Conversatorio…»—, y sobra por los dos lados: la chapa ya dice
+           cuánto falta, que es lo que se le pide, y la hora exacta está dos
+           renglones más arriba, en el renglón de esa misma actividad dentro de
+           la lista. Puesta aquí no añadía un dato, partía el titular en dos. */
+        $('[data-ahora-proxima]')!.textContent = siguiente.titulo;
         quien.textContent = siguiente.artista || siguiente.sede;
         quien.hidden = false;
         luego.hidden = false;
