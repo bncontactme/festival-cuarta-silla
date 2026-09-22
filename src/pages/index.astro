@@ -7,9 +7,11 @@ import Estrella from '../components/Estrella.astro';
 import Mosaico from '../components/Mosaico.astro';
 import Portada from '../components/movil/Portada.astro';
 import Gantt from '../components/Gantt.astro';
+import AhoraPortada from '../components/AhoraPortada.astro';
 import AvisoPrograma from '../components/AvisoPrograma.astro';
 import Mapa from '../components/Mapa.astro';
 import {
+  agendaPorDia,
   festival,
   manifiesto,
   sedes,
@@ -17,6 +19,10 @@ import {
   programa,
   programaPublicado,
 } from '../data/site';
+
+/** «25 de septiembre» → «25». El número suelto, que es el que va en grande
+ *  en el carril de los días. Es el mismo corte que hace el cartel de sede. */
+const diaNumero = (fecha: string) => fecha.match(/\d+/)?.[0] ?? '';
 
 const cuenta = [
   { campo: 'dias', label: 'Días' },
@@ -429,72 +435,80 @@ const sillasSedes = [
         </a>
       </div>
 
-      {/* Un solo instrumento partido en dos mitades: la lista de la derecha
-          manda y la rejilla de la izquierda enseña. Antes eran dos bloques
-          que hablaban de lo mismo sin mirarse —el día salía escrito dos
-          veces, una en la cabecera del mini y otra en la lista— y ninguno de
-          los dos se podía tocar. */}
-      {/* `items-stretch` y no `items-start`: la tarjeta de la izquierda mide
-          lo que mide el día que se esté viendo, y la lista de la derecha medía
-          siempre lo mismo —cuatro filas de sesenta píxeles—. La diferencia
-          quedaba en un socavón de amarillo debajo de la lista, que era lo que
-          hacía que la sección pareciera una caja a medio llenar. Estiradas a
-          la par, las cuatro filas se reparten el alto que haya y las dos
-          columnas cierran a la misma línea. */}
+      {/* ── Qué hay AHORA, y luego el resto ──────────────────────────────
+          Aquí estuvo el adelanto en dos mitades: la rejilla mini a la
+          izquierda y los cuatro días a la derecha. No se cae porque estuviera
+          mal hecho —se lleva mirando bien desde que existe—, sino porque
+          contesta la pregunta equivocada durante los únicos cuatro días que
+          importan. «Cómo se reparte la jornada entre las sedes» es una buena
+          pregunta el 10 de septiembre; el 26 a la una y media de la tarde la
+          pregunta es «¿qué hay abierto y a cuánto me queda?», y eso la
+          portada no lo decía en ningún sitio.
+
+          Así que la sección se lee ahora de arriba abajo en el orden en que
+          se pregunta, que es el mismo orden del cartel de una sede:
+
+            1. ¿Qué está pasando ahora?  — la banda negra.
+            2. ¿Y el día que me interesa? — el carril de los cuatro números.
+            3. ¿Cómo se reparte ese día?  — la rejilla, que sigue entera.
+
+          La banda nace escondida y sólo aparece con el festival corriendo
+          (ver `AhoraPortada`), así que fuera de esos cuatro días la sección
+          se queda exactamente con lo que tenía: el carril y la rejilla. */}
       {
         programaPublicado ? (
-        <div
-          class="mt-10 grid gap-10 lg:mt-12 lg:grid-cols-[1.35fr_1fr] lg:items-stretch lg:gap-14"
-        >
-          {/* El mini: la silueta del día, sin texto en las barras. No es para
-              leer qué hay —eso está a la derecha y en el programa—, es para ver
-              de un golpe cómo se reparte la jornada entre las sedes. */}
-          <div data-reveal="arriba" data-retraso="120">
-            <Gantt agrupar="sede" resumen mini selector="[data-dias-portada]" />
-          </div>
+        <div class="mt-10 lg:mt-12">
+          <AhoraPortada />
 
-          {/* Sin rótulo de columna: la tarjeta de la izquierda ya lleva el suyo
-              dentro y aquí sobra: cuatro días con su fecha, bajo un titular que
-              dice «Programa», no necesitan que nadie los presente. Sin él,
-              además, el canto de arriba de la lista arranca exactamente en el
-              canto de arriba de la tarjeta. */}
-          <div data-reveal="arriba">
-            <ul
-              class="flex h-full flex-col border-y-2 border-amarillo"
-              data-dias-portada
-            >
-              {
-                programa.dias.map((d, i) => (
-                  <li class="flex flex-1 border-b border-amarillo/30 last:border-b-0">
-                    {/* La fila entera cambia el día de la rejilla: el objetivo
-                        es la franja, no dos palabras. */}
-                    <button
-                      type="button"
-                      class="dia-portada flex w-full items-center gap-x-4 py-4 text-left"
-                      data-dia={i}
-                      aria-pressed={i === 0 ? 'true' : 'false'}
-                    >
-                      <span class="meta dia-num w-7 shrink-0 text-papel/75 transition-colors duration-200">
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                      <span class="display dia-nombre flex-1 text-2xl leading-none text-amarillo transition-colors duration-200">
-                        {d.dia}
-                      </span>
-                      {/* Filete de 1 px y sin relleno vertical: con el de 2 px
-                          del resto del sitio la etiqueta medía más que el
-                          nombre del día y la fila crecía tres píxeles respecto
-                          a las otras tres. */}
-                      <span class="meta dia-hoy shrink-0 border border-amarillo px-1.5 text-[0.55rem] leading-[1.7] text-amarillo">
-                        Hoy
-                      </span>
-                      <span class="meta shrink-0 text-papel/75">
-                        {d.fecha.replace(' de septiembre', ' sep')}
-                      </span>
-                    </button>
-                  </li>
-                ))
-              }
-            </ul>
+          {/* El carril: los cuatro días, que son el mando de la rejilla.
+              Es el carril del cartel de sede —celdas iguales, número grande,
+              nota con el día de la semana y la cuenta— traído a la portada,
+              así que no se estrena ninguna forma: quien haya abierto una sede
+              ya lo usó. Y de paso los días dejan de ser una lista de texto
+              pegada al canto de la rejilla y pasan a parecer lo que son, un
+              mando que se pulsa. */}
+          <nav
+            class="mt-10 flex flex-wrap border-2 border-tinta bg-amarillo"
+            data-dias-portada
+            aria-label="Los días"
+            data-reveal="arriba"
+          >
+            {programa.dias.map((d, i) => (
+              <button
+                type="button"
+                class="dia-portada flex-1 basis-[8rem] border-r-2 border-tinta px-5 py-4 text-left last:border-r-0"
+                data-dia={i}
+                aria-pressed={i === 0 ? 'true' : 'false'}
+              >
+                <span class="display block text-4xl leading-none lg:text-5xl">
+                  {diaNumero(d.fecha)}
+                </span>
+                <span class="mt-2 flex flex-wrap items-center gap-2">
+                  {/* «Jue · 4», no «Jueves»: es el corte que ya hace el carril
+                      de la sede, y lo que decide si las cuatro celdas caben en
+                      una fila. El número de arriba ya dice qué día es; esto
+                      sólo dice cuál de la semana y cuánto hay. */}
+                  <span class="meta dia-nombre">
+                    {d.dia.slice(0, 3)} · {agendaPorDia[i].actividades.length}
+                  </span>
+                  {/* Filete de 1 px y sin relleno vertical: con el de 2 px del
+                      resto del sitio la etiqueta medía más que la nota y la
+                      celda crecía respecto a las otras tres. Y de `currentColor`
+                      para que el canto se vuelque con la letra cuando la celda
+                      se pinta de tinta. */}
+                  <span class="meta dia-hoy border border-current px-1.5 text-[0.55rem] leading-[1.7]">
+                    Hoy
+                  </span>
+                </span>
+              </button>
+            ))}
+          </nav>
+
+          {/* El mini: la silueta del día, sin texto en las barras. No es para
+              leer qué hay —eso está en la banda y en el programa—, es para ver
+              de un golpe cómo se reparte la jornada entre las sedes. */}
+          <div class="mt-8" data-reveal="arriba" data-retraso="120">
+            <Gantt agrupar="sede" resumen mini selector="[data-dias-portada]" />
           </div>
         </div>
         ) : (

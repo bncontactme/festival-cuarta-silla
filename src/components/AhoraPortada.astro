@@ -1,0 +1,519 @@
+---
+/**
+ * La banda del AHORA, en la portada y para el festival entero.
+ *
+ * Es la banda negra del cartel de sede —`CartelDeSede`, punto 2— traída a la
+ * portada y con una diferencia que lo cambia todo: allí contesta «¿qué hay en
+ * ESTA sede?» y aquí contesta «¿qué hay abierto, en cualquiera de las
+ * dieciséis?». Por eso cada renglón trae el nombre de su sede y es un enlace:
+ * durante los cuatro días la pregunta de la portada no es qué se programó,
+ * es a dónde me muevo ahora.
+ *
+ * Sustituye al adelanto que había aquí —la rejilla mini y la lista de los
+ * cuatro días— como PRIMERA cosa de la sección. Aquello enseñaba la forma de
+ * la jornada, que es una buena pregunta el día 10 de septiembre y la peor
+ * posible a la una y media de la tarde del día 26. La rejilla no se va: baja
+ * un escalón, debajo del carril de días, que es donde se pregunta «¿y el
+ * sábado qué hay?».
+ *
+ * ── Nace escondida ───────────────────────────────────────────────────────
+ *
+ * Igual que la del cartel: sale del build vacía y con `hidden`, y sólo la
+ * rellena el script si el reloj cae dentro del festival. Sin JavaScript, con
+ * el festival terminado o si algo falla, la sección se lee como se leía —el
+ * carril y la rejilla— y aquí no ha pasado nada. Es la razón de que este
+ * componente no traiga ni un dato pintado en HTML.
+ */
+import { conBase } from '../lib/base';
+import {
+  agendaPorDia,
+  enTodasLasSedes,
+  instanteDe,
+  rutaDeSede,
+  sedeDe,
+} from '../data/site';
+
+/**
+ * Lo que el script necesita para saber qué está pasando: cada actividad del
+ * festival con su instante real, su sede y su puerta.
+ *
+ * Va en un `<script type="application/json">` y no en mil atributos por la
+ * misma razón que en el cartel: es una sola lectura y se ve de un vistazo en
+ * el inspector.
+ *
+ * La ruta sólo se escribe si la sede existe en la lista. `rutaDeSede` deduce
+ * la dirección del nombre, así que un nombre escrito a mano en el panel que no
+ * esté en `sedes.lista` daría un enlace a un 404 — y un 404 a media tarde, con
+ * alguien en la calle buscando dónde entrar, es peor que no poner enlace.
+ */
+const paraElReloj = agendaPorDia.flatMap((dia) =>
+  dia.actividades.map((a) => {
+    const suya = sedeDe(a.sede);
+    const todas = enTodasLasSedes(a.sede);
+    return {
+      inicio: instanteDe(dia.indice, a.inicio),
+      fin: instanteDe(dia.indice, a.fin),
+      titulo: a.titulo,
+      artista: a.artista ?? '',
+      sede: todas ? 'Todas las sedes' : a.sede,
+      /* Que sea un recorrido se dice aquí y no se deduce allá de que no haya
+         ruta. Son dos cosas distintas que se parecen: un recorrido no tiene
+         sede a la que ir, y una sede escrita en el panel con un nombre que no
+         está en la lista tampoco — pero de la segunda hay que seguir diciendo
+         el nombre, no ponerle la chapa de «pasa por aquí», que sería un dato
+         inventado por un error de tecleo. */
+      todas,
+      ruta: suya ? conBase(rutaDeSede(suya.nombre)) : '',
+      dia: dia.indice,
+    };
+  }),
+);
+
+const rutaPrograma = conBase('/programa');
+---
+
+<section class="ahora" data-ahora hidden aria-label="Qué está pasando ahora">
+  <div class="ahora-reja">
+    {/* ── La hora, que es el titular ──────────────────────────────────────
+        A tamaño de cartel y en amarillo, porque es lo único de esta sección
+        que caduca: quien llega y ve «13:40» ya sabe, antes de leer una sola
+        palabra, que lo de al lado es de verdad y está pasando. */}
+    <div class="ahora-reloj">
+      <p class="meta text-amarillo" data-ahora-dia></p>
+      <p class="display ahora-hora" data-ahora-reloj></p>
+      <p class="meta ahora-cierre" data-ahora-cierre></p>
+    </div>
+
+    <div class="min-w-0">
+      <p class="meta ahora-rotulo" data-ahora-rotulo></p>
+
+      {/* Los renglones los escribe el script. Son renglones y no fichas por lo
+          mismo que en el panel de `/sedes`: con las dieciséis sedes abiertas a
+          la vez, seis tarjetas apiladas son una pared. */}
+      <ul class="ahora-lista" data-ahora-lista></ul>
+
+      {/* Y si hay más de las que caben, la puerta al programa entero: cortar
+          la lista en seis sin decirlo sería mentir por omisión. */}
+      <a class="meta ahora-mas" href={rutaPrograma} data-ahora-mas hidden></a>
+
+      {/* La chapa roja: lo único de la banda que todavía no ha pasado, y por
+          eso se separa de lo que ya está corriendo con su propio campo. */}
+      <p class="ahora-luego" data-ahora-luego hidden>
+        <span class="meta ahora-cuando" data-ahora-cuando></span>
+        <span class="display ahora-proxima" data-ahora-proxima></span>
+        <span class="meta ahora-quien" data-ahora-artista hidden></span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* La banda entera: negra dentro del campo rojo de la sección, con su canto
+     de 2 px como cualquier otro objeto del sitio. El negro es lo que la separa
+     del rojo sin inventar un color nuevo — es el mismo trato que recibe en el
+     cartel de sede, donde el campo de al lado también es rojo. */
+  .ahora {
+    background-color: var(--color-tinta);
+    border: var(--borde) solid var(--color-tinta);
+    color: var(--color-papel);
+  }
+
+  /* Dos columnas: la hora manda a la izquierda con un ancho fijo —16rem, que
+     es lo que mide «13:40» a este cuerpo— y lo que pasa ocupa el resto. En
+     cuanto la ventana se estrecha, una encima de la otra: la hora en una
+     columna de ocho centímetros deja de ser un titular y pasa a ser un estorbo
+     al lado de los títulos. */
+  .ahora-reja {
+    display: grid;
+    gap: 1.5rem 2.5rem;
+    padding: 1.75rem 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    .ahora-reja {
+      grid-template-columns: 16rem minmax(0, 1fr);
+      padding: 2rem 2.25rem;
+    }
+  }
+
+  .ahora-hora {
+    margin-top: 0.5rem;
+    font-size: clamp(3.5rem, 6vw, 5.5rem);
+    line-height: 0.85;
+    color: var(--color-amarillo);
+  }
+
+  /* Sobre negro, el papel al 60 % da 9:1 de sobra: es el gris de este sitio
+     para lo que acompaña sin mandar. */
+  .ahora-cierre,
+  .ahora-rotulo {
+    margin-top: 0.75rem;
+    color: var(--color-apagado-papel);
+  }
+  .ahora-rotulo {
+    margin-top: 0;
+  }
+
+  /* ── Los renglones ───────────────────────────────────────────────────
+     Un filete de un pelo entre uno y otro, como la lista de las dieciséis
+     sedes y como el panel: lo que separa las actividades es una línea, no un
+     marco. El último no lleva filete — un canto suelto al aire se lee como que
+     la lista sigue y se cortó. */
+  .ahora-lista {
+    margin-top: 0.75rem;
+  }
+
+  /* ── Y por qué estos van en `:global` ─────────────────────────────────
+     Los renglones los escribe el script en el navegador, así que no llevan
+     —no pueden llevar— la marca de ámbito que Astro le pone a lo que sale del
+     build. Un `.ahora-fila` escrito a secas aquí dentro compila a
+     `.ahora-fila:where(.astro-xxxx)` y no pinta nada.
+
+     La alternativa era escribir los renglones con utilidades de Tailwind desde
+     el script —que es lo que hace el cartel de sede— y se descarta: aquí cada
+     renglón tiene cuatro estados (enlace, recorrido, hover, foco) y eso en
+     utilidades es una ristra ilegible dentro de un `createElement`. El nombre
+     no se escapa a ningún sitio: los seis empiezan por `ahora-` y sólo los
+     escribe este componente. */
+  .ahora-lista :global(.ahora-fila) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 1.25rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-papel) 22%, transparent);
+  }
+  .ahora-lista :global(li:last-child .ahora-fila) {
+    border-bottom: 0;
+  }
+
+  /* La fila entera es la puerta a su sede, así que se enciende entera al
+     pasar por encima: el objetivo es el renglón, no dos palabras. */
+  .ahora-lista :global(a.ahora-fila) {
+    width: 100%;
+    text-align: left;
+  }
+  .ahora-lista :global(a.ahora-fila:hover .ahora-que),
+  .ahora-lista :global(a.ahora-fila:focus-visible .ahora-que) {
+    color: var(--color-amarillo);
+  }
+  .ahora-lista :global(a.ahora-fila:hover .ahora-donde),
+  .ahora-lista :global(a.ahora-fila:focus-visible .ahora-donde) {
+    color: var(--color-papel);
+  }
+
+  /* «hasta 18:00» a ancho fijo: con las horas alineadas en columna, seis
+     renglones se leen de un barrido vertical y no uno por uno. */
+  .ahora-lista :global(.ahora-hasta) {
+    flex: 0 0 auto;
+    min-width: 6.5rem;
+    color: var(--color-amarillo);
+  }
+  .ahora-lista :global(.ahora-que) {
+    flex: 1 1 14rem;
+    min-width: 0;
+    font-size: 1.25rem;
+    line-height: 1.1;
+    color: var(--color-papel);
+    transition: color 0.2s var(--ease-salida);
+  }
+  .ahora-lista :global(.ahora-donde) {
+    flex: 0 0 auto;
+    color: var(--color-apagado-papel);
+    transition: color 0.2s var(--ease-salida);
+  }
+  /* El recorrido no es de ninguna sede: lo dice con la chapa amarilla que ya
+     usa en el cartel, y no con un nombre de sede que sería mentira. */
+  .ahora-lista :global(.ahora-donde--todas) {
+    background-color: var(--color-amarillo);
+    color: var(--color-tinta);
+    padding: 0.15rem 0.5rem;
+  }
+
+  .ahora-mas {
+    display: inline-block;
+    margin-top: 0.85rem;
+    color: var(--color-amarillo);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+
+  /* ── La chapa roja ───────────────────────────────────────────────────
+     Es la misma de la banda del cartel de sede: campo rojo, canto amarillo.
+     Lo que cambia es que aquí lleva tres cosas —cuándo, qué y quién— porque
+     en la portada nadie sabe todavía de qué actividad se habla. */
+  .ahora-luego {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+    margin-top: 1.25rem;
+    background-color: var(--color-rojo);
+    border: var(--borde) solid var(--color-amarillo);
+    padding: 0.85rem 1.25rem;
+  }
+
+  /* El «en 20 min» trae su propio campo, y no va suelto sobre el rojo. Es la
+     regla de la casa y la cuenta la explica el cartel de sede: tinta sobre
+     rojo son 4,2:1 y esta letra mide 11,5 px, que pide 4,5. Sobre negro son
+     15:1 y no hay nada que discutir. */
+  .ahora-cuando {
+    background-color: var(--color-tinta);
+    color: var(--color-amarillo);
+    padding: 0.3rem 0.6rem;
+    font-weight: 700;
+  }
+  .ahora-proxima {
+    flex: 1 1 12rem;
+    min-width: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--color-amarillo);
+  }
+  /* El artista, al otro canto: es de quien es, no qué es, y por eso no compite
+     con el título. En negrita porque es lo único que se escribe chico sobre el
+     rojo. */
+  .ahora-quien {
+    margin-left: auto;
+    color: var(--color-tinta);
+    font-weight: 700;
+  }
+</style>
+
+<script type="application/json" data-reloj-portada set:html={JSON.stringify(paraElReloj)} is:inline />
+
+<script>
+  /**
+   * El reloj de la portada: qué hay abierto en el festival, y qué entra luego.
+   *
+   * Es el de `CartelDeSede` con una sola diferencia de fondo: aquel mira una
+   * sede y éste mira las dieciséis, así que aquí «corriendo» son varias cosas
+   * en varios sitios y cada una tiene que decir dónde. Lo demás —el reloj de
+   * mentira, los tres estados, el latido de treinta segundos— es lo mismo, a
+   * propósito: son dos bandas que contestan la misma pregunta y tienen que
+   * contestarla igual.
+   *
+   * Las horas llegan con el huso de Guadalajara puesto (`instanteDe` en
+   * `site.ts`), así que quien mire desde otro país ve bien qué está pasando
+   * ALLÁ, que es lo que preguntaba.
+   */
+  type Punto = {
+    inicio: string;
+    fin: string;
+    titulo: string;
+    artista: string;
+    sede: string;
+    todas: boolean;
+    ruta: string;
+    dia: number;
+  };
+
+  /** Cuántas caben antes de mandar al programa. Seis es lo que cabe sin que la
+   *  banda pase de alto de pantalla en un portátil; con dieciséis sedes, un
+   *  sábado por la tarde puede haber más. */
+  const CABEN = 6;
+
+  const fuente = document.querySelector<HTMLScriptElement>('[data-reloj-portada]');
+  const banda = document.querySelector<HTMLElement>('[data-ahora]');
+
+  if (fuente && banda) {
+    let puntos: Punto[] = [];
+    try {
+      puntos = JSON.parse(fuente.textContent || '[]');
+    } catch {
+      puntos = [];
+    }
+
+    const $ = <T extends HTMLElement>(sel: string) => banda.querySelector<T>(sel);
+
+    const dosCifras = (n: number) => String(n).padStart(2, '0');
+    const relojDe = (d: Date) => `${dosCifras(d.getHours())}:${dosCifras(d.getMinutes())}`;
+
+    /**
+     * El reloj de mentira, para poder ver la banda antes del festival.
+     *
+     * `?ahora=2026-09-26T13:40` y la portada se comporta como si fuera ese
+     * momento. Es el mismo parámetro que ya entiende el cartel de sede, y
+     * existe por lo mismo: esta banda sólo se pinta durante los cuatro días,
+     * así que sin esto la única manera de revisarla —o de enseñársela a
+     * alguien— sería cambiarle la hora al ordenador.
+     */
+    const finge = new URLSearchParams(location.search).get('ahora');
+    const desfase = finge ? new Date(finge).getTime() - Date.now() : 0;
+    const reloj = () => Date.now() + (Number.isFinite(desfase) ? desfase : 0);
+
+    const conFechas = puntos.map((p) => ({
+      ...p,
+      desde: new Date(p.inicio).getTime(),
+      hasta: new Date(p.fin).getTime(),
+    }));
+
+    /** Un renglón: hasta cuándo, qué, y dónde. Si la sede tiene página, el
+     *  renglón entero es el enlace; si es un recorrido, no hay a dónde ir. */
+    const renglon = (p: (typeof conFechas)[number]) => {
+      const li = document.createElement('li');
+      const fila = document.createElement(p.ruta ? 'a' : 'div');
+      fila.className = 'ahora-fila';
+      if (fila instanceof HTMLAnchorElement) {
+        fila.href = p.ruta;
+        fila.setAttribute('aria-label', `${p.titulo}, en ${p.sede}`);
+      }
+
+      const hasta = document.createElement('span');
+      hasta.className = 'meta ahora-hasta';
+      hasta.textContent = `hasta ${relojDe(new Date(p.hasta))}`;
+
+      const que = document.createElement('span');
+      que.className = 'ahora-que font-bold';
+      que.textContent = p.titulo;
+
+      const donde = document.createElement('span');
+      donde.className = `meta ahora-donde${p.todas ? ' ahora-donde--todas' : ''}`;
+      donde.textContent = p.todas ? 'Pasa por aquí' : p.sede;
+
+      fila.append(hasta, que, donde);
+      li.append(fila);
+      return li;
+    };
+
+    const pintar = () => {
+      const ahora = reloj();
+      if (!conFechas.length) return;
+
+      /* La banda contesta siempre lo mismo —«¿qué hay abierto?»— en los tres
+         momentos en que se puede preguntar: con algo corriendo, con el
+         festival en marcha y todo parado, y antes de que empiece nada. Lo
+         único que no tiene respuesta es después: con la última actividad del
+         festival terminada no hay siguiente que anunciar, y la banda se va. */
+      const arranca = Math.min(...conFechas.map((p) => p.desde));
+      const termina = Math.max(...conFechas.map((p) => p.hasta));
+      if (ahora > termina) return;
+
+      const corriendo = conFechas
+        .filter((p) => p.desde <= ahora && p.hasta > ahora)
+        .sort((a, b) => a.hasta - b.hasta);
+      const siguiente = conFechas
+        .filter((p) => p.desde > ahora)
+        .sort((a, b) => a.desde - b.desde)[0];
+
+      const d = new Date(ahora);
+      const rotulo = $('[data-ahora-rotulo]')!;
+      const lista = $('[data-ahora-lista]')!;
+      const cierre = $('[data-ahora-cierre]')!;
+      const mas = $<HTMLAnchorElement>('[data-ahora-mas]')!;
+      lista.textContent = '';
+      mas.hidden = true;
+
+      /** Cuándo es algo, contado desde ahora y dicho como lo diría uno:
+       *  dentro de hora y media, en minutos; hoy, a secas; y más allá, con su
+       *  día delante, porque «a las 18:30» sin día no sirve de nada.
+       *
+       *  Devuelve también si la chapa ya dijo la hora, y no sólo el texto. Sin
+       *  eso, «Jue 24 · 11:00» acababa seguido de «11:00 · Conversatorio»: la
+       *  hora escrita dos veces en el mismo renglón y a dos cuerpos distintos,
+       *  que es de las cosas que hacen dudar de si son la misma. */
+      const cuandoEs = (cuando: number) => {
+        const faltan = Math.round((cuando - ahora) / 60000);
+        if (faltan <= 90) return { chapa: `En ${faltan} min`, llevaHora: false };
+        const fecha = new Date(cuando);
+        if (fecha.toDateString() === d.toDateString())
+          return { chapa: `Hoy · ${relojDe(fecha)}`, llevaHora: true };
+        return {
+          chapa: `${fecha.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' })} · ${relojDe(fecha)}`,
+          llevaHora: true,
+        };
+      };
+
+      if (ahora < arranca) {
+        /* Todavía no empieza. La banda dice lo único que se puede decir, que
+           es qué va a ser lo primero — y así la mejor franja de la portada no
+           se queda en blanco durante los meses de espera. */
+        const primera = new Date(arranca);
+        const manana = new Date(d);
+        manana.setDate(manana.getDate() + 1);
+
+        const esHoy = primera.toDateString() === d.toDateString();
+        const esManana = primera.toDateString() === manana.toDateString();
+
+        $('[data-ahora-dia]')!.textContent = esHoy
+          ? 'Empieza hoy'
+          : esManana
+            ? 'Empieza mañana'
+            : 'Todavía no empieza';
+        /* El día, y no los días que faltan.
+           La cuenta regresiva ya existe y está dos pantallas más arriba, en el
+           mismo scroll: dos relojes contando a lo mismo en una sola página se
+           contradicen el primer día —aquél cuenta al arranque del festival y
+           redondea hacia abajo, éste contaba a la primera actividad y
+           redondeaba hacia arriba, así que el 22 de septiembre uno decía «2» y
+           el otro «3»—. Aquí la respuesta útil es otra: qué día hay que venir. */
+        $('[data-ahora-reloj]')!.textContent =
+          esHoy || esManana
+            ? relojDe(primera)
+            : primera.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' });
+        cierre.textContent = 'Abre el festival';
+        rotulo.textContent = 'Lo primero';
+      } else {
+        $('[data-ahora-dia]')!.textContent = `Ahora · ${d.toLocaleDateString('es-MX', {
+          weekday: 'long',
+          day: 'numeric',
+        })}`;
+        $('[data-ahora-reloj]')!.textContent = relojDe(d);
+
+        if (corriendo.length) {
+          /* Cuántas y en cuántos sitios: con dieciséis sedes, «3 abiertas» no
+             es lo mismo que «3 cosas en la misma sala», y la diferencia es la
+             que decide si hay que moverse. */
+          const sitios = new Set(corriendo.map((p) => p.sede)).size;
+          rotulo.textContent =
+            sitios > 1
+              ? `Corriendo ahora · ${corriendo.length} en ${sitios} sedes`
+              : `Corriendo ahora · ${corriendo.length}`;
+
+          const ultimo = Math.max(...corriendo.map((p) => p.hasta));
+          cierre.textContent = `Abierto hasta las ${relojDe(new Date(ultimo))}`;
+
+          for (const p of corriendo.slice(0, CABEN)) lista.append(renglon(p));
+
+          const sobran = corriendo.length - CABEN;
+          if (sobran > 0) {
+            mas.textContent = `Y ${sobran} más en el programa →`;
+            mas.hidden = false;
+          }
+        } else {
+          /* El festival está en marcha pero no hay nada abierto. Es un estado
+             de verdad —entre la charla de la tarde y la fiesta de la noche hay
+             cuatro horas— y lo que hace falta saber es cuándo vuelve a abrir,
+             que es justo lo que dice la chapa roja de abajo. */
+          rotulo.textContent = 'Nada abierto ahora mismo';
+          cierre.textContent = '';
+        }
+      }
+
+      const luego = $('[data-ahora-luego]')!;
+      const quien = $('[data-ahora-artista]')!;
+      if (siguiente) {
+        /* Con la hora delante del título cuando la chapa sólo dice minutos:
+           «en 20 min» dice cuándo salir de casa y «14:00» dice qué apuntar.
+           Y sin ella cuando la chapa ya la trae, que es lo que pasa en cuanto
+           lo siguiente cae a más de hora y media. */
+        const cuando = cuandoEs(siguiente.desde);
+        $('[data-ahora-cuando]')!.textContent = cuando.chapa;
+        $('[data-ahora-proxima]')!.textContent = cuando.llevaHora
+          ? siguiente.titulo
+          : `${relojDe(new Date(siguiente.desde))} · ${siguiente.titulo}`;
+        quien.textContent = siguiente.artista || siguiente.sede;
+        quien.hidden = false;
+        luego.hidden = false;
+      } else {
+        luego.hidden = true;
+      }
+
+      banda.hidden = false;
+    };
+
+    pintar();
+    /* Cada treinta segundos: lo que se enseña son minutos, pero el «en 20 min»
+       tiene que bajar a 19 cuando toca y no medio minuto tarde. */
+    setInterval(pintar, 30_000);
+  }
+</script>
