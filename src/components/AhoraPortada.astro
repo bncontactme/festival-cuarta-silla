@@ -33,6 +33,36 @@ import {
   sedeDe,
 } from '../data/site';
 
+interface Props {
+  /** `escritorio`: dos columnas, la hora al canto izquierdo. `movil`: una
+   *  columna dentro del cartel del teléfono, y menos renglones. */
+  variante?: 'escritorio' | 'movil';
+}
+
+const { variante = 'escritorio' } = Astro.props;
+
+/** Cuántos renglones tiene la guía.
+ *
+ * Cinco en escritorio: lo que cabe sin que la banda pase de alto de pantalla
+ * en un portátil. Tres en el teléfono, y no por gusto: la portada móvil no
+ * tiene scroll —es una pantalla, no una página— así que cada renglón de más
+ * se lo quita a la silla, que es el cartel. */
+const caben = variante === 'movil' ? 3 : 5;
+
+/**
+ * Y cuántos en un teléfono bajo.
+ *
+ * La portada móvil no tiene scroll: lo que crece aquí se lo quita a la escena
+ * de la silla, que es el cartel. En un iPhone SE —667 px— la banda con tres
+ * renglones pedía 362 y dejaba 103 para un titular que mide 131, así que
+ * «CONCEPTUAL» acababa encima de la banda. Es exactamente el desbordamiento
+ * que ya documenta `.portada-escena` en `movil.css`, por el otro lado.
+ *
+ * Dos renglones y la cuenta sale. No es una pérdida grande: con la chapa de
+ * «siguiente» debajo, la banda sigue diciendo qué hay abierto y qué entra.
+ */
+const cabenCorto = variante === 'movil' ? 2 : undefined;
+
 /**
  * Lo que el script necesita para saber qué está pasando: cada actividad del
  * festival con su instante real, su sede y su puerta.
@@ -67,7 +97,20 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
 );
 ---
 
-<section class="ahora" data-ahora hidden aria-label="Qué está pasando ahora">
+<section
+  class:list={['ahora', variante === 'movil' && 'ahora--movil']}
+  data-ahora
+  data-caben={caben}
+  data-caben-corto={cabenCorto}
+  hidden
+  aria-label="Qué está pasando ahora"
+>
+  {/* Los datos van DENTRO de la sección, y no sueltos al final del
+      componente: la portada monta esta banda dos veces —una de escritorio y
+      otra de teléfono— y cada una tiene que encontrar los suyos sin contar
+      posiciones ni inventarse identificadores. */}
+  <script type="application/json" data-reloj-portada set:html={JSON.stringify(paraElReloj)} is:inline />
+
   <div class="ahora-reja">
     {/* ── La hora ──────────────────────────────────────────────────────────
         Es lo único de la portada que caduca: quien llega y ve «13:40» ya sabe,
@@ -322,9 +365,120 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     color: var(--color-tinta);
     font-weight: 700;
   }
+
+  /* ══ La variante del teléfono ══════════════════════════════════════════
+     Vive dentro del cartel de la portada móvil, que no tiene scroll: es una
+     pantalla, no una página. Así que aquí no se trata de apretar la de
+     escritorio, sino de decidir qué cabe. El campo lo pone el bloque que la
+     aloja —`.portada-tiempo`, que se vuelve de tinta al empezar el festival—
+     y por eso la banda entra sin fondo ni canto propios: dos cajas negras,
+     una dentro de otra, dibujan un marco que no significa nada. */
+  .ahora--movil {
+    background-color: transparent;
+    border: 0;
+  }
+
+  /* Una columna, y el filete de la del escritorio se cae con ella: separaba
+     dos columnas que aquí no existen. */
+  .ahora--movil .ahora-reja {
+    gap: 0;
+    padding: 0.7rem 1rem 0.85rem;
+  }
+  .ahora--movil .ahora-reloj {
+    text-align: left;
+    padding-right: 0;
+    border-right: 0;
+  }
+
+  /* El reloj, en renglón: la hora grande y, a su derecha, el día encima y el
+     «abierto hasta» debajo. Apilados los tres —que es como van en el
+     escritorio— se comían tres renglones de los pocos que hay. Así son uno. */
+  @media (min-width: 0px) {
+    .ahora--movil .ahora-reloj {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      column-gap: 0.85rem;
+      align-items: center;
+    }
+    .ahora--movil .ahora-hora {
+      grid-row: 1 / 3;
+      margin-top: 0;
+      font-size: 3.1rem;
+      line-height: 0.85;
+    }
+    .ahora--movil .ahora-reloj > :first-child {
+      align-self: end;
+    }
+    .ahora--movil .ahora-cierre {
+      margin-top: 0.15rem;
+      align-self: start;
+    }
+  }
+
+  /* El cuerpo, separado del reloj por el filete que en el escritorio va en
+     vertical entre las dos columnas. La misma raya, girada. */
+  .ahora--movil .ahora-cuerpo {
+    margin-top: 0.7rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-papel) 22%, transparent);
+  }
+
+  /* ── El renglón, en dos líneas ──────────────────────────────────────
+     A 375 px no caben la hora, el título y la sede en fila: el título se
+     parte en tres y la sede acaba sola en la cuarta. En dos líneas —arriba
+     cuándo y dónde, abajo qué— cada renglón mide lo mismo y la columna de
+     horas se sigue leyendo de un barrido.
+
+     El `order` sólo mueve lo que se ve; lo que se lee sigue siendo hora,
+     título, sede, que es el orden con el que tiene sentido escucharlo. */
+  .ahora--movil .ahora-lista :global(.ahora-fila) {
+    gap: 0.1rem 0.6rem;
+    padding: 0.42rem 0;
+  }
+  .ahora--movil .ahora-lista :global(.ahora-hasta) {
+    order: 1;
+    min-width: 0;
+  }
+  .ahora--movil .ahora-lista :global(.ahora-donde) {
+    order: 2;
+    font-size: 0.6rem;
+  }
+  .ahora--movil .ahora-lista :global(.ahora-que) {
+    order: 3;
+    flex: 1 1 100%;
+    font-size: 0.92rem;
+    line-height: 1.25;
+  }
+
+  /* La chapa roja, a lo ancho y en dos renglones: el artista debajo y no al
+     otro canto, que aquí no hay canto al que mandarlo. */
+  .ahora--movil .ahora-luego {
+    gap: 0.3rem 0.7rem;
+    margin-top: 0.7rem;
+    padding: 0.45rem 0.7rem;
+  }
+  .ahora--movil .ahora-cuando {
+    font-size: 0.6rem;
+    padding: 0.22rem 0.45rem;
+  }
+  .ahora--movil .ahora-proxima {
+    flex: 1 1 100%;
+    font-size: 1.05rem;
+  }
+  .ahora--movil .ahora-quien {
+    margin-left: 0;
+    flex: 1 1 100%;
+    font-size: 0.6rem;
+  }
+
+  /* Y el rótulo de la lista, al cuerpo de todo lo chico de esta portada. */
+  .ahora--movil .ahora-rotulo,
+  .ahora--movil .ahora-cierre,
+  .ahora--movil .ahora-lista :global(.ahora-dia) {
+    font-size: 0.6rem;
+  }
 </style>
 
-<script type="application/json" data-reloj-portada set:html={JSON.stringify(paraElReloj)} is:inline />
 
 <script>
   /**
@@ -351,16 +505,29 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     dia: number;
   };
 
-  /** Cuántos renglones tiene la guía. Cinco: es lo que cabe sin que la banda
-   *  pase de alto de pantalla en un portátil, y lo que se lee de una pasada
-   *  sin contar. Lo que no entra no se anuncia — el botón «Ver el programa»
-   *  está en la cabecera de esta misma sección. */
-  const CABEN = 5;
+  /**
+   * Una banda, y las que hagan falta.
+   *
+   * La portada monta dos: la de escritorio y la del teléfono. Las dos están
+   * en el DOM a la vez —el ancho decide cuál se pinta— y este guion se
+   * empaqueta una sola vez para las dos, así que no puede quedarse con la
+   * primera que encuentre: con `querySelector` a secas, la del teléfono se
+   * quedaba en blanco.
+   *
+   * Cada una trae sus propios datos dentro y su propio número de renglones,
+   * así que arrancarlas es repetir lo mismo sobre otro elemento.
+   */
+  const arrancar = (banda: HTMLElement) => {
+    const fuente = banda.querySelector<HTMLScriptElement>('[data-reloj-portada]');
+    if (!fuente) return;
 
-  const fuente = document.querySelector<HTMLScriptElement>('[data-reloj-portada]');
-  const banda = document.querySelector<HTMLElement>('[data-ahora]');
+    /** Cuántos renglones caben ahora mismo. Se pregunta en cada repintado y no
+     *  una vez al arrancar: un teléfono gira, y girando cambia el alto. */
+    const CABEN = () => {
+      const corto = Number(banda.dataset.cabenCorto);
+      return corto && innerHeight < 760 ? corto : Number(banda.dataset.caben) || 5;
+    };
 
-  if (fuente && banda) {
     let puntos: Punto[] = [];
     try {
       puntos = JSON.parse(fuente.textContent || '[]');
@@ -610,10 +777,12 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
         /* Lo que está puesto, dicho por cuándo ACABA: es lo que hay que saber
            para decidir si da tiempo a llegar. Todo lo que corre es de hoy por
            definición, así que aquí no hay días que separar. */
-        for (const p of corriendo.slice(0, CABEN))
+        const cuantas = CABEN();
+
+        for (const p of corriendo.slice(0, cuantas))
           lista.append(renglon(p, `hasta ${relojDe(new Date(p.hasta))}`));
 
-        const hueco = CABEN - Math.min(corriendo.length, CABEN);
+        const hueco = cuantas - Math.min(corriendo.length, cuantas);
         if (hueco <= 0) return;
 
         /* Y detrás, lo que entra, hasta llenar. La fecha se escribe una vez y
@@ -641,6 +810,19 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
           lista.append(renglon(p, faltan <= 90 ? `En ${faltan} min` : relojDe(f)));
         }
       };
+
+      /**
+       * En qué fase estamos, dicho en el propio elemento.
+       *
+       * Lo lee la portada móvil para saber si relevar la cuenta atrás. Lo dice
+       * la banda y no `motion.ts` —que también sabe cuándo llega a cero— por
+       * dos razones. Una: `motion.ts` cuenta al arranque del festival y esto
+       * cuenta a la primera actividad, así que son dos ceros distintos y el
+       * relevo tiene que colgar del que manda aquí. Y dos: el reloj de mentira
+       * de `?ahora=` sólo lo entiende esta banda, y sin esto no habría manera
+       * de ver el relevo hasta el día 24.
+       */
+      banda.dataset.fase = ahora < arranca ? 'antes' : 'curso';
 
       if (ahora < arranca) {
         /* Todavía no empieza. La banda dice lo único que se puede decir, que
@@ -750,5 +932,12 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     };
 
     latir();
-  }
+
+    /* Girar el teléfono cambia el alto y con él cuántos renglones caben. Sin
+       esto, la banda se queda con los dos de vertical en una pantalla
+       apaisada que admite cinco. */
+    addEventListener('resize', pintar);
+  };
+
+  for (const banda of document.querySelectorAll<HTMLElement>('[data-ahora]')) arrancar(banda);
 </script>

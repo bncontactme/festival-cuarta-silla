@@ -21,6 +21,7 @@
  * piezas que anima.
  */
 import Silla from '../Silla.astro';
+import AhoraPortada from '../AhoraPortada.astro';
 import Mosaico from '../Mosaico.astro';
 import { conBase } from '../../lib/base';
 import {
@@ -194,6 +195,21 @@ const duracionCinta = ((tira.length * PASO) / VELOCIDAD).toFixed(1);
 
         Es además el tercer color de la portada, y por eso es un elemento de
         verdad y no una capa de la animación: entra barriendo y se queda. */}
+    {/* ── Y cuando el contador llega a cero ───────────────────────────
+        El mismo bloque cambia de oficio. Mientras falta, es la cuenta
+        regresiva; en cuanto llega a cero deja de tener nada que contar y su
+        sitio lo ocupa la banda del ahora, que es la pregunta que se hace
+        alguien de pie en la calle con el teléfono en la mano.
+
+        Es el MISMO componente que la portada de escritorio, con la variante
+        del teléfono: una columna, tres renglones y el reloj arriba. Dos
+        relojes escritos dos veces se separan el primer día que alguien toca
+        uno, y éste tiene cuatro estados y una cuenta atrás que girar.
+
+        Quién manda el cambio: `motion.ts` pone `data-estado="enCurso"` en el
+        `[data-cuenta]` cuando la resta llega a cero. Ya lo hacía —es lo que
+        apagaba los números— así que aquí no hay guion nuevo, sólo dos reglas
+        en `movil.css` que enseñan una cosa y esconden la otra. */}
     <div class="portada-tiempo" data-cuenta={festival.inicioISO}>
       <p class="meta portada-cuando">
         24 — 27 SEP {festival.anio}
@@ -212,6 +228,8 @@ const duracionCinta = ((tira.length * PASO) / VELOCIDAD).toFixed(1);
           ))
         }
       </dl>
+
+      <AhoraPortada variante="movil" />
     </div>
 
     {/* ── Patrocinadores ─────────────────────────────────────────────────

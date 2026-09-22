@@ -239,6 +239,43 @@
     color: color-mix(in srgb, var(--color-papel) 65%, transparent);
   }
 
+  /* ── El relevo: la cuenta atrás y la banda del ahora ──────────────────
+     El mismo bloque rojo hace dos oficios, y nunca los dos a la vez. Mientras
+     falta, los cuatro números; cuando `motion.ts` marca `enCurso` —o sea, en
+     cuanto la resta llega a cero— los números se van y entra la banda.
+
+     El campo cambia con ellos. La cuenta atrás es amarillo sobre rojo, que es
+     el tercer color de esta portada; la banda es de tinta, como la de
+     escritorio, porque todo lo que lleva dentro —renglones de papel, horas en
+     amarillo, la chapa roja de «siguiente»— está medido contra un campo negro.
+     Sobre rojo, el papel da 4,0:1 y la chapa roja desaparecería del todo. */
+  /* Quién manda el relevo: la propia banda, que se marca `data-fase="curso"`
+     en cuanto su reloj entra en el festival. No `motion.ts`, aunque también
+     sepa cuándo llega a cero: aquél cuenta al arranque del festival y la banda
+     cuenta a la primera actividad, así que son dos ceros distintos y el relevo
+     tiene que colgar del que manda dentro del bloque. */
+  .portada-tiempo:has(.ahora--movil[data-fase='curso']) {
+    background-color: var(--color-tinta);
+  }
+
+  .portada-tiempo:has(.ahora--movil[data-fase='curso']) .portada-reloj,
+  .portada-tiempo:has(.ahora--movil[data-fase='curso']) .portada-cuando {
+    display: none;
+  }
+
+  /* Y antes de tiempo no se asoma. La banda se enseña a sí misma en cuanto su
+     guion la rellena —y lo hace también antes del festival, para decir cuándo
+     abre—, así que sin esta regla se vería debajo de la cuenta atrás durante
+     los meses de espera. En el teléfono manda el contador: una portada con un
+     reloj de cuenta atrás Y una banda de «lo primero» son dos respuestas a la
+     misma pregunta, y la cuenta atrás es la que el cartel pide.
+
+     Sin JavaScript no hay `data-fase` y no hay banda: queda la cuenta atrás,
+     que es exactamente lo que había. */
+  .ahora--movil:not([data-fase='curso']) {
+    display: none;
+  }
+
   /* ── Patrocinadores ─────────────────────────────────────────────────────
      La misma cinta del escritorio, encogida a la anchura de un teléfono:
      las fichas blancas —`.mosaico`, de global.css— y el `marquee` corriendo
