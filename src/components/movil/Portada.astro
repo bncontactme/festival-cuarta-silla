@@ -124,14 +124,19 @@ const indice = [
 ];
 
 /* ── La cinta de marcas ──────────────────────────────────────────────────
-   La misma tira del escritorio a escala de teléfono: la ficha mide 5.5rem
-   —88 px— más medio rem de aire, y la tira corre a 42 px por segundo, más
-   despacio que los 52 de allá porque aquí el recorrido visible es un tercio.
+   La misma tira del escritorio a escala de teléfono: la ficha mide 5.25rem
+   —84 px— más 0.4rem de aire, o sea los 90 del `PASO`, y la tira corre a 42
+   píxeles por segundo, más despacio que los 52 de allá porque aquí el
+   recorrido visible es un tercio.
+
+   El `PASO` tiene que seguir a la ficha: es lo que traduce «cuántas fichas
+   hay» a «cuánto dura una vuelta», y si se quedan desparejados la cinta corre
+   a otra velocidad que la calculada.
 
    Con veintitantas marcas una vuelta ya cubre de sobra el ancho del teléfono;
    el `repes` es el seguro para el día que queden dos, y el `length > 0` de
    abajo es lo que evita dividir entre cero. */
-const PASO = 96;
+const PASO = 90;
 const VELOCIDAD = 42;
 const repes = Math.max(
   1,

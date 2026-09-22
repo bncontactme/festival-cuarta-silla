@@ -304,7 +304,7 @@
     position: relative;
     flex: none;
     background-color: var(--color-rojo);
-    padding: 0.55rem 0 0.65rem;
+    padding: 0.4rem 0 0.5rem;
     overflow: hidden;
   }
 
@@ -326,7 +326,7 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    padding: 0 1rem 0.5rem;
+    padding: 0 1rem 0.4rem;
     color: var(--color-papel);
   }
 
@@ -347,10 +347,19 @@
      de una caja de 76 px no se lee — que es de lo que sirve una cinta de
      patrocinadores. A 6.5rem entran cuatro y monedas: siguen asomando por el
      canto —que es lo que dice que la tira sigue— y ya se distingue la marca. */
+  /* Un punto por debajo de lo que era —6.5rem— y con menos aire arriba y
+     abajo: la cinta baja de 114 px a unos 90.
+
+     No es por gusto. La portada móvil reparte un alto fijo, y durante el
+     festival hay una franja más que antes: la banda del ahora. Los píxeles
+     que suelta la cinta y los que suelta la banda son los que le devuelven al
+     cartel el tamaño de cartel. Y un logotipo aguanta el recorte mejor que
+     nada de lo que hay aquí: no se lee, se reconoce — y para eso sigue
+     estando la lupa, que lo agranda al tocarlo. */
   .portada-marcas .mosaico {
-    width: 6.5rem;
-    margin-right: 0.5rem;
-    box-shadow: 4px 4px 0 var(--color-amarillo);
+    width: 5.25rem;
+    margin-right: 0.4rem;
+    box-shadow: 3px 3px 0 var(--color-amarillo);
     transition: width 0.28s var(--ease-salida);
   }
 
@@ -358,7 +367,7 @@
      `:hover`, que en un teléfono se enciende al tocar y se queda encendido:
      el gesto tenía ida pero no vuelta. La casilla tiene las dos. */
   .cinta-lupa:checked ~ .portada-pista .mosaico {
-    width: 8.75rem;
+    width: 7.75rem;
   }
 
   /* Y sigue corriendo, agrandada o no. `.marquee:hover` de global.css la para
