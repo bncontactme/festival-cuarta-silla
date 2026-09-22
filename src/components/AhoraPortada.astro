@@ -336,9 +336,14 @@ const rutaPrograma = conBase('/programa');
       hasta: new Date(p.fin).getTime(),
     }));
 
-    /** Un renglón: hasta cuándo, qué, y dónde. Si la sede tiene página, el
-     *  renglón entero es el enlace; si es un recorrido, no hay a dónde ir. */
-    const renglon = (p: (typeof conFechas)[number]) => {
+    /** Un renglón: cuándo, qué, y dónde. Si la sede tiene página, el renglón
+     *  entero es el enlace; si es un recorrido, no hay a dónde ir.
+     *
+     *  El «cuándo» llega hecho desde fuera y no se calcula aquí, porque no es
+     *  el mismo para las dos mitades de la lista: lo que está corriendo se
+     *  dice por cuándo ACABA —«hasta 18:00», que es lo que hay que saber para
+     *  decidir si da tiempo— y lo que viene, por cuándo EMPIEZA. */
+    const renglon = (p: (typeof conFechas)[number], cuando: string) => {
       const li = document.createElement('li');
       const fila = document.createElement(p.ruta ? 'a' : 'div');
       fila.className = 'ahora-fila';
@@ -349,7 +354,7 @@ const rutaPrograma = conBase('/programa');
 
       const hasta = document.createElement('span');
       hasta.className = 'meta ahora-hasta';
-      hasta.textContent = `hasta ${relojDe(new Date(p.hasta))}`;
+      hasta.textContent = cuando;
 
       const que = document.createElement('span');
       que.className = 'ahora-que font-bold';
@@ -380,9 +385,10 @@ const rutaPrograma = conBase('/programa');
       const corriendo = conFechas
         .filter((p) => p.desde <= ahora && p.hasta > ahora)
         .sort((a, b) => a.hasta - b.hasta);
-      const siguiente = conFechas
+      const proximas = conFechas
         .filter((p) => p.desde > ahora)
-        .sort((a, b) => a.desde - b.desde)[0];
+        .sort((a, b) => a.desde - b.desde);
+      const siguiente = proximas[0];
 
       const d = new Date(ahora);
       const rotulo = $('[data-ahora-rotulo]')!;
@@ -392,24 +398,60 @@ const rutaPrograma = conBase('/programa');
       lista.textContent = '';
       mas.hidden = true;
 
-      /** Cuándo es algo, contado desde ahora y dicho como lo diría uno:
-       *  dentro de hora y media, en minutos; hoy, a secas; y más allá, con su
-       *  día delante, porque «a las 18:30» sin día no sirve de nada.
+      /**
+       * Cuándo es algo, contado desde ahora y dicho como lo diría uno.
        *
-       *  Devuelve también si la chapa ya dijo la hora, y no sólo el texto. Sin
-       *  eso, «Jue 24 · 11:00» acababa seguido de «11:00 · Conversatorio»: la
-       *  hora escrita dos veces en el mismo renglón y a dos cuerpos distintos,
-       *  que es de las cosas que hacen dudar de si son la misma. */
+       * Es la única regla de horas de la banda, y la usan los renglones y la
+       * chapa roja por igual: dos maneras distintas de decir la misma hora en
+       * el mismo bloque se leen como dos horas distintas.
+       *
+       * La escala es la de quien está en la calle decidiendo si le da tiempo:
+       * dentro de hora y media, los minutos que faltan —que es lo único que
+       * sirve para eso—; más tarde el mismo día, la hora a secas; y otro día,
+       * con su día delante, porque «a las 18:30» sin día no dice nada.
+       */
       const cuandoEs = (cuando: number) => {
         const faltan = Math.round((cuando - ahora) / 60000);
-        if (faltan <= 90) return { chapa: `En ${faltan} min`, llevaHora: false };
+        if (faltan <= 90) return { dicho: `En ${faltan} min`, llevaHora: false };
         const fecha = new Date(cuando);
         if (fecha.toDateString() === d.toDateString())
-          return { chapa: `Hoy · ${relojDe(fecha)}`, llevaHora: true };
+          return { dicho: `Hoy · ${relojDe(fecha)}`, llevaHora: true };
         return {
-          chapa: `${fecha.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' })} · ${relojDe(fecha)}`,
+          dicho: `${fecha.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' })} · ${relojDe(fecha)}`,
           llevaHora: true,
         };
+      };
+
+      /**
+       * Y con qué se llena la lista.
+       *
+       * Con algo corriendo, la lista es lo que está corriendo y la chapa roja
+       * de abajo es lo siguiente. Sin nada corriendo, la lista pasa a ser lo
+       * que viene — antes se quedaba VACÍA con un rótulo encima, que es la
+       * peor manera de contestar «¿qué hay?»: entre la charla de la tarde y la
+       * fiesta de la noche hay cuatro horas, y en esas cuatro horas la banda
+       * no decía nada. Y la chapa se cae, porque lo siguiente ya es el primer
+       * renglón y repetirlo dos veces en el mismo bloque se lee como dos
+       * cosas.
+       */
+      const pintarLista = () => {
+        lista.textContent = '';
+        mas.hidden = true;
+
+        if (corriendo.length) {
+          for (const p of corriendo.slice(0, CABEN))
+            lista.append(renglon(p, `hasta ${relojDe(new Date(p.hasta))}`));
+
+          const sobran = corriendo.length - CABEN;
+          if (sobran > 0) {
+            mas.textContent = `Y ${sobran} más en el programa →`;
+            mas.hidden = false;
+          }
+          return;
+        }
+
+        for (const p of proximas.slice(0, CABEN))
+          lista.append(renglon(p, cuandoEs(p.desde).dicho));
       };
 
       if (ahora < arranca) {
@@ -428,6 +470,7 @@ const rutaPrograma = conBase('/programa');
           : esManana
             ? 'Empieza mañana'
             : 'Todavía no empieza';
+
         /* El día, y no los días que faltan.
            La cuenta regresiva ya existe y está dos pantallas más arriba, en el
            mismo scroll: dos relojes contando a lo mismo en una sola página se
@@ -460,33 +503,29 @@ const rutaPrograma = conBase('/programa');
 
           const ultimo = Math.max(...corriendo.map((p) => p.hasta));
           cierre.textContent = `Abierto hasta las ${relojDe(new Date(ultimo))}`;
-
-          for (const p of corriendo.slice(0, CABEN)) lista.append(renglon(p));
-
-          const sobran = corriendo.length - CABEN;
-          if (sobran > 0) {
-            mas.textContent = `Y ${sobran} más en el programa →`;
-            mas.hidden = false;
-          }
         } else {
           /* El festival está en marcha pero no hay nada abierto. Es un estado
              de verdad —entre la charla de la tarde y la fiesta de la noche hay
              cuatro horas— y lo que hace falta saber es cuándo vuelve a abrir,
-             que es justo lo que dice la chapa roja de abajo. */
-          rotulo.textContent = 'Nada abierto ahora mismo';
-          cierre.textContent = '';
+             que ahora lo dice la propia lista. */
+          rotulo.textContent = 'Lo que viene';
+          cierre.textContent = siguiente ? `Vuelve a abrir ${cuandoEs(siguiente.desde).dicho.toLowerCase()}` : '';
         }
       }
 
+      pintarLista();
+
+      /* La chapa roja: lo siguiente, y sólo cuando la lista de arriba es lo
+         que está corriendo. Sin nada corriendo la lista YA es lo que viene, y
+         la chapa estaría repitiendo su primer renglón. */
       const luego = $('[data-ahora-luego]')!;
       const quien = $('[data-ahora-artista]')!;
-      if (siguiente) {
-        /* Con la hora delante del título cuando la chapa sólo dice minutos:
-           «en 20 min» dice cuándo salir de casa y «14:00» dice qué apuntar.
-           Y sin ella cuando la chapa ya la trae, que es lo que pasa en cuanto
-           lo siguiente cae a más de hora y media. */
+      if (siguiente && corriendo.length) {
         const cuando = cuandoEs(siguiente.desde);
-        $('[data-ahora-cuando]')!.textContent = cuando.chapa;
+        $('[data-ahora-cuando]')!.textContent = cuando.dicho;
+        /* Con la hora delante del título cuando la chapa sólo dice minutos:
+           «en 20 min» dice cuándo salir de casa y «14:00» dice qué apuntar. Y
+           sin ella cuando la chapa ya la trae. */
         $('[data-ahora-proxima]')!.textContent = cuando.llevaHora
           ? siguiente.titulo
           : `${relojDe(new Date(siguiente.desde))} · ${siguiente.titulo}`;
@@ -500,9 +539,27 @@ const rutaPrograma = conBase('/programa');
       banda.hidden = false;
     };
 
-    pintar();
-    /* Cada treinta segundos: lo que se enseña son minutos, pero el «en 20 min»
-       tiene que bajar a 19 cuando toca y no medio minuto tarde. */
-    setInterval(pintar, 30_000);
+    /**
+     * Y el latido, clavado al minuto.
+     *
+     * Fue un `setInterval` de treinta segundos y se cae. Todo lo que enseña
+     * esta banda son minutos —el reloj grande, el «en 20 min», el «hasta las
+     * 18:00»— y un latido suelto cae donde cae: arranca en el segundo 47 y a
+     * partir de ahí el reloj de la portada enseña las 13:39 durante los
+     * diecisiete primeros segundos de las 13:40. Es la clase de error que no
+     * se ve en una revisión y se ve el sábado, con la banda a tamaño de
+     * cartel y el teléfono de al lado diciendo otra hora.
+     *
+     * Así que cada repintado calcula cuándo empieza el minuto siguiente y se
+     * cita ahí. El medio segundo de más es para no llegar justo al filo y
+     * pintar todavía el minuto viejo por un redondeo.
+     */
+    const latir = () => {
+      pintar();
+      const falta = 60_000 - ((reloj() % 60_000) + 60_000) % 60_000;
+      setTimeout(latir, falta + 500);
+    };
+
+    latir();
   }
 </script>

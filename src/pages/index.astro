@@ -6,9 +6,7 @@ import Silla from '../components/Silla.astro';
 import Estrella from '../components/Estrella.astro';
 import Mosaico from '../components/Mosaico.astro';
 import Portada from '../components/movil/Portada.astro';
-import Gantt from '../components/Gantt.astro';
 import AhoraPortada from '../components/AhoraPortada.astro';
-import VistasDelDia from '../components/VistasDelDia.astro';
 import AvisoPrograma from '../components/AvisoPrograma.astro';
 import Mapa from '../components/Mapa.astro';
 import {
@@ -431,102 +429,23 @@ const sillasSedes = [
         </a>
       </div>
 
-      {/* ── Las dos vistas del programa, y el mando que las reparte ──────
-          Aquí estuvo el adelanto en dos mitades: la rejilla mini a la
-          izquierda y los cuatro días a la derecha. No se cae porque estuviera
-          mal hecho, sino porque contesta la pregunta equivocada durante los
-          únicos cuatro días que importan. «Cómo se reparte la jornada entre
-          las sedes» es una buena pregunta el 10 de septiembre; el 26 a la una
-          y media de la tarde la pregunta es «¿qué hay abierto y a cuánto me
-          queda?», y eso la portada no lo decía en ningún sitio.
+      {/* ── Qué hay AHORA ────────────────────────────────────────────────
+          Aquí estuvo el adelanto del programa: la rejilla mini a la izquierda
+          y los cuatro días a la derecha. No se cae porque estuviera mal hecho,
+          sino porque contesta la pregunta equivocada durante los únicos cuatro
+          días que importan. «Cómo se reparte la jornada entre las sedes» es
+          una buena pregunta el 10 de septiembre; el 26 a la una y media de la
+          tarde la pregunta es «¿qué hay abierto y a cuánto me queda?».
 
-          Ahora son dos vistas turnándose el mismo hueco, con el conmutador de
-          burbuja del sitio:
-
-            · Por horas — la banda del ahora, y la de arranque.
-            · Gantt     — el adelanto que había aquí, ENTERO y sin retocar:
-                          la rejilla mini y los cuatro días que la mandan.
-
-          Turnándose y no apiladas: dos bloques hablando del programa uno
-          debajo del otro dejan al de abajo sin que lo vea nadie. Y la pestaña
-          del gantt no reinventa nada: es la sección de siempre, mudada tal
-          cual al hueco que le toca. */}
+          Y una sola cosa, no dos turnándose: hubo aquí un conmutador que
+          repartía la banda y la rejilla, y se cae con ella. La rejilla no se
+          pierde — vive en `/programa`, que es a donde lleva el botón de esta
+          misma cabecera; lo que se pierde es una portada que pregunta qué
+          quieres mirar antes de enseñarte nada. */}
       {
         programaPublicado ? (
         <div class="mt-10 lg:mt-12">
-          <VistasDelDia>
-            <AhoraPortada slot="horas" />
-
-            {/* ── La pestaña del gantt: la sección tal y como era ──────────
-                Letra por letra el adelanto que había en la portada antes de
-                todo esto: la rejilla mini a la izquierda y los cuatro días a
-                la derecha mandándola. No se rehace ni se «mejora» al mudarla
-                —si esta pestaña dice «Gantt», tiene que ser el gantt que ya
-                se conocía—, así que entra entero y con sus comentarios.
-
-                `items-stretch` y no `items-start`: la tarjeta de la izquierda
-                mide lo que mide el día que se esté viendo, y la lista de la
-                derecha medía siempre lo mismo —cuatro filas de sesenta
-                píxeles—. La diferencia quedaba en un socavón debajo de la
-                lista. Estiradas a la par, las cuatro filas se reparten el alto
-                que haya y las dos columnas cierran a la misma línea. */}
-            <Fragment slot="rejilla">
-              <div
-                class="grid gap-10 lg:grid-cols-[1.35fr_1fr] lg:items-stretch lg:gap-14"
-              >
-            {/* El mini: la silueta del día, sin texto en las barras. No es para
-                leer qué hay —eso está a la derecha y en el programa—, es para ver
-                de un golpe cómo se reparte la jornada entre las sedes. */}
-            <div data-reveal="arriba" data-retraso="120">
-              <Gantt agrupar="sede" resumen mini selector="[data-dias-portada]" />
-            </div>
-
-            {/* Sin rótulo de columna: la tarjeta de la izquierda ya lleva el suyo
-                dentro y aquí sobra: cuatro días con su fecha, bajo un titular que
-                dice «Programa», no necesitan que nadie los presente. Sin él,
-                además, el canto de arriba de la lista arranca exactamente en el
-                canto de arriba de la tarjeta. */}
-            <div data-reveal="arriba">
-              <ul
-                class="flex h-full flex-col border-y-2 border-amarillo"
-                data-dias-portada
-              >
-                {
-                  programa.dias.map((d, i) => (
-                    <li class="flex flex-1 border-b border-amarillo/30 last:border-b-0">
-                      {/* La fila entera cambia el día de la rejilla: el objetivo
-                          es la franja, no dos palabras. */}
-                      <button
-                        type="button"
-                        class="dia-portada flex w-full items-center gap-x-4 py-4 text-left"
-                        data-dia={i}
-                        aria-pressed={i === 0 ? 'true' : 'false'}
-                      >
-                        <span class="meta dia-num w-7 shrink-0 text-papel/75 transition-colors duration-200">
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <span class="display dia-nombre flex-1 text-2xl leading-none text-amarillo transition-colors duration-200">
-                          {d.dia}
-                        </span>
-                        {/* Filete de 1 px y sin relleno vertical: con el de 2 px
-                            del resto del sitio la etiqueta medía más que el
-                            nombre del día y la fila crecía tres píxeles respecto
-                            a las otras tres. */}
-                        <span class="meta dia-hoy shrink-0 border border-amarillo px-1.5 text-[0.55rem] leading-[1.7] text-amarillo">
-                          Hoy
-                        </span>
-                        <span class="meta shrink-0 text-papel/75">
-                          {d.fecha.replace(' de septiembre', ' sep')}
-                        </span>
-                      </button>
-                    </li>
-                  ))
-                }
-              </ul>
-            </div>
-              </div>
-            </Fragment>
-          </VistasDelDia>
+          <AhoraPortada />
         </div>
         ) : (
           <div class="mt-10 lg:mt-12">
