@@ -49,20 +49,17 @@ import {
 const paraElReloj = agendaPorDia.flatMap((dia) =>
   dia.actividades.map((a) => {
     const suya = sedeDe(a.sede);
-    const todas = enTodasLasSedes(a.sede);
     return {
       inicio: instanteDe(dia.indice, a.inicio),
       fin: instanteDe(dia.indice, a.fin),
       titulo: a.titulo,
       artista: a.artista ?? '',
-      sede: todas ? 'Todas las sedes' : a.sede,
-      /* Que sea un recorrido se dice aquí y no se deduce allá de que no haya
-         ruta. Son dos cosas distintas que se parecen: un recorrido no tiene
-         sede a la que ir, y una sede escrita en el panel con un nombre que no
-         está en la lista tampoco — pero de la segunda hay que seguir diciendo
-         el nombre, no ponerle la chapa de «pasa por aquí», que sería un dato
-         inventado por un error de tecleo. */
-      todas,
+      /* El recorrido dice su nombre y ya: «Todas las sedes» es dónde es, igual
+         que «No Museo», y con eso queda dicho. Aquí estuvo una chapa amarilla
+         de «Pasa por aquí» y se cae — era la única de los renglones que se
+         pintaba distinta, y un renglón de cada seis con campo propio se lee
+         como que ése importa más, que es justo lo que no se quería decir. */
+      sede: enTodasLasSedes(a.sede) ? 'Todas las sedes' : a.sede,
       ruta: suya ? conBase(rutaDeSede(suya.nombre)) : '',
       dia: dia.indice,
     };
@@ -221,13 +218,6 @@ const rutaPrograma = conBase('/programa');
     color: var(--color-apagado-papel);
     transition: color 0.2s var(--ease-salida);
   }
-  /* El recorrido no es de ninguna sede: lo dice con la chapa amarilla que ya
-     usa en el cartel, y no con un nombre de sede que sería mentira. */
-  .ahora-lista :global(.ahora-donde--todas) {
-    background-color: var(--color-amarillo);
-    color: var(--color-tinta);
-    padding: 0.15rem 0.5rem;
-  }
 
   .ahora-mas {
     display: inline-block;
@@ -302,7 +292,6 @@ const rutaPrograma = conBase('/programa');
     titulo: string;
     artista: string;
     sede: string;
-    todas: boolean;
     ruta: string;
     dia: number;
   };
@@ -367,8 +356,8 @@ const rutaPrograma = conBase('/programa');
       que.textContent = p.titulo;
 
       const donde = document.createElement('span');
-      donde.className = `meta ahora-donde${p.todas ? ' ahora-donde--todas' : ''}`;
-      donde.textContent = p.todas ? 'Pasa por aquí' : p.sede;
+      donde.className = 'meta ahora-donde';
+      donde.textContent = p.sede;
 
       fila.append(hasta, que, donde);
       li.append(fila);
