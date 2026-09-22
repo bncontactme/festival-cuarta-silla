@@ -1237,54 +1237,29 @@
   }
 }
 
-/* — El carril de los días, en la portada ——————————————————————————————
-   Los cuatro días del adelanto del programa son el mando de la rejilla que
-   tienen debajo. Fueron cuatro renglones de texto al canto de la rejilla, en
-   amarillo sobre el campo rojo, y son ahora cuatro celdas macizas con el
-   número grande: EL MISMO carril que el cartel de una sede, que es donde esta
-   forma ya estaba funcionando.
+/* — Días de la portada ————————————————————————————————————————————— */
+/* La lista de los cuatro días del adelanto del programa es el mando de la
+   rejilla que tiene al lado. El día elegido se pinta entero —número y
+   nombre—, así que el estado se lee en la fila y no en el botón; es el mismo
+   trato que reciben las sedes, que se ponen en amarillo enteras.
+   Nada de fondo ni de relleno: con un titular encima, cualquier caja más
+   sería otro bloque compitiendo.
 
-   El cambio no es de adorno. Cuatro renglones de texto dentro de una sección
-   que es toda texto no se leen como un mando —nadie los pulsaba—, y encima
-   competían con el titular por ser lo segundo que se mira. Un carril amarillo
-   con cuatro números de 48 px es un objeto, y un objeto se pulsa.
-
-   El día elegido se pinta ENTERO, celda y letra: es el mismo trato que reciben
-   las sedes del plano, que se ponen en amarillo enteras, y el mismo que la
-   celda del carril de la sede. De paso se arregla la cuenta de contraste que
-   arrastraba la forma anterior: era letra de color sobre el campo rojo de la
-   sección —4,0:1 raspando, y sólo porque el nombre del día era grande—, y
-   ahora es amarillo sobre tinta, que son 15,3:1. */
+   De qué color se pinta depende del campo, y por eso sale de una variable: en
+   una sección amarilla el día elegido va en rojo, pero esa misma sección
+   ahora es roja en la portada y un rojo sobre rojo no existe. Ahí se vuelca a
+   papel, que sobre rojo da 4,0:1 — suficiente para los 24px del nombre del
+   día, que es texto grande. */
 .dia-portada {
-  color: var(--color-tinta);
-  transition:
-    background-color 0.25s var(--ease-salida),
-    color 0.25s var(--ease-salida);
+  --dia-activo: var(--color-rojo);
 }
-.dia-portada:hover,
-.dia-portada:focus-visible,
-.dia-portada[aria-pressed='true'] {
-  background-color: var(--color-tinta);
-  color: var(--color-amarillo);
-}
-
-/* La nota de debajo del número —«Sáb · 7»— apagada, que es lo que la separa
-   del número sin cambiarle el color. */
-.dia-nombre {
-  color: color-mix(in srgb, var(--color-tinta) 55%, transparent);
-  transition: color 0.25s var(--ease-salida);
+.bg-rojo .dia-portada {
+  --dia-activo: var(--color-papel);
 }
 .dia-portada:hover .dia-nombre,
-.dia-portada:focus-visible .dia-nombre,
-.dia-portada[aria-pressed='true'] .dia-nombre {
-  color: var(--color-amarillo);
-}
-
-/* Hoy, cuando no es el día que se está enseñando: se dice en rojo, que es el
-   único acento que este sitio usa para «esto está pasando». Es la regla del
-   carril del cartel de sede, con las mismas palabras. */
-.dia-portada[data-hoy]:not([aria-pressed='true']) .dia-nombre {
-  color: var(--color-rojo);
+.dia-portada[aria-pressed='true'] .dia-nombre,
+.dia-portada[aria-pressed='true'] .dia-num {
+  color: var(--dia-activo);
 }
 
 /* «Hoy» sólo aparece si el festival está en marcha: lo pone el script de la
