@@ -138,6 +138,18 @@
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
+    /* La escena es la que mide: `size` y no `inline-size` porque lo que hace
+       falta saber aquí es el ALTO que le ha quedado, y eso es `cqh`. Trae de
+       regalo lo que hacía falta de todas formas — con contención de tamaño,
+       lo que hay dentro ya no puede empujar la escena para que crezca. */
+    container-type: size;
+    /* Y un suelo, que es la otra mitad del trato. Con la escena midiendo el
+       hueco que le dejan, en un teléfono de 568 px la banda del ahora se lo
+       quedaba casi entero: la escena bajaba a 32 px y el titular, que se mide
+       contra ella, desaparecía. El cartel es el cartel — antes que encoger
+       hasta borrarse, lo que cede es la banda, que para eso sabe enseñar
+       menos renglones. */
+    min-height: 7.5rem;
     display: grid;
     grid-template-rows: minmax(0, 1fr);
     grid-template-columns: minmax(0, 1fr);
@@ -171,23 +183,30 @@
    * Medido en `cqw` a secas —el ancho del marco— el titular no se entera de
    * cuánto alto le queda, y en un teléfono bajo la escena se encoge pero la
    * tipografía no: en 360×640 «CONCEPTUAL» se metía media línea debajo de la
-   * franja roja. Es el mismo problema que ya tenía el titular de escritorio y
-   * se resuelve igual, con un `min()` que mide lo que sobra de pantalla.
+   * franja de abajo.
    *
-   * De dónde sale el número: lo fijo de la portada —barra 52, tiempo 105,
-   * cinta de marcas 114, línea legal 37, filetes incluidos: 308 px— medido
-   * en devtools, y la escena se queda con el resto menos su relleno de 2rem.
-   * Eso son 19.25rem + 2rem, redondeado hacia arriba.
+   * ── Por qué ya no hay un número fijo ──────────────────────────────────
    *
-   * Y el 3.22 en vez de 2.64 (tres líneas a 0.88 de interlínea): Anton pinta
-   * las mayúsculas por fuera de su caja de línea, así que la caja sólo puede
-   * ocupar un 82 % del hueco. Medir la caja y no la tinta es justo lo que
-   * hacía que los números cuadraran y la pantalla no.
+   * Aquí estuvo `100dvh - 21.3rem`, y los 21.3 eran la suma medida a mano de
+   * todo lo que hay fuera de la escena: barra, cuenta atrás, cinta de marcas
+   * y línea legal. Funcionaba mientras esa suma no cambiara — y cambió el día
+   * en que la cuenta atrás dejó su sitio a la banda del ahora, que mide tres
+   * veces más. El titular siguió pidiendo el hueco de antes y «CONCEPTUAL»
+   * volvió a meterse debajo, esta vez sobre campo negro.
    *
-   * Comprobado en 360×640, 375×667, 390×844 y 430×932: sólo actúa en los dos
-   * primeros, en el resto sigue mandando el 16cqw de siempre. */
+   * Un presupuesto escrito a mano es una copia de un dato que vive en otro
+   * sitio, y las copias se separan del original. Así que se le pregunta al
+   * hueco: `container-type: size` en la escena la convierte en una unidad de
+   * medida, y `cqh` es literalmente el alto que le ha quedado después de que
+   * todo lo demás coja el suyo. Mida lo que mida la banda —y mide distinto en
+   * cada uno de sus cuatro estados— el titular se entera.
+   *
+   * El 2.9 en vez de 2.64 (tres líneas a 0.88 de interlínea): Anton pinta las
+   * mayúsculas por fuera de su caja de línea, así que la caja sólo puede
+   * ocupar un 91 % del hueco. Y los 2.5rem que se restan son el relleno de la
+   * escena más un pelo de aire, que sin él el titular besa la banda. */
   .portada-rotulo .display {
-    font-size: min(16cqw, calc((100dvh - 21.3rem) / 3.22));
+    font-size: min(16cqw, calc((100cqh - 2.5rem) / 2.9));
   }
 
   /* ── El tiempo ──────────────────────────────────────────────────────────

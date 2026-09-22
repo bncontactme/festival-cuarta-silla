@@ -367,60 +367,90 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
   }
 
   /* ══ La variante del teléfono ══════════════════════════════════════════
+
      Vive dentro del cartel de la portada móvil, que no tiene scroll: es una
-     pantalla, no una página. Así que aquí no se trata de apretar la de
-     escritorio, sino de decidir qué cabe. El campo lo pone el bloque que la
-     aloja —`.portada-tiempo`, que se vuelve de tinta al empezar el festival—
-     y por eso la banda entra sin fondo ni canto propios: dos cajas negras,
-     una dentro de otra, dibujan un marco que no significa nada. */
+     pantalla, no una página. Y el marco está topado en 32rem, así que esto no
+     se diseña «para móvil» en abstracto — se diseña para una columna de entre
+     320 y 512 px, que es un formato concreto y estrecho.
+
+     Lo que se busca es un tablero de salidas de estación: una hora enorme,
+     una retícula de renglones que se barre en vertical, y una chapa abajo con
+     lo siguiente. Denso, plano y de cantos duros, que es como está impreso el
+     resto del sitio.
+
+     El campo lo pone el bloque que la aloja —`.portada-tiempo`, que se vuelve
+     de tinta al empezar el festival— y por eso la banda entra sin fondo ni
+     canto propios: dos cajas negras, una dentro de otra, dibujan un marco que
+     no significa nada. */
   .ahora--movil {
     background-color: transparent;
     border: 0;
   }
 
-  /* Una columna, y el filete de la del escritorio se cae con ella: separaba
-     dos columnas que aquí no existen. */
   .ahora--movil .ahora-reja {
     gap: 0;
-    padding: 0.7rem 1rem 0.85rem;
+    padding: 0.85rem 1rem 1rem;
   }
+
+  /* ── La cabecera: la hora y, a su lado, hasta cuándo ────────────────
+     Dos renglones. Arriba el día, suelto y en amarillo. Abajo la hora
+     grande al canto izquierdo y «abierto hasta las 18:00» al derecho,
+     compartiendo LÍNEA DE BASE con ella.
+
+     Esa línea compartida es lo único que hay que entender de este bloque.
+     Apilados —que es como iban— eran tres renglones cortos pegados al canto
+     izquierdo y media banda de hueco muerto a la derecha; colgados de la
+     misma base, la hora y su pie son un solo objeto que ocupa el ancho, y el
+     ojo lee «13:40 … hasta las 18:00» de un tirón, que es justo la frase que
+     hay que leer. */
   .ahora--movil .ahora-reloj {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    column-gap: 0.75rem;
     text-align: left;
     padding-right: 0;
     border-right: 0;
   }
-
-  /* El reloj, en renglón: la hora grande y, a su derecha, el día encima y el
-     «abierto hasta» debajo. Apilados los tres —que es como van en el
-     escritorio— se comían tres renglones de los pocos que hay. Así son uno. */
-  @media (min-width: 0px) {
-    .ahora--movil .ahora-reloj {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      column-gap: 0.85rem;
-      align-items: center;
-    }
-    .ahora--movil .ahora-hora {
-      grid-row: 1 / 3;
-      margin-top: 0;
-      font-size: 3.1rem;
-      line-height: 0.85;
-    }
-    .ahora--movil .ahora-reloj > :first-child {
-      align-self: end;
-    }
-    .ahora--movil .ahora-cierre {
-      margin-top: 0.15rem;
-      align-self: start;
-    }
+  .ahora--movil .ahora-reloj > :first-child {
+    grid-column: 1 / -1;
+  }
+  .ahora--movil .ahora-hora {
+    margin-top: 0.1rem;
+    /* En `cqw` y no en `rem`: el marco va de 320 a 512 y la hora tiene que
+       crecer con él — es el objeto de la banda, no una etiqueta. */
+    font-size: clamp(2.9rem, 15cqw, 4.6rem);
+    line-height: 0.8;
+  }
+  .ahora--movil .ahora-cierre {
+    margin-top: 0;
+    text-align: right;
   }
 
-  /* El cuerpo, separado del reloj por el filete que en el escritorio va en
+  /* ── El cuerpo ───────────────────────────────────────────────────────
+     Separado de la hora por el mismo filete que en el escritorio va en
      vertical entre las dos columnas. La misma raya, girada. */
   .ahora--movil .ahora-cuerpo {
-    margin-top: 0.7rem;
-    padding-top: 0.6rem;
+    margin-top: 0.85rem;
+    padding-top: 0.7rem;
     border-top: 1px solid color-mix(in srgb, var(--color-papel) 22%, transparent);
+  }
+
+  /* El rótulo de la lista, con el filete amarillo delante: es exactamente el
+     `.portada-marcas-rotulo` que vive dos bloques más abajo en esta misma
+     pantalla. Repetirlo no es pereza — es lo que hace que las dos franjas se
+     lean como dos apartados de un mismo cartel y no como dos widgets. */
+  .ahora--movil .ahora-rotulo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .ahora--movil .ahora-rotulo::before {
+    content: '';
+    flex: none;
+    width: 1.75rem;
+    height: 2px;
+    background-color: var(--color-amarillo);
   }
 
   /* ── El renglón, en dos líneas ──────────────────────────────────────
@@ -429,11 +459,26 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
      cuándo y dónde, abajo qué— cada renglón mide lo mismo y la columna de
      horas se sigue leyendo de un barrido.
 
+     La sede se va al canto derecho, y no pegada a la hora. Es lo mismo que
+     hace la cabecera con «abierto hasta»: en una columna estrecha, dos datos
+     cortos en los dos cantos ocupan el ancho y se distinguen de un vistazo;
+     pegados, son una frase larga que hay que leer entera para encontrar el
+     nombre del sitio.
+
      El `order` sólo mueve lo que se ve; lo que se lee sigue siendo hora,
      título, sede, que es el orden con el que tiene sentido escucharlo. */
   .ahora--movil .ahora-lista :global(.ahora-fila) {
-    gap: 0.1rem 0.6rem;
-    padding: 0.42rem 0;
+    gap: 0.15rem 0.6rem;
+    padding: 0.5rem 1rem;
+    /* Sangrado negativo para que el filete —y el destello del dedo— lleguen a
+       los dos cantos de la banda, como las filas de sedes del móvil.
+
+       Y `width: auto` para deshacer el `width: 100%` que la fila trae de la
+       variante de escritorio: con el ancho clavado, el sangrado la corría
+       dieciséis píxeles a la izquierda sin ensancharla, así que el filete
+       sobresalía por un canto y se quedaba corto por el otro. */
+    margin-inline: -1rem;
+    width: auto;
   }
   .ahora--movil .ahora-lista :global(.ahora-hasta) {
     order: 1;
@@ -441,39 +486,73 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
   }
   .ahora--movil .ahora-lista :global(.ahora-donde) {
     order: 2;
+    margin-left: auto;
     font-size: 0.6rem;
   }
+  /* En Anton y en caja alta, que es como esta pantalla escribe los nombres
+     —el índice, la lista de sedes, el titular—. La misma letra que el cartel
+     de arriba, tres cuerpos más abajo. */
   .ahora--movil .ahora-lista :global(.ahora-que) {
     order: 3;
     flex: 1 1 100%;
-    font-size: 0.92rem;
-    line-height: 1.25;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.12rem;
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
   }
 
-  /* La chapa roja, a lo ancho y en dos renglones: el artista debajo y no al
-     otro canto, que aquí no hay canto al que mandarlo. */
+  /* El destello rojo al tocar: el mismo con el que responden las filas de
+     sedes en este sitio móvil. El dedo ya sabe de qué color es tocar aquí. */
+  .ahora--movil .ahora-lista :global(a.ahora-fila:active) {
+    background-color: var(--color-rojo);
+  }
+  .ahora--movil .ahora-lista :global(a.ahora-fila:active .ahora-que) {
+    color: var(--color-amarillo);
+  }
+  .ahora--movil .ahora-lista :global(a.ahora-fila:active .ahora-hasta),
+  .ahora--movil .ahora-lista :global(a.ahora-fila:active .ahora-donde) {
+    color: var(--color-tinta);
+  }
+
+  /* ── La chapa: dos tintas, y sin hueco muerto ───────────────────────
+     Era un rectángulo rojo con una pastilla negra arriba a la izquierda y
+     media chapa vacía a la derecha, porque los títulos son cortos. Ahora la
+     pastilla se estira de canto a canto y hace de cabecera: la chapa pasa a
+     ser un objeto de dos tintas —barra negra arriba, campo rojo debajo— en
+     vez de un campo con algo suelto encima.
+
+     El relleno se muda de la chapa a sus tres piezas para que la barra pueda
+     llegar a los cantos sin sangrados negativos. */
   .ahora--movil .ahora-luego {
-    gap: 0.3rem 0.7rem;
-    margin-top: 0.7rem;
-    padding: 0.45rem 0.7rem;
+    gap: 0;
+    margin-top: 0.85rem;
+    padding: 0;
   }
   .ahora--movil .ahora-cuando {
+    flex: 1 1 100%;
+    padding: 0.32rem 0.7rem;
     font-size: 0.6rem;
-    padding: 0.22rem 0.45rem;
   }
   .ahora--movil .ahora-proxima {
     flex: 1 1 100%;
-    font-size: 1.05rem;
+    margin-top: 0.5rem;
+    padding: 0 0.7rem;
+    font-size: 1.22rem;
+    line-height: 1.02;
   }
   .ahora--movil .ahora-quien {
-    margin-left: 0;
     flex: 1 1 100%;
+    margin-left: 0;
+    padding: 0.2rem 0.7rem 0.55rem;
     font-size: 0.6rem;
   }
 
-  /* Y el rótulo de la lista, al cuerpo de todo lo chico de esta portada. */
+  /* Y todo lo chico, al cuerpo de lo chico de esta portada. */
   .ahora--movil .ahora-rotulo,
   .ahora--movil .ahora-cierre,
+  .ahora--movil [data-ahora-dia],
   .ahora--movil .ahora-lista :global(.ahora-dia) {
     font-size: 0.6rem;
   }
@@ -521,11 +600,28 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     const fuente = banda.querySelector<HTMLScriptElement>('[data-reloj-portada]');
     if (!fuente) return;
 
-    /** Cuántos renglones caben ahora mismo. Se pregunta en cada repintado y no
-     *  una vez al arrancar: un teléfono gira, y girando cambia el alto. */
+    /**
+     * Cuántos renglones caben ahora mismo.
+     *
+     * Se pregunta en cada repintado y no una vez al arrancar: un teléfono
+     * gira, y girando cambia el alto.
+     *
+     * Los escalones son del teléfono y sólo del teléfono —`data-caben-corto`
+     * es lo que dice que esta banda es la de móvil— porque allí la portada no
+     * tiene scroll: lo que crece aquí se lo quita a la escena de la silla, que
+     * es el cartel. En escritorio la sección crece hacia abajo y no le quita
+     * nada a nadie.
+     *
+     * 760 y 640 son las dos rayas donde la cuenta deja de salir: por debajo de
+     * 760 —un iPhone SE de 667— tres renglones dejaban al titular sin sitio, y
+     * por debajo de 640 lo dejaban sin existir.
+     */
     const CABEN = () => {
+      const base = Number(banda.dataset.caben) || 5;
       const corto = Number(banda.dataset.cabenCorto);
-      return corto && innerHeight < 760 ? corto : Number(banda.dataset.caben) || 5;
+      if (!corto) return base;
+      if (innerHeight < 640) return 1;
+      return innerHeight < 760 ? corto : base;
     };
 
     let puntos: Punto[] = [];
