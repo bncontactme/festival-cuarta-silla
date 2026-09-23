@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 164,
-  "actualizado": "2026-09-23T16:57:22.174Z",
+  "version": 165,
+  "actualizado": "2026-09-23T16:59:43.985Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1841,10 +1841,11 @@
     ]
   },
   "festival": {
-    "manifiesto": {
-      "titulo": "¿Qué entendemos por arte conceptual?",
-      "cuerpo": "Entendemos el arte conceptual como una práctica crítica en la que las ideas, las preguntas y las tensiones que una obra provoca tienen mayor relevancia que su apariencia material. Se trata de generar pensamiento, abrir diálogos y cuestionar las estructuras culturales, políticas y sociales que organizan nuestra realidad.\n\nPartimos de la tradición del conceptualismo latinoamericano, que transformó el arte conceptual en una herramienta de intervención social. Desde esta perspectiva, la obra deja de ser un fin en sí mismo para convertirse en un medio de reflexión, resistencia y construcción de nuevas formas de imaginar el mundo.\n\nPor ello, en este festival nos preguntamos qué pone en discusión la obra, qué relaciones activa y qué posibilidades de transformación abre.",
-      "cierre": "El arte conceptual propone preguntas capaces de alterar nuestra manera de mirar y habitar la realidad."
+    "sala": {
+      "titulo": "Festival de Arte Conceptual La Cuarta Silla|",
+      "cuerpo": "El arte no transforma el mundo por sí solo, pero puede cambiar a quienes pueden transformarlo. ( Lucy R. Lippard)\n\nEl arte conceptual no nació en el vacío. En el siglo XX, cuando las vanguardias históricas comenzaron a cuestionar los límites del arte tradicional, emergió una interrogante que aún nos sostiene: ¿qué convierte a un objeto en arte?\n\nUno de los ejemplos más paradigmáticos de esa ruptura es  La Fuente (1917), un urinario firmado con el seudónimo “R. Mutt” y atribuido históricamente a Marcel Duchamp. Investigaciones recientes han complejizado su autoría, señalando la coautoría intelectual de la Baronesa Elsa von Freytag-Loringhoven, artista dadaísta cuya práctica del objeto encontrado y la provocación lingüística anticipa la operación duchampiana (Gammel, 2002). Con esta obra, se desplaza la pregunta central del arte: ya no reside en la técnica ni en la materialidad del objeto, sino en el concepto que lo sustenta (Tomkins, 1996).\n\nDe esa fisura nace el arte conceptual como movimiento. Emergido a finales de la década de 1960 y con su apogeo en los años setenta; planteando que la idea es más importante que el objeto. Lo invisible, lo intangible o incluso lo efímero se convierten en protagonistas. El lenguaje mismo puede ser el medio, el mensaje y la experiencia. El término fue acuñado en 1967 por Sol LeWitt, para quien “la idea misma puede ser una obra de arte” (LeWitt, 1967). Y con ello, emerge una figura central: el espectador activo, sin cuya participación intelectual el concepto no se completa (Lippard, 1973).\n\n•⁠  ⁠El problema de la categoría\n\nExiste un problema al emplear la categoría “conceptualista” para artistas que se opusieron al adjetivo de “conceptuales”. Resulta necesario distinguir entre arte conceptual —como categoría histórica, anglosajona y ontológica— y conceptualismo como operación.\n\nJustificamos aquí el uso de la categoría “conceptualismo” no como estilo, sino como dispositivo para pensar la producción de conceptos en arte. Como propone Luis Camnitzer, en el pasaje de la Otra Figuración al conceptualismo, lo que está en juego en América Latina no es la definición de arte, sino su función (Camnitzer, 2007).\nAhora hablemos del concepto como transformación de la realidad: la propuesta del “conceptualismo latinoamericano” es clara: Filosóficamente, esta idea cobra pleno sentido si la pensamos desde Gilles Deleuze y Félix Guattari: el concepto no es una abstracción que representa lo real, es un acontecimiento, una irrupción \"El concepto no describe el mundo, lo interviene\"\n\nAhí se juega la descolonización del pensamiento: mientras el arte conceptual anglosajón se agotó en su pregunta ontológica y hermética, el conceptualismo latinoamericano utilizó el concepto como táctica de infiltración en los circuitos ideológicos de Tucumán Arde (1968) a Cildo Meireles, de León Ferrari a las prácticas actuales (Freire y Longoni, 2013).\n\n•⁠  ⁠La Cuarta Silla\n\nEste festival retoma esa genealogía. Entendemos lo inmaterial no como efecto visual, sino como operación política que se cuela por el sistema.\n\nLa Cuarta Silla es ese lugar vacío que se deja en la mesa. Es el espacio del espectador activo, del que toma la palabra y completa la obra. Es la invitación a comprender que el concepto, aquí y ahora, todavía puede transformar la realidad.",
+      "firma": "Yuriko Cortes Salcedo",
+      "publicado": true
     }
   }
 }
