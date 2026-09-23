@@ -1,7 +1,7 @@
 {
   "contrato": 3,
-  "version": 162,
-  "actualizado": "2026-09-22T18:15:38.640Z",
+  "version": 164,
+  "actualizado": "2026-09-23T16:57:22.174Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -146,16 +146,6 @@
       "coord": [
         20.6778493,
         -103.3634779
-      ]
-    },
-    {
-      "nombre": "Casa ITESO Clavijero",
-      "direccion": "C. José Guadalupe Zuno Hernández 2083, Col Americana, Obrera, 44150 Guadalajara, Jal.",
-      "instagram": "https://www.instagram.com/casaitesoclavigero/",
-      "mapa": "https://maps.app.goo.gl/nA4oPAGvr9pRx7bC6",
-      "coord": [
-        20.670145,
-        -103.372631
       ]
     }
   ],
@@ -547,24 +537,6 @@
         "fin": "22:30",
         "sede": "Ánima Galería",
         "tipo": "escena"
-      },
-      {
-        "titulo": "Conversatorio \"Arte Conceptual Latinoamericano\"",
-        "dia": 0,
-        "inicio": "11:00",
-        "fin": "12:30",
-        "sede": "Casa ITESO Clavijero",
-        "tipo": "charla",
-        "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
-      },
-      {
-        "titulo": "Conversatorio \"Curaduría Crítica\"",
-        "dia": 1,
-        "inicio": "11:00",
-        "fin": "12:30",
-        "sede": "Casa ITESO Clavijero",
-        "tipo": "charla",
-        "registro": "https://forms.gle/X7XV19qUoWr1Skod9"
       },
       {
         "titulo": "Proyección documental Toshkua",
