@@ -491,10 +491,18 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
   .ahora--movil .ahora-lista :global(.ahora-fila) {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
-    align-content: center;
-    column-gap: 0.35rem;
+    align-content: start;
+    gap: 0 0.35rem;
     height: 100%;
-    padding: 0 0.5rem;
+    padding: 0.2125rem 0.5rem 0;
+  }
+
+  /* Con el renglón a lo alto de todo el tablero —lo último del festival, o
+     la última espera—, el contenido vuelve al centro. La décima de arriba
+     compensa lo que sube el título, que si no quedaba corrido hacia arriba. */
+  .ahora--movil .ahora-cuerpo:has(.ahora-luego[hidden]) .ahora-lista :global(.ahora-fila) {
+    align-content: center;
+    padding-top: 0.2rem;
   }
   .ahora--movil .ahora-lista :global(.ahora-hasta),
   .ahora--movil .ahora-lista :global(.ahora-donde),
@@ -525,8 +533,25 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
      la Anton ocupa 21 de alto y la Í sube un píxel y medio por encima de su
      propio renglón: con 1,05rem, las tildes del segundo renglón —el que el
      corte esconde— asomaban por debajo del primero como rayitas sueltas.
-     Con 20 px cada tilde cabe en su renglón y el corte es limpio. */
+     Con 20 px cada tilde cabe en su renglón y el corte es limpio.
+
+     Pero la Anton se sienta en el fondo de esa caja, y el título quedaba
+     despegado de su línea y caído hacia el canto. Eran dos cosas. Una, que
+     la fila heredaba del escritorio un hueco de 0,3rem entre renglones —el
+     `gap` de allá, que aquí sólo se había cambiado entre columnas—: 12 + 4,8
+     + 20 son 36,8 px en un renglón de 34, y el marco le cortaba al título
+     los pies. La otra, esa caja de 20 px: aun sin el hueco, entre la línea
+     de la hora y las mayúsculas quedaban casi 8 px, el doble que encima.
+
+     Así que la fila va sin hueco entre renglones, el título sube 0,2rem con
+     `position: relative` —un margen negativo dentro de la rejilla le
+     descuadraba el renglón— y el relleno de arriba centra el conjunto a
+     mano: 6 px encima de la hora, 4,7 entre las dos líneas y 6 debajo del
+     título. La Í se queda a píxel y medio de la línea de arriba, sin
+     tocarla. */
   .ahora--movil .ahora-lista :global(.ahora-que) {
+    position: relative;
+    top: -0.2rem;
     grid-row: 2;
     grid-column: 1 / -1;
     display: -webkit-box;
