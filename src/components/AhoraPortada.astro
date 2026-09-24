@@ -1114,13 +1114,12 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
       /**
        * En qué fase estamos, dicho en el propio elemento.
        *
-       * Lo lee la portada móvil para saber si relevar la cuenta atrás. Lo dice
-       * la banda y no `motion.ts` —que también sabe cuándo llega a cero— por
-       * dos razones. Una: `motion.ts` cuenta al arranque del festival y esto
-       * cuenta a la primera actividad, así que son dos ceros distintos y el
-       * relevo tiene que colgar del que manda aquí. Y dos: el reloj de mentira
-       * de `?ahora=` sólo lo entiende esta banda, y sin esto no habría manera
-       * de ver el relevo hasta el día del arranque.
+       * Lo lee la portada móvil para saber si relevar la cuenta atrás. No es
+       * la única señal: `motion.ts` marca su propio cero, que es el arranque
+       * del festival y no la primera actividad, y el relevo entra con el
+       * primero de los dos que llegue (ver `movil.css`). Éste hace falta
+       * igual, porque el reloj de mentira de `?ahora=` sólo lo entiende esta
+       * banda, y sin él no habría manera de ver el relevo antes de tiempo.
        */
       banda.dataset.fase = ahora < arranca ? 'antes' : 'curso';
 
@@ -1166,14 +1165,11 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
            dos vecinos es una franja gastada. */
         rotulo.textContent = '';
       } else {
-        /* En el teléfono, «Ahora» a secas: allí el día tiene renglón propio,
-           debajo de la hora. */
-        $('[data-ahora-dia]')!.textContent = movil
-          ? 'Ahora'
-          : `Ahora · ${d.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric' })}`;
+        $('[data-ahora-dia]')!.textContent = `Ahora · ${d.toLocaleDateString('es-MX', {
+          weekday: 'long',
+          day: 'numeric',
+        })}`;
         $('[data-ahora-reloj]')!.textContent = relojDe(d);
-        const fecha = $('[data-ahora-fecha]');
-        if (fecha) fecha.textContent = cortoDe(d);
 
         if (corriendo.length) {
           /* Cuántas y en cuántos sitios: con dieciséis sedes, «3 abiertas» no
@@ -1195,6 +1191,17 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
           rotulo.textContent = 'Lo que viene';
           cierre.textContent = siguiente ? `Vuelve a abrir ${cuandoEs(siguiente.desde).dicho.toLowerCase()}` : '';
         }
+      }
+
+      /* El teléfono dice «Ahora», y el día en su renglón debajo de la hora, en
+         las dos fases. Allí la banda puede salir antes de la primera actividad
+         —en cuanto la cuenta atrás llega a cero, ver el relevo en `movil.css`—
+         y un «Empieza hoy» encima de la hora se leía como si empezara a esa
+         hora. Lo que falta para abrir ya lo dice la chapa roja. */
+      if (movil) {
+        $('[data-ahora-dia]')!.textContent = 'Ahora';
+        const fecha = $('[data-ahora-fecha]');
+        if (fecha) fecha.textContent = cortoDe(d);
       }
 
       /* Y si no hay rótulo, no hay franja: un `<p>` vacío mide un renglón
