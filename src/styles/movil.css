@@ -268,30 +268,46 @@
      escritorio, porque todo lo que lleva dentro —renglones de papel, horas en
      amarillo, la chapa roja de «siguiente»— está medido contra un campo negro.
      Sobre rojo, el papel da 4,0:1 y la chapa roja desaparecería del todo. */
-  /* Quién manda el relevo: la propia banda, que se marca `data-fase="curso"`
-     en cuanto su reloj entra en el festival. No `motion.ts`, aunque también
-     sepa cuándo llega a cero: aquél cuenta al arranque del festival y la banda
-     cuenta a la primera actividad, así que son dos ceros distintos y el relevo
-     tiene que colgar del que manda dentro del bloque. */
-  .portada-tiempo:has(.ahora--movil[data-fase='curso']) {
+  /* Quién manda el relevo: el primero de los dos ceros que llegue.
+
+     Hay dos, y no coinciden. `motion.ts` cuenta al arranque del festival
+     —`inicioISO`, las 8:00 del jueves— y marca este bloque con
+     `data-estado="enCurso"`; la banda cuenta a la primera actividad y se
+     marca `data-fase="curso"`. El relevo colgaba sólo de la banda, y el
+     primer día la primera actividad era a las 18:30: diez horas y media de
+     portada con la cuenta atrás muerta en «00 00 00 00», justo el día que
+     más gente la iba a abrir.
+
+     Entre los dos ceros la banda ya sabe qué decir: es el mismo estado que el
+     hueco entre la charla de la tarde y la fiesta de la noche, con la chapa
+     roja de lo siguiente —y cuánto falta— arriba y lo de después debajo.
+
+     Con el cero de `motion.ts` hay una condición, y es la que impide que esto
+     rompa nada: la banda sólo releva si ya está pintada. Sin JavaScript, con
+     el festival terminado o si su guion falla, la banda sigue con `hidden` y
+     se queda la cuenta atrás, que es lo que había. */
+  .portada-tiempo:has(.ahora--movil[data-fase='curso']),
+  .portada-tiempo[data-estado='enCurso']:has(.ahora--movil:not([hidden])) {
     background-color: var(--color-tinta);
   }
 
   .portada-tiempo:has(.ahora--movil[data-fase='curso']) .portada-reloj,
-  .portada-tiempo:has(.ahora--movil[data-fase='curso']) .portada-cuando {
+  .portada-tiempo:has(.ahora--movil[data-fase='curso']) .portada-cuando,
+  .portada-tiempo[data-estado='enCurso']:has(.ahora--movil:not([hidden])) .portada-reloj,
+  .portada-tiempo[data-estado='enCurso']:has(.ahora--movil:not([hidden])) .portada-cuando {
     display: none;
   }
 
-  /* Y antes de tiempo no se asoma. La banda se enseña a sí misma en cuanto su
-     guion la rellena —y lo hace también antes del festival, para decir cuándo
-     abre—, así que sin esta regla se vería debajo de la cuenta atrás durante
-     los meses de espera. En el teléfono manda el contador: una portada con un
-     reloj de cuenta atrás Y una banda de «lo primero» son dos respuestas a la
-     misma pregunta, y la cuenta atrás es la que el cartel pide.
+  /* Y mientras la cuenta atrás cuenta, la banda no se asoma. Se enseña a sí
+     misma en cuanto su guion la rellena —y lo hace también antes del
+     festival, para decir cuándo abre—, así que sin esta regla se vería debajo
+     de la cuenta atrás durante los meses de espera. En el teléfono manda el
+     contador hasta su cero: una portada con un reloj de cuenta atrás Y una
+     banda de «lo primero» son dos respuestas a la misma pregunta.
 
-     Sin JavaScript no hay `data-fase` y no hay banda: queda la cuenta atrás,
-     que es exactamente lo que había. */
-  .ahora--movil:not([data-fase='curso']) {
+     Sin JavaScript no hay `data-fase` ni `data-estado`, y no hay banda: queda
+     la cuenta atrás, que es exactamente lo que había. */
+  .portada-tiempo:not([data-estado='enCurso']) .ahora--movil:not([data-fase='curso']) {
     display: none;
   }
 
