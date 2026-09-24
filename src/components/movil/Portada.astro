@@ -124,10 +124,12 @@ const indice = [
 ];
 
 /* ── La cinta de marcas ──────────────────────────────────────────────────
-   La misma tira del escritorio a escala de teléfono: la ficha mide 5.25rem
-   —84 px— más 0.4rem de aire, o sea los 90 del `PASO`, y la tira corre a 42
-   píxeles por segundo, más despacio que los 52 de allá porque aquí el
-   recorrido visible es un tercio.
+   La misma tira del escritorio a escala de teléfono: la ficha mide 3.1875rem
+   —51 px— más 0.375rem de aire, o sea los 57 del `PASO`, y la tira corre a 27
+   píxeles por segundo. Es la misma cadencia que tenía con fichas de 84 px a
+   42 por segundo: pasa una marca cada dos segundos y pico. Con la ficha más
+   chica y la velocidad de antes, las marcas pasarían un 60 % más deprisa y
+   no daría tiempo a reconocerlas.
 
    El `PASO` tiene que seguir a la ficha: es lo que traduce «cuántas fichas
    hay» a «cuánto dura una vuelta», y si se quedan desparejados la cinta corre
@@ -136,8 +138,8 @@ const indice = [
    Con veintitantas marcas una vuelta ya cubre de sobra el ancho del teléfono;
    el `repes` es el seguro para el día que queden dos, y el `length > 0` de
    abajo es lo que evita dividir entre cero. */
-const PASO = 90;
-const VELOCIDAD = 42;
+const PASO = 57;
+const VELOCIDAD = 27;
 const repes = Math.max(
   1,
   Math.ceil(600 / PASO / Math.max(1, patrocinadores.lista.length)),
@@ -258,10 +260,7 @@ const duracionCinta = ((tira.length * PASO) / VELOCIDAD).toFixed(1);
             type="checkbox"
             class="cinta-lupa sr-only"
           />
-          <p class="meta portada-marcas-rotulo">
-            <span class="portada-marcas-filete" aria-hidden="true" />
-            {patrocinadores.titulo}
-          </p>
+          <p class="meta portada-marcas-rotulo" aria-hidden="true">{patrocinadores.titulo}</p>
           <div class="portada-pista">
             {/* Dos copias de la misma tira, la segunda escondida de los
                 lectores de pantalla: la animación corre la primera hasta su
