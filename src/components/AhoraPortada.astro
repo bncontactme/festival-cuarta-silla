@@ -33,6 +33,25 @@ import {
   sedeDe,
 } from '../data/site';
 
+interface Props {
+  /** `escritorio`: dos columnas, la hora al canto izquierdo. `movil`: un
+   *  tablero de dos renglones dentro del cartel del teléfono, con la hora a
+   *  su izquierda. */
+  variante?: 'escritorio' | 'movil';
+}
+
+const { variante = 'escritorio' } = Astro.props;
+
+/** Cuántas actividades se enseñan.
+ *
+ * Cinco: lo que cabe en escritorio sin que la banda pase de alto de pantalla.
+ * En el teléfono el tablero enseña una a la vez y lo demás pasa por turnos,
+ * así que allí el cinco es otra cosa: el tope de la cola de «después» cuando
+ * no hay nada abierto. Sin tope, a las tres de la mañana esa cola eran las
+ * veinticinco actividades que quedaban, y una vuelta entera tardaba dos
+ * minutos y medio. */
+const caben = 5;
+
 /**
  * Lo que el script necesita para saber qué está pasando: cada actividad del
  * festival con su instante real, su sede y su puerta.
@@ -67,7 +86,20 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
 );
 ---
 
-<section class="ahora" data-ahora hidden aria-label="Qué está pasando ahora">
+<section
+  class:list={['ahora', variante === 'movil' && 'ahora--movil']}
+  data-ahora
+  data-caben={caben}
+  data-variante={variante}
+  hidden
+  aria-label="Qué está pasando ahora"
+>
+  {/* Los datos van DENTRO de la sección, y no sueltos al final del
+      componente: la portada monta esta banda dos veces —una de escritorio y
+      otra de teléfono— y cada una tiene que encontrar los suyos sin contar
+      posiciones ni inventarse identificadores. */}
+  <script type="application/json" data-reloj-portada set:html={JSON.stringify(paraElReloj)} is:inline />
+
   <div class="ahora-reja">
     {/* ── La hora ──────────────────────────────────────────────────────────
         Es lo único de la portada que caduca: quien llega y ve «13:40» ya sabe,
@@ -84,6 +116,12 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
       <p class="meta text-amarillo" data-ahora-dia></p>
       <p class="display display-centro ahora-hora" data-ahora-reloj></p>
       <p class="meta ahora-cierre" data-ahora-cierre></p>
+      {/* El día, debajo de la hora, y sólo en el teléfono. Allí la columna del
+          reloj mide lo que mide la hora, y «Ahora · sábado 26» en un renglón
+          le quitaba al tablero de al lado el ancho que necesitan los títulos:
+          se parte en dos —«Ahora» encima, «sáb 26» debajo— y la hora queda
+          en medio. */}
+      {variante === 'movil' && <p class="meta ahora-fecha" data-ahora-fecha></p>}
     </div>
 
     <div class="ahora-cuerpo">
@@ -322,9 +360,292 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     color: var(--color-tinta);
     font-weight: 700;
   }
+
+  /* ══ La variante del teléfono ══════════════════════════════════════════
+
+     ── Un tablero de salidas ─────────────────────────────────────────────
+
+     La hora a la izquierda y, a su derecha, dos renglones del mismo alto:
+     arriba lo que está pasando, abajo lo que entra. Se lee como el tablero
+     de una estación —de arriba abajo, en el orden del reloj— y mide 93 px,
+     lo mismo que la cinta de patrocinadores que tiene debajo. Ésa es la
+     unidad de esta portada: una franja, no un bloque.
+
+     Venía de medir entre 133 y 167 px en dos columnas —el ahora a la
+     izquierda, la chapa roja a la derecha—, con la chapa estirada al alto
+     de su vecina y media vacía, y con cuatro rótulos para una sola
+     actividad: «Ahora», «Abierto hasta las 18:00», «En este momento» y
+     «Hasta 14:00». Queda uno por renglón.
+
+     ── Y mide siempre lo mismo ───────────────────────────────────────────
+
+     Cada cosa es de un renglón y se corta con puntos, y los dos renglones
+     del tablero tienen el alto clavado. Es la mitad del arreglo y no un
+     detalle: el cartel de arriba se mide contra el hueco que le deja esta
+     banda —`cqh` en `.portada-escena`—, y una banda que crecía cuando el
+     turno le traía un título de dos líneas hacía respirar el cartel entero,
+     catorce píxeles cada seis segundos. */
+  .ahora--movil {
+    background-color: transparent;
+    border: 0;
+  }
+
+  .ahora--movil .ahora-reja {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0 0.75rem;
+    padding: 0.375rem 1rem 0.45rem;
+  }
+
+  /* ── La columna del reloj ────────────────────────────────────────────
+     «Ahora», la hora y el día, uno encima de otro y del ancho de la hora.
+     Centrada en vertical contra el tablero, que es quien manda en el alto. */
+  .ahora--movil .ahora-reloj {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+  }
+  .ahora--movil [data-ahora-dia],
+  .ahora--movil .ahora-fecha {
+    font-size: 0.5rem;
+    line-height: 0.75rem;
+  }
+  .ahora--movil .ahora-fecha {
+    color: var(--color-apagado-papel);
+  }
+
+  /* El mismo cuerpo que tenía —la banda encoge sin que encoja la hora— y
+     anclada a la izquierda. `display-centro` escala la Anton desde el
+     centro, que es lo que pide la columna centrada del escritorio; aquí,
+     con la hora alineada a la izquierda, la dejaba ocho píxeles metida
+     hacia dentro y fuera de la línea de todo lo demás.
+
+     Y con el ancho de la hora más ancha, no el de la que toca. La Anton no
+     trae cifras tabulares —`tabular-nums` no le hace nada— y «11:11» mide
+     54 px donde «00:00» mide 78: con la columna siguiendo a la hora, el
+     tablero entero se corría a un lado cada vez que cambiaba el minuto.
+     2,15 em es «00:00» con un pelo de aire, y en `em` sigue al cuerpo de la
+     hora, que crece con el marco. */
+  .ahora--movil .ahora-hora {
+    min-width: 2.15em;
+    margin: 0.1rem 0;
+    font-size: clamp(1.85rem, 9.5cqw, 2.5rem);
+    line-height: 0.85;
+    transform-origin: left center;
+  }
+
+  /* Lo que el escritorio dice en renglones propios, aquí lo dice el
+     tablero. «Abierto hasta las 18:00» además se leía como que el festival
+     cerraba a esa hora, y es sólo cuándo acaba lo último de lo que está
+     abierto; «Corriendo ahora · 4 en 3 sedes» lo cuenta el «1/4» del
+     renglón. */
+  .ahora--movil .ahora-cierre,
+  .ahora--movil .ahora-rotulo {
+    display: none;
+  }
+
+  /* ── El tablero ──────────────────────────────────────────────────────
+     Dos renglones de alto fijo, que se llenan en el orden del DOM. Ese
+     orden lo pone el guion: con algo abierto la chapa va debajo —ahora,
+     luego—, y sin nada abierto sube, porque entonces lo siguiente es lo
+     primero que va a pasar y el renglón negro es lo de después. El tablero
+     se lee siempre en el orden del reloj, y un lector de pantalla lo oye
+     en el mismo. */
+  .ahora--movil .ahora-cuerpo {
+    display: grid;
+    grid-template-rows: repeat(2, 2.25rem);
+    row-gap: 0.25rem;
+  }
+
+  /* Y si falta uno —lo último del festival no tiene siguiente, y la última
+     espera no tiene después— el otro se queda con los dos renglones y su
+     título con dos líneas, en vez de dejar un marco vacío. */
+  .ahora--movil .ahora-cuerpo:has(.ahora-luego[hidden]) .ahora-lista,
+  .ahora--movil .ahora-cuerpo:has(.ahora-lista:empty) .ahora-luego {
+    grid-row: 1 / -1;
+    --lineas: 2;
+  }
+
+  /* ── El renglón de lo que pasa ───────────────────────────────────────
+     El marco es la lista y no la fila, para que el relevo pase por dentro:
+     la fila vieja sube y se va, la nueva entra desde abajo, y el marco se
+     queda quieto, como la ventanilla de un tablero. */
+  .ahora--movil .ahora-lista {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-papel) 22%, transparent);
+  }
+  .ahora--movil .ahora-lista:empty {
+    display: none;
+  }
+  .ahora--movil .ahora-lista :global(li) {
+    height: 100%;
+  }
+
+  /* Arriba hasta cuándo, dónde y cuál de cuántas; abajo qué. El `order`
+     del escritorio no hace falta: cada pieza tiene su casilla, y lo que se
+     lee sigue siendo hora, título y sede, que es como tiene sentido
+     escucharlo. */
+  .ahora--movil .ahora-lista :global(.ahora-fila) {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-content: center;
+    column-gap: 0.35rem;
+    height: 100%;
+    padding: 0 0.5rem;
+  }
+  .ahora--movil .ahora-lista :global(.ahora-hasta),
+  .ahora--movil .ahora-lista :global(.ahora-donde),
+  .ahora--movil .ahora-lista :global(.ahora-turno) {
+    grid-row: 1;
+    min-width: 0;
+    font-size: 0.5rem;
+    line-height: 0.75rem;
+  }
+  .ahora--movil .ahora-lista :global(.ahora-donde) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ahora--movil .ahora-lista :global(.ahora-donde::before) {
+    content: '· ';
+  }
+  .ahora--movil .ahora-lista :global(.ahora-turno) {
+    grid-column: 3;
+    color: var(--color-apagado-papel);
+  }
+
+  /* En Anton y en caja alta, que es como esta pantalla escribe los nombres
+     —el índice, la lista de sedes, el titular—, y de un renglón: un título
+     de doce palabras no puede decidir el alto del tablero.
+
+     La interlínea no se aprieta más de 1,25rem, y es por las tildes. A 14 px
+     la Anton ocupa 21 de alto y la Í sube un píxel y medio por encima de su
+     propio renglón: con 1,05rem, las tildes del segundo renglón —el que el
+     corte esconde— asomaban por debajo del primero como rayitas sueltas.
+     Con 20 px cada tilde cabe en su renglón y el corte es limpio. */
+  .ahora--movil .ahora-lista :global(.ahora-que) {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--lineas, 1);
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+
+  /* El destello rojo al tocar: el mismo con el que responden las filas de
+     sedes en este sitio móvil. El dedo ya sabe de qué color es tocar aquí. */
+  .ahora--movil .ahora-lista :global(a.ahora-fila:active .ahora-que) {
+    color: var(--color-rojo);
+  }
+
+  /* El anillo del foco, por dentro. La lista recorta lo que se sale del
+     marco —es lo que deja pasar el relevo por dentro—, y el anillo de la
+     casa, que va tres píxeles por fuera, se quedaba cortado. */
+  .ahora--movil .ahora-lista :global(a.ahora-fila:focus-visible) {
+    outline-offset: -4px;
+  }
+
+  /* ── El relevo ───────────────────────────────────────────────────────
+     La fila que se va sube y se apaga; la que llega entra desde abajo. Es el
+     movimiento de un tablero de estación, y es lo que convierte el turno en
+     un relevo: sin él, lo que se ve es un renglón que cambia de texto solo,
+     que se lee como un error de pintado.
+
+     Los 260 ms de la salida están también en el guion, en `SALIDA`: es él
+     quien espera a que termine para pintar la siguiente. */
+  .ahora--movil .ahora-lista :global(.ahora-fila) {
+    animation: ahora-entra 0.3s var(--ease-salida) both;
+  }
+  .ahora--movil .ahora-lista[data-saliendo] :global(.ahora-fila) {
+    animation: ahora-sale 0.26s var(--ease-salida) both;
+  }
+
+  @keyframes ahora-entra {
+    from {
+      opacity: 0;
+      translate: 0 0.5rem;
+    }
+  }
+  @keyframes ahora-sale {
+    to {
+      opacity: 0;
+      translate: 0 -0.5rem;
+    }
+  }
+
+  /* Quieto para quien lo pidió: el turno ya no gira —lo mira el guion— y aquí
+     se apaga también el movimiento del primer pintado. */
+  @media (prefers-reduced-motion: reduce) {
+    .ahora--movil .ahora-lista :global(.ahora-fila),
+    .ahora--movil .ahora-lista[data-saliendo] :global(.ahora-fila) {
+      animation: none;
+    }
+  }
+
+  /* ── El renglón de lo siguiente: la chapa roja ──────────────────────
+     La chapa del escritorio —campo rojo, canto amarillo— con su misma
+     regla: la letra chica no va suelta sobre el rojo. Tinta sobre rojo da
+     4,2:1 y a este cuerpo le hacen falta 4,5, así que el «Siguiente · en 20
+     min» y la sede van juntos en una tira negra, que es el campo propio que
+     el escritorio le da al «cuándo». Aquí habían acabado sueltos sobre el
+     rojo. Sobre el rojo queda el título, como en escritorio. */
+  .ahora--movil .ahora-luego {
+    display: grid;
+    grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  .ahora--movil .ahora-cuando,
+  .ahora--movil .ahora-quien {
+    grid-row: 1;
+    align-self: start;
+    font-size: 0.5rem;
+    line-height: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background-color: var(--color-tinta);
+  }
+  .ahora--movil .ahora-cuando {
+    padding: 0 0.4rem;
+  }
+  /* La sede, al otro canto de la tira y apagada: acompaña al cuándo, no
+     compite con él. */
+  .ahora--movil .ahora-quien {
+    grid-column: 2;
+    margin: 0;
+    padding-right: 0.4rem;
+    text-align: right;
+    color: var(--color-apagado-papel);
+    font-weight: 400;
+  }
+  .ahora--movil .ahora-proxima {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--lineas, 1);
+    overflow: hidden;
+    padding: 0 0.4rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
 </style>
 
-<script type="application/json" data-reloj-portada set:html={JSON.stringify(paraElReloj)} is:inline />
 
 <script>
   /**
@@ -351,16 +672,35 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     dia: number;
   };
 
-  /** Cuántos renglones tiene la guía. Cinco: es lo que cabe sin que la banda
-   *  pase de alto de pantalla en un portátil, y lo que se lee de una pasada
-   *  sin contar. Lo que no entra no se anuncia — el botón «Ver el programa»
-   *  está en la cabecera de esta misma sección. */
-  const CABEN = 5;
+  /**
+   * Una banda, y las que hagan falta.
+   *
+   * La portada monta dos: la de escritorio y la del teléfono. Las dos están
+   * en el DOM a la vez —el ancho decide cuál se pinta— y este guion se
+   * empaqueta una sola vez para las dos, así que no puede quedarse con la
+   * primera que encuentre: con `querySelector` a secas, la del teléfono se
+   * quedaba en blanco.
+   *
+   * Cada una trae sus propios datos dentro y su propio número de renglones,
+   * así que arrancarlas es repetir lo mismo sobre otro elemento.
+   */
+  const arrancar = (banda: HTMLElement) => {
+    const fuente = banda.querySelector<HTMLScriptElement>('[data-reloj-portada]');
+    if (!fuente) return;
 
-  const fuente = document.querySelector<HTMLScriptElement>('[data-reloj-portada]');
-  const banda = document.querySelector<HTMLElement>('[data-ahora]');
+    /** Cuántas actividades se enseñan: la lista entera en escritorio, y el
+     *  tope de la cola de «después» en el teléfono. La cuenta está arriba,
+     *  junto a `caben`. */
+    const CABEN = () => Number(banda.dataset.caben) || 5;
 
-  if (fuente && banda) {
+    /** Qué banda es. La del teléfono es un tablero de dos renglones que turna
+     *  lo que no cabe; la de escritorio, la guía entera. */
+    const movil = banda.dataset.variante === 'movil';
+
+    /** Si hay más de una actividad que turnar. Lo decide `pintarLista`, y lo
+     *  lee el reloj del turno para no animar un relevo que no existe. */
+    let hayTurnos = false;
+
     let puntos: Punto[] = [];
     try {
       puntos = JSON.parse(fuente.textContent || '[]');
@@ -372,6 +712,13 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
 
     const dosCifras = (n: number) => String(n).padStart(2, '0');
     const relojDe = (d: Date) => `${dosCifras(d.getHours())}:${dosCifras(d.getMinutes())}`;
+
+    /** «sáb 26». En dos llamadas y no en una, por lo mismo que la fecha suelta
+     *  de la lista: pedidos juntos, `toLocaleDateString` puede meter una coma
+     *  en medio. Y sin el punto de la abreviatura, que según el navegador
+     *  viene o no viene. */
+    const cortoDe = (f: Date) =>
+      `${f.toLocaleDateString('es-MX', { weekday: 'short' }).replace(/\.$/, '')} ${f.getDate()}`;
 
     /**
      * El reloj de mentira, para poder ver la banda antes del festival.
@@ -419,8 +766,11 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
      *  El «cuándo» llega hecho desde fuera y no se calcula aquí, porque no es
      *  el mismo para las dos mitades de la lista: lo que está corriendo se
      *  dice por cuándo ACABA —«hasta 18:00», que es lo que hay que saber para
-     *  decidir si da tiempo— y lo que viene, por cuándo EMPIEZA. */
-    const renglon = (p: (typeof conFechas)[number], cuando: string) => {
+     *  decidir si da tiempo— y lo que viene, por cuándo EMPIEZA.
+     *
+     *  La `cuenta` —«2/4»— sólo la pide el teléfono, donde el renglón va
+     *  turnando; en escritorio la lista entera está a la vista. */
+    const renglon = (p: (typeof conFechas)[number], cuando: string, cuenta = '') => {
       const li = document.createElement('li');
       const fila = document.createElement(p.ruta ? 'a' : 'div');
       fila.className = 'ahora-fila';
@@ -442,6 +792,14 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
       donde.textContent = p.sede;
 
       fila.append(hasta, que, donde);
+
+      if (cuenta) {
+        const cual = document.createElement('span');
+        cual.className = 'meta ahora-turno';
+        cual.textContent = cuenta;
+        fila.append(cual);
+      }
+
       li.append(fila);
       return li;
     };
@@ -468,6 +826,15 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
 
     let empatadas: { desde: number; titulo: string; artista: string; sede: string }[] = [];
     let giro = 0;
+    /* Qué empate se está enseñando. Sirve para no reiniciar el turno de la
+       chapa cuando la banda se repinta por otra cosa —cada minuto lo hace— y
+       el siguiente sigue siendo el mismo: antes, el repintado del minuto
+       cortaba el ciclo de tres a mitad y volvía siempre al primero. */
+    let claveEmpate = '';
+
+    /** El turno del renglón del teléfono: cuál de la cola se enseña. Lo mueve
+     *  su propio reloj, y lo lee `pintarLista` cada vez que pinta. */
+    let turno = 0;
 
     const pintarChapa = () => {
       if (!empatadas.length) {
@@ -483,7 +850,11 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
          falta, y la hora exacta está en el renglón de esa misma actividad
          dentro de la lista. Puesta aquí partía el titular en dos. */
       proximaChapa.textContent = p.titulo;
-      quien.textContent = p.artista || p.sede;
+      /* En el teléfono, la sede y no el artista. El tablero contesta «¿a dónde
+         me muevo?», y el renglón de encima ya dice dónde: si el de abajo
+         dijera quién, los dos renglones pondrían cosas distintas en la misma
+         casilla. */
+      quien.textContent = movil ? p.sede : p.artista || p.sede;
       quien.hidden = false;
       luego.hidden = false;
     };
@@ -504,6 +875,53 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
         pintarChapa();
       }
     }, 5_000);
+
+    /**
+     * El turno del renglón, cada seis segundos.
+     *
+     * Más lento que el de la chapa —cinco— a propósito: la chapa cambia un
+     * título y el renglón cambia título, hora y sede, que es más letra que
+     * leer. Y desfasados, para que las dos cosas no salten a la vez y la
+     * banda entera parpadee.
+     *
+     * Lo dispara `repintarTira`, que vuelve a pintar SÓLO la lista: llamar a
+     * `pintar()` entero reharía también el reloj y la chapa, y con ellos el
+     * ciclo de los empates.
+     *
+     * Y se para mientras alguien lo está usando. El turno no cambia el texto
+     * del renglón: lo tira y pinta uno nuevo, así que con el foco del teclado
+     * encima el foco se perdía cada seis segundos, y el enlace que se iba a
+     * pulsar pasaba a ser otro. Lo mismo con el puntero parado encima, que es
+     * donde se va a hacer clic. En un teléfono el `:hover` se queda pegado
+     * después de tocar, así que ése sólo cuenta donde hay puntero de verdad.
+     */
+    let repintarTira = () => {};
+
+    const conPuntero = matchMedia('(hover: hover)');
+    const enUso = () =>
+      banda.matches(':focus-within') || (conPuntero.matches && banda.matches(':hover'));
+
+    /** Cuánto dura la salida. El mismo número está en el CSS, en
+     *  `@keyframes ahora-sale`: si se separan, la fila vieja se va y deja un
+     *  hueco en blanco antes de que entre la nueva. */
+    const SALIDA = 260;
+
+    setInterval(() => {
+      if (!hayTurnos || !movil || quieto.matches || enUso()) return;
+
+      const lista = banda.querySelector<HTMLElement>('[data-ahora-lista]');
+      if (!lista) return;
+
+      /* Sale, y al acabar entra la siguiente. Se hace en dos tiempos y no de
+         golpe porque un relevo instantáneo a esta velocidad se lee como un
+         error de pintado: lo que se ve es un renglón que cambia de texto. */
+      lista.dataset.saliendo = '';
+      setTimeout(() => {
+        delete lista.dataset.saliendo;
+        turno += 1;
+        repintarTira();
+      }, SALIDA);
+    }, 6_000);
 
     const pintar = () => {
       const ahora = reloj();
@@ -592,6 +1010,22 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
       };
 
       /**
+       * Cuándo es lo de después, en el renglón negro del teléfono cuando no
+       * hay nada abierto. Con la palabra delante por lo mismo que la chapa
+       * lleva «Siguiente»: una hora suelta no dice de qué es, y justo encima
+       * hay otra. La escala es la de `cuandoEs` sin el «Hoy», que en un
+       * tablero de hoy no dice nada.
+       */
+      const despuesDe = (cuando: number) => {
+        const faltan = Math.round((cuando - ahora) / 60000);
+        const f = new Date(cuando);
+        if (faltan <= 90) return `Después · en ${faltan} min`;
+        return f.toDateString() === d.toDateString()
+          ? `Después · ${relojDe(f)}`
+          : `Después · ${cortoDe(f)} ${relojDe(f)}`;
+      };
+
+      /**
        * La guía: lo que está puesto y lo que entra después, en un solo carril.
        *
        * Es una guía de televisión y se comporta como una. Antes era una cosa o
@@ -607,23 +1041,58 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
       const pintarLista = () => {
         lista.textContent = '';
 
-        /* Lo que está puesto, dicho por cuándo ACABA: es lo que hay que saber
-           para decidir si da tiempo a llegar. Todo lo que corre es de hoy por
-           definición, así que aquí no hay días que separar. */
-        for (const p of corriendo.slice(0, CABEN))
+        /* ── El teléfono: un renglón que va turnando ──────────────────
+           El tablero tiene un renglón para lo que está pasando, y lo que no
+           cabe pasa por él de uno en uno, en orden, volviendo al primero al
+           llegar al último. Dice cuál de cuántas enseña —«2/4»— para que el
+           cambio se lea como un turno y no como un fallo, igual que la chapa
+           con sus empates.
+
+           Sin nada abierto, el renglón es lo de DESPUÉS: lo siguiente ya está
+           en la chapa roja, que sube arriba, y aquí van los que vienen detrás
+           de ella. Detrás de TODAS las que empatan con ella, que ésas ya las
+           va turnando la chapa: contar desde la segunda de la cola, como se
+           hacía, repetía en negro la que la chapa enseñaba en rojo.
+
+           Con `prefers-reduced-motion` no gira —eso lo mira el reloj del
+           turno—, pero se pinta igual: la primera y la cuenta. Antes caía a
+           la guía entera de escritorio, y en el teléfono eso eran cinco
+           renglones apilados en una banda pensada para uno. */
+        if (movil) {
+          const suyos = corriendo.length
+            ? corriendo.map((p) => ({ p, cuando: `hasta ${relojDe(new Date(p.hasta))}` }))
+            : proximas
+                .filter((p) => siguiente && p.desde > siguiente.desde)
+                .slice(0, CABEN())
+                .map((p) => ({ p, cuando: despuesDe(p.desde) }));
+
+          hayTurnos = suyos.length > 1;
+          if (!suyos.length) return;
+
+          const cual = turno % suyos.length;
+          const { p, cuando } = suyos[cual];
+          lista.append(renglon(p, cuando, hayTurnos ? `${cual + 1}/${suyos.length}` : ''));
+          return;
+        }
+
+        /* ── Lo demás: la guía entera, de una ─────────────────────────
+           Lo que está puesto, dicho por cuándo ACABA —que es lo que hay que
+           saber para decidir si da tiempo a llegar— y detrás lo que entra,
+           hasta llenar.
+
+           La fecha se escribe una vez y encima de su grupo, y entonces cada
+           renglón sólo tiene que decir su hora. El primer grupo se llama «A
+           continuación» cuando es de hoy y hay algo corriendo: ahí el
+           separador no está diciendo qué día es —eso ya se sabe—, está
+           marcando dónde acaba lo que está puesto y empieza lo que no. */
+        const cuantas = CABEN();
+
+        for (const p of corriendo.slice(0, cuantas))
           lista.append(renglon(p, `hasta ${relojDe(new Date(p.hasta))}`));
 
-        const hueco = CABEN - Math.min(corriendo.length, CABEN);
+        const hueco = cuantas - Math.min(corriendo.length, cuantas);
         if (hueco <= 0) return;
 
-        /* Y detrás, lo que entra, hasta llenar. La fecha se escribe una vez y
-           encima de su grupo, y entonces cada renglón sólo tiene que decir su
-           hora — o los minutos que faltan, si ya está encima.
-
-           El primer grupo se llama «A continuación» cuando es de hoy y hay
-           algo corriendo: ahí el separador no está diciendo qué día es —eso ya
-           se sabe—, está marcando dónde acaba lo que está puesto y empieza lo
-           que no. */
         let ultimo = '';
         let primero = true;
         for (const p of proximas.slice(0, hueco)) {
@@ -641,6 +1110,19 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
           lista.append(renglon(p, faltan <= 90 ? `En ${faltan} min` : relojDe(f)));
         }
       };
+
+      /**
+       * En qué fase estamos, dicho en el propio elemento.
+       *
+       * Lo lee la portada móvil para saber si relevar la cuenta atrás. Lo dice
+       * la banda y no `motion.ts` —que también sabe cuándo llega a cero— por
+       * dos razones. Una: `motion.ts` cuenta al arranque del festival y esto
+       * cuenta a la primera actividad, así que son dos ceros distintos y el
+       * relevo tiene que colgar del que manda aquí. Y dos: el reloj de mentira
+       * de `?ahora=` sólo lo entiende esta banda, y sin esto no habría manera
+       * de ver el relevo hasta el día del arranque.
+       */
+      banda.dataset.fase = ahora < arranca ? 'antes' : 'curso';
 
       if (ahora < arranca) {
         /* Todavía no empieza. La banda dice lo único que se puede decir, que
@@ -684,11 +1166,14 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
            dos vecinos es una franja gastada. */
         rotulo.textContent = '';
       } else {
-        $('[data-ahora-dia]')!.textContent = `Ahora · ${d.toLocaleDateString('es-MX', {
-          weekday: 'long',
-          day: 'numeric',
-        })}`;
+        /* En el teléfono, «Ahora» a secas: allí el día tiene renglón propio,
+           debajo de la hora. */
+        $('[data-ahora-dia]')!.textContent = movil
+          ? 'Ahora'
+          : `Ahora · ${d.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric' })}`;
         $('[data-ahora-reloj]')!.textContent = relojDe(d);
+        const fecha = $('[data-ahora-fecha]');
+        if (fecha) fecha.textContent = cortoDe(d);
 
         if (corriendo.length) {
           /* Cuántas y en cuántos sitios: con dieciséis sedes, «3 abiertas» no
@@ -716,13 +1201,30 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
          igual, y ese renglón se ve. */
       rotulo.hidden = !rotulo.textContent;
 
+      /* El orden del tablero del teléfono, que es el del reloj: con algo
+         abierto, lo abierto y debajo la chapa; sin nada abierto, la chapa
+         arriba y lo de después debajo. Se mueve la chapa en el DOM y no sólo
+         en la pantalla para que un lector de pantalla lo oiga en el mismo
+         orden en que se ve. */
+      if (movil) {
+        if (corriendo.length) lista.after(luego);
+        else lista.before(luego);
+      }
+
+      /* El reloj del turno pinta esta misma lista, con la cola y la hora de
+         esta pasada: se le pasa aquí, que es donde las dos cosas existen. */
+      repintarTira = pintarLista;
       pintarLista();
 
       /* La chapa roja la pinta `pintarChapa`, que además es quien la gira
          cuando hay un empate. Aquí sólo se le dice a qué mirar: todas las que
          arrancan en el mismo instante que la primera que queda. */
       empatadas = siguiente ? proximas.filter((p) => p.desde === siguiente.desde) : [];
-      giro = 0;
+      const clave = siguiente ? `${siguiente.desde}·${empatadas.length}` : '';
+      if (clave !== claveEmpate) {
+        claveEmpate = clave;
+        giro = 0;
+      }
       pintarChapa();
 
       banda.hidden = false;
@@ -750,5 +1252,7 @@ const paraElReloj = agendaPorDia.flatMap((dia) =>
     };
 
     latir();
-  }
+  };
+
+  for (const banda of document.querySelectorAll<HTMLElement>('[data-ahora]')) arrancar(banda);
 </script>

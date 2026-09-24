@@ -138,6 +138,18 @@
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
+    /* La escena es la que mide: `size` y no `inline-size` porque lo que hace
+       falta saber aquí es el ALTO que le ha quedado, y eso es `cqh`. Trae de
+       regalo lo que hacía falta de todas formas — con contención de tamaño,
+       lo que hay dentro ya no puede empujar la escena para que crezca. */
+    container-type: size;
+    /* Y un suelo, que es la otra mitad del trato. Con la escena midiendo el
+       hueco que le dejan, en un teléfono de 568 px la banda del ahora se lo
+       quedaba casi entero: la escena bajaba a 32 px y el titular, que se mide
+       contra ella, desaparecía. El cartel es el cartel — antes que encoger
+       hasta borrarse, lo que cede es la banda, que para eso sabe enseñar
+       menos renglones. */
+    min-height: 7.5rem;
     display: grid;
     grid-template-rows: minmax(0, 1fr);
     grid-template-columns: minmax(0, 1fr);
@@ -171,23 +183,30 @@
    * Medido en `cqw` a secas —el ancho del marco— el titular no se entera de
    * cuánto alto le queda, y en un teléfono bajo la escena se encoge pero la
    * tipografía no: en 360×640 «CONCEPTUAL» se metía media línea debajo de la
-   * franja roja. Es el mismo problema que ya tenía el titular de escritorio y
-   * se resuelve igual, con un `min()` que mide lo que sobra de pantalla.
+   * franja de abajo.
    *
-   * De dónde sale el número: lo fijo de la portada —barra 52, tiempo 105,
-   * cinta de marcas 114, línea legal 37, filetes incluidos: 308 px— medido
-   * en devtools, y la escena se queda con el resto menos su relleno de 2rem.
-   * Eso son 19.25rem + 2rem, redondeado hacia arriba.
+   * ── Por qué ya no hay un número fijo ──────────────────────────────────
    *
-   * Y el 3.22 en vez de 2.64 (tres líneas a 0.88 de interlínea): Anton pinta
-   * las mayúsculas por fuera de su caja de línea, así que la caja sólo puede
-   * ocupar un 82 % del hueco. Medir la caja y no la tinta es justo lo que
-   * hacía que los números cuadraran y la pantalla no.
+   * Aquí estuvo `100dvh - 21.3rem`, y los 21.3 eran la suma medida a mano de
+   * todo lo que hay fuera de la escena: barra, cuenta atrás, cinta de marcas
+   * y línea legal. Funcionaba mientras esa suma no cambiara — y cambió el día
+   * en que la cuenta atrás dejó su sitio a la banda del ahora, que mide tres
+   * veces más. El titular siguió pidiendo el hueco de antes y «CONCEPTUAL»
+   * volvió a meterse debajo, esta vez sobre campo negro.
    *
-   * Comprobado en 360×640, 375×667, 390×844 y 430×932: sólo actúa en los dos
-   * primeros, en el resto sigue mandando el 16cqw de siempre. */
+   * Un presupuesto escrito a mano es una copia de un dato que vive en otro
+   * sitio, y las copias se separan del original. Así que se le pregunta al
+   * hueco: `container-type: size` en la escena la convierte en una unidad de
+   * medida, y `cqh` es literalmente el alto que le ha quedado después de que
+   * todo lo demás coja el suyo. Mida lo que mida la banda —y mide distinto en
+   * cada uno de sus cuatro estados— el titular se entera.
+   *
+   * El 2.9 en vez de 2.64 (tres líneas a 0.88 de interlínea): Anton pinta las
+   * mayúsculas por fuera de su caja de línea, así que la caja sólo puede
+   * ocupar un 91 % del hueco. Y los 2.5rem que se restan son el relleno de la
+   * escena más un pelo de aire, que sin él el titular besa la banda. */
   .portada-rotulo .display {
-    font-size: min(16cqw, calc((100dvh - 21.3rem) / 3.22));
+    font-size: min(16cqw, calc((100cqh - 2.5rem) / 2.9));
   }
 
   /* ── El tiempo ──────────────────────────────────────────────────────────
@@ -239,16 +258,58 @@
     color: color-mix(in srgb, var(--color-papel) 65%, transparent);
   }
 
+  /* ── El relevo: la cuenta atrás y la banda del ahora ──────────────────
+     El mismo bloque rojo hace dos oficios, y nunca los dos a la vez. Mientras
+     falta, los cuatro números; cuando `motion.ts` marca `enCurso` —o sea, en
+     cuanto la resta llega a cero— los números se van y entra la banda.
+
+     El campo cambia con ellos. La cuenta atrás es amarillo sobre rojo, que es
+     el tercer color de esta portada; la banda es de tinta, como la de
+     escritorio, porque todo lo que lleva dentro —renglones de papel, horas en
+     amarillo, la chapa roja de «siguiente»— está medido contra un campo negro.
+     Sobre rojo, el papel da 4,0:1 y la chapa roja desaparecería del todo. */
+  /* Quién manda el relevo: la propia banda, que se marca `data-fase="curso"`
+     en cuanto su reloj entra en el festival. No `motion.ts`, aunque también
+     sepa cuándo llega a cero: aquél cuenta al arranque del festival y la banda
+     cuenta a la primera actividad, así que son dos ceros distintos y el relevo
+     tiene que colgar del que manda dentro del bloque. */
+  .portada-tiempo:has(.ahora--movil[data-fase='curso']) {
+    background-color: var(--color-tinta);
+  }
+
+  .portada-tiempo:has(.ahora--movil[data-fase='curso']) .portada-reloj,
+  .portada-tiempo:has(.ahora--movil[data-fase='curso']) .portada-cuando {
+    display: none;
+  }
+
+  /* Y antes de tiempo no se asoma. La banda se enseña a sí misma en cuanto su
+     guion la rellena —y lo hace también antes del festival, para decir cuándo
+     abre—, así que sin esta regla se vería debajo de la cuenta atrás durante
+     los meses de espera. En el teléfono manda el contador: una portada con un
+     reloj de cuenta atrás Y una banda de «lo primero» son dos respuestas a la
+     misma pregunta, y la cuenta atrás es la que el cartel pide.
+
+     Sin JavaScript no hay `data-fase` y no hay banda: queda la cuenta atrás,
+     que es exactamente lo que había. */
+  .ahora--movil:not([data-fase='curso']) {
+    display: none;
+  }
+
   /* ── Patrocinadores ─────────────────────────────────────────────────────
      La misma cinta del escritorio, encogida a la anchura de un teléfono:
      las fichas blancas —`.mosaico`, de global.css— y el `marquee` corriendo
      sin fin. Va sobre rojo: el blanco de las fichas hace de tercer color
-     aquí, nunca el fondo. */
+     aquí, nunca el fondo.
+
+     Y en 64 px, dos tercios de lo que medía: el rótulo en su renglón y un
+     solo renglón de fichas. Con la banda del ahora convertida en un tablero
+     de 93, la cinta medía uno más que ella —94— y los créditos pesaban lo
+     mismo que lo que está pasando. */
   .portada-marcas {
     position: relative;
     flex: none;
     background-color: var(--color-rojo);
-    padding: 0.55rem 0 0.65rem;
+    padding: 0.375rem 0 0.4375rem;
     overflow: hidden;
   }
 
@@ -266,43 +327,71 @@
     outline-offset: -4px;
   }
 
+  /* ── El rótulo de la casa ────────────────────────────────────────────
+     El filete amarillo y la letra de máquina con que se nombra cualquier
+     otra sección del sitio, en su propio renglón y con las fichas de canto
+     a canto debajo. Antes de éste se probaron una etiqueta negra a la
+     izquierda —se comía el principio de la tira, que se leía «rótulo |
+     logos»— y una pestaña amarilla montada sobre el canto: las dos eran
+     cajas, y una caja más en el pie se lee como otra cosa que pulsar.
+
+     Papel sobre rojo da 4:1, medio punto por debajo de lo que pide esta
+     letra; es lo que ya tenía la cinta, y meterlo en un campo negro —que es
+     lo que pide la regla de la casa— lo volvía a convertir en caja. */
   .portada-marcas-rotulo {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    padding: 0 1rem 0.5rem;
+    padding: 0 1rem;
     color: var(--color-papel);
+    font-size: 0.6rem;
+    line-height: 0.875rem;
   }
-
-  .portada-marcas-filete {
-    display: inline-block;
+  .portada-marcas-rotulo::before {
+    content: '';
+    flex: none;
     width: 1.75rem;
     height: 2px;
     background-color: var(--color-amarillo);
   }
 
   .portada-pista {
-    overflow: hidden;
+    margin-top: 0.1875rem;
     padding-left: 1rem;
+    overflow: hidden;
   }
 
-  /* Las fichas del escritorio a media escala: 14rem allá, 6.5rem aquí. A
-     4.75rem entraban seis en el ancho del teléfono, pero un logotipo dentro
-     de una caja de 76 px no se lee — que es de lo que sirve una cinta de
-     patrocinadores. A 6.5rem entran cuatro y monedas: siguen asomando por el
-     canto —que es lo que dice que la tira sigue— y ya se distingue la marca. */
+  /* Las fichas, a 51×34: chicas por fuera y grandes por dentro. Medían
+     84×56, pero con los 16 px de relleno que traen del escritorio al logo le
+     quedaban 48×20 — la caja blanca era casi toda relleno, el objeto más
+     brillante de la pantalla y el que menos decía. Con 3 px de relleno el
+     logo tiene 41×24: más alto que antes, en una ficha que ocupa un tercio.
+
+     Sin la sombra amarilla, que en una tira de este alto era una raya más
+     entre el negro de la banda y el amarillo del pie. Un logotipo aguanta
+     el recorte mejor que nada de lo que hay aquí: no se lee, se reconoce — y
+     para eso sigue estando la lupa, que lo agranda al tocarlo. */
   .portada-marcas .mosaico {
-    width: 6.5rem;
-    margin-right: 0.5rem;
-    box-shadow: 4px 4px 0 var(--color-amarillo);
+    width: 3.1875rem;
+    margin-right: 0.375rem;
     transition: width 0.28s var(--ease-salida);
+  }
+  .portada-marcas .mosaico > div {
+    padding: 0.1875rem;
+  }
+
+  /* La marca que todavía no tiene archivo se pinta con su nombre, y aquí en
+     cuerpo de nota: el de escritorio, dentro de una ficha de 51 px, se salía
+     por los dos cantos. */
+  .portada-marcas .mosaico .display {
+    font-size: 0.55rem;
   }
 
   /* Un toque agranda, el siguiente devuelve la ficha a su tamaño. Colgaba de
      `:hover`, que en un teléfono se enciende al tocar y se queda encendido:
      el gesto tenía ida pero no vuelta. La casilla tiene las dos. */
   .cinta-lupa:checked ~ .portada-pista .mosaico {
-    width: 8.75rem;
+    width: 4.75rem;
   }
 
   /* Y sigue corriendo, agrandada o no. `.marquee:hover` de global.css la para
@@ -401,9 +490,14 @@
      por encima del centro óptico y se nota. `--desvio` es la mitad de lo que
      ocupan el tiempo, la cinta y el legal menos la barra: bloques de alto
      fijo — el único que estira con la pantalla es la escena — así que el
-     número vale igual en cualquier teléfono. */
+     número vale igual en cualquier teléfono.
+
+     Con la cinta de 64 px son 77 px con la cuenta atrás y 71 con la banda
+     del ahora, que mide doce menos. Se toma el medio: la diferencia son tres
+     píxeles hacia cada lado, y no se ven. Cuando cambie el alto de alguno de
+     los tres bloques, hay que volver a hacer esta cuenta. */
   .portada-silla {
-    --desvio: 6.4rem;
+    --desvio: 4.6rem;
   }
 
   @keyframes silla-entra {
