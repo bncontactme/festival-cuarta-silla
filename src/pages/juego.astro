@@ -1,0 +1,42 @@
+---
+/**
+ * El juego de la 404, con dirección propia.
+ *
+ * Existe para poder compartirlo: mandar por WhatsApp un enlace roto a
+ * propósito para que alguien juegue es raro, y además la vista previa de un
+ * 404 sale vacía. No está en la barra ni en el mapa del sitio: es un huevo de
+ * pascua, se llega por enlace.
+ *
+ * Misma composición que la 404 —el texto a la izquierda, el juego a la
+ * derecha— para que se lean como la misma pieza. Aquí sobre amarillo, que es
+ * el campo, y con la estrella roja: la tinta contraria.
+ */
+import Base from '../layouts/Base.astro';
+import Estrella from '../components/Estrella.astro';
+import Juego from '../components/Juego.astro';
+---
+
+<Base
+  titulo="Brinca la silla"
+  descripcion="Como el dinosaurio de Chrome, pero lo que se te atraviesa es la silla del festival."
+>
+  <section class="relative flex min-h-[70vh] items-center overflow-hidden bg-amarillo text-tinta">
+    <Estrella tinta="roja" alto="abajo" />
+
+    <div
+      class="relative grid w-full items-center gap-x-16 gap-y-14 px-4 py-24 sm:px-6 lg:grid-cols-[fit-content(28rem)_minmax(0,1fr)] lg:px-10"
+    >
+      <div>
+        <p class="meta mb-6 inline-block bg-tinta px-3 py-1.5 text-amarillo">Juego</p>
+        <h1 class="display text-[20vw] leading-[0.95] lg:text-[11vw]">
+          Brinca<br />la silla
+        </h1>
+        <p class="mt-8 max-w-md text-xl font-bold">
+          Como el dinosaurio de Chrome, pero lo que se te atraviesa es la silla.
+        </p>
+      </div>
+
+      <Juego class="max-w-3xl" />
+    </div>
+  </section>
+</Base>

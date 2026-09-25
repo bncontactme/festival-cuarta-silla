@@ -22,8 +22,10 @@ El texto se migró literal del sitio original. Dos apuntes:
   choca con el rango anunciado (24–27). Aquí dice **27**. Si el original
   estaba bien y el festival sí repite día, se corrige en `site.ts`.
 - **Textos nuevos** (no existían en Wix): las etiquetas de la cuenta regresiva
-  (Días/Horas/Min/Seg), «Por anunciar» en los huecos del programa, y la
-  página 404 («Silla vacía»). Todo lo demás es del original.
+  (Días/Horas/Min/Seg), «Por anunciar» en los huecos del programa, la
+  página 404 («Silla vacía») y el juego («Brinca la silla», «¡Sillazo!»,
+  «Otra vez», las instrucciones y la línea de `/juego`). Todo lo demás es del
+  original.
 
 Los patrocinadores están vacíos a propósito: el sitio de Wix sólo tenía fotos
 de stock de relleno. Cuando lleguen los logos reales se añaden a
@@ -178,8 +180,8 @@ este sitio trae los suyos, más pequeños. Todo lo específico vive en
 [`src/styles/movil.css`](src/styles/movil.css), dentro de una sola media
 query — por encima de 1024px ese archivo no existe.
 
-Las páginas que no traen `slot="movil"` (privacidad, 404) ya cabían en un
-teléfono y se sirven igual en todas partes.
+Las páginas que no traen `slot="movil"` (privacidad, 404, juego) ya cabían en
+un teléfono y se sirven igual en todas partes.
 
 ### Reglas que conviene no romper
 
@@ -196,6 +198,36 @@ teléfono y se sirven igual en todas partes.
   puertas y el legal: coloca la silla en el centro de la *pantalla* al empezar
   la entrada, no en el centro de su hueco. Si cambian esos bloques, cambia.
 
+## El juego de la 404
+
+La 404 ya se llamaba «Silla vacía»; ahora además se juega. **«Brinca la
+silla»** es el dinosaurio de Chrome, pero lo que se le atraviesa es la silla
+del festival. Vive donde vive el de Chrome, en la página de error, y también en
+[`/juego`](src/pages/juego.astro), para poder compartirlo sin mandar un enlace
+roto. `/juego` no está en la barra ni en el mapa del sitio: se llega por
+enlace.
+
+- **Controles.** Espacio o ↑ brinca (mantener pulsado, más alto) y ↓ se agacha
+  —en el aire, cae más rápido—. En el teléfono, tocar y mantener. Con el foco
+  en un enlace o un botón, el espacio es de ellos; con el foco en ninguna parte
+  y el juego a la vista, es del juego, como en Chrome.
+- **La silla es la del logo**, reducida a píxeles y limpiada a mano
+  ([`sprites.ts`](src/scripts/juego/sprites.ts)). Llega sola, en filas de dos o
+  tres y, pasada cierta velocidad, volando y dando vueltas: a esa hay que
+  saltarla o agacharse. El dino es propio, en el espíritu del de Chrome.
+- **La física son las cuentas del de Chrome** —gravedad, impulso, aceleración,
+  huecos— a pasos fijos de 1/60 s, en [`mundo.ts`](src/scripts/juego/mundo.ts)
+  y sin DOM. Así se probó sin navegador que cada obstáculo, y cada pareja de
+  obstáculos al hueco mínimo, tiene manera de pasarse.
+- **5 KB gzip, y sólo en esas dos páginas**: no cuenta en el presupuesto de
+  movimiento del resto del sitio. El bucle corre sólo mientras se juega y se
+  pausa al cambiar de pestaña o al sacar el juego de la pantalla.
+- **Sin JS no se pinta** —un «Espacio para brincar» que no brinca es un
+  letrero que miente—. Con `prefers-reduced-motion`, las estrellas del fondo se
+  quedan quietas y el dino no parpadea: sólo se mueve si alguien lo arranca.
+- **El récord** se guarda en el navegador (`localStorage`, `cs-juego-record`)
+  y de ahí no sale.
+
 ## Estructura
 
 ```
@@ -211,12 +243,15 @@ src/
   scripts/motion.ts   Lenis + reveals + partidor + cuenta + menú + entrada
   scripts/panel/      el panel: api, esquema, campos, tabla, previa, sala,
                       registro, festival (los dos textos del festival)
+  scripts/juego/      el juego de la 404: sprites (los dibujos), mundo (la
+                      física, sin DOM) y juego (lienzo, teclas y letreros)
   layouts/Base.astro  head, SEO, JSON-LD, nav, pie, reparto móvil/escritorio
   components/         Nav, Footer, Marquee, Silla, Encabezado, Analitica,
-                      TableroSedes (las sedes y lo que pasa en cada una)
+                      TableroSedes (las sedes y lo que pasa en cada una),
+                      Juego (la caja del juego)
   components/movil/   Portada (con la entrada), Pantalla
   pages/              index, programa, artistas, sedes, archivo, registro,
-                      privacidad, 404
+                      privacidad, 404, juego
   pages/sedes/        una página por sede: `/sedes/<nombre-de-la-sede>`
   pages/admin/        el panel de edición (noindex, fuera del sitemap)
 scripts/instantanea.mjs   baja el contenido del panel antes de cada build

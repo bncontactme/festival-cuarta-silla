@@ -1,0 +1,270 @@
+---
+/**
+ * «Brinca la silla»: el dino de Chrome, pero lo que se atraviesa es la silla.
+ *
+ * Vive en la 404 porque ahí vive el de Chrome, en la página que no cargó —y
+ * la nuestra ya se llamaba «Silla vacía»—. Y en `/juego`, para poder mandarlo
+ * por WhatsApp sin mandar un enlace roto.
+ *
+ * Esto es sólo la caja. El juego entero está en `src/scripts/juego/`: los
+ * dibujos (`sprites.ts`), la física (`mundo.ts`) y lo que lo pone en la
+ * página (`juego.ts`).
+ *
+ * ── Sin JS no se pinta ─────────────────────────────────────────────────
+ * Una caja con «Espacio para brincar» que no brinca es un letrero que miente.
+ * Cuelga de la clase `.js` que pone el `<head>` y no de un `hidden` que quite
+ * el script: así ocupa su sitio desde el primer pintado y no empuja la página
+ * cuando llega el JS, medio segundo después.
+ *
+ * ── Toda la letra es HTML ──────────────────────────────────────────────
+ * El lienzo pinta el mundo y nada más. El marcador, «¡Sillazo!» y el botón de
+ * «Otra vez» van encima, en HTML: salen con las tipografías del sitio, el
+ * botón se pulsa con el teclado y el resultado se le cuenta a un lector de
+ * pantalla por la región de estado.
+ */
+interface Props {
+  /** Prefijo de los `id`. Sólo hace falta cambiarlo si hay dos en una página. */
+  id?: string;
+  class?: string;
+}
+
+const { id = 'juego', class: clase } = Astro.props;
+---
+
+<div
+  class:list={['juego', clase]}
+  data-juego
+  data-estado="inicio"
+  tabindex="0"
+  role="application"
+  aria-roledescription="juego"
+  aria-label="Brinca la silla"
+  aria-describedby={`${id}-ayuda`}
+>
+  <div class="juego-escena">
+    <canvas class="juego-lienzo" data-juego-lienzo aria-hidden="true"></canvas>
+
+    <p class="juego-marcador" data-juego-marcador aria-hidden="true">
+      <span class="juego-record" data-juego-record hidden>
+        Récord <span data-juego-record-cifra>00000</span>
+      </span>
+      <span class="juego-puntos" data-juego-puntos>00000</span>
+    </p>
+
+    <p class="juego-aviso juego-aviso--inicio" aria-hidden="true">
+      <span class="juego-teclado">Espacio para brincar</span>
+      <span class="juego-tacto">Toca para brincar</span>
+    </p>
+    {/* En un renglón: con el salto de línea antes del `<span>`, la compresión
+        del HTML se come el espacio y sale «PAUSA ·ESPACIO». */}
+    <p class="juego-aviso juego-aviso--pausa" aria-hidden="true">
+      Pausa · <span class="juego-teclado">espacio para seguir</span><span class="juego-tacto">toca para seguir</span>
+    </p>
+
+    <div class="juego-fin">
+      {/* Lo dice la región de estado; aquí sólo se ve. */}
+      <p class="display display-centro juego-sillazo" aria-hidden="true">¡Sillazo!</p>
+      <button type="button" class="boton juego-otra" data-juego-otra>Otra vez</button>
+    </div>
+  </div>
+
+  <p class="meta juego-ayuda" id={`${id}-ayuda`}>
+    <span class="juego-teclado">Espacio o ↑ brinca · ↓ se agacha</span>
+    <span class="juego-tacto">Toca: brinca · mantén: más alto</span>
+  </p>
+
+  <p class="sr-only" role="status" data-juego-estado></p>
+</div>
+
+<style>
+  .juego {
+    display: none;
+
+    /* Los colores del mundo. `juego.ts` los lee de aquí, así que para
+       vestirlo de otra manera basta con cambiarlos en quien lo use. El campo
+       es papel y no amarillo: en la 404 va sobre rojo, al lado de los
+       botones blancos, y la estrella amarilla de la sección pasa por detrás. */
+    --juego-campo: var(--color-papel);
+    --juego-tinta: var(--color-tinta);
+    --juego-silla: var(--color-rojo);
+    --juego-estrella: var(--color-amarillo);
+
+    position: relative;
+    /* El alto de la escena sale del ancho de la caja (ver abajo). De paso, la
+       caja deja de tener ancho propio: en una rejilla toma el de su columna y
+       nunca empuja la página hacia los lados. */
+    container-type: inline-size;
+    background-color: var(--juego-campo);
+    color: var(--juego-tinta);
+    /* El canto y la sombra dura de los botones: es un objeto puesto encima. */
+    border: var(--borde) solid var(--canto);
+    box-shadow: 6px 6px 0 var(--canto);
+    cursor: pointer;
+    /* Un toque es un salto: ni zoom por doble toque, ni selección, ni el menú
+       de mantener pulsado. Arrastrar sigue moviendo la página. */
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :global(.js) .juego {
+    display: block;
+  }
+
+  .juego-escena {
+    position: relative;
+    /* El mundo mide 150 de alto y lo que dé de ancho; 4:1 es el del dino de
+       Chrome (600 × 150). Con topes: sin el de abajo, en un teléfono sería
+       una tira de 90 px con un dino de 25.
+
+       Con `cqi` y no con `aspect-ratio` + `min-height`: el mínimo de alto se
+       transfiere por la proporción al ancho —7rem × 4 = 448 px de ancho
+       mínimo— y en un teléfono de 390 la caja se salía de la pantalla. */
+    height: 9rem;
+    height: clamp(7rem, 25cqi, 13rem);
+    overflow: hidden;
+  }
+
+  .juego-lienzo {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── El marcador ──────────────────────────────────────────────────── */
+  .juego-marcador {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.75rem;
+    display: flex;
+    gap: 1.1em;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .juego-record {
+    color: var(--color-apagado);
+  }
+
+  /* Cada cien puntos, tres parpadeos. */
+  .juego-marcador--hito .juego-puntos {
+    animation: juego-hito 0.25s step-end 3;
+  }
+
+  @keyframes juego-hito {
+    50% {
+      visibility: hidden;
+    }
+  }
+
+  /* ── Los letreros ─────────────────────────────────────────────────── */
+  .juego-aviso,
+  .juego-fin {
+    display: none;
+  }
+
+  /* A media altura del dino, en el hueco entre él y la silla de muestra:
+     más arriba se cruza con las estrellas del fondo. */
+  .juego-aviso {
+    position: absolute;
+    inset-inline: 0;
+    top: 56%;
+    margin: 0;
+    padding-inline: 1rem;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .juego[data-estado='inicio'] .juego-aviso--inicio,
+  .juego[data-estado='pausa'] .juego-aviso--pausa {
+    display: block;
+  }
+
+  .juego-fin {
+    position: absolute;
+    /* Arriba, el renglón del marcador; abajo, el décimo que es el suelo. El
+       letrero se centra en lo que queda entre los dos: en el teléfono la
+       escena mide 112 px y centrado en toda ella se montaba en el marcador. */
+    inset: 1.9rem 0 10% 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    /* Dentro del campo blanco, el canto y el anillo de foco son de tinta
+       aunque la sección de fuera los vuelque a amarillo: amarillo sobre
+       blanco no se ve. */
+    --canto: var(--color-tinta);
+    --anillo: var(--color-tinta);
+  }
+
+  .juego[data-estado='fin'] .juego-fin {
+    display: flex;
+  }
+
+  /* Rojo, que es el grito. A este cuerpo es letra grande y le basta el
+     4:1 del rojo sobre blanco. */
+  .juego-sillazo {
+    margin: 0;
+    font-size: clamp(1.3rem, 0.6rem + 3.5cqi, 2.6rem);
+    color: var(--color-rojo);
+  }
+
+  .juego-otra {
+    --desfase: 4px;
+    padding: 0.55rem 1.1rem;
+    font-size: 0.7rem;
+  }
+
+  @container (width < 32rem) {
+    .juego-fin {
+      gap: 0.4rem;
+    }
+    .juego-otra {
+      padding: 0.4rem 0.85rem;
+      font-size: 0.62rem;
+    }
+  }
+
+  /* ── La ayuda ─────────────────────────────────────────────────────── */
+  /* Dentro de la caja y no debajo: así va siempre en tinta sobre blanco,
+     esté el juego sobre rojo, sobre amarillo o sobre negro. */
+  .juego-ayuda {
+    margin: 0;
+    border-top: var(--borde) solid var(--juego-tinta);
+    padding: 0.6rem 0.75rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* Cada letrero en dos versiones: con teclado o con el dedo. */
+  .juego-tacto {
+    display: none;
+  }
+
+  @media (hover: none) and (pointer: coarse) {
+    .juego-teclado {
+      display: none;
+    }
+    .juego-tacto {
+      display: inline;
+    }
+  }
+</style>
+
+<script>
+  import '../scripts/juego/juego';
+</script>
