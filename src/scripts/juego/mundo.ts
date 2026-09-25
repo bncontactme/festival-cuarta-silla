@@ -33,6 +33,16 @@ export const X_DINO = 50;
  * teléfono.
  */
 const ANCHO_DE_REFERENCIA = 600;
+/**
+ * Pero no menos que esto. Más despacio, el salto cubre menos suelo, y por
+ * debajo de 4,5 una fila de sillas chicas ya no se puede saltar: la ventana
+ * para pasarla se queda en cero. Un teléfono de 320 px cae justo en el tope;
+ * lo más angosto —una ventana estrecha, un plegable cerrado— se queda en 4,5
+ * en vez de bajar a 4.
+ */
+const FACTOR_MIN = 0.75;
+/** Pasos que tarda el suelo en ponerse a velocidad al arrancar (0,3 s). */
+const PASOS_ARRANQUE = 18;
 
 // ── Física, por paso ──────────────────────────────────────────────────────
 const GRAVEDAD = 0.6;
@@ -88,8 +98,11 @@ interface Tipo {
   paso: number;
 }
 
+// Los umbrales de las filas están medidos, no puestos a ojo: por debajo, la
+// fila no tiene ninguna manera de saltarse (ver «El juego de la 404» en el
+// README).
 const TIPOS: Tipo[] = [
-  { clase: 'chica', sprite: SILLA.chica, desde: 0, enFila: 4, hueco: 120, paso: 24 },
+  { clase: 'chica', sprite: SILLA.chica, desde: 0, enFila: 5, hueco: 120, paso: 24 },
   { clase: 'grande', sprite: SILLA.grande, desde: 0, enFila: 7, hueco: 120, paso: 32 },
   // Una fila de sillas volando no se puede esquivar; sale siempre sola.
   { clase: 'voladora', sprite: SILLA.chica, desde: 8.5, enFila: Infinity, hueco: 150, paso: 0 },
@@ -198,6 +211,14 @@ export class Mundo {
   velocidad = VELOCIDAD;
   distancia = 0;
   pasos = 0;
+  /**
+   * Cuánto se mueve el mundo, de 0 a 1. Como en el de Chrome, el primer
+   * salto es en el sitio: el suelo no arranca hasta que el dino vuelve a
+   * pisarlo, y entonces se pone a velocidad en `PASOS_ARRANQUE`, sin
+   * tirón. Tras un choque se empieza sin salto, y arranca en el primer paso.
+   */
+  arranque = 0;
+  private arrancado = false;
   /** Lo que ha corrido el suelo, para las motas. */
   recorrido = 0;
   recorridoAntes = 0;
@@ -230,7 +251,7 @@ export class Mundo {
 
   /** La velocidad con la que se mueve de verdad el suelo en esta pantalla. */
   get velocidadReal(): number {
-    return this.velocidad * Math.min(1, (this.ancho / ANCHO_DE_REFERENCIA) * 1.2);
+    return this.velocidad * Math.min(1, Math.max(FACTOR_MIN, (this.ancho / ANCHO_DE_REFERENCIA) * 1.2));
   }
 
   get puntos(): number {
@@ -260,6 +281,8 @@ export class Mundo {
     this.velocidad = VELOCIDAD;
     this.distancia = 0;
     this.pasos = 0;
+    this.arranque = 0;
+    this.arrancado = false;
     this.h = this.hAntes = this.vh = 0;
     this.saltando = this.agachado = this.soltado = this.alcanzoMin = this.caidaRapida = false;
     this.obstaculos = [];
@@ -307,15 +330,20 @@ export class Mundo {
   paso() {
     if (this.estado !== 'corriendo') return;
     this.pasos++;
-    const v = this.velocidadReal;
 
     this.hAntes = this.h;
     if (this.saltando) this.moverSalto();
 
+    // El suelo espera a que el dino pise; luego entra suave (smoothstep).
+    if (!this.saltando) this.arrancado = true;
+    if (this.arrancado && this.arranque < 1) this.arranque = Math.min(1, this.arranque + 1 / PASOS_ARRANQUE);
+    const suave = this.arranque * this.arranque * (3 - 2 * this.arranque);
+    const v = this.velocidadReal * suave;
+
     this.recorridoAntes = this.recorrido;
     this.recorrido += v;
-    this.distancia += this.velocidad;
-    if (this.velocidad < VELOCIDAD_MAX) this.velocidad += ACELERACION;
+    this.distancia += this.velocidad * suave;
+    if (this.arranque === 1 && this.velocidad < VELOCIDAD_MAX) this.velocidad += ACELERACION;
 
     for (const o of this.obstaculos) {
       o.xAntes = o.x;
@@ -402,8 +430,10 @@ export class Mundo {
     return this.historial.length >= REPETICIONES && this.historial.every((c) => c === clase);
   }
 
+  /** Entre el renglón del marcador (arriba, hasta ~30) y el letrero de en
+   *  medio (desde 84): así ninguna estrella se mete debajo de una letra. */
   private estrella(x: number): Estrella {
-    return { x, xAntes: x, y: 12 + this.azar() * 50, hueco: 160 + this.azar() * 260 };
+    return { x, xAntes: x, y: 32 + this.azar() * 28, hueco: 160 + this.azar() * 260 };
   }
 
   private moverEstrellas(v: number) {

@@ -3,10 +3,44 @@ import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
 import Estrella from '../components/Estrella.astro';
 import Juego from '../components/Juego.astro';
+import Pantalla from '../components/movil/Pantalla.astro';
 import { nav } from '../data/site';
 ---
 
 <Base titulo="Página no encontrada" descripcion="Esta página no existe.">
+  {/* ── Móvil: una pantalla, como todas las del teléfono ─────────────────
+      Sin ella se servía la de escritorio apilada, y el juego caía al final,
+      medio escondido bajo el pliegue: para jugar había que bajar, y al bajar
+      el dedo le pasaba por encima. Aquí cabe entera y no se mueve: el aviso
+      arriba, el juego de canto a canto y, debajo, las cuatro salidas. Rojo y
+      amarillo, como Registro: la portada de la pantalla en rojo, el cuerpo en
+      amarillo. */}
+  <Fragment slot="movil">
+    <Pantalla
+      titulo="Silla vacía"
+      indice="404"
+      nota="Esta página no existe"
+      fondo="rojo"
+      fondoCuerpo="amarillo"
+    >
+      <Juego id="juego-movil" variante="banda" />
+
+      <p class="meta px-4 pt-5 pb-2 font-bold">Estas sí:</p>
+      <ul class="puertas">
+        {
+          nav.map((item) => (
+            <li>
+              <a href={conBase(item.href)} class="puerta">
+                <span class="display text-2xl leading-none">{item.label}</span>
+                <span class="puerta-flecha" aria-hidden="true">→</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Pantalla>
+  </Fragment>
+
   <section
     class="relative flex min-h-[70vh] items-center overflow-hidden bg-rojo text-amarillo"
   >
@@ -15,14 +49,17 @@ import { nav } from '../data/site';
         La estrella entra a plena fuerza y se queda dentro del sistema. */}
     <Estrella tinta="amarilla" alto="abajo" />
 
-    {/* En escritorio, dos columnas: el aviso a la izquierda y el juego en el
-        rojo que sobraba a la derecha, los dos a la vista sin bajar. La
-        primera mide lo que el titular y 28rem como poco, para que los
-        botones hagan dos renglones y no uno que se coma el ancho del juego.
-        En el teléfono, el juego va debajo de los botones: lo primero de una
-        404 es devolver a la gente a alguna parte. */}
+    {/* Dos columnas, y cada una con su oficio. A la izquierda, el titular
+        solo, como un cartel. A la derecha, lo que se hace con él: arriba el
+        aviso y las salidas, a la altura del «Error 404»; abajo el juego,
+        asentado en la base de «vacía» como en un suelo, con la estrella
+        asomando por detrás. Arriba y abajo, los cantos de las dos columnas
+        coinciden: nada flota.
+
+        Y en ese orden en el HTML, no sólo en la vista: quien tabula llega
+        antes a las salidas que al juego, que es lo que toca en una 404. */}
     <div
-      class="relative grid w-full items-center gap-x-16 gap-y-14 px-4 py-24 sm:px-6 lg:grid-cols-[fit-content(28rem)_minmax(0,1fr)] lg:px-10"
+      class="relative grid w-full gap-x-16 gap-y-12 px-4 py-24 sm:px-6 lg:grid-cols-[max-content_minmax(0,1fr)] lg:px-10"
     >
       <div>
         <p class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta">
@@ -31,27 +68,60 @@ import { nav } from '../data/site';
         <h1 class="display text-[22vw] leading-[0.95] lg:text-[13vw]">
           Silla<br />vacía
         </h1>
-        {/* En papel y a cuerpo grande: amarillo sobre rojo da 3,67:1 y esto es
-            texto corrido. A 20px en negrita cuenta como texto grande y el blanco
-            sobre rojo (4,0:1) ya alcanza. */}
-        <p class="mt-8 max-w-md text-xl font-bold text-papel">
-          Esta página no existe. Estas sí:
-        </p>
-        <ul class="mt-8 flex flex-wrap gap-3">
-          {
-            nav.map((item) => (
-              <li>
-                <a href={conBase(item.href)} class="boton boton--papel">
-                  {item.label}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
       </div>
 
-      {/* El dino de Chrome vive en la página de error; el nuestro, también. */}
-      <Juego class="max-w-3xl" />
+      <div class="flex min-w-0 flex-col justify-between gap-12">
+        <div>
+          {/* En papel y a cuerpo grande: amarillo sobre rojo da 3,67:1 y esto
+              es texto corrido. A 20px en negrita cuenta como texto grande y
+              el blanco sobre rojo (4,0:1) ya alcanza. */}
+          <p class="max-w-md text-xl font-bold text-papel">
+            Esta página no existe. Estas sí:
+          </p>
+          <ul class="mt-5 flex flex-wrap gap-3">
+            {
+              nav.map((item) => (
+                <li>
+                  <a href={conBase(item.href)} class="boton boton--papel">
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        {/* El dino de Chrome vive en la página de error; el nuestro, también. */}
+        <Juego id="juego-escritorio" class="w-full max-w-4xl" />
+      </div>
     </div>
   </section>
 </Base>
+
+<style>
+  /* Las salidas del móvil, con la misma piel que los días de Registro: filas
+     de canto a canto, titular a la izquierda y el signo a la derecha. */
+  .puertas {
+    border-top: var(--borde) solid var(--color-tinta);
+  }
+
+  .puerta {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.7rem 1rem;
+    border-bottom: var(--borde) solid var(--color-tinta);
+    transition: background-color 0.25s var(--ease-salida);
+  }
+
+  .puerta-flecha {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-weight: 700;
+  }
+
+  .puerta:active {
+    background-color: var(--color-rojo);
+    color: var(--color-amarillo);
+  }
+</style>

@@ -7,36 +7,51 @@
  * 404 sale vacía. No está en la barra ni en el mapa del sitio: es un huevo de
  * pascua, se llega por enlace.
  *
- * Misma composición que la 404 —el texto a la izquierda, el juego a la
- * derecha— para que se lean como la misma pieza. Aquí sobre amarillo, que es
- * el campo, y con la estrella roja: la tinta contraria.
+ * La misma composición que la 404 —el titular solo a la izquierda; a la
+ * derecha el texto arriba y el juego abajo, asentado en la base del
+ * titular— para que se lean como la misma pieza. Aquí sobre amarillo, que es
+ * el campo, y con la estrella roja: la tinta contraria. En el teléfono, una
+ * pantalla como las demás, con el juego de canto a canto.
  */
 import Base from '../layouts/Base.astro';
 import Estrella from '../components/Estrella.astro';
 import Juego from '../components/Juego.astro';
+import Pantalla from '../components/movil/Pantalla.astro';
+
+const bajada = 'Como el dinosaurio de Chrome, pero lo que se te atraviesa es la silla.';
 ---
 
 <Base
   titulo="Brinca la silla"
   descripcion="Como el dinosaurio de Chrome, pero lo que se te atraviesa es la silla del festival."
 >
+  <Fragment slot="movil">
+    {/* Rojo arriba y amarillo abajo, como la 404: son la misma pieza. Con la
+        cabecera amarilla, su filete y el de la banda quedaban uno encima del
+        otro, un canto doble que en el resto del sitio no existe. */}
+    <Pantalla titulo="Brinca la silla" indice="★" fondo="rojo" fondoCuerpo="amarillo">
+      <Juego id="juego-movil" variante="banda" />
+      <p class="px-4 pt-6 text-lg leading-snug font-bold">{bajada}</p>
+    </Pantalla>
+  </Fragment>
+
   <section class="relative flex min-h-[70vh] items-center overflow-hidden bg-amarillo text-tinta">
     <Estrella tinta="roja" alto="abajo" />
 
     <div
-      class="relative grid w-full items-center gap-x-16 gap-y-14 px-4 py-24 sm:px-6 lg:grid-cols-[fit-content(28rem)_minmax(0,1fr)] lg:px-10"
+      class="relative grid w-full gap-x-16 gap-y-12 px-4 py-24 sm:px-6 lg:grid-cols-[max-content_minmax(0,1fr)] lg:px-10"
     >
       <div>
         <p class="meta mb-6 inline-block bg-tinta px-3 py-1.5 text-amarillo">Juego</p>
         <h1 class="display text-[20vw] leading-[0.95] lg:text-[11vw]">
           Brinca<br />la silla
         </h1>
-        <p class="mt-8 max-w-md text-xl font-bold">
-          Como el dinosaurio de Chrome, pero lo que se te atraviesa es la silla.
-        </p>
       </div>
 
-      <Juego class="max-w-3xl" />
+      <div class="flex min-w-0 flex-col justify-between gap-12">
+        <p class="max-w-md text-xl font-bold">{bajada}</p>
+        <Juego id="juego-escritorio" class="w-full max-w-4xl" />
+      </div>
     </div>
   </section>
 </Base>

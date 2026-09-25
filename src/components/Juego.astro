@@ -23,16 +23,26 @@
  * pantalla por la región de estado.
  */
 interface Props {
-  /** Prefijo de los `id`. Sólo hace falta cambiarlo si hay dos en una página. */
+  /** Prefijo de los `id`. Hay que cambiarlo si hay dos en una página, y en
+   *  las que traen sitio móvil los hay: el del teléfono y el de escritorio. */
   id?: string;
+  /**
+   * `caja`: un objeto puesto encima, con canto y sombra dura, como los
+   * botones. Es la de escritorio.
+   * `banda`: de canto a canto, sin sombra, como las bandas del sitio móvil
+   * —la del ahora, la de patrocinadores—. Es la del teléfono, donde una caja
+   * flotando con dieciséis píxeles a cada lado se come ancho de juego y se
+   * lee como algo pegado encima de la pantalla y no como parte de ella.
+   */
+  variante?: 'caja' | 'banda';
   class?: string;
 }
 
-const { id = 'juego', class: clase } = Astro.props;
+const { id = 'juego', variante = 'caja', class: clase } = Astro.props;
 ---
 
 <div
-  class:list={['juego', clase]}
+  class:list={['juego', `juego--${variante}`, clase]}
   data-juego
   data-estado="inicio"
   tabindex="0"
@@ -101,7 +111,7 @@ const { id = 'juego', class: clase } = Astro.props;
     box-shadow: 6px 6px 0 var(--canto);
     cursor: pointer;
     /* Un toque es un salto: ni zoom por doble toque, ni selección, ni el menú
-       de mantener pulsado. Arrastrar sigue moviendo la página. */
+       de mantener pulsado. Arrastrar sigue moviendo la página... */
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
@@ -109,8 +119,19 @@ const { id = 'juego', class: clase } = Astro.props;
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* ...menos en plena carrera: ahí cada dedo es un salto, y un salto que
+     además arrastra la página saca el juego de la pantalla (y lo pausa). */
+  .juego[data-estado='corriendo'] {
+    touch-action: none;
+  }
+
   :global(.js) .juego {
     display: block;
+  }
+
+  .juego--banda {
+    border-inline: 0;
+    box-shadow: none;
   }
 
   /* Jugando, sin anillo de foco: ver «El anillo de foco» en `juego.ts`. */
@@ -126,9 +147,13 @@ const { id = 'juego', class: clase } = Astro.props;
 
        Con `cqi` y no con `aspect-ratio` + `min-height`: el mínimo de alto se
        transfiere por la proporción al ancho —7rem × 4 = 448 px de ancho
-       mínimo— y en un teléfono de 390 la caja se salía de la pantalla. */
+       mínimo— y en un teléfono de 390 la caja se salía de la pantalla.
+
+       8rem de mínimo: en el teléfono, un dino de 37 px y no de 33. Más alto
+       ya no: con el alto fijo en 150 unidades, cada píxel de alto le quita
+       ancho al mundo, y el ancho es lo que deja ver venir las sillas. */
     height: 9rem;
-    height: clamp(7rem, 25cqi, 13rem);
+    height: clamp(8rem, 25cqi, 13rem);
     overflow: hidden;
   }
 
@@ -241,6 +266,13 @@ const { id = 'juego', class: clase } = Astro.props;
     .juego-otra {
       padding: 0.4rem 0.85rem;
       font-size: 0.62rem;
+    }
+  }
+
+  /* Con el dedo, 44 px de alto como poco: es lo que un pulgar acierta. */
+  @media (pointer: coarse) {
+    .juego-otra {
+      min-height: 2.75rem;
     }
   }
 

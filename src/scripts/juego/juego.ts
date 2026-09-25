@@ -24,6 +24,14 @@ const MAX_PASOS = 8;
 /** Tras el choque, una tecla tarda esto en valer para empezar otra: si no, la
  *  misma pulsación que llegó tarde reinicia sin que se vea el choque. */
 const ESPERA_REINICIO = 750;
+/** Al volver de una pausa el tiempo arranca a esta fracción y en
+ *  `RAMPA_REANUDAR` ms vuelve a ir normal. Todo a cámara lenta a la vez —el
+ *  dino y el suelo—: quien pausó a medio salto aterriza donde iba a aterrizar,
+ *  y nadie se come una silla por reanudar. */
+const ESCALA_REANUDAR = 0.25;
+const RAMPA_REANUDAR = 600;
+/** Un dedo que se movió más que esto no tocó: estaba desplazando la página. */
+const TOLERANCIA_TOQUE = 10;
 const CLAVE_RECORD = 'cs-juego-record';
 
 /** Lo que, con el foco puesto, ya sabe qué hacer con un espacio. */
@@ -189,12 +197,16 @@ function montar(pantalla: HTMLElement) {
   let raf = 0;
   let antes = 0;
   let acumulado = 0;
+  /** A qué velocidad corre el tiempo: 1, salvo al volver de una pausa. */
+  let escala = 1;
 
   function cuadro(t: number) {
     raf = 0;
     if (estado !== 'corriendo') return;
-    acumulado += Math.min(250, Math.max(0, t - antes));
+    const dt = Math.min(250, Math.max(0, t - antes));
     antes = t;
+    if (escala < 1) escala = Math.min(1, escala + (dt / RAMPA_REANUDAR) * (1 - ESCALA_REANUDAR));
+    acumulado += dt * escala;
     let pasos = 0;
     while (acumulado >= PASO_MS && pasos < MAX_PASOS && mundo.estado === 'corriendo') {
       mundo.paso();
@@ -208,8 +220,9 @@ function montar(pantalla: HTMLElement) {
     raf = requestAnimationFrame(cuadro);
   }
 
-  function arrancar() {
+  function arrancar(camaraLenta = false) {
     ponerEstado('corriendo');
+    escala = camaraLenta ? ESCALA_REANUDAR : 1;
     if (raf) return;
     antes = performance.now();
     acumulado = 0;
@@ -291,7 +304,7 @@ function montar(pantalla: HTMLElement) {
       // Una tecla que se quedó pulsada no reanuda ni reinicia: tiene que ser
       // una pulsación nueva.
     } else if (estado === 'pausa') {
-      arrancar();
+      arrancar(true);
     } else if (performance.now() - horaChoque >= ESPERA_REINICIO) {
       otraVez();
     }
@@ -361,10 +374,21 @@ function montar(pantalla: HTMLElement) {
   });
 
   // ── Dedo y ratón ────────────────────────────────────────────────────────
+  // En carrera, el dedo salta al bajar, sin esperar nada: un retraso ahí es
+  // una silla en la cara. Fuera de carrera —esperando, en pausa, tras el
+  // choque— el dedo cuenta al subir y sólo si no se movió: quien desplaza la
+  // página pasando por encima del juego no lo arranca sin querer. El ratón no
+  // tiene ese problema y cuenta siempre al bajar.
+  let toque: { id: number; x: number; y: number } | null = null;
+
   pantalla.addEventListener('pointerdown', (e) => {
     if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
     if (e.target instanceof Element && e.target.closest('button')) return;
     jugando();
+    if (estado !== 'corriendo' && e.pointerType !== 'mouse') {
+      toque = { id: e.pointerId, x: e.clientX, y: e.clientY };
+      return;
+    }
     adelante();
     // Para enterarse de cuándo se levanta el dedo aunque se salga del juego:
     // de eso depende la altura del salto.
@@ -374,8 +398,17 @@ function montar(pantalla: HTMLElement) {
       // Sin captura, se suelta al salir: el salto queda corto y ya.
     }
   });
-  pantalla.addEventListener('pointerup', () => mundo.soltarSalto());
-  pantalla.addEventListener('pointercancel', () => mundo.soltarSalto());
+  pantalla.addEventListener('pointerup', (e) => {
+    mundo.soltarSalto();
+    if (!toque || e.pointerId !== toque.id) return;
+    const quieto = Math.hypot(e.clientX - toque.x, e.clientY - toque.y) <= TOLERANCIA_TOQUE;
+    toque = null;
+    if (quieto) adelante();
+  });
+  pantalla.addEventListener('pointercancel', () => {
+    mundo.soltarSalto();
+    toque = null;
+  });
 
   botonOtra.addEventListener('click', () => {
     otraVez();
@@ -391,14 +424,24 @@ function montar(pantalla: HTMLElement) {
     if (document.hidden) pausar();
   });
   window.addEventListener('blur', pausar);
+  // «A la vista» es la escena, no la caja entera, y tres cuartos de ella: con
+  // media caja fuera puede quedar fuera justo el suelo, y un juego del que no
+  // se ve el dino no se puede estar jugando.
   new IntersectionObserver(
     ([entrada]) => {
-      enVista = entrada.intersectionRatio >= 0.5;
+      enVista = entrada.intersectionRatio >= 0.75;
       if (!enVista) pausar();
+      // La página trae dos juegos —el del teléfono y el de escritorio— y sólo
+      // se ve uno. Al girar una tablet se pasa de uno a otro: el que aparece
+      // se trae el récord que haya hecho el otro.
+      else if (leerRecord() > record) {
+        record = leerRecord();
+        marcador();
+      }
       programarParpadeo();
     },
-    { threshold: [0, 0.5, 1] },
-  ).observe(pantalla);
+    { threshold: [0, 0.75, 1] },
+  ).observe(lienzo);
 
   marcador();
   ponerEstado('inicio');
