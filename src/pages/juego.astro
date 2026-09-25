@@ -10,9 +10,9 @@
  *
  * La composición de la 404. En escritorio, el titular solo a la izquierda y
  * el juego a la derecha, asentado en la base del titular. En el teléfono,
- * como la 404 también: la misma página en una columna —el titular, las
- * salidas y el juego— y no una pantalla del sitio móvil, donde el juego
- * quedaba solo en medio de la pantalla.
+ * como la 404 también: la misma página en una columna —el titular, el juego
+ * y las salidas— y no una pantalla del sitio móvil, donde el juego quedaba
+ * solo en medio de la pantalla.
  */
 import Base from '../layouts/Base.astro';
 import { conBase } from '../lib/base';
@@ -78,11 +78,12 @@ import { nav } from '../data/site';
         </h1>
       </div>
 
-      {/* Abajo, en la base del titular, como en la 404. En el teléfono, antes
-          del juego, las salidas de la 404: sin ellas el juego se quedaba
-          solo. En escritorio no hacen falta, que ahí la barra ya las trae a
-          la vista. */}
+      {/* Abajo, en la base del titular, como en la 404. En el teléfono, bajo
+          el juego —que es a lo que se viene—, las salidas de la 404: sin
+          ellas el juego se quedaba solo. En escritorio no hacen falta, que
+          ahí la barra ya las trae a la vista. */}
       <div class="flex min-w-0 flex-col justify-end gap-8">
+        <Juego class="w-full max-w-4xl" />
         <ul class="flex flex-wrap gap-3 lg:hidden">
           {
             nav.map((item) => (
@@ -94,7 +95,6 @@ import { nav } from '../data/site';
             ))
           }
         </ul>
-        <Juego class="w-full max-w-4xl" />
       </div>
     </div>
   </section>

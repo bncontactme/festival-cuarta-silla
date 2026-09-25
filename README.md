@@ -215,9 +215,9 @@ enlace… o por la silla secreta (ver abajo).
   la 404 es la misma en una columna y en ese orden —el cartel, las salidas, el
   juego—, apretada para que el juego entero quepa en la primera pantalla de un
   teléfono normal (390×664); en uno muy bajo, como el SE, asoma y hay que
-  bajar un poco. `/juego` va igual —el titular, las mismas salidas y el
-  juego—, sólo que las salidas no salen en escritorio, donde la barra ya las
-  trae.
+  bajar un poco. `/juego` va igual, pero con el juego antes que las salidas
+  —el titular, el juego y las mismas salidas—, que es a lo que se viene; y
+  las salidas no salen en escritorio, donde la barra ya las trae.
 - **La silla secreta.** Diez toques a la silla del hero de la portada —las
   dos que flotan junto al titular en escritorio, la de detrás del rótulo en
   el teléfono— y se abre el juego
