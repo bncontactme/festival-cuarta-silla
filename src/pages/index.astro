@@ -73,7 +73,7 @@ const sillasSedes = [
              derecha: queda más al borde, como estaba antes de darle sitio
              para pasear, y de paso se aleja del límite del titular. -->
         <div class="flota absolute inset-0 grid place-items-center pl-[12%]">
-          <Silla variante="roja" deriva class="w-56 rotate-6 xl:w-72" />
+          <Silla variante="roja" deriva secreta class="w-56 rotate-6 xl:w-72" />
         </div>
       </div>
     </div>
@@ -83,7 +83,7 @@ const sillasSedes = [
     >
       <div class="sigue">
         <div class="flota flota--b">
-          <Silla variante="roja" deriva class="w-full -rotate-12" />
+          <Silla variante="roja" deriva secreta class="w-full -rotate-12" />
         </div>
       </div>
     </div>
@@ -623,5 +623,10 @@ const sillasSedes = [
         ojo.observe(cinta);
       }
     }
+  </script>
+
+  {/* Diez toques a la silla del hero y se abre el juego. */}
+  <script>
+    import '../scripts/silla-secreta';
   </script>
 </Base>

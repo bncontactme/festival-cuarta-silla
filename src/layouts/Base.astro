@@ -189,6 +189,12 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
         url: canonica.toString(),
       })}
     />
+
+    {/* Lo que una página necesita tener puesto antes del primer pintado.
+        Hoy, `/juego`: escucha `pagereveal` para abrirse en portal cuando se
+        llega desde la silla secreta de la portada, y ese evento llega antes
+        del primer cuadro — un script más abajo lo perdería. */}
+    <slot name="cabeza" />
   </head>
 
   <body data-movil={conMovil ? 'si' : undefined}>

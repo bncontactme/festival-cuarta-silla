@@ -11,6 +11,9 @@ interface Props {
   style?: string;
   deriva?: boolean;
   alt?: string;
+  /** La silla secreta: diez toques y lleva al juego. Sólo las de la
+   *  portada —ver `src/scripts/silla-secreta.ts`—. */
+  secreta?: boolean;
 }
 
 const {
@@ -19,12 +22,14 @@ const {
   style,
   deriva = false,
   alt = '',
+  secreta = false,
 } = Astro.props;
 ---
 
 <img
   src={conBase(`/logos/silla-${variante}.svg`)}
   alt={alt}
+  data-silla-secreta={secreta ? '' : undefined}
   aria-hidden={alt === '' ? 'true' : undefined}
   loading="lazy"
   decoding="async"

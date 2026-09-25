@@ -24,8 +24,7 @@ El texto se migró literal del sitio original. Dos apuntes:
 - **Textos nuevos** (no existían en Wix): las etiquetas de la cuenta regresiva
   (Días/Horas/Min/Seg), «Por anunciar» en los huecos del programa, la
   página 404 («Silla vacía») y el juego («Brinca la silla», «¡Sillazo!»,
-  «Otra vez», las instrucciones y la línea de `/juego`). Todo lo demás es del
-  original.
+  «Otra vez» y las instrucciones). Todo lo demás es del original.
 
 Los patrocinadores están vacíos a propósito: el sitio de Wix sólo tenía fotos
 de stock de relleno. Cuando lleguen los logos reales se añaden a
@@ -180,9 +179,10 @@ este sitio trae los suyos, más pequeños. Todo lo específico vive en
 [`src/styles/movil.css`](src/styles/movil.css), dentro de una sola media
 query — por encima de 1024px ese archivo no existe.
 
-Las páginas que no traen `slot="movil"` (privacidad) ya cabían en un teléfono
-y se sirven igual en todas partes. La 404 y `/juego` lo traen desde que llevan
-el juego: ver «El juego de la 404».
+Las páginas que no traen `slot="movil"` (privacidad, 404) ya cabían en un
+teléfono y se sirven igual en todas partes. La 404 es la de escritorio en una
+columna a propósito: su gracia es el cartel. `/juego` sí lo trae: ver «El
+juego de la 404».
 
 ### Reglas que conviene no romper
 
@@ -206,16 +206,33 @@ silla»** es el dinosaurio de Chrome, pero lo que se le atraviesa es la silla
 del festival. Vive donde vive el de Chrome, en la página de error, y también en
 [`/juego`](src/pages/juego.astro), para poder compartirlo sin mandar un enlace
 roto. `/juego` no está en la barra ni en el mapa del sitio: se llega por
-enlace.
+enlace… o por la silla secreta (ver abajo).
 
 - **Dónde va.** En escritorio, dos columnas: el titular solo a la izquierda,
   como un cartel; a la derecha, arriba el aviso y las salidas —a la altura del
   «Error 404»— y abajo el juego, asentado en la base del titular como en un
   suelo. Los cantos de las dos columnas coinciden arriba y abajo, y la escena
-  entera queda a la vista sin bajar de 1024×768 para arriba. En el teléfono
-  es una pantalla como las demás (`Pantalla`), sin scroll de página: la
-  cabecera roja, el juego de canto a canto —una banda, como las de la
-  portada— y debajo las cuatro salidas en filas, como los días de Registro.
+  entera queda a la vista sin bajar de 1024×768 para arriba. En el teléfono,
+  la 404 es la misma en una columna y en ese orden —el cartel, las salidas, el
+  juego—, apretada para que el juego entero quepa en la primera pantalla de un
+  teléfono normal (390×664); en uno muy bajo, como el SE, asoma y hay que
+  bajar un poco. `/juego`, en cambio, es una pantalla del sitio móvil
+  (`Pantalla`): cabecera roja, el juego de canto a canto como una banda y la
+  vuelta a la portada arriba, que es de donde se llega por la silla.
+- **La silla secreta.** Diez toques a la silla del hero de la portada —las
+  dos que flotan junto al titular en escritorio, la de detrás del rótulo en
+  el teléfono— y se abre el juego
+  ([`silla-secreta.ts`](src/scripts/silla-secreta.ts)). Cada toque la
+  despierta: de marca de agua a rojo entero en diez pasos, con un brinco que
+  crece y, del séptimo en adelante, un temblor. Si se deja de tocar segundo y
+  medio se vuelve a dormir y la cuenta vuelve a cero. Al quinto se pide
+  `/juego` por adelantado. Al décimo la silla toma impulso y salta hacia quien
+  mira, y `/juego` se abre en un círculo que crece desde donde estaba la silla
+  mientras ella pasa de largo: una transición entre páginas del navegador
+  (`pagereveal`, en la cabeza de `juego.astro`). Sin esa transición —Firefox,
+  o con menos movimiento pedido— la silla se llena igual y se llega sin más.
+  Los toques fuera de la silla, en enlaces o durante la entrada del teléfono
+  no cuentan, y los clics seguidos no seleccionan el titular.
 - **Controles.** Espacio o ↑ brinca (mantener pulsado, más alto) y ↓ se agacha
   —en el aire, cae más rápido—. En el teléfono, tocar y mantener. Con el foco
   en un enlace o un botón, el espacio es de ellos; con el foco en ninguna parte
@@ -269,6 +286,7 @@ src/
   styles/panel.css    el panel; CSS propio, no el del sitio
   lib/analitica.ts    el token del faro de visitas (vacío = no se mide nada)
   scripts/motion.ts   Lenis + reveals + partidor + cuenta + menú + entrada
+  scripts/silla-secreta.ts  diez toques a la silla de la portada: al juego
   scripts/panel/      el panel: api, esquema, campos, tabla, previa, sala,
                       registro, festival (los dos textos del festival)
   scripts/juego/      el juego de la 404: sprites (los dibujos), mundo (la

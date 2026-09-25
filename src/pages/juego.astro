@@ -2,36 +2,78 @@
 /**
  * El juego de la 404, con dirección propia.
  *
- * Existe para poder compartirlo: mandar por WhatsApp un enlace roto a
- * propósito para que alguien juegue es raro, y además la vista previa de un
- * 404 sale vacía. No está en la barra ni en el mapa del sitio: es un huevo de
- * pascua, se llega por enlace.
+ * Existe para poder compartirlo —mandar un enlace roto a propósito para que
+ * alguien juegue es raro, y la vista previa de un 404 sale vacía— y porque
+ * es adonde lleva la silla secreta de la portada: diez toques y se abre aquí,
+ * en portal (ver abajo y `src/scripts/silla-secreta.ts`). No está en la
+ * barra ni en el mapa del sitio: se llega por enlace o por la silla.
  *
- * La misma composición que la 404 —el titular solo a la izquierda; a la
- * derecha el texto arriba y el juego abajo, asentado en la base del
- * titular— para que se lean como la misma pieza. Aquí sobre amarillo, que es
- * el campo, y con la estrella roja: la tinta contraria. En el teléfono, una
- * pantalla como las demás, con el juego de canto a canto.
+ * En escritorio, la composición de la 404: el titular solo a la izquierda y
+ * el juego a la derecha, asentado en la base del titular. En el teléfono,
+ * una pantalla como las demás, con el juego de canto a canto y la vuelta a
+ * la portada arriba, que es de donde se llega.
  */
 import Base from '../layouts/Base.astro';
 import Estrella from '../components/Estrella.astro';
 import Juego from '../components/Juego.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
-
-const bajada = 'Como el dinosaurio de Chrome, pero lo que se te atraviesa es la silla.';
 ---
 
-<Base
-  titulo="Brinca la silla"
-  descripcion="Como el dinosaurio de Chrome, pero lo que se te atraviesa es la silla del festival."
->
+<Base titulo="Brinca la silla">
+  {/* ── El portal ────────────────────────────────────────────────────────
+      Si se llega desde la silla secreta, la portada dejó dicho dónde estaba
+      la silla (en fracciones de la ventana, con la hora). Al revelarse la
+      página, el navegador ya tiene montada la transición: se le pone el
+      centro y el radio del círculo, y la clase que la dispara (el CSS está
+      al final). Sin transición —Firefox, o con menos movimiento pedido—, se
+      llega y ya.
+
+      En la cabeza y en línea: `pagereveal` llega antes del primer cuadro, y
+      un script de módulo, que corre al terminar de leer la página, lo
+      perdería. */}
+  <Fragment slot="cabeza">
+    <script is:inline>
+      (function () {
+        var origen = null;
+        try {
+          origen = JSON.parse(sessionStorage.getItem('cs-portal') || 'null');
+          sessionStorage.removeItem('cs-portal');
+        } catch (e) {}
+        // Una marca vieja —se tocó la silla y luego se volvió atrás— no abre
+        // portales al entrar aquí otro día.
+        if (!origen || Date.now() - origen.t > 10000) return;
+        // Sin el cargador del teléfono: la entrada es el portal. Con los dos,
+        // el círculo se abría sobre el cargador —amarillo y la silla en
+        // medio— y luego había que esperarlo a que se fuera.
+        delete document.documentElement.dataset.carga;
+        addEventListener(
+          'pagereveal',
+          function (e) {
+            if (!e.viewTransition) return;
+            var raiz = document.documentElement;
+            var x = origen.x * innerWidth;
+            var y = origen.y * innerHeight;
+            var r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+            raiz.style.setProperty('--portal-x', x + 'px');
+            raiz.style.setProperty('--portal-y', y + 'px');
+            raiz.style.setProperty('--portal-r', r + 'px');
+            raiz.classList.add('portal');
+            e.viewTransition.finished.finally(function () {
+              raiz.classList.remove('portal');
+            });
+          },
+          { once: true },
+        );
+      })();
+    </script>
+  </Fragment>
+
   <Fragment slot="movil">
     {/* Rojo arriba y amarillo abajo, como la 404: son la misma pieza. Con la
         cabecera amarilla, su filete y el de la banda quedaban uno encima del
         otro, un canto doble que en el resto del sitio no existe. */}
     <Pantalla titulo="Brinca la silla" indice="★" fondo="rojo" fondoCuerpo="amarillo">
       <Juego id="juego-movil" variante="banda" />
-      <p class="px-4 pt-6 text-lg leading-snug font-bold">{bajada}</p>
     </Pantalla>
   </Fragment>
 
@@ -48,10 +90,52 @@ const bajada = 'Como el dinosaurio de Chrome, pero lo que se te atraviesa es la 
         </h1>
       </div>
 
-      <div class="flex min-w-0 flex-col justify-between gap-12">
-        <p class="max-w-md text-xl font-bold">{bajada}</p>
+      {/* Abajo, en la base del titular, como en la 404. */}
+      <div class="flex min-w-0 flex-col justify-end">
         <Juego id="juego-escritorio" class="w-full max-w-4xl" />
       </div>
     </div>
   </section>
 </Base>
+
+<style is:global>
+  /* La página vieja se queda quieta debajo —sin el «salir» de siempre— y la
+     nueva se abre en un círculo desde donde estaba la silla. La silla, que
+     viaja aparte (lleva nombre de transición), pasa de largo hacia quien mira
+     y se deshace mientras el círculo crece: la puerta es ella. */
+  html.portal::view-transition-old(root) {
+    animation: none;
+  }
+
+  /* Los dos tiempos van cosidos: el círculo empieza a crecer enseguida —con
+     la curva de cortina tardaba un quinto de segundo en asomar— y la silla
+     se mantiene entera el primer tramo de su vuelo. Así el círculo se abre
+     por debajo de la silla y aparece cuando ella se deshace, sin un momento
+     muerto entre las dos. */
+  html.portal::view-transition-new(root) {
+    animation: portal-abre 0.8s cubic-bezier(0.5, 0, 0.2, 1) both;
+  }
+
+  html.portal::view-transition-old(silla-portal) {
+    animation: portal-silla 0.7s var(--ease-salida) both;
+  }
+
+  @keyframes portal-abre {
+    from {
+      clip-path: circle(0 at var(--portal-x) var(--portal-y));
+    }
+    to {
+      clip-path: circle(var(--portal-r) at var(--portal-x) var(--portal-y));
+    }
+  }
+
+  @keyframes portal-silla {
+    40% {
+      opacity: 1;
+    }
+    to {
+      scale: 3;
+      opacity: 0;
+    }
+  }
+</style>

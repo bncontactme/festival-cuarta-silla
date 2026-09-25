@@ -138,6 +138,10 @@
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
+    /* La silla de aquí es la secreta: diez toques seguidos. Sin esto, en
+       Safari dos toques rápidos hacen zoom, y el tercero ya cae en otra
+       parte. La portada no hace scroll, así que no se pierde nada. */
+    touch-action: manipulation;
     /* La escena es la que mide: `size` y no `inline-size` porque lo que hace
        falta saber aquí es el ALTO que le ha quedado, y eso es `cqh`. Trae de
        regalo lo que hacía falta de todas formas — con contención de tamaño,
