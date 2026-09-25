@@ -113,6 +113,11 @@ const { id = 'juego', class: clase } = Astro.props;
     display: block;
   }
 
+  /* Jugando, sin anillo de foco: ver «El anillo de foco» en `juego.ts`. */
+  .juego[data-jugando]:focus-visible {
+    outline: none;
+  }
+
   .juego-escena {
     position: relative;
     /* El mundo mide 150 de alto y lo que dé de ancho; 4:1 es el del dino de

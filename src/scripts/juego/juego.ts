@@ -312,12 +312,21 @@ function montar(pantalla: HTMLElement) {
     }, 2500 + Math.random() * 4000);
   }
 
+  // ── El anillo de foco ───────────────────────────────────────────────────
+  // El anillo es para quien llega tabulando: le dice dónde quedó el teclado.
+  // Quien juega ya lo sabe, y el navegador lo encendería igual, porque el
+  // juego toma el foco con una tecla y eso cuenta como foco de teclado. Así
+  // que se apaga en cuanto se juega y vuelve con el tabulador (el CSS está en
+  // `Juego.astro`).
+  const jugando = () => (pantalla.dataset.jugando = '');
+
   // ── Teclado ─────────────────────────────────────────────────────────────
   // Con el foco en el juego, todo es suyo. Con el foco en ninguna parte y el
   // juego a la vista, el espacio también: es lo que hace el dino de Chrome en
   // la página de error, y aquí vive en la página de error. Con el foco en un
   // enlace, un botón o un campo, la tecla es de ellos.
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') delete pantalla.dataset.jugando;
     if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
     const salto = e.key === ' ' || e.key === 'Spacebar' || e.key === 'ArrowUp';
     const abajo = e.key === 'ArrowDown';
@@ -335,6 +344,7 @@ function montar(pantalla: HTMLElement) {
     if (intro && estado === 'corriendo') return;
 
     e.preventDefault();
+    jugando();
     if (abajo) {
       mundo.sinAgacharse = false;
       mundo.agacharse(true);
@@ -354,6 +364,7 @@ function montar(pantalla: HTMLElement) {
   pantalla.addEventListener('pointerdown', (e) => {
     if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
     if (e.target instanceof Element && e.target.closest('button')) return;
+    jugando();
     adelante();
     // Para enterarse de cuándo se levanta el dedo aunque se salga del juego:
     // de eso depende la altura del salto.
@@ -368,6 +379,7 @@ function montar(pantalla: HTMLElement) {
 
   botonOtra.addEventListener('click', () => {
     otraVez();
+    jugando();
     pantalla.focus({ preventScroll: true });
   });
 
