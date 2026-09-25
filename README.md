@@ -179,10 +179,9 @@ este sitio trae los suyos, más pequeños. Todo lo específico vive en
 [`src/styles/movil.css`](src/styles/movil.css), dentro de una sola media
 query — por encima de 1024px ese archivo no existe.
 
-Las páginas que no traen `slot="movil"` (privacidad, 404) ya cabían en un
-teléfono y se sirven igual en todas partes. La 404 es la de escritorio en una
-columna a propósito: su gracia es el cartel. `/juego` sí lo trae: ver «El
-juego de la 404».
+Las páginas que no traen `slot="movil"` (privacidad, 404, `/juego`) ya
+cabían en un teléfono y se sirven igual en todas partes. La 404 y `/juego`
+son las de escritorio en una columna a propósito: su gracia es el cartel.
 
 ### Reglas que conviene no romper
 
@@ -216,9 +215,9 @@ enlace… o por la silla secreta (ver abajo).
   la 404 es la misma en una columna y en ese orden —el cartel, las salidas, el
   juego—, apretada para que el juego entero quepa en la primera pantalla de un
   teléfono normal (390×664); en uno muy bajo, como el SE, asoma y hay que
-  bajar un poco. `/juego`, en cambio, es una pantalla del sitio móvil
-  (`Pantalla`): cabecera roja, el juego de canto a canto como una banda y la
-  vuelta a la portada arriba, que es de donde se llega por la silla.
+  bajar un poco. `/juego` va igual —el titular, las mismas salidas y el
+  juego—, sólo que las salidas no salen en escritorio, donde la barra ya las
+  trae.
 - **La silla secreta.** Diez toques a la silla del hero de la portada —las
   dos que flotan junto al titular en escritorio, la de detrás del rótulo en
   el teléfono— y se abre el juego
@@ -258,10 +257,10 @@ enlace… o por la silla secreta (ver abajo).
   juego va más despacio, como el de Chrome en el teléfono, pero nunca por
   debajo de 4,5: a 4, una fila de sillas chicas no tiene manera de saltarse.
   Por lo mismo, las filas de chicas esperan a ir a 5 y las de grandes, a 7.
-- **Dos juegos por página.** Con sitio móvil, la página trae el del teléfono
-  y el de escritorio, y sólo se ve uno. El escondido no arranca nunca ni se
-  queda con las teclas; al girar una tablet, el que aparece se trae el récord
-  del otro.
+- **Dos juegos por página.** Si una página con sitio móvil lo lleva en las
+  dos versiones, trae el del teléfono y el de escritorio, y sólo se ve uno.
+  El escondido no arranca nunca ni se queda con las teclas; al girar una
+  tablet, el que aparece se trae el récord del otro.
 - **5 KB gzip, y sólo en esas dos páginas**: no cuenta en el presupuesto de
   movimiento del resto del sitio. El bucle corre sólo mientras se juega y se
   pausa al cambiar de pestaña o al sacar de la pantalla más de un cuarto de la

@@ -8,15 +8,17 @@
  * aquí con un fundido (ver abajo y `src/scripts/silla-secreta.ts`). No está en la
  * barra ni en el mapa del sitio: se llega por enlace o por la silla.
  *
- * En escritorio, la composición de la 404: el titular solo a la izquierda y
+ * La composición de la 404. En escritorio, el titular solo a la izquierda y
  * el juego a la derecha, asentado en la base del titular. En el teléfono,
- * una pantalla como las demás, con el juego de canto a canto y la vuelta a
- * la portada arriba, que es de donde se llega.
+ * como la 404 también: la misma página en una columna —el titular, las
+ * salidas y el juego— y no una pantalla del sitio móvil, donde el juego
+ * quedaba solo en medio de la pantalla.
  */
 import Base from '../layouts/Base.astro';
+import { conBase } from '../lib/base';
 import Estrella from '../components/Estrella.astro';
 import Juego from '../components/Juego.astro';
-import Pantalla from '../components/movil/Pantalla.astro';
+import { nav } from '../data/site';
 ---
 
 <Base titulo="Brinca la silla">
@@ -61,31 +63,38 @@ import Pantalla from '../components/movil/Pantalla.astro';
     </script>
   </Fragment>
 
-  <Fragment slot="movil">
-    {/* Rojo arriba y amarillo abajo, como la 404: son la misma pieza. Con la
-        cabecera amarilla, su filete y el de la banda quedaban uno encima del
-        otro, un canto doble que en el resto del sitio no existe. */}
-    <Pantalla titulo="Brinca la silla" indice="★" fondo="rojo" fondoCuerpo="amarillo">
-      <Juego id="juego-movil" variante="banda" />
-    </Pantalla>
-  </Fragment>
-
   <section class="relative flex min-h-[70vh] items-center overflow-hidden bg-amarillo text-tinta">
     <Estrella tinta="roja" alto="abajo" />
 
+    {/* Los mismos márgenes que la 404: en el teléfono, apretada para que el
+        juego entero quepa en la primera pantalla. */}
     <div
-      class="relative grid w-full gap-x-16 gap-y-12 px-4 py-24 sm:px-6 lg:grid-cols-[max-content_minmax(0,1fr)] lg:px-10"
+      class="relative grid w-full gap-x-16 gap-y-6 px-4 pt-6 pb-12 sm:px-6 lg:grid-cols-[max-content_minmax(0,1fr)] lg:gap-y-12 lg:px-10 lg:py-24"
     >
       <div>
-        <p class="meta mb-6 inline-block bg-tinta px-3 py-1.5 text-amarillo">Juego</p>
+        <p class="meta mb-4 inline-block bg-tinta px-3 py-1.5 text-amarillo lg:mb-6">Juego</p>
         <h1 class="display text-[20vw] leading-[0.95] lg:text-[11vw]">
           Brinca<br />la silla
         </h1>
       </div>
 
-      {/* Abajo, en la base del titular, como en la 404. */}
-      <div class="flex min-w-0 flex-col justify-end">
-        <Juego id="juego-escritorio" class="w-full max-w-4xl" />
+      {/* Abajo, en la base del titular, como en la 404. En el teléfono, antes
+          del juego, las salidas de la 404: sin ellas el juego se quedaba
+          solo. En escritorio no hacen falta, que ahí la barra ya las trae a
+          la vista. */}
+      <div class="flex min-w-0 flex-col justify-end gap-8">
+        <ul class="flex flex-wrap gap-3 lg:hidden">
+          {
+            nav.map((item) => (
+              <li>
+                <a href={conBase(item.href)} class="boton boton--papel">
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <Juego class="w-full max-w-4xl" />
       </div>
     </div>
   </section>
