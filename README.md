@@ -226,11 +226,10 @@ enlace… o por la silla secreta (ver abajo).
   despierta: de marca de agua a rojo entero en diez pasos, con un brinco que
   crece y, del séptimo en adelante, un temblor. Si se deja de tocar segundo y
   medio se vuelve a dormir y la cuenta vuelve a cero. Al quinto se pide
-  `/juego` por adelantado. Al décimo la silla toma impulso y salta hacia quien
-  mira, y `/juego` se abre en un círculo que crece desde donde estaba la silla
-  mientras ella pasa de largo: una transición entre páginas del navegador
-  (`pagereveal`, en la cabeza de `juego.astro`). Sin esa transición —Firefox,
-  o con menos movimiento pedido— la silla se llena igual y se llega sin más.
+  `/juego` por adelantado. Al décimo se va a `/juego`, que entra con un
+  fundido en vez de la transición de siempre: una transición entre páginas
+  del navegador (`pagereveal`, en la cabeza de `juego.astro`). Sin esa
+  transición —Firefox, o con menos movimiento pedido— se llega sin más.
   Los toques fuera de la silla, en enlaces o durante la entrada del teléfono
   no cuentan, y los clics seguidos no seleccionan el titular.
 - **Controles.** Espacio o ↑ brinca (mantener pulsado, más alto) y ↓ se agacha

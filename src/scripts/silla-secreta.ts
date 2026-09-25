@@ -20,13 +20,12 @@
  * abren nada.
  *
  * ── El décimo ──────────────────────────────────────────────────────────
- * La silla, ya roja, toma impulso y salta hacia quien mira, y el sitio se va
- * a `/juego` dejando dicho dónde estaba: allí la página se abre en un círculo
- * que crece desde ese punto mientras la silla pasa de largo (`juego.astro`).
- * Al quinto toque ya se pidió la página por adelantado, para que el décimo
- * no espere a la red. Con menos movimiento pedido, o donde el navegador no
- * sabe hacer transiciones entre páginas, la silla se llena igual y se llega
- * al juego sin más.
+ * Con la silla ya roja, el sitio se va a `/juego` dejando una marca: allí la
+ * página entra con un fundido en vez de la transición de siempre
+ * (`juego.astro`). Al quinto toque ya se pidió la página por adelantado,
+ * para que el décimo no espere a la red. Con menos movimiento pedido, o
+ * donde el navegador no sabe hacer transiciones entre páginas, se llega al
+ * juego sin más.
  */
 import { conBase } from '../lib/base';
 
@@ -46,8 +45,6 @@ function iniciar(sillas: HTMLImageElement[]) {
   let saliendo = false;
   let precargada = false;
   const tocadas = new Set<HTMLImageElement>();
-  /** El salto del décimo toque, que se queda en su último cuadro. */
-  let despegue: Animation | null = null;
 
   /** Lo que se aclara: en escritorio la opacidad de marca de agua la lleva la
    *  caja de paseo (`.flotador`), no la silla; en el teléfono, la silla. */
@@ -120,35 +117,15 @@ function iniciar(sillas: HTMLImageElement[]) {
     document.head.append(l);
   }
 
-  function saltar(silla: HTMLImageElement) {
+  function saltar() {
     saliendo = true;
     clearTimeout(reloj);
-    const r = silla.getBoundingClientRect();
     try {
-      sessionStorage.setItem(
-        'cs-portal',
-        JSON.stringify({
-          x: (r.left + r.width / 2) / innerWidth,
-          y: (r.top + r.height / 2) / innerHeight,
-          t: Date.now(),
-        }),
-      );
+      sessionStorage.setItem('cs-portal', JSON.stringify({ t: Date.now() }));
     } catch {
-      // Sin almacenamiento se llega igual, sin portal.
+      // Sin almacenamiento se llega igual, con la transición de siempre.
     }
-
-    const ir = () => location.assign(DESTINO);
-    if (reducido()) return ir();
-
-    // Toma impulso y salta hacia quien mira. Lleva nombre de transición: al
-    // cambiar de página el navegador la saca aparte, y allí pasa de largo
-    // mientras se abre el círculo.
-    silla.style.viewTransitionName = 'silla-portal';
-    despegue = silla.animate(
-      [{ scale: '1' }, { scale: '0.9', offset: 0.3 }, { scale: '1.3' }],
-      { duration: 320, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' },
-    );
-    despegue.finished.then(ir, ir);
+    location.assign(DESTINO);
   }
 
   function tocar(silla: HTMLImageElement) {
@@ -164,7 +141,7 @@ function iniciar(sillas: HTMLImageElement[]) {
 
     if (!reducido()) brinco(silla, cuenta);
     if (cuenta >= PRECARGA && !precargada) precargar();
-    if (cuenta >= TOQUES) saltar(silla);
+    if (cuenta >= TOQUES) saltar();
   }
 
   document.addEventListener('pointerdown', (e) => {
@@ -181,14 +158,11 @@ function iniciar(sillas: HTMLImageElement[]) {
     tocar(silla);
   });
 
-  // Volver atrás desde el juego trae esta página tal como se fue —la silla
-  // roja, agrandada y con nombre de transición—. Se la devuelve a su sitio.
+  // Volver atrás desde el juego trae esta página tal como se fue, con la
+  // silla roja entera. Se la vuelve a dormir.
   addEventListener('pageshow', (e) => {
     if (!e.persisted) return;
     saliendo = false;
-    despegue?.cancel();
-    despegue = null;
-    for (const s of sillas) s.style.viewTransitionName = '';
     // De golpe y no con el fundido de `dormir()`: al volver, la silla ya
     // tiene que estar dormida, no dormirse delante de quien vuelve.
     for (const s of tocadas) {
