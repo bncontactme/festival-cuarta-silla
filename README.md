@@ -22,8 +22,9 @@ El texto se migró literal del sitio original. Dos apuntes:
   choca con el rango anunciado (24–27). Aquí dice **27**. Si el original
   estaba bien y el festival sí repite día, se corrige en `site.ts`.
 - **Textos nuevos** (no existían en Wix): las etiquetas de la cuenta regresiva
-  (Días/Horas/Min/Seg), «Por anunciar» en los huecos del programa, y la
-  página 404 («Silla vacía»). Todo lo demás es del original.
+  (Días/Horas/Min/Seg), «Por anunciar» en los huecos del programa, la
+  página 404 («Silla vacía») y el juego («Brinca la silla», «¡Sillazo!»,
+  «Otra vez» y las instrucciones). Todo lo demás es del original.
 
 Los patrocinadores están vacíos a propósito: el sitio de Wix sólo tenía fotos
 de stock de relleno. Cuando lleguen los logos reales se añaden a
@@ -178,8 +179,9 @@ este sitio trae los suyos, más pequeños. Todo lo específico vive en
 [`src/styles/movil.css`](src/styles/movil.css), dentro de una sola media
 query — por encima de 1024px ese archivo no existe.
 
-Las páginas que no traen `slot="movil"` (privacidad, 404) ya cabían en un
-teléfono y se sirven igual en todas partes.
+Las páginas que no traen `slot="movil"` (privacidad, 404, `/juego`) ya
+cabían en un teléfono y se sirven igual en todas partes. La 404 y `/juego`
+son las de escritorio en una columna a propósito: su gracia es el cartel.
 
 ### Reglas que conviene no romper
 
@@ -196,6 +198,79 @@ teléfono y se sirven igual en todas partes.
   puertas y el legal: coloca la silla en el centro de la *pantalla* al empezar
   la entrada, no en el centro de su hueco. Si cambian esos bloques, cambia.
 
+## El juego de la 404
+
+La 404 ya se llamaba «Silla vacía»; ahora además se juega. **«Brinca la
+silla»** es el dinosaurio de Chrome, pero lo que se le atraviesa es la silla
+del festival. Vive donde vive el de Chrome, en la página de error, y también en
+[`/juego`](src/pages/juego.astro), para poder compartirlo sin mandar un enlace
+roto. `/juego` no está en la barra ni en el mapa del sitio: se llega por
+enlace… o por la silla secreta (ver abajo).
+
+- **Dónde va.** En escritorio, dos columnas: el titular solo a la izquierda,
+  como un cartel; a la derecha, arriba el aviso y las salidas —a la altura del
+  «Error 404»— y abajo el juego, asentado en la base del titular como en un
+  suelo. Los cantos de las dos columnas coinciden arriba y abajo, y la escena
+  entera queda a la vista sin bajar de 1024×768 para arriba. En el teléfono,
+  la 404 es la misma en una columna y en ese orden —el cartel, las salidas, el
+  juego—, apretada para que el juego entero quepa en la primera pantalla de un
+  teléfono normal (390×664); en uno muy bajo, como el SE, asoma y hay que
+  bajar un poco. `/juego` va igual, pero con el juego antes que las salidas
+  —el titular, el juego y las mismas salidas—, que es a lo que se viene; y
+  las salidas no salen en escritorio, donde la barra ya las trae.
+- **La silla secreta.** Diez toques a la silla del hero de la portada —las
+  dos que flotan junto al titular en escritorio, la de detrás del rótulo en
+  el teléfono— y se abre el juego
+  ([`silla-secreta.ts`](src/scripts/silla-secreta.ts)). Cada toque la
+  despierta: de marca de agua a rojo entero en diez pasos, con un brinco que
+  crece y, del séptimo en adelante, un temblor. Si se deja de tocar segundo y
+  medio se vuelve a dormir y la cuenta vuelve a cero. Al quinto se pide
+  `/juego` por adelantado. Al décimo se va a `/juego`, que entra con un
+  fundido en vez de la transición de siempre: una transición entre páginas
+  del navegador (`pagereveal`, en la cabeza de `juego.astro`). Sin esa
+  transición —Firefox, o con menos movimiento pedido— se llega sin más.
+  Los toques fuera de la silla, en enlaces o durante la entrada del teléfono
+  no cuentan, y los clics seguidos no seleccionan el titular.
+- **Controles.** Espacio o ↑ brinca (mantener pulsado, más alto) y ↓ se agacha
+  —en el aire, cae más rápido—. En el teléfono, tocar y mantener. Con el foco
+  en un enlace o un botón, el espacio es de ellos; con el foco en ninguna parte
+  y el juego a la vista, es del juego, como en Chrome.
+- **El dedo.** Esperando, en pausa o tras el choque, el juego arranca al
+  *levantar* el dedo y sólo si no se movió: quien pasa por encima desplazando
+  la pantalla no lo arranca sin querer. En carrera salta al bajarlo, sin
+  esperar, y se queda con el dedo (`touch-action: none`): un salto nunca
+  arrastra la página.
+- **El arranque**, como en Chrome: la primera pulsación es un salto en el
+  sitio, el suelo arranca cuando el dino vuelve a pisarlo y se pone a
+  velocidad en 0,3 s. La primera silla llega unos dos segundos después de
+  pulsar. Al volver de una pausa, todo va a cámara lenta durante 0,6 s —el
+  dino y el suelo a la vez—, así que reanudar a medio salto no mata a nadie.
+- **La silla es la del logo**, reducida a píxeles y limpiada a mano
+  ([`sprites.ts`](src/scripts/juego/sprites.ts)). Llega sola, en filas de dos o
+  tres y, pasada cierta velocidad, volando y dando vueltas: a esa hay que
+  saltarla o agacharse. El dino es propio, en el espíritu del de Chrome.
+- **La física son las cuentas del de Chrome** —gravedad, impulso, aceleración,
+  huecos— a pasos fijos de 1/60 s, en [`mundo.ts`](src/scripts/juego/mundo.ts)
+  y sin DOM. Así se probó sin navegador que cada obstáculo se puede pasar a
+  cualquier velocidad a la que pueda salir, y cada pareja de obstáculos al
+  hueco mínimo también (331 de 331, de 4,5 a 13). En una pantalla angosta el
+  juego va más despacio, como el de Chrome en el teléfono, pero nunca por
+  debajo de 4,5: a 4, una fila de sillas chicas no tiene manera de saltarse.
+  Por lo mismo, las filas de chicas esperan a ir a 5 y las de grandes, a 7.
+- **Dos juegos por página.** Si una página con sitio móvil lo lleva en las
+  dos versiones, trae el del teléfono y el de escritorio, y sólo se ve uno.
+  El escondido no arranca nunca ni se queda con las teclas; al girar una
+  tablet, el que aparece se trae el récord del otro.
+- **5 KB gzip, y sólo en esas dos páginas**: no cuenta en el presupuesto de
+  movimiento del resto del sitio. El bucle corre sólo mientras se juega y se
+  pausa al cambiar de pestaña o al sacar de la pantalla más de un cuarto de la
+  escena.
+- **Sin JS no se pinta** —un «Espacio para brincar» que no brinca es un
+  letrero que miente—. Con `prefers-reduced-motion`, las estrellas del fondo se
+  quedan quietas y el dino no parpadea: sólo se mueve si alguien lo arranca.
+- **El récord** se guarda en el navegador (`localStorage`, `cs-juego-record`)
+  y de ahí no sale.
+
 ## Estructura
 
 ```
@@ -209,14 +284,18 @@ src/
   styles/panel.css    el panel; CSS propio, no el del sitio
   lib/analitica.ts    el token del faro de visitas (vacío = no se mide nada)
   scripts/motion.ts   Lenis + reveals + partidor + cuenta + menú + entrada
+  scripts/silla-secreta.ts  diez toques a la silla de la portada: al juego
   scripts/panel/      el panel: api, esquema, campos, tabla, previa, sala,
                       registro, festival (los dos textos del festival)
+  scripts/juego/      el juego de la 404: sprites (los dibujos), mundo (la
+                      física, sin DOM) y juego (lienzo, teclas y letreros)
   layouts/Base.astro  head, SEO, JSON-LD, nav, pie, reparto móvil/escritorio
   components/         Nav, Footer, Marquee, Silla, Encabezado, Analitica,
-                      TableroSedes (las sedes y lo que pasa en cada una)
+                      TableroSedes (las sedes y lo que pasa en cada una),
+                      Juego (la caja del juego)
   components/movil/   Portada (con la entrada), Pantalla
   pages/              index, programa, artistas, sedes, archivo, registro,
-                      privacidad, 404
+                      privacidad, 404, juego
   pages/sedes/        una página por sede: `/sedes/<nombre-de-la-sede>`
   pages/admin/        el panel de edición (noindex, fuera del sitemap)
 scripts/instantanea.mjs   baja el contenido del panel antes de cada build

@@ -1,0 +1,119 @@
+---
+/**
+ * El juego de la 404, con dirección propia.
+ *
+ * Existe para poder compartirlo —mandar un enlace roto a propósito para que
+ * alguien juegue es raro, y la vista previa de un 404 sale vacía— y porque
+ * es adonde lleva la silla secreta de la portada: diez toques y se llega
+ * aquí con un fundido (ver abajo y `src/scripts/silla-secreta.ts`). No está en la
+ * barra ni en el mapa del sitio: se llega por enlace o por la silla.
+ *
+ * La composición de la 404. En escritorio, el titular solo a la izquierda y
+ * el juego a la derecha, asentado en la base del titular. En el teléfono,
+ * como la 404 también: la misma página en una columna —el titular, el juego
+ * y las salidas— y no una pantalla del sitio móvil, donde el juego quedaba
+ * solo en medio de la pantalla.
+ */
+import Base from '../layouts/Base.astro';
+import { conBase } from '../lib/base';
+import Estrella from '../components/Estrella.astro';
+import Juego from '../components/Juego.astro';
+import { nav } from '../data/site';
+---
+
+<Base titulo="Brinca la silla">
+  {/* ── El fundido ───────────────────────────────────────────────────────
+      Si se llega desde la silla secreta, la portada dejó una marca con la
+      hora. Al revelarse la página, el navegador ya tiene montada la
+      transición: se le pone la clase que la cambia por un fundido (el CSS
+      está al final). Sin transición —Firefox, o con menos movimiento
+      pedido—, se llega y ya.
+
+      En la cabeza y en línea: `pagereveal` llega antes del primer cuadro, y
+      un script de módulo, que corre al terminar de leer la página, lo
+      perdería. */}
+  <Fragment slot="cabeza">
+    <script is:inline>
+      (function () {
+        var origen = null;
+        try {
+          origen = JSON.parse(sessionStorage.getItem('cs-portal') || 'null');
+          sessionStorage.removeItem('cs-portal');
+        } catch (e) {}
+        // Una marca vieja —se tocó la silla y luego se volvió atrás— no
+        // cambia la transición al entrar aquí otro día.
+        if (!origen || Date.now() - origen.t > 10000) return;
+        // Sin el cargador del teléfono: la entrada es el fundido. Con los
+        // dos, el fundido llegaba al cargador —amarillo y la silla en
+        // medio— y luego había que esperarlo a que se fuera.
+        delete document.documentElement.dataset.carga;
+        addEventListener(
+          'pagereveal',
+          function (e) {
+            if (!e.viewTransition) return;
+            var raiz = document.documentElement;
+            raiz.classList.add('portal');
+            e.viewTransition.finished.finally(function () {
+              raiz.classList.remove('portal');
+            });
+          },
+          { once: true },
+        );
+      })();
+    </script>
+  </Fragment>
+
+  <section class="relative flex min-h-[70vh] items-center overflow-hidden bg-amarillo text-tinta">
+    <Estrella tinta="roja" alto="abajo" />
+
+    {/* Los mismos márgenes que la 404: en el teléfono, apretada para que el
+        juego entero quepa en la primera pantalla. */}
+    <div
+      class="relative grid w-full gap-x-16 gap-y-6 px-4 pt-6 pb-12 sm:px-6 lg:grid-cols-[max-content_minmax(0,1fr)] lg:gap-y-12 lg:px-10 lg:py-24"
+    >
+      <div>
+        <p class="meta mb-4 inline-block bg-tinta px-3 py-1.5 text-amarillo lg:mb-6">Juego</p>
+        <h1 class="display text-[20vw] leading-[0.95] lg:text-[11vw]">
+          Brinca<br />la silla
+        </h1>
+      </div>
+
+      {/* Abajo, en la base del titular, como en la 404. En el teléfono, bajo
+          el juego —que es a lo que se viene—, las salidas de la 404: sin
+          ellas el juego se quedaba solo. En escritorio no hacen falta, que
+          ahí la barra ya las trae a la vista. */}
+      <div class="flex min-w-0 flex-col justify-end gap-8">
+        <Juego class="w-full max-w-4xl" />
+        <ul class="flex flex-wrap gap-3 lg:hidden">
+          {
+            nav.map((item) => (
+              <li>
+                <a href={conBase(item.href)} class="boton boton--papel">
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style is:global>
+  /* Un fundido y nada más: la portada se queda quieta debajo —sin el «salir»
+     de las demás páginas— y el juego aparece encima. */
+  html.portal::view-transition-old(root) {
+    animation: none;
+  }
+
+  html.portal::view-transition-new(root) {
+    animation: portal-funde 0.45s ease both;
+  }
+
+  @keyframes portal-funde {
+    from {
+      opacity: 0;
+    }
+  }
+</style>
