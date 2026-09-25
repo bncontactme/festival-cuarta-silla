@@ -11,8 +11,11 @@
 // contenido estructurado, no texto libre, así que se valida antes de entrar.
 //
 // Rutas públicas (GET, abiertas a cualquier origen — sirven al sitio):
-//   GET /contenido               las cinco colecciones, en un viaje
+//   GET /contenido               las cinco colecciones, en un viaje, y el feed
+//                                de Instagram que llena la galería
 //   GET /contenido/<coleccion>   una sola
+//   GET /instagram               cómo va el feed: si está encendido, cuántas
+//                                publicaciones, el último error
 //
 // Rutas de admin (POST JSON, origen en lista blanca, contraseña):
 //   ping          probar la contraseña
@@ -23,8 +26,12 @@
 //   publicar      dispara el rebuild a mano
 //   historial     las últimas 20 versiones
 //   restaurar     { version }                  vuelve atrás
+//   instagram     trae el feed ya, sin esperar al reloj
 //
 // Cinco contraseñas falladas dejan a esa IP fuera 15 minutos (KV: fail:<ip>).
+//
+// Y dos relojes (ver [triggers] en wrangler.toml): el respaldo semanal a
+// Cloudinary y la vuelta por Instagram cada cuarto de hora.
 //
 // Desplegar:  npx wrangler deploy      (desde workers/panel/)
 // Ver el README de esta carpeta para el alta de KV y de los secrets.
@@ -37,6 +44,10 @@ import {
 } from './lib/contenido.js';
 import { validar } from './lib/validar.js';
 import { slug } from './lib/slug.js';
+import { sha256 } from './lib/cripto.js';
+import {
+  leerInstagram, estadoInstagram, sincronizar, porPublicar, anotarPublicado,
+} from './lib/instagram.js';
 
 const ORIGENES = new Set([
   'https://www.festivaldearteconceptual.com',
@@ -88,8 +99,15 @@ const CUERPO_MAX = 1_000_000;
  *   1 → sedes, programa, artistas, archivo, marcas
  *   2 → + `sala` en las actividades (descripciones)
  *   3 → + `festival`: el texto de sala del festival y el manifiesto
+ *   4 → + `instagram` en /contenido: el feed que llena la galería. No lo
+ *       escribe el panel, así que el panel sigue pidiendo el 3; se sube para
+ *       que `worker.yml` sepa distinguir desde fuera el Worker que lo trae.
  */
-const CONTRATO = 3;
+const CONTRATO = 4;
+
+/** El reloj del respaldo semanal. Tiene que ser letra por letra el de
+ *  `wrangler.toml`: es como `scheduled()` distingue un reloj del otro. */
+const CRON_RESPALDO = '0 9 * * 1';
 
 export default {
   async fetch(request, env, ctx) {
@@ -117,10 +135,19 @@ export default {
         // El contrato viaja también aquí, sin contraseña: así el despliegue de
         // Actions puede comprobar desde fuera que el Worker que quedó puesto es
         // el que se acaba de subir. Ver `.github/workflows/worker.yml`.
-        return json({ contrato: CONTRATO, ...(await leerTodo(env)) }, 200, '*', { cache: 30 });
+        //
+        // `instagram` va aparte de las colecciones y no dentro de `leerTodo()`
+        // a propósito: no es contenido del panel, no sube la versión —si la
+        // subiera, cada foto nueva le daría un 409 a quien estuviera editando—
+        // y no entra en el historial ni se restaura con él.
+        const [todo, instagram] = await Promise.all([leerTodo(env), leerInstagram(env)]);
+        return json({ contrato: CONTRATO, ...todo, instagram }, 200, '*', { cache: 30 });
       }
       if (partes[0] === 'contenido' && COLECCIONES[partes[1]]) {
         return json(await leerColeccion(env, partes[1]), 200, '*', { cache: 30 });
+      }
+      if (partes[0] === 'instagram' && partes.length === 1) {
+        return json(await estadoInstagram(env), 200, '*', { cache: 30 });
       }
       return new Response('Not Found', { status: 404 });
     }
@@ -164,6 +191,7 @@ export default {
         case 'estado-build': return await estadoBuild(env, cors);
         case 'historial':    return json({ ok: true, versiones: await listarHistorial(env) }, 200, cors);
         case 'restaurar':    return await volver(cuerpo, env, ctx, cors);
+        case 'instagram':    return await traerInstagram(env, cors);
         default:             return json({ error: 'No sé hacer «' + cuerpo.accion + '»' }, 400, cors);
       }
     } catch (e) {
@@ -172,16 +200,51 @@ export default {
     }
   },
 
-  // Respaldo semanal a Cloudinary (ver [triggers] en wrangler.toml). Es la
-  // tercera copia: KV, el JSON comiteado en el repo, y esto.
+  // Los dos relojes de wrangler.toml. El semanal es el respaldo a Cloudinary,
+  // la tercera copia: KV, el JSON comiteado en el repo, y esto. El otro es la
+  // vuelta por Instagram.
   async scheduled(evento, env, ctx) {
+    if (evento.cron === CRON_RESPALDO) {
+      ctx.waitUntil(
+        respaldar(env)
+          .then(r => console.log('Respaldo semanal: versión ' + r.version))
+          .catch(e => console.error('El respaldo semanal falló:', e)),
+      );
+      return;
+    }
     ctx.waitUntil(
-      respaldar(env)
-        .then(r => console.log('Respaldo semanal: versión ' + r.version))
-        .catch(e => console.error('El respaldo semanal falló:', e)),
+      vueltaInstagram(env)
+        .then(r => { if (r.estado !== 'apagado') console.log('instagram:', JSON.stringify(r)); })
+        .catch(e => console.error('La vuelta por Instagram falló:', e)),
     );
   },
 };
+
+// ── Instagram ─────────────────────────────────────────────────────────────────
+
+/** Trae el feed y, si la galería cambió, reconstruye el sitio. La lógica del
+ *  feed está en `lib/instagram.js`; aquí sólo se enchufa a Cloudinary y al
+ *  build, que viven en este archivo. */
+async function vueltaInstagram(env) {
+  const r = await sincronizar(env, { subir: (url, id) => subirDesdeUrl(env, url, id) });
+  if (r.estado === 'apagado') return r;
+
+  // No se pregunta si cambió en ESTA vuelta sino si hay algo que el sitio no
+  // enseña todavía: si el build de la vuelta anterior no salió, sale en ésta.
+  const pendiente = await porPublicar(env);
+  if (pendiente) {
+    r.despliegue = await publicarSilencioso(env);
+    if (r.despliegue.disparado) await anotarPublicado(env, pendiente);
+  }
+  return r;
+}
+
+/** La misma vuelta, a mano. `ok` es si trajo el feed, igual que en `publicar`:
+ *  sin token o con Instagram fallando no se hizo nada, y `estado` dice cuál. */
+async function traerInstagram(env, cors) {
+  const r = await vueltaInstagram(env);
+  return json({ ok: r.estado === 'ok', ...r }, 200, cors);
+}
 
 // ── Guardar ───────────────────────────────────────────────────────────────────
 
@@ -531,11 +594,52 @@ async function listarCloudinary(env, prefijo) {
   return recursos;
 }
 
+/**
+ * Copia a Cloudinary una foto que está en otra parte, a partir de su URL:
+ * Cloudinary la baja por su cuenta y no pasa por el Worker. Es como entran las
+ * fotos de Instagram —ver `lib/instagram.js`—, cuyas URLs caducan.
+ *
+ * El `public_id` es el id de la publicación y `overwrite` va en falso, así que
+ * pedir dos veces la misma no la duplica: Cloudinary contesta con la que ya
+ * tenía. El preset es el mismo de las subidas del panel, para que a estas
+ * fotos les pase lo mismo que a todas.
+ */
+async function subirDesdeUrl(env, url, nombre) {
+  const folder = RAIZ + '/instagram';
+  const params = {
+    asset_folder: folder,
+    folder,
+    overwrite: 'false',
+    public_id: nombre,
+    timestamp: String(Math.floor(Date.now() / 1000)),
+  };
+  if (env.CLOUDINARY_UPLOAD_PRESET) params.upload_preset = env.CLOUDINARY_UPLOAD_PRESET;
+
+  const forma = new FormData();
+  forma.append('file', url);
+  forma.append('api_key', env.CLOUDINARY_API_KEY);
+  Object.entries(params).forEach(([k, v]) => forma.append(k, v));
+  forma.append('signature', await sha256(cadenaFirma(params) + env.CLOUDINARY_API_SECRET));
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD_NAME}/image/upload`,
+    { method: 'POST', body: forma },
+  );
+  const datos = await res.json().catch(() => ({}));
+  if (!res.ok || !datos.secure_url) {
+    throw new Error('Cloudinary contestó ' + res.status + (datos.error ? ': ' + datos.error.message : ''));
+  }
+  return { foto: datos.secure_url, ancho: datos.width, alto: datos.height };
+}
+
 /** Vuelca el contenido entero a Cloudinary como archivo suelto. Se sobrescribe
  *  el mismo `public_id` cada semana: lo que se quiere es que exista una copia
- *  fuera de Cloudflare, no un museo de copias. */
+ *  fuera de Cloudflare, no un museo de copias. La lista de Instagram va
+ *  también: las fotos ya viven en Cloudinary, y sin la lista son una carpeta de
+ *  números sin fecha ni enlace. */
 async function respaldar(env) {
-  const todo = await leerTodo(env);
+  const [colecciones, instagram] = await Promise.all([leerTodo(env), leerInstagram(env)]);
+  const todo = { ...colecciones, instagram };
   const timestamp = String(Math.floor(Date.now() / 1000));
   const public_id = RAIZ + '/respaldo/contenido';
   const params = { overwrite: 'true', public_id, timestamp };
@@ -577,11 +681,6 @@ async function limpiarFallos(env, ip) {
 }
 
 // ── Plomería ──────────────────────────────────────────────────────────────────
-
-async function sha256(texto) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto));
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 function cabecerasCors(origen) {
   return {

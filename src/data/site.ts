@@ -47,6 +47,15 @@ export const festival = {
     paypal: '',
     nota: '',
   },
+  /**
+   * La cuenta del festival. Hoy la pinta la galería: su feed es lo que la llena
+   * —ver `archivo.instagram`— y cada foto lleva de vuelta a su publicación.
+   * Mientras no haya fotos, la galería vacía manda aquí.
+   */
+  instagram: {
+    cuenta: '@festivaldearteconceptual',
+    url: 'https://www.instagram.com/festivaldearteconceptual/',
+  },
   creditoFooter:
     '© 2026 Creado por Festival De Arte Conceptual La Cuarta Silla',
 };

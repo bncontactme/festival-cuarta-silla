@@ -12,9 +12,14 @@ workers_dev = true
 binding = "CONTENIDO"
 id = "d6e661c30a68474ca66820048769ddaa"   # en `wrangler dev` no se usa: KV corre en local
 
-# Respaldo semanal a Cloudinary (lunes 9:00 UTC ≈ 3:00 en GDL).
+# Dos relojes:
+#   · el respaldo semanal a Cloudinary (lunes 9:00 UTC ≈ 3:00 en GDL). Si se
+#     cambia, se cambia también `CRON_RESPALDO` en index.js, que es como el
+#     Worker sabe cuál de los dos le ha sonado;
+#   · la vuelta por Instagram, cada cuarto de hora (ver lib/instagram.js). Sin
+#     `INSTAGRAM_TOKEN` suena igual y no hace nada.
 [triggers]
-crons = ["0 9 * * 1"]
+crons = ["0 9 * * 1", "*/15 * * * *"]
 
 # ── Secrets (no van en este archivo; se ponen con `wrangler secret put`) ──────
 #   ADMIN_HASH                 SHA-256 de la contraseña de admin
@@ -27,6 +32,13 @@ crons = ["0 9 * * 1"]
 #   GitHub Pages (ver .github/workflows/publicar.yml), así que son estos dos:
 #   GITHUB_TOKEN               token con permiso de escritura en el repo
 #   GITHUB_REPO                bncontactme/festival-cuarta-silla
+#
+#   INSTAGRAM_TOKEN            token de larga duración de @festivaldearteconceptual
+#                              (API de Instagram con inicio de sesión de
+#                              Instagram). Con él, la galería se llena sola con
+#                              el feed; sin él, no se hace nada. Se pone una vez:
+#                              el Worker lo refresca solo y guarda el nuevo en
+#                              KV. Cómo sacarlo: workers/panel/README.md.
 #
 #   DEPLOY_HOOK                el otro camino: URL del build hook de Cloudflare
 #                              Pages, para el día que el sitio se mude ahí. Si

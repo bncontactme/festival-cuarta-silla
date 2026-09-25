@@ -1,5 +1,5 @@
 import { contenido } from './contenido';
-import type { Edicion, Foto } from './tipos';
+import type { Edicion, Foto, PublicacionInstagram } from './tipos';
 
 /**
  * El registro histórico del festival: las ediciones anteriores con sus fotos.
@@ -25,7 +25,7 @@ import type { Edicion, Foto } from './tipos';
  * sola.
  */
 
-export type { Foto, Edicion };
+export type { Foto, Edicion, PublicacionInstagram };
 
 export const archivo = {
   titulo: 'Galería',
@@ -46,4 +46,22 @@ export const archivo = {
    *  más reciente a la más vieja, que es como se lee un archivo. El panel
    *  avisa si se guarda al revés. */
   lista: contenido.archivo,
+  /**
+   * Lo que publica la cuenta del festival, que llena la galería sola.
+   *
+   * **No se edita en ninguna parte**: lo trae el Worker cada cuarto de hora
+   * desde Instagram, copia las portadas a Cloudinary y reconstruye el sitio.
+   * Lo que se borra allá se va de aquí. Mientras el Worker no tenga el token
+   * de la cuenta la lista está vacía y la galería se pinta como siempre. Ver
+   * `workers/panel/lib/instagram.js`.
+   *
+   * Va antes que las ediciones de `lista`: es lo más nuevo, y es lo que viene
+   * a buscar quien llega a la galería durante el festival.
+   */
+  instagram: {
+    rotulo: 'Instagram',
+    ver: 'Ver en Instagram',
+    video: 'Video',
+    lista: contenido.instagram?.publicaciones ?? [],
+  },
 };

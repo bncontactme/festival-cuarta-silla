@@ -91,6 +91,65 @@ La semilla sube lo que hoy está en `src/data/contenido.json`, que salió de los
 `.ts` del sitio: las 14 sedes, la rejilla de ejemplo y las 18 marcas. Pasa por
 la misma validación que usará el panel, así que si algo no cuadra sale ahí.
 
+### 6. Instagram → Galería (opcional, y se puede hacer cuando sea)
+
+Con esto `/galeria` se llena sola con lo que publica
+[@festivaldearteconceptual](https://www.instagram.com/festivaldearteconceptual/):
+el Worker mira la cuenta cada cuarto de hora, copia a Cloudinary la portada de
+cada publicación nueva y reconstruye el sitio. Sin esto no pasa nada: la
+galería enseña su ficha de «Todavía no hay fotos» con un botón a Instagram.
+
+Lo único que hace falta es un **token de larga duración de la cuenta**, de la
+API de Instagram con inicio de sesión de Instagram. Los nombres de los menús de
+Meta cambian seguido; lo que se busca es eso.
+
+1. **La cuenta tiene que ser profesional** (de empresa o de creador). En la app
+   de Instagram: Configuración → Tipo de cuenta y herramientas → Cambiar a
+   cuenta profesional. Es gratis, se puede deshacer y no toca nada de lo
+   publicado.
+2. En [developers.facebook.com](https://developers.facebook.com/apps) → Crear
+   app, con el caso de uso de Instagram («Administrar mensajes y contenido en
+   Instagram»). El permiso que se usa es sólo `instagram_business_basic`: leer
+   las publicaciones propias.
+3. En la app: Instagram → *Configuración de la API con inicio de sesión de
+   Instagram* → *Generar identificadores de acceso* → Agregar cuenta, entrar con
+   @festivaldearteconceptual y aceptar. Sale el token; se copia.
+   Si pide que la cuenta tenga un rol en la app: Roles de la app → Agregar
+   personas → Evaluador de Instagram, y aceptar la invitación desde la cuenta.
+4. Se le da al Worker:
+
+   ```bash
+   npx wrangler secret put INSTAGRAM_TOKEN
+   ```
+
+Y ya. El token caduca a los 60 días, pero el Worker lo refresca solo cada tres
+y guarda el nuevo en KV: no hay que volver a tocarlo. Si algún día se muere de
+todas formas —cambiar la contraseña de Instagram, por ejemplo, invalida los
+tokens—, se saca otro y se pone con el mismo comando.
+
+Para ver si está vivo, en el navegador:
+
+```
+https://cuartasilla-panel.guadalajaradenoxe.workers.dev/instagram
+```
+
+`encendido`, cuántas publicaciones hay y, si algo falla, `error` con el motivo
+que da Instagram. Para no esperar al cuarto de hora la primera vez:
+
+```bash
+curl -X POST https://cuartasilla-panel.guadalajaradenoxe.workers.dev \
+  -H 'Origin: https://www.festivaldearteconceptual.com' \
+  -H 'Content-Type: application/json' \
+  -d '{"password":"la-contraseña-del-panel","accion":"instagram"}'
+```
+
+La primera vuelta copia 25 fotos como mucho; una cuenta con cien publicaciones
+queda entera en una hora, sola.
+
+Para apagarlo: `npx wrangler secret delete INSTAGRAM_TOKEN`. Deja de traer, pero
+lo ya traído se queda en la galería; quitarlo también es borrar la clave
+`cs:ig:lista` de KV y `instagram` de `src/data/contenido.json`.
+
 ---
 
 ## Probar en local
@@ -122,11 +181,14 @@ salvo que pongas las credenciales buenas en `.dev.vars`.
 
 | | |
 |---|---|
-| `index.js` | Rutas, contraseña, bloqueo por intentos, Cloudinary, disparo del build |
+| `index.js` | Rutas, contraseña, bloqueo por intentos, Cloudinary, disparo del build, los dos relojes |
 | `lib/contenido.js` | Todo lo que toca KV: leer, guardar, versionar, historial |
 | `lib/validar.js` | La puerta. Nada entra sin pasar por aquí |
+| `lib/instagram.js` | El feed de la cuenta: leerlo, refrescar el token, qué entra y qué sale de la galería |
 | `lib/slug.js` | Nombres de carpeta y comparación sin tildes |
+| `lib/cripto.js` | El SHA-256 que comparten la contraseña y el token |
 | `semilla.mjs` | Volcado inicial desde el repo |
+| `probar.mjs` | Las pruebas: el validador, y el feed contra un Instagram de mentira |
 
 ## Cambios que hay que hacer en tres sitios a la vez
 

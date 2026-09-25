@@ -146,7 +146,15 @@ cs:col:festival        { sala: SalaFestival, manifiesto: Manifiesto }
 cs:meta                { version, actualizado, ultimoDeploy }
 cs:hist:<version>      instantánea completa (se conservan las últimas 20)
 cs:build               marca de tiempo del último rebuild disparado
+
+cs:ig:lista            { actualizado, publicaciones }  el feed de Instagram
+cs:ig:token            el token de la cuenta, refrescado
+cs:ig:estado           el último error del feed, si lo hay
+cs:ig:publicado        qué versión del feed ya se mandó a construir
 ```
+
+Las `cs:ig:*` no son colecciones —ver *Instagram → Galería*, más abajo—: no las
+escribe el panel, no suben la versión y no entran en el historial.
 
 Los tipos son **exactamente** los que ya están en `src/data/*.ts`. No se
 inventa un esquema nuevo: `Sede`, `ActividadGantt`, `Artista`, `Edicion`,
@@ -303,6 +311,57 @@ cien megas.
 
 Las fotos que ya están en `public/` (los logos de patrocinadores) se quedan
 donde están: funcionan, y `imagen()` las deja pasar intactas.
+
+---
+
+## Instagram → Galería
+
+El registro de verdad del festival está en su cuenta: ahí se publica cada noche
+lo que pasó. Pedir que cada foto se suba dos veces —a Instagram y al panel— es
+pedir que la segunda no se suba nunca. Así que `/galeria` se llena sola con lo
+que publica @festivaldearteconceptual, y la pestaña Galería del panel queda
+para lo que Instagram no tiene: las ediciones anteriores, con sus pies.
+
+```
+   Instagram ──(API oficial, cada 15 min)──► Worker ──► Cloudinary  cuartasilla/instagram/<id>
+                                               │
+                                               ├──► KV  cs:ig:lista
+                                               └──► repository_dispatch → build → /galeria
+```
+
+Las decisiones, y por qué:
+
+| | Qué | Por qué |
+|---|---|---|
+| **Cómo se lee** | La API oficial, con un token de la cuenta | Leer el perfil público sin sesión no funciona: Instagram pide entrar para listar publicaciones y cierra la puerta a las IP de centros de datos, que es lo que son las de Cloudflare y las de Actions. |
+| **Dónde vive el token** | En el Worker, como la llave de Cloudinary | Caduca a los 60 días. Un secreto de GitHub no se puede reescribir desde un build; KV sí, así que el Worker lo refresca cada tres días y guarda el nuevo. Se pone una vez y se olvida. |
+| **Dónde viven las fotos** | Copiadas a Cloudinary | Las URLs de Instagram van firmadas y caducan en días: enlazadas tal cual, la galería se llena de cuadros rotos. Y servir desde el CDN de Meta le daría la IP de cada visitante a Meta, en un sitio sin cookies. |
+| **Qué viaja** | La portada de cada publicación | Es lo que enseña la cuadrícula del perfil. Un carrusel de diez anuncios de artistas son diez láminas de texto; el resto está a un toque, en Instagram. |
+| **Cuándo se publica** | Cuando el feed cambia | El Worker dispara el mismo build que el panel, con el mismo freno de 60 s. Si no sale a la primera, lo reintenta en la vuelta siguiente. |
+
+**Lo que se borra en Instagram se va de la galería; lo que sólo es viejo, se
+queda.** Cada vuelta lee hasta 300 publicaciones. Lo guardado que cae dentro de
+lo leído y no vino, se borró o se archivó allá, y sale. Lo más viejo que eso no
+se toca: no se sabe nada de ello, y en un archivo lo que no se sabe se conserva.
+
+**Una respuesta vacía no vacía nada.** Si Instagram devuelve el feed en blanco
+con fotos ya guardadas, no se borra nada y queda escrito el error. Es la misma
+regla que `scripts/instantanea.mjs` aplica al panel: vacío no quiere decir «lo
+han borrado».
+
+**No es una colección del panel, y a propósito.** El Worker no sube la versión
+al traer fotos: si la subiera, cada foto nueva le daría un 409 a quien estuviera
+editando el programa en ese momento. Tampoco entra en el historial ni se
+restaura con él. Viaja en `GET /contenido` junto a las demás, y el contrato
+sube a 4 sólo en el Worker — el panel no la escribe, así que sigue pidiendo el 3.
+
+Lo que cuesta, dentro del plan gratis: una vuelta gasta hasta seis peticiones en
+leer el feed y copia 25 fotos como mucho (el tope es de 50 por invocación). KV se
+escribe sólo cuando algo cambia, no en cada vuelta: los mil guardados diarios
+son de la cuenta entera. Sin `INSTAGRAM_TOKEN`, el reloj suena y no hace nada.
+
+Cómo darlo de alta, verlo y apagarlo: [`workers/panel/README.md`](workers/panel/README.md),
+paso 6.
 
 ---
 

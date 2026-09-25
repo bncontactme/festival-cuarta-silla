@@ -4,27 +4,56 @@ import { conBase } from '../lib/base';
 import { imagen, juegoDeImagenes } from '../lib/imagen';
 import Encabezado from '../components/Encabezado.astro';
 import Estrella from '../components/Estrella.astro';
+import FotoInstagram from '../components/FotoInstagram.astro';
 import Pantalla from '../components/movil/Pantalla.astro';
-import { archivo } from '../data/archivo';
+import { archivo, type PublicacionInstagram } from '../data/archivo';
 import { festival } from '../data/site';
 
 const ediciones = archivo.lista;
+
+/* El feed de la cuenta, por años: en un archivo lo primero que se busca es el
+   año, y así cada uno se pinta como se pinta una edición —el año a tamaño
+   cartel y debajo sus fotos—. Llega ordenado de lo más nuevo a lo más viejo,
+   así que basta con cortar donde cambia. El año es el de Guadalajara: lo de la
+   noche del 31 de diciembre es de ese año, aunque en UTC ya sea el siguiente. */
+const anioDe = (iso: string) =>
+  new Date(iso).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City', year: 'numeric' });
+const feed: { anio: string; publicaciones: PublicacionInstagram[] }[] = [];
+for (const p of archivo.instagram.lista) {
+  const anio = anioDe(p.fecha);
+  const ultimo = feed.at(-1);
+  if (ultimo?.anio === anio) ultimo.publicaciones.push(p);
+  else feed.push({ anio, publicaciones: [p] });
+}
+
+/* Las bandas de la página: primero los años del feed, después las ediciones.
+   Con cero, la galería está vacía y se pinta la ficha. */
+const bandas = feed.length + ediciones.length;
+const cuantas = (n: number, una: string, varias: string) => `${n} ${n === 1 ? una : varias}`;
+const nota =
+  [
+    archivo.instagram.lista.length &&
+      cuantas(archivo.instagram.lista.length, 'publicación', 'publicaciones'),
+    ediciones.length && cuantas(ediciones.length, 'edición', 'ediciones'),
+  ]
+    .filter(Boolean)
+    .join(' · ') || undefined;
 ---
 
 <Base
   titulo={archivo.titulo}
-  descripcion={`Registro histórico del ${festival.nombre}: las ediciones anteriores en ${festival.ciudad}.`}
+  descripcion={`Registro del ${festival.nombre} en ${festival.ciudad}: las fotos de la cuenta del festival y las ediciones anteriores.`}
 >
   {/* ── Móvil: el índice, y las fotos debajo de cada año ────────────────── */}
   <Fragment slot="movil">
     <Pantalla
       titulo={archivo.titulo}
       indice="06"
-      nota={ediciones.length ? `${ediciones.length} ediciones` : undefined}
+      nota={nota}
       fondo="amarillo"
     >
       {
-        ediciones.length === 0 ? (
+        bandas === 0 && (
           <div class="p-4">
             {/* Sin el rótulo de «En construcción». La galería no está a medio
                 hacer: está hecha y vacía, que no es lo mismo — y lo segundo lo
@@ -39,9 +68,57 @@ const ediciones = archivo.lista;
               <p class="mt-4 font-mono text-[0.8rem] leading-relaxed text-tinta/70">
                 {archivo.vacio}
               </p>
+              {/* Mientras aquí no hay nada, las fotos están allá. */}
+              <a
+                href={festival.instagram.url}
+                target="_blank"
+                rel="noopener"
+                class="boton mt-5"
+              >
+                {archivo.instagram.ver} ↗
+              </a>
             </div>
           </div>
-        ) : (
+        )
+      }
+
+      {
+        feed.map(({ anio, publicaciones }) => (
+          <section class="border-b-2 border-tinta/20 px-4 py-6">
+            <p class="meta text-[0.6rem] text-tinta/55">
+              {archivo.instagram.rotulo} ·{' '}
+              {cuantas(publicaciones.length, 'publicación', 'publicaciones')}
+            </p>
+            <h2 class="display mt-2 text-3xl leading-none">{anio}</h2>
+            {/* El marco del móvil se topa en 32rem: por encima de eso la
+                columna ya no crece y la foto se queda en 236 px. */}
+            <ul class="mt-4 grid grid-cols-2 gap-2">
+              {publicaciones.map((p) => (
+                <li>
+                  <FotoInstagram publicacion={p} sizes="(min-width: 32rem) 236px, 50vw" />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+
+      {
+        feed.length > 0 && (
+          <div class="border-b-2 border-tinta/20 px-4 py-6">
+            <a
+              href={festival.instagram.url}
+              target="_blank"
+              rel="noopener"
+              class="boton"
+            >
+              {festival.instagram.cuenta} ↗
+            </a>
+          </div>
+        )
+      }
+
+      {
           ediciones.map((e) => (
             <section class="border-b-2 border-tinta/20 px-4 py-6">
               <p class="meta text-[0.6rem] text-tinta/55">{e.anio}</p>
@@ -66,15 +143,14 @@ const ediciones = archivo.lista;
               </div>
             </section>
           ))
-        )
       }
     </Pantalla>
   </Fragment>
 
   <Encabezado
     indice={
-      ediciones.length
-        ? `${archivo.titulo} / ${String(ediciones.length).padStart(2, '0')}`
+      bandas
+        ? `${archivo.titulo} / ${String(bandas).padStart(2, '0')}`
         : `${archivo.titulo} / ${archivo.estado}`
     }
     titulo={archivo.titulo}
@@ -82,7 +158,7 @@ const ediciones = archivo.lista;
   />
 
   {
-    ediciones.length === 0 ? (
+    bandas === 0 && (
       <section class="bg-amarillo">
         {/* Mismo criterio que artistas: sin ediciones cargadas la banda se
             aprieta. Con `py-32` la ficha quedaba sola en el medio de una
@@ -101,10 +177,99 @@ const ediciones = archivo.lista;
             <p class="mt-5 max-w-[52ch] font-mono text-sm leading-relaxed text-tinta/70">
               {archivo.vacio}
             </p>
+            {/* Mientras aquí no hay nada, las fotos están allá. */}
+            <a
+              href={festival.instagram.url}
+              target="_blank"
+              rel="noopener"
+              class="boton mt-7"
+            >
+              {archivo.instagram.ver} ↗
+            </a>
           </div>
         </div>
       </section>
-    ) : (
+    )
+  }
+
+  {
+    /* Un año del feed por banda, con la misma banda que una edición: el
+       rótulo, el año a tamaño cartel y su hoja de contactos. Lo que cambia es
+       la columna de la derecha —cuántas y la puerta a la cuenta— y la hoja,
+       que es más apretada: aquí hay decenas de fotos por año, no una docena,
+       y a 4:5, que es como corta Instagram. */
+    feed.map(({ anio, publicaciones }, n) => {
+        const rojo = n % 2 === 0;
+        return (
+        <section
+          class={`border-b-2 border-tinta ${rojo ? 'relative overflow-hidden bg-rojo' : 'bg-amarillo'}`}
+        >
+          {rojo && <Estrella tinta="amarilla" alto="abajo" />}
+          <div class="relative px-4 pt-12 pb-16 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
+            <div class="relative flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8">
+              <div>
+                {rojo ? (
+                  <p
+                    class="meta mb-5 inline-block bg-amarillo px-3 py-1.5 text-tinta"
+                    data-reveal="lado"
+                  >
+                    {archivo.instagram.rotulo} / {festival.instagram.cuenta}
+                  </p>
+                ) : (
+                  <p class="meta mb-5 flex items-center gap-4 text-tinta" data-reveal="lado">
+                    <span class="inline-block h-[2px] w-12 bg-rojo" />
+                    {archivo.instagram.rotulo} / {festival.instagram.cuenta}
+                  </p>
+                )}
+                <h2
+                  class={`display text-[16vw] leading-[0.82] lg:text-[9vw] ${rojo ? 'text-amarillo' : 'text-rojo'}`}
+                  data-lineas
+                  data-reveal="lineas"
+                >
+                  {anio}
+                </h2>
+              </div>
+
+              <div class="grid justify-items-end gap-5" data-reveal="arriba">
+                <p class={`meta ${rojo ? 'text-papel' : 'text-tinta/55'}`}>
+                  {cuantas(publicaciones.length, 'publicación', 'publicaciones')}
+                </p>
+                {/* Sobre rojo, el botón rojo de siempre desaparece: va en
+                    amarillo, la otra tinta del par. */}
+                <a
+                  href={festival.instagram.url}
+                  target="_blank"
+                  rel="noopener"
+                  class={`boton ${rojo ? 'boton--amarillo' : ''}`}
+                >
+                  {archivo.instagram.ver} ↗
+                </a>
+              </div>
+            </div>
+
+            {/* `data-reja` le da el escalonado por filas de `motion.ts`: el
+                número de columnas cambia con la pantalla y sólo allí se sabe
+                en qué fila cae cada foto. */}
+            <ul
+              class="relative mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-4 2xl:grid-cols-5"
+              data-reja
+            >
+              {publicaciones.map((p) => (
+                <li data-reveal="escala">
+                  <FotoInstagram
+                    publicacion={p}
+                    sizes="(min-width: 96rem) 20vw, (min-width: 64rem) 25vw, (min-width: 40rem) 33vw, 50vw"
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+        );
+      })
+  }
+
+  {
       /* Una banda por edición, y dentro una hoja de contactos. El año manda:
          va en display al tamaño de un titular de sección, porque en un
          archivo lo primero que se busca es el año y no el nombre.
@@ -116,7 +281,9 @@ const ediciones = archivo.lista;
          es el único sitio donde las dos tintas se tocan a plena fuerza — algo
          que sólo se puede hacer a tamaño cartel, y 9vw lo es de sobra. */
       ediciones.map((e, n) => {
-        const rojo = n % 2 === 0;
+        // El campo sigue alternando donde lo dejó el feed; el número del
+        // rótulo sigue siendo el de la edición.
+        const rojo = (feed.length + n) % 2 === 0;
         return (
         <section
           class={`border-b-2 border-tinta ${rojo ? 'relative overflow-hidden bg-rojo' : 'bg-amarillo'}`}
@@ -214,7 +381,6 @@ const ediciones = archivo.lista;
         </section>
         );
       })
-    )
   }
 
   <section class="relative overflow-hidden bg-rojo text-amarillo">

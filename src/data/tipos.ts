@@ -241,6 +241,40 @@ export type Edicion = {
   fotos: Foto[];
 };
 
+/**
+ * Una publicación de la cuenta del festival, ya copiada para la galería.
+ *
+ * No la escribe nadie: la trae el Worker de Instagram cada cuarto de hora —ver
+ * `workers/panel/lib/instagram.js`— y el panel no la toca. Por eso no pasa por
+ * `validar.js` como el resto: la forma la pone el propio Worker al copiarla.
+ *
+ * De cada publicación viaja la portada, que es lo que enseña la cuadrícula del
+ * perfil; el resto de un carrusel está a un toque, en `enlace`.
+ */
+export type PublicacionInstagram = {
+  id: string;
+  /** La publicación en Instagram. Es a donde lleva la foto. */
+  enlace: string;
+  /** ISO, en UTC. */
+  fecha: string;
+  tipo: 'imagen' | 'video' | 'carrusel';
+  /** Cuántas piezas trae un carrusel. Sólo cuando son dos o más. */
+  piezas?: number;
+  /** La portada, copiada a Cloudinary: las URLs de Instagram caducan. */
+  foto: string;
+  ancho?: number;
+  alto?: number;
+  /** El pie del post, tal cual, con sus saltos de línea. */
+  texto?: string;
+};
+
+export type Instagram = {
+  /** Cuándo cambió la lista por última vez. `null` = nunca se ha traído nada. */
+  actualizado: string | null;
+  /** De la más nueva a la más vieja. */
+  publicaciones: PublicacionInstagram[];
+};
+
 /** Quién pone. Sin `logo` se pinta el nombre en display: prefiero un hueco
  *  honesto a inventar un archivo que no nos dieron. */
 export type Marca = { nombre: string; logo?: string; url?: string };
@@ -273,6 +307,13 @@ export type Contenido = {
    * construir igual —tirando del texto que trae de fábrica— en vez de caerse.
    */
   festival?: Festival;
+  /**
+   * El feed de la cuenta del festival, que llena la galería. Opcional por lo
+   * mismo que `festival`: un Worker de antes de esto contesta sin él. Tampoco
+   * es una colección —no la escribe el panel, no sube la versión— y por eso
+   * no cuenta en «las cinco».
+   */
+  instagram?: Instagram;
   /** Una sola lista. El Worker todavía guarda un `colaboradores` al lado
    *  —vacío, y ahí se queda hasta que toque limpiar KV—: el sitio ya no lo
    *  lee y el panel ya no lo enseña. */

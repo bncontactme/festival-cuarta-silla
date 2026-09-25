@@ -1,0 +1,92 @@
+---
+import { imagen, juegoDeImagenes } from '../lib/imagen';
+import { archivo, type PublicacionInstagram } from '../data/archivo';
+
+/**
+ * Una publicación de la cuenta en la galería: la portada, y un toque lleva a
+ * la publicación.
+ *
+ * Es la foto de la ficha de artista sin el pie. A 4:5, que es como corta
+ * Instagram su cuadrícula; con la fecha en la chapa de tinta de arriba —donde
+ * la ficha lleva su número, porque en un feed lo que ordena es la fecha—; y la
+ * de la derecha, en rojo, dice lo que no se ve desde fuera: que es un video, o
+ * que detrás de la portada hay más fotos. El resto de un carrusel no viaja: se
+ * ve en Instagram.
+ *
+ * Sale en el escritorio y en el móvil, y la única diferencia es el `sizes`,
+ * que lo pone quien sabe en cuántas columnas cae.
+ */
+interface Props {
+  publicacion: PublicacionInstagram;
+  sizes: string;
+  class?: string;
+}
+
+const { publicacion: p, sizes, class: clase = '' } = Astro.props;
+
+/* En hora de Guadalajara: una foto de las once de la noche del sábado es del
+   sábado, aunque en UTC ya sea domingo. */
+const fecha = new Date(p.fecha);
+const enGdl = (o: Intl.DateTimeFormatOptions) =>
+  fecha.toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City', ...o });
+const dia = enGdl({ day: 'numeric', month: 'short' }).replace('.', '');
+const larga = enGdl({ day: 'numeric', month: 'long', year: 'numeric' });
+
+/* El texto alternativo sale del pie: su primera línea, que en la cuenta es la
+   que dice qué se ve —«Inauguración en No Museo»—, y no los hashtags ni las
+   menciones que vienen detrás. Cortado a lo que un lector de pantalla lee de
+   una sentada. Sin pie, se dice qué es y de cuándo. */
+const primera = (p.texto ?? '').split('\n').map((l) => l.trim()).find(Boolean) ?? '';
+const TOPE = 125;
+const resumen =
+  primera.length <= TOPE
+    ? primera
+    : primera.slice(0, primera.lastIndexOf(' ', TOPE) > 60 ? primera.lastIndexOf(' ', TOPE) : TOPE).trimEnd() + '…';
+
+const que =
+  p.tipo === 'video' ? 'Video' : p.piezas ? `Carrusel de ${p.piezas} fotos` : 'Foto';
+
+/* Lo que lee el lector de pantalla después del texto alternativo. Con un
+   punto delante si el resumen no trae ya uno, para que haga la pausa. */
+const pausa = !resumen ? '' : /[.…!?]$/.test(resumen) ? ' ' : '. ';
+const detras = `${pausa}${que} del ${larga}, en Instagram`;
+---
+
+<a
+  href={p.enlace}
+  target="_blank"
+  rel="noopener"
+  class={`foto-ig group relative block aspect-[4/5] overflow-hidden border-2 border-tinta bg-amarillo ${clase}`}
+>
+  <img
+    src={imagen(p.foto, 480)}
+    srcset={juegoDeImagenes(p.foto, [320, 480, 800]) || undefined}
+    sizes={sizes}
+    alt={resumen}
+    width={p.ancho ?? 1080}
+    height={p.alto ?? 1350}
+    loading="lazy"
+    decoding="async"
+    class="h-full w-full object-cover transition-transform duration-700 ease-[var(--ease-salida)] group-hover:scale-[1.04]"
+  />
+
+  {/* Las chapas son para el ojo. Al lector de pantalla se le dice lo mismo, en
+      una frase, en el `sr-only` de abajo. */}
+  <span
+    class="meta absolute top-0 left-0 bg-tinta px-2.5 py-1.5 text-[0.55rem] text-amarillo"
+    aria-hidden="true"
+  >
+    {dia}
+  </span>
+  {
+    (p.tipo === 'video' || p.piezas) && (
+      <span
+        class="meta absolute top-0 right-0 bg-rojo px-2.5 py-1.5 text-[0.55rem] text-papel"
+        aria-hidden="true"
+      >
+        {p.tipo === 'video' ? archivo.instagram.video : `1/${p.piezas}`}
+      </span>
+    )
+  }
+  <span class="sr-only">{detras}</span>
+</a>

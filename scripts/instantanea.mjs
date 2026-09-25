@@ -143,6 +143,20 @@ if (sinNada(datos.festival) && !sinNada(guardado?.festival)) {
   log('  ', 'deja de salir en cuanto se guarde esa pestaña desde /admin.');
 }
 
+/**
+ * Y lo mismo con el feed de Instagram, que tampoco es de las cinco.
+ *
+ * Un Worker de antes contesta sin él, y uno recién puesto contesta con la lista
+ * vacía y `actualizado: null` —nunca se ha traído nada—. Ninguno de los dos
+ * quiere decir que las fotos ya no estén: la copia del repo se queda. En
+ * cuanto el Worker haya traído el feed una vez, `actualizado` deja de ser
+ * `null` y manda él, también el día que de verdad se borre algo.
+ */
+if (!datos.instagram?.actualizado && guardado?.instagram?.actualizado) {
+  datos.instagram = guardado.instagram;
+  log('⚠️ ', 'el panel no trae el feed de Instagram: se conserva el que hay en el repo.');
+}
+
 const nuevo = JSON.stringify(datos, null, 2) + '\n';
 const viejo = guardado ? JSON.stringify(guardado, null, 2) + '\n' : '';
 
@@ -159,6 +173,7 @@ const cuenta = [
   `${datos.artistas.length} artistas`,
   `${datos.archivo.length} ediciones`,
   `${datos.marcas.patrocinadores.length} marcas`,
+  `${datos.instagram?.publicaciones?.length ?? 0} de Instagram`,
 ].join(' · ');
 
 log('✓', `versión ${datos.version} — ${cuenta}`);

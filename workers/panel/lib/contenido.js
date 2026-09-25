@@ -7,6 +7,9 @@
 //   cs:hist:<version>    instantánea completa de las cinco colecciones
 //   cs:build             marca de tiempo del último rebuild disparado
 //   fail:<ip>            intentos fallidos de contraseña (lo usa index.js)
+//   cs:ig:*              el feed de Instagram y su token. No son colecciones:
+//                        no las escribe el panel, no suben la versión ni entran
+//                        en el historial. Viven en lib/instagram.js.
 //
 // Las cinco listas son de menos de cien elementos: se guardan y se leen enteras.
 // Nada de paginar ni de índices — sería complicar un JSON de 30 KB. La sexta,

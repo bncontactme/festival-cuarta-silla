@@ -47,6 +47,15 @@ de donar que no lleva a ninguna parte es peor que no tenerlo. En cuanto haya
 enlace aparece en tres sitios a la vez (cierre de la portada, pie y remate de
 `/registro`).
 
+Y una cuarta, posterior al pedido: **la galería se llena sola con el
+Instagram del festival**. Está entera y espera un solo dato, el token de la
+cuenta, que se le da al Worker con `wrangler secret put INSTAGRAM_TOKEN` —cómo
+sacarlo, en [`workers/panel/README.md`](workers/panel/README.md), paso 6—.
+Mientras no esté, la ficha vacía de `/galeria` lleva un botón a la cuenta; en
+cuanto esté, cada publicación nueva llega a la galería sola, en la siguiente
+vuelta del Worker —una cada cuarto de hora— más lo que tarde el build. El
+porqué de cada pieza, en [PANEL.md](PANEL.md).
+
 ## Identidad
 
 Paleta y tipografías salen del manual (`identidad visual.ai`), no del sitio
@@ -220,7 +229,8 @@ src/
   pages/sedes/        una página por sede: `/sedes/<nombre-de-la-sede>`
   pages/admin/        el panel de edición (noindex, fuera del sitemap)
 scripts/instantanea.mjs   baja el contenido del panel antes de cada build
-workers/panel/            el Worker: KV, validación, Cloudinary, historial
+workers/panel/            el Worker: KV, validación, Cloudinary, historial,
+                          el feed de Instagram que llena la galería
 ```
 
 ## Cuánta gente entra
@@ -327,4 +337,7 @@ correcto que un cambio ahí sea un commit.
 - Registro a eventos: hoy es una ficha en estado «Próximamente» con el botón
   desactivado. Cuando se decida el sistema (formulario propio, Eventbrite,
   etc.) se conecta ahí.
-- Redes sociales del festival: el sitio de Wix no enlazaba ninguna.
+- Redes sociales del festival: el sitio de Wix no enlazaba ninguna. El
+  Instagram ya está (`festival.instagram` en `site.ts`) y lo pinta la galería;
+  el pie todavía no enlaza ninguna.
+- El token de Instagram para que la galería se llene sola (ver arriba).
