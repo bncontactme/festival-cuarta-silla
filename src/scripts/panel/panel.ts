@@ -12,6 +12,7 @@ import { pintarPrevia } from './previa';
 import { abrirSala, imprimirCartelas, imprimirQR, elegirCartelas } from './sala';
 import { pintarRegistro } from './registro';
 import { pintarFestival } from './festival';
+import { pintarEnvios, cargarEnvios, sinFila } from './envios';
 import { el, vaciar, cuando } from './dom';
 import {
   pedir, leerContenido, ponerClave, olvidarClave, recordada, ErrorPanel,
@@ -42,7 +43,7 @@ const RAIZ: string = config.raiz || location.origin + '/';
 const MANIFIESTO_DEL_SITIO: { titulo: string; cuerpo: string; cierre: string } =
   config.manifiesto ?? { titulo: '', cuerpo: '', cierre: '' };
 
-const COLECCIONES = ['sedes', 'programa', 'artistas', 'archivo', 'marcas', 'festival'] as const;
+const COLECCIONES = ['sedes', 'programa', 'artistas', 'archivo', 'marcas', 'festival', 'aportes'] as const;
 type Coleccion = (typeof COLECCIONES)[number];
 
 /**
@@ -63,8 +64,12 @@ type Coleccion = (typeof COLECCIONES)[number];
  * festival y el manifiesto—. Un Worker en el 2 ni siquiera sabe que esa
  * colección existe, así que contestaría 400 y al menos se vería; el cartel sale
  * igual, porque enterarse al entrar es mejor que enterarse al guardar.
+ *
+ * Va por el 4 desde la galería abierta: la colección `aportes` y la fila de
+ * envíos del público. Un Worker en el 3 no sabe revisar nada, y la pestaña de
+ * Envíos ni siquiera pregunta.
  */
-const CONTRATO_NECESARIO = 3;
+const CONTRATO_NECESARIO = 4;
 /** Lo que contestó el Worker. `0` = uno tan viejo que ni sabe de esto. */
 let contratoDelWorker = 0;
 const workerAtrasado = () => contratoDelWorker < CONTRATO_NECESARIO;
@@ -135,7 +140,7 @@ async function entrar(pass: string) {
     if (workerAtrasado()) {
       avisar(
         'El panel de esta página sabe de campos que el Worker todavía no conoce, y el Worker es quien guarda. ' +
-        'Si guardas así, esos campos —hoy los textos del festival y las descripciones— se tiran al guardar y no te avisa nadie: ' +
+        'Si guardas así, esos campos —hoy los textos del festival, las descripciones y las entradas de la galería— se tiran al guardar y no te avisa nadie: ' +
         'la versión sube, el sitio se reconstruye en verde, y el texto no está. ' +
         'Por eso el botón de Guardar está apagado. Avisa a quien lleva el sitio: hay que desplegar el Worker.',
         'error',
@@ -149,6 +154,8 @@ async function entrar(pass: string) {
     // Lo primero que hay que saber al entrar es si lo último que se guardó
     // llegó al sitio. Si no llegó, sale el aviso antes de tocar nada.
     mirarBuild();
+    // Y lo que mandó el público: la pestaña de Envíos lo cuenta en rojo.
+    refrescarEnvios();
   } catch (e: any) {
     olvidarClave();
     $('#entrada-queja').textContent = e.message || 'No entró';
@@ -159,23 +166,65 @@ async function entrar(pass: string) {
   }
 }
 
-async function cargar() {
+/**
+ * Baja el contenido y lo pinta.
+ *
+ * `repintar: false` es para la fila de Envíos, que recarga por debajo cuando
+ * alguien guardó mientras revisaba y quiere seguir en la misma pantalla: rehacer
+ * el lienzo en ese momento dejaría al botón que lo pidió hablándole a una
+ * tarjeta que ya no está.
+ */
+async function cargar({ repintar = true } = {}) {
   try {
     const datos = await leerContenido();
     // Un Worker que todavía no conoce la colección —o uno recién sembrado—
     // contesta sin `festival`. Se pone la caja vacía AQUÍ, antes de tomar la
     // copia limpia de abajo: puesta después, el panel arrancaría diciendo que
-    // hay algo sin guardar sin que nadie hubiera tocado nada.
+    // hay algo sin guardar sin que nadie hubiera tocado nada. Lo mismo con
+    // `aportes`, que un Worker de antes del contrato 4 no trae.
     datos.festival ??= {};
+    datos.aportes ??= [];
     estado = datos;
     meta = { version: datos.version, actualizado: datos.actualizado, ultimoDeploy: meta.ultimoDeploy };
     for (const c of COLECCIONES) limpio[c] = JSON.stringify(datos[c]);
     erroresPorColeccion = {};
-    pintar();
+    if (repintar) pintar(); else estadoBarras();
   } catch (e: any) {
     avisar(e.message || String(e), 'error', 'No se pudo leer el contenido');
   }
 }
+
+/** Pregunta qué mandó el público. No con un Worker viejo: no sabría contestar,
+ *  y el cartel rojo de arriba ya dice por qué. */
+async function refrescarEnvios() {
+  if (workerAtrasado()) {
+    sinFila('El Worker está viejo y no sabe de envíos: hay que desplegarlo (ver el cartel rojo de arriba).');
+  } else {
+    await cargarEnvios();
+  }
+  estadoBarras();
+  if (pestanaActiva === 'envios') pintarLienzo();
+}
+
+/** Lo que la fila de Envíos necesita del panel. */
+const ctxEnvios = {
+  version: () => meta.version,
+  aportesSinGuardar: () => Boolean(sucia('aportes')),
+  haySinGuardar: () => haySucias(),
+  recargar: () => cargar({ repintar: false }),
+  /** Aceptar ya guardó en el Worker: aquí sólo se pone al día lo que el panel
+   *  cree que hay, para que la pestaña Galería no diga «sin guardar» sobre una
+   *  lista que ya está guardada. */
+  aceptado: (r: any) => {
+    estado.aportes = r.aportes ?? [];
+    limpio.aportes = JSON.stringify(estado.aportes);
+    meta = { version: r.version, actualizado: r.actualizado, ultimoDeploy: r.ultimoDeploy ?? meta.ultimoDeploy };
+    if (r.despliegue?.disparado) mirarBuild({ insistir: 9 });
+  },
+  cambiado: () => estadoBarras(),
+  avisar,
+  sitio: () => config.sitio || '/',
+};
 
 // ── ¿Se publicó de verdad? ───────────────────────────────────────────────────
 //
@@ -272,7 +321,10 @@ function pintarPestanas() {
     const boton = el('button', {
       type: 'button', role: 'tab',
       'aria-selected': String(p.clave === pestanaActiva),
-      class: colecciones(p).some(sucia) ? 'sucia' : '',
+      class: [
+        colecciones(p).some(sucia) ? 'sucia' : '',
+        p.alerta?.(estado) ? 'alerta' : '',
+      ].filter(Boolean).join(' '),
       onclick: () => { pestanaActiva = p.clave; pintar(); },
     }, p.titulo, el('span', { class: 'cuenta' }, cuentaDe(p)));
     barra.append(boton);
@@ -390,6 +442,9 @@ function pintarLienzo() {
       avisar: (m, c) => avisar(m, c ?? 'ojo'),
       manifiestoDelSitio: () => MANIFIESTO_DEL_SITIO,
     }));
+  }
+  if (p.clave === 'envios') {
+    lienzo.append(pintarEnvios(ctxEnvios));
   }
   for (const t of p.tablas) {
     // La tabla —donde se editan todos los campos— va debajo de la LISTA, que es
@@ -560,6 +615,7 @@ function estadoBarras() {
   // pantalla es peor que no poner ninguno: parece que se perdió algo.
   [...$('#pestanas').children].forEach((nodo, i) => {
     nodo.classList.toggle('sucia', colecciones(PESTANAS[i]).some(sucia));
+    nodo.classList.toggle('alerta', Boolean(PESTANAS[i].alerta?.(estado)));
     const cuenta = nodo.querySelector('.cuenta');
     if (cuenta) cuenta.textContent = cuentaDe(PESTANAS[i]);
   });
@@ -756,11 +812,11 @@ async function historial() {
     cuerpo.append(el('tr', {},
       el('td', {}, String(v.version)),
       el('td', {}, cuando(v.actualizado)),
-      el('td', {}, `${v.cuenta.sedes} sedes · ${v.cuenta.programa} act. · ${v.cuenta.artistas} art. · ${v.cuenta.archivo} ed. · ${v.cuenta.marcas} marcas`),
+      el('td', {}, `${v.cuenta.sedes} sedes · ${v.cuenta.programa} act. · ${v.cuenta.artistas} art. · ${v.cuenta.archivo} ed. · ${v.cuenta.aportes ?? 0} entradas · ${v.cuenta.marcas} marcas`),
       el('td', {}, el('button', {
         type: 'button', class: 'boton suave',
         onclick: async () => {
-          if (!confirm(`¿Volver a la versión ${v.version}?\n\nSe queda como estaba entonces TODO: sedes, programa, artistas, archivo y marcas. Y esto también se puede deshacer.`)) return;
+          if (!confirm(`¿Volver a la versión ${v.version}?\n\nSe queda como estaba entonces TODO: sedes, programa, artistas, galería (ediciones y entradas del público) y marcas. Lo que el público mande y esté en Envíos no se toca. Y esto también se puede deshacer.`)) return;
           try {
             await pedir('restaurar', { version: v.version });
             fondo.remove();
@@ -798,6 +854,7 @@ $('#historial-boton').addEventListener('click', historial);
 $('#recargar-boton').addEventListener('click', async () => {
   if (haySucias() && !confirm('Hay cambios sin guardar. Si recargas, se pierden. ¿Seguir?')) return;
   await cargar();
+  await refrescarEnvios();
 });
 $('#salir-boton').addEventListener('click', () => {
   if (haySucias() && !confirm('Hay cambios sin guardar. ¿Salir de todas formas?')) return;

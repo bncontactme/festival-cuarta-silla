@@ -338,7 +338,7 @@ function fotos(campo: Campo, fila: any, ctx: Ctx) {
               onclick: () => { mover(i, i - 1); } }, '←'),
             el('button', { type: 'button', class: 'boton suave',
               onclick: () => {
-                if (!confirm('¿Quitar esta foto de la edición?\n\nSe quita de la lista; el archivo sigue en Cloudinary.')) return;
+                if (!confirm('¿Quitar esta foto?\n\nSe quita de la lista; el archivo sigue en Cloudinary.')) return;
                 (fila[campo.clave] as any[]).splice(i, 1); pintar(); ctx.cambiado();
               } }, 'Quitar'),
             el('button', { type: 'button', class: 'boton suave',
@@ -348,7 +348,11 @@ function fotos(campo: Campo, fila: any, ctx: Ctx) {
         ),
       );
     }
-    caja.append(soltadero());
+    // Con tope —las entradas de la galería abierta son de cinco— el hueco se
+    // va al llegar: un soltadero que sólo puede decir «ya no caben» es una
+    // pregunta que nadie hizo.
+    const tope = campo.max ?? Infinity;
+    if ((fila[campo.clave] as any[]).length < tope) caja.append(soltadero());
   }
 
   function mover(de: number, a: number) {
@@ -361,6 +365,12 @@ function fotos(campo: Campo, fila: any, ctx: Ctx) {
   async function subirVarias(archivos: File[]) {
     const carpeta = typeof campo.carpeta === 'function' ? campo.carpeta(fila) : campo.carpeta || '';
     const zona = caja.querySelector('.soltar') as HTMLElement | null;
+    const caben = (campo.max ?? Infinity) - (fila[campo.clave] as any[]).length;
+    if (archivos.length > caben) {
+      const sobran = archivos.length - caben;
+      ctx.avisar(`Caben ${campo.max} fotos: ${sobran === 1 ? 'una se quedó fuera' : `${sobran} se quedaron fuera`}.`, 'ojo');
+      archivos = archivos.slice(0, Math.max(0, caben));
+    }
     let hechas = 0;
     for (const archivo of archivos) {
       const queja = revisarArchivo(archivo);

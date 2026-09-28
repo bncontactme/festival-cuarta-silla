@@ -412,6 +412,77 @@ select {
 }
 .vacio p { opacity: 0.6; font-size: 0.85rem; margin-bottom: 0.9rem; }
 
+/* ── Envíos: la fila de revisión de la galería abierta ─────────────────── */
+/* Una tarjeta por envío: las fotos a la izquierda, los textos a la derecha, y
+   los dos botones abajo. Las fotos se ven grandes —se está decidiendo si
+   publicarlas— y cada una se abre entera en otra pestaña. */
+.envios .cabecera { align-items: center; }
+.envios .cabecera .empuje { margin-left: auto; }
+.envios-fila { display: grid; gap: 0.9rem; }
+.envio {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.9rem;
+  border: 2px solid var(--tinta);
+  background: var(--papel);
+  box-shadow: 4px 4px 0 var(--tinta);
+}
+.envio.ocupado { opacity: 0.55; pointer-events: none; }
+.envio-fotos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: 0.5rem;
+  align-content: start;
+}
+.envio-foto { display: grid; gap: 0.3rem; }
+.envio-foto img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 2px solid var(--tinta);
+  background: var(--amarillo);
+}
+/* Quitada: sigue ahí —se puede devolver— pero tachada, para que se vea de un
+   golpe qué va a salir y qué no. */
+.envio-foto.fuera img { opacity: 0.25; filter: grayscale(1); }
+.envio-foto.fuera a { position: relative; display: block; }
+.envio-foto.fuera a::after {
+  content: 'fuera';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--rojo);
+}
+.envio-campos { display: grid; gap: 0.55rem; align-content: start; }
+.envio-par { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+.envio-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+@media (max-width: 760px) {
+  .envio { grid-template-columns: 1fr; }
+  .envio-par { grid-template-columns: 1fr; }
+}
+
+/* La cuenta de una pestaña con algo esperando: en rojo, como una chapa. */
+.pestanas button.alerta .cuenta {
+  opacity: 1;
+  background: var(--rojo);
+  color: var(--papel);
+  padding: 0.05rem 0.4rem;
+  font-weight: 700;
+}
+
 /* ── Rejilla de vista previa (programa) ─────────────────────────────────── */
 
 .previa { background: var(--papel); border: 2px solid var(--tinta); padding: 0.7rem; margin-bottom: 0.9rem; }
