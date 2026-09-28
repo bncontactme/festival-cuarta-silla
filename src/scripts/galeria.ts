@@ -21,15 +21,11 @@
  * Worker: mejor eso que reintentar sobre una firma que a lo mejor ya caducó.
  */
 import { PANEL_URL } from '../lib/panel';
+import { reducir } from '../lib/reducir';
 
 /** Lo que pidió el festival: «máximo 5 fotos por post». El Worker lo vuelve a
  *  mirar; esto sólo evita subir la sexta para que la rechacen. */
 const MAXIMO = 5;
-
-/** El lado largo con el que se sube cada foto. Una foto de teléfono de hoy son
- *  8000 px y 12 MB; la galería la enseña a 1600 como mucho. Subir el original
- *  por el wifi de una sede es un minuto por foto para nada. */
-const LADO = 2400;
 
 /** Lo que Cloudinary acepta si una foto no se puede rehacer aquí y hay que
  *  mandarla tal cual. Coincide con `allowed_formats` de la firma. */
@@ -64,43 +60,21 @@ type Abierto = {
 };
 
 /**
- * Rehace la foto antes de subirla: como mucho `LADO` px y en JPEG.
- *
- * Tres cosas de un tiro. Pesa una décima parte, así que sube en segundos y no en
- * minutos. **Se le caen los metadatos**, y en una foto de teléfono eso incluye
- * la coordenada GPS de donde se tomó —que para una foto hecha en casa es la
- * dirección de alguien—. Y sale derecha: el navegador aplica la orientación de
- * la cámara al pintarla, y el JPEG nuevo ya no la necesita.
+ * Rehace la foto antes de subirla —ver `reducir()` en `src/lib/reducir.ts`: a
+ * 2000 px, en JPEG y sin metadatos—. Una foto de teléfono de 12 MB sube en
+ * medio mega, que por el wifi de una sede es la diferencia entre segundos y
+ * minutos.
  *
  * Si el navegador no sabe abrirla —un HEIC en Chrome— y el formato es de los
- * que Cloudinary acepta, se manda tal cual. Si tampoco, no se puede subir.
+ * que Cloudinary acepta, se manda tal cual: la transformación de entrada que
+ * firma el Worker la deja igual a 2000 px al llegar. Si tampoco, no se sube.
  */
 async function preparar(archivo: File): Promise<Blob> {
-  const url = URL.createObjectURL(archivo);
   try {
-    const img = new Image();
-    img.src = url;
-    await img.decode();
-    const escala = Math.min(1, LADO / Math.max(img.naturalWidth, img.naturalHeight));
-    const ancho = Math.max(1, Math.round(img.naturalWidth * escala));
-    const alto = Math.max(1, Math.round(img.naturalHeight * escala));
-    const lienzo = document.createElement('canvas');
-    lienzo.width = ancho;
-    lienzo.height = alto;
-    const c = lienzo.getContext('2d');
-    if (!c) throw new Error('sin lienzo');
-    // Un PNG con transparencia pasado a JPEG sale con el fondo negro.
-    c.fillStyle = '#fff';
-    c.fillRect(0, 0, ancho, alto);
-    c.drawImage(img, 0, 0, ancho, alto);
-    const foto = await new Promise<Blob | null>((listo) => lienzo.toBlob(listo, 'image/jpeg', 0.86));
-    if (!foto) throw new Error('sin JPEG');
-    return foto;
+    return await reducir(archivo);
   } catch (e) {
     if (TAL_CUAL.includes(archivo.type) && archivo.size <= PESO_MAX) return archivo;
     throw e;
-  } finally {
-    URL.revokeObjectURL(url);
   }
 }
 

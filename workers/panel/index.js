@@ -86,17 +86,58 @@ const FOTOS_POR_ENVIO = 5;
 /** Envíos que puede abrir una misma conexión en una hora. Cuenta los que se
  *  abren, no los que se mandan: firmar es lo que deja subir a Cloudinary, y es
  *  eso lo que hay que frenar. */
-const ENVIOS_POR_HORA = 8;
+const ENVIOS_POR_HORA = 5;
+
+/** Envíos que se abren al día entre TODO el mundo. El de arriba frena a una
+ *  conexión; éste, a muchas a la vez — que es como se llena una cuenta de
+ *  Cloudinary en una noche. Sesenta al día son trescientas fotos y unos
+ *  doscientos megas en el peor caso: la cuenta ni lo nota, y un festival de
+ *  cuatro días no manda tanto. Se reinicia a medianoche de Guadalajara. */
+const ENVIOS_POR_DIA = 60;
 
 /** Cuántos pueden esperar revisión a la vez. Pasado esto la puerta se cierra
- *  sola hasta que el festival revise: una cola de quinientos no la revisa nadie,
- *  y si llega a quinientos es que no la está mandando gente. */
-const COLA_MAX = 150;
+ *  sola hasta que el festival revise: una fila de cien no la revisa nadie, y si
+ *  llega a cien es que no la está mandando gente. */
+const COLA_MAX = 60;
+
+/**
+ * Lo que Cloudinary le hace a una foto AL RECIBIRLA, antes de guardarla — la
+ * «transformación de entrada». Va dentro de la firma, así que quien sube no
+ * puede quitarla.
+ *
+ * Es el segundo freno contra llenar la cuenta, y el que no se puede saltar. El
+ * primero es el navegador, que ya achica cada foto a 2000 px en JPEG antes de
+ * mandarla (`src/lib/reducir.ts`); pero eso corre en la máquina de quien sube,
+ * y un script con una firma en la mano manda lo que quiera. Con esto, lo que se
+ * guarda nunca pasa de 2000 px, venga de donde venga: una foto de 48
+ * megapíxeles se queda en una de 4.
+ *
+ *   · Las fotos de la galería (`archivo/…`, `aportes/…`) además se guardan en
+ *     JPEG a calidad 85. Es la que ya pone el navegador, así que a una foto que
+ *     llega por el formulario no le pasa nada; a la que llega de otra parte, sí.
+ *   · Retratos y fotos de sedes: el tope de tamaño y la calidad, sin tocar el
+ *     formato.
+ *   · Los logos (`marcas`), sólo el tope. Bajarle la calidad a un PNG lo pasa a
+ *     paleta de colores y le mancha los cantos, y un logo es cantos.
+ *
+ * El sitio nunca pide nada más grande: la ficha va a 800 y el visor a pantalla
+ * entera, a 1600 (2000 en doble densidad).
+ */
+function alRecibir(carpeta) {
+  const tope = 'c_limit,w_2000,h_2000';
+  if (/^(archivo|aportes)\//.test(carpeta)) return { format: 'jpg', transformation: tope + ',q_85' };
+  if (carpeta === 'marcas') return { transformation: tope };
+  return { transformation: tope + ',q_85' };
+}
 
 /** Pasado este rato, un envío abierto que nunca se mandó se da por perdido y el
  *  cron borra sus fotos. La firma de Cloudinary caduca a la hora; dos es margen
  *  para una subida lenta desde el wifi de una sede. */
 const SUBIDA_CADUCA_MS = 2 * 3600 * 1000;
+
+/** El cron del respaldo semanal. Tiene que ser el mismo texto que en
+ *  `wrangler.toml`: con ése, `scheduled()` respalda; con el diario, sólo barre. */
+const CRON_RESPALDO = '0 9 * * 1';
 
 const MIMES = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/avif']);
 
@@ -234,15 +275,18 @@ export default {
   // Respaldo semanal a Cloudinary (ver [triggers] en wrangler.toml). Es la
   // tercera copia: KV, el JSON comiteado en el repo, y esto.
   //
-  // Y de paso, la escoba de la galería abierta: las fotos de los envíos que se
-  // abrieron y nunca se mandaron. Una vez por semana basta — no las ve nadie,
-  // sólo ocupan sitio.
+  // Y la escoba de la galería abierta: las fotos de los envíos que se abrieron
+  // y nunca se mandaron. Pasa todos los días (el otro cron de wrangler.toml):
+  // no las ve nadie, pero ocupan sitio en la cuenta, y una semana de fotos
+  // huérfanas es justo lo que no se quiere juntar.
   async scheduled(evento, env, ctx) {
-    ctx.waitUntil(
-      respaldar(env)
-        .then(r => console.log('Respaldo semanal: versión ' + r.version))
-        .catch(e => console.error('El respaldo semanal falló:', e)),
-    );
+    if (evento.cron === CRON_RESPALDO) {
+      ctx.waitUntil(
+        respaldar(env)
+          .then(r => console.log('Respaldo semanal: versión ' + r.version))
+          .catch(e => console.error('El respaldo semanal falló:', e)),
+      );
+    }
     ctx.waitUntil(
       barrerSubidas(env)
         .then(n => n && console.log('Galería: ' + n + ' envío(s) abandonado(s) barridos'))
@@ -289,17 +333,27 @@ async function envioAbrir(cuerpo, env, ip, cors) {
     return json({ error: 'Ya mandaste varias entradas seguidas. Espera un rato y vuelve a intentarlo.' }, 429, cors);
   }
 
+  // El tope de todo el mundo, por día de Guadalajara. Caduca solo al segundo
+  // día: no hace falta barrerlo.
+  const claveDia = 'cs:tope:dia:' + hoyEnGDL();
+  const delDia = Number(await env.CONTENIDO.get(claveDia)) || 0;
+  if (delDia >= ENVIOS_POR_DIA) {
+    return json({ error: 'Hoy ya llegaron muchas fotos. Vuelve a intentarlo mañana.' }, 429, cors);
+  }
+
   if ((await contarEnvios(env)) >= COLA_MAX) {
     return json({ error: 'Hay muchas fotos esperando revisión. Vuelve a intentarlo en unos días.' }, 503, cors);
   }
 
   await env.CONTENIDO.put(clave, String(hechos + 1), { expirationTtl: 3600 });
+  await env.CONTENIDO.put(claveDia, String(delDia + 1), { expirationTtl: 2 * 86400 });
 
   const id = nuevoId();
   await abrirSubida(env, id);
 
   const folder = RAIZ + '/aportes/' + id;
   const comunes = {
+    ...alRecibir('aportes/' + id),
     allowed_formats: 'jpg,png,webp,avif',
     asset_folder: folder,
     folder,
@@ -765,8 +819,16 @@ async function firmar(cuerpo, env, cors) {
   const sub = cuerpo.nombre ? '/' + slug(cuerpo.nombre) : '';
   const folder = RAIZ + '/' + carpeta + sub;
 
+  // La transformación de entrada (`alRecibir`) va sólo si el panel dice que
+  // sabe mandarla. Firmada y no mandada, Cloudinary rechaza la subida por firma
+  // mala; así que un panel de antes —que no la conoce— sigue subiendo como
+  // siempre en vez de dejar de subir, y el orden en que se desplieguen el sitio
+  // y el Worker da igual.
+  const entrada = cuerpo.entrada === true ? alRecibir(carpeta) : {};
+
   const timestamp = String(Math.floor(Date.now() / 1000));
   const params = {
+    ...entrada,
     asset_folder: folder,
     folder,
     timestamp,
@@ -776,6 +838,7 @@ async function firmar(cuerpo, env, cors) {
 
   return json({
     ok: true,
+    ...entrada,
     signature: firma,
     timestamp,
     api_key: env.CLOUDINARY_API_KEY,

@@ -700,10 +700,27 @@ abren la imagen en grande en vez del visor.
 | | |
 | --- | --- |
 | Fotos por entrada | 5, en el navegador, al firmar, al mandar y al aceptar |
-| Envíos por conexión | 8 por hora (la IP se guarda hecha hash y caduca a la hora) |
-| Fila de revisión | 150 esperando; pasado eso la puerta se cierra sola hasta que se revise |
+| Tamaño de cada foto | 2000 px de lado largo, en JPEG: el navegador la achica antes de subir (`src/lib/reducir.ts`) y Cloudinary la vuelve a topar al recibir (`alRecibir()`, firmado) |
+| Envíos por conexión | 5 por hora (la IP se guarda hecha hash y caduca a la hora) |
+| Envíos de todo el mundo | 60 al día, a medianoche de Guadalajara vuelve a cero |
+| Fila de revisión | 60 esperando; pasado eso la puerta se cierra sola hasta que se revise |
 | Trampa | un campo invisible que un robot rellena: se le dice que sí y no se guarda |
-| Abandonados | las fotos de un envío abierto y nunca mandado las barre el cron semanal |
+| Abandonados | las fotos de un envío abierto y nunca mandado las barre un cron diario |
+
+**Cuánto pesa una foto.** Una de teléfono llega con 4 a 12 MB y se guarda con
+400 a 900 KB: un 90 % menos, sin que se note, porque el sitio nunca la enseña a
+más de 1600 px (2000 en pantallas de doble densidad). Lo mismo vale para las
+fotos de las ediciones que sube el panel. El achique del navegador es cortesía
+—sube en segundos por el wifi de una sede— y el de Cloudinary es el cerrojo: va
+dentro de la firma, así que un script que se salte el navegador tampoco guarda
+nada más grande. En el peor caso, un día entero de tope son 300 fotos y unos
+200 MB.
+
+El panel pide la transformación de entrada con `entrada: true` al firmar. Sin
+eso el Worker no la firma, y es a propósito: firmada y no mandada, Cloudinary
+rechaza la subida, así que un panel viejo contra un Worker nuevo seguiría
+subiendo como antes en vez de dejar de subir. El sitio y el Worker se pueden
+desplegar en cualquier orden.
 
 Lo que sale en `/privacidad`: qué se guarda, que lo rechazado se borra, y cómo
 pedir que se retire algo publicado.

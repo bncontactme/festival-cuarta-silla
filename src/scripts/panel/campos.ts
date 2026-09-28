@@ -10,6 +10,7 @@ import type { Campo } from './esquema';
 import { TIPOS_ACTIVIDAD, SEDE_TODAS } from './esquema';
 import { el } from './dom';
 import { subirImagen, revisarArchivo } from './api';
+import { reducir } from '../../lib/reducir';
 
 export type Ctx = {
   /** Los nombres de sede vigentes, para los desplegables. */
@@ -372,7 +373,16 @@ function fotos(campo: Campo, fila: any, ctx: Ctx) {
       archivos = archivos.slice(0, Math.max(0, caben));
     }
     let hechas = 0;
-    for (const archivo of archivos) {
+    for (const original of archivos) {
+      // Las fotos de la galería —ediciones y entradas del público— se achican
+      // aquí antes de subir: a 2000 px y en JPEG, un 90 % menos. Ver
+      // `src/lib/reducir.ts`. Si el navegador no sabe abrirla, se queda la
+      // original y `revisarArchivo()` dice por qué no sube (un HEIC, un PDF).
+      let archivo = original;
+      if (/^(archivo|aportes)\//.test(carpeta)) {
+        if (zona) zona.textContent = `preparando ${hechas + 1} de ${archivos.length}…`;
+        try { archivo = await reducir(original); } catch { /* se queda la original */ }
+      }
       const queja = revisarArchivo(archivo);
       if (queja) { ctx.avisar(queja, 'ojo'); continue; }
       if (zona) zona.textContent = `subiendo ${hechas + 1} de ${archivos.length}…`;

@@ -107,6 +107,10 @@ export async function subirImagen(
     carpeta,
     nombre,
     content_type: archivo.type,
+    // «Sé mandar la transformación de entrada»: con esto el Worker firma el
+    // tope de 2000 px que Cloudinary aplica al recibir. Ver `alRecibir()` en
+    // `workers/panel/index.js`.
+    entrada: true,
   });
 
   const forma = new FormData();
@@ -117,6 +121,11 @@ export async function subirImagen(
   forma.append('upload_preset', firma.upload_preset);
   forma.append('folder', firma.folder);
   forma.append('asset_folder', firma.asset_folder);
+  // Lo que Cloudinary hace al recibir —achicar a 2000 px, pasar a JPEG— va
+  // dentro de la firma, así que tiene que viajar tal cual la firmó el Worker.
+  // Un Worker de antes no lo manda, y entonces no se manda nada.
+  if (firma.transformation) forma.append('transformation', firma.transformation);
+  if (firma.format) forma.append('format', firma.format);
 
   return new Promise((listo, falla) => {
     const x = new XMLHttpRequest();
