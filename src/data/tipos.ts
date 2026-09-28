@@ -241,6 +241,42 @@ export type Edicion = {
   fotos: Foto[];
 };
 
+/**
+ * Una entrada de la galería abierta: lo que mandó alguien del público desde
+ * `/galeria` y el festival aceptó en el panel.
+ *
+ * Pedido del cliente el 28/09: que la galería sea «un archivo compartido» al
+ * que cualquiera suba fotos, «máximo 5 por post», agrupadas en una entrada con
+ * título, nombre, Instagram y descripción, y que el festival revise y acepte
+ * sólo lo que tenga sentido.
+ *
+ * No es una `Edicion` con otra ropa. Una edición es del festival —su año, su
+ * lema, sus cifras— y una entrada es de quien la manda: lleva su nombre y su
+ * cuenta, y se lee como su post, no como la hoja de contactos de un año. Por eso
+ * van en colecciones distintas (`archivo` y `aportes`) y se pintan distinto.
+ *
+ * Quien manda sobre esta forma es `workers/panel/lib/validar.js` (`aporte()`),
+ * igual que con el resto.
+ */
+export type Aporte = {
+  /**
+   * Lo acuña el Worker al abrir el envío y no lo escribe nadie. Es también la
+   * carpeta de sus fotos en Cloudinary, `cuartasilla/aportes/<id>/`.
+   */
+  id: string;
+  titulo: string;
+  /** Cómo quiere salir quien la mandó. Sale publicado. */
+  nombre: string;
+  /** La cuenta a secas, sin arroba ni enlace: `lacuartasilla`. */
+  instagram?: string;
+  /** Los párrafos se separan con una línea en blanco. Hasta 800 caracteres. */
+  descripcion?: string;
+  /** De una a cinco. La primera es la portada de la entrada. */
+  fotos: Foto[];
+  /** El día que llegó, en Guadalajara: `AAAA-MM-DD`. */
+  fecha: string;
+};
+
 /** Quién pone. Sin `logo` se pinta el nombre en display: prefiero un hueco
  *  honesto a inventar un archivo que no nos dieron. */
 export type Marca = { nombre: string; logo?: string; url?: string };
@@ -273,6 +309,12 @@ export type Contenido = {
    * construir igual —tirando del texto que trae de fábrica— en vez de caerse.
    */
   festival?: Festival;
+  /**
+   * La galería abierta: las entradas del público ya aceptadas, en el orden en
+   * que se pintan. Opcional por lo mismo que `festival`: un Worker de antes del
+   * contrato 4 contesta sin ella, y el sitio construye igual — sin entradas.
+   */
+  aportes?: Aporte[];
   /** Una sola lista. El Worker todavía guarda un `colaboradores` al lado
    *  —vacío, y ahí se queda hasta que toque limpiar KV—: el sitio ya no lo
    *  lee y el panel ya no lo enseña. */

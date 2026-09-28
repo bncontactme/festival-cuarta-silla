@@ -277,6 +277,11 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
       <div class={conMovil ? 'escritorio' : undefined}>
         <slot />
       </div>
+      {/* Lo que sirve a los dos sitios a la vez: hoy, los diálogos de la
+          galería. Va fuera de `.movil` y de `.escritorio` a propósito — a la
+          que no toca se le apaga el `display`, y un `<dialog>` metido ahí
+          dentro no se abre por mucho que se le pida. */}
+      <slot name="capa" />
     </main>
 
     <Footer />

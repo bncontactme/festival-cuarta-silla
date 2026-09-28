@@ -143,6 +143,18 @@ if (sinNada(datos.festival) && !sinNada(guardado?.festival)) {
   log('  ', 'deja de salir en cuanto se guarde esa pestaña desde /admin.');
 }
 
+/**
+ * `aportes` que no viene tampoco pisa la copia: es la colección del contrato 4
+ * —la galería abierta— y un Worker de antes contesta sin ella. Sin esto, el
+ * rato entre mezclar un PR y que Cloudflare tenga el Worker nuevo publicaría la
+ * galería sin las entradas del público que ya estaban aceptadas. Aquí sí vale
+ * sólo «no viene»: una lista vacía que llega es que el festival las quitó.
+ */
+if (datos.aportes === undefined && guardado?.aportes !== undefined) {
+  datos.aportes = guardado.aportes;
+  log('⚠️ ', 'el panel contesta sin «aportes» (¿Worker viejo?): se conservan las del repo.');
+}
+
 const nuevo = JSON.stringify(datos, null, 2) + '\n';
 const viejo = guardado ? JSON.stringify(guardado, null, 2) + '\n' : '';
 
@@ -159,6 +171,7 @@ const cuenta = [
   `${datos.artistas.length} artistas`,
   `${datos.archivo.length} ediciones`,
   `${datos.marcas.patrocinadores.length} marcas`,
+  `${(datos.aportes ?? []).length} entradas del público`,
 ].join(' · ');
 
 log('✓', `versión ${datos.version} — ${cuenta}`);

@@ -352,6 +352,28 @@ export const privacidad = {
       'de un día para otro: cada visita se cuenta y se olvida. Lo que vemos es un número por página, ' +
       'el país y el tipo de aparato, y nos sirve para saber si los códigos QR de las sedes se usan.',
   },
+  /**
+   * Lo que pasa con lo que se manda desde el formulario de `/galeria`.
+   *
+   * Éste se pinta siempre, al revés que el de las visitas: el formulario está
+   * siempre, y quien lo llena tiene que poder leer qué se hace con su nombre
+   * antes de mandarlo — el formulario enlaza aquí, a `#fotos`.
+   *
+   * Dice lo que hace el Worker, ni más ni menos: lo rechazado se borra con sus
+   * fotos (`moderar`), y de la conexión sólo se cuenta cuántos envíos abrió en
+   * la última hora, con la IP pasada por un hash que caduca a la hora
+   * (`cs:tope:` en `workers/panel/lib/contenido.js`).
+   */
+  fotos: {
+    titulo: 'Si subes fotos a la galería',
+    cuerpo:
+      'Guardamos las fotos y lo que escribas en el formulario —título, nombre, Instagram y descripción— ' +
+      'para revisarlas y, si las aceptamos, publicarlas en la galería con tu nombre. Lo que no aceptamos ' +
+      'se borra, fotos incluidas. Las fotos se guardan en Cloudinary y el resto en Cloudflare. Para frenar ' +
+      'el correo basura contamos cuántas entradas se mandan desde cada conexión en una hora, sin guardar ' +
+      'tu dirección IP. Para retirar una entrada ya publicada, escríbenos por Instagram a ' +
+      '@festivaldearteconceptual.',
+  },
 };
 
 /** ── Rejilla del programa (Gantt) ─────────────────────────────────────────

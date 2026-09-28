@@ -1,0 +1,184 @@
+---
+import { conBase } from '../lib/base';
+import { archivo } from '../data/archivo';
+
+/**
+ * El formulario de la galería abierta: hasta cinco fotos, un título, un nombre,
+ * y si se quiere el Instagram y unas líneas.
+ *
+ * **Es el modal del manifiesto**, no uno nuevo: la cabecera roja con
+ * cuadrícula, el cuerpo en papel y el remate en tinta, con los mismos filetes
+ * de 2 px. Lo abre cualquier botón con `data-abre="subir"` y lo cierra
+ * `iniciarModales()` de `motion.ts`, con su animación, Esc y clic fuera. Lo que
+ * pasa dentro —elegir fotos, subirlas, mandar— es de `src/scripts/galeria.ts`.
+ *
+ * Va en el slot `capa` de `Base.astro` y no dentro de una de las dos versiones
+ * de la página: el mismo diálogo sirve al botón del teléfono y al del
+ * escritorio, y dentro de la versión apagada no se abriría.
+ *
+ * Sin JS no hay manera de subir nada —las fotos van del navegador a Cloudinary
+ * con una firma que pide el script— así que los botones que lo abren sólo
+ * existen con JS (`.solo-js`). Un botón que no hace nada es un letrero que
+ * miente, que es lo mismo que se decidió con el juego de la 404.
+ */
+const t = archivo.subir;
+---
+
+<dialog class="modal subir" data-modal="subir" aria-labelledby="subir-titulo">
+  <button type="button" class="modal-cerrar" data-cierra aria-label="Cerrar">✕</button>
+
+  <div class="modal-caja" data-lenis-prevent>
+    <header class="modal-cabecera">
+      <div class="cuadricula absolute inset-0 opacity-40" aria-hidden="true"></div>
+      <p class="meta relative mb-6">{t.rotulo}</p>
+      <h2
+        id="subir-titulo"
+        class="display relative max-w-[16ch] text-[11vw] leading-[0.92] sm:text-[5.5vw] lg:text-[3.4vw]"
+      >
+        {t.titulo}
+      </h2>
+      <p class="relative mt-5 max-w-[46ch] font-mono text-sm leading-relaxed text-papel">
+        {t.bajada}
+      </p>
+    </header>
+
+    {/* `novalidate`: las comprobaciones las hace el script, con los mensajes de
+        la casa y en el sitio del error, no con el globo del navegador — que en
+        cada uno sale distinto y en ninguno en español de aquí. */}
+    <form
+      class="subir-forma"
+      data-subir
+      data-textos={JSON.stringify({ ...t.mensajes, quitar: t.quitar, fotosNota: t.fotosNota })}
+      novalidate
+    >
+      <div class="subir-cuerpo">
+        <fieldset class="forma-campo">
+          <legend class="forma-rotulo">
+            <span>{t.fotos}</span>
+            <small data-subir-cuenta>{t.fotosNota}</small>
+          </legend>
+          <ul class="subir-fotos" data-subir-fotos>
+            {/* Las elegidas las pinta el script aquí delante, con su ✕ y su
+                barra de avance. El hueco de añadir es un `<label>` del input:
+                así el selector de archivos del teléfono se abre sin JS de
+                por medio, que en iOS es la diferencia entre abrirse o no. */}
+            <li class="subir-hueco" data-subir-hueco>
+              <label class="subir-anadir">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  class="sr-only"
+                  data-subir-archivo
+                />
+                <span aria-hidden="true" class="display text-3xl leading-none">+</span>
+                <span>{t.anadir}</span>
+                <small class="subir-soltar">{t.soltar}</small>
+              </label>
+            </li>
+          </ul>
+        </fieldset>
+
+        <label class="forma-campo">
+          <span class="forma-rotulo"><span>{t.tituloCampo}</span></span>
+          <input
+            class="forma-entrada"
+            name="titulo"
+            maxlength="120"
+            autocomplete="off"
+            placeholder={t.tituloAyuda}
+            required
+          />
+        </label>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <label class="forma-campo">
+            <span class="forma-rotulo">
+              <span>{t.nombre}</span>
+              <small>{t.nombreAyuda}</small>
+            </span>
+            <input
+              class="forma-entrada"
+              name="nombre"
+              maxlength="80"
+              autocomplete="name"
+              required
+            />
+          </label>
+          <label class="forma-campo">
+            <span class="forma-rotulo">
+              <span>{t.instagram}</span>
+              <small>{t.opcional}</small>
+            </span>
+            <input
+              class="forma-entrada"
+              name="instagram"
+              maxlength="80"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="@usuario"
+            />
+          </label>
+        </div>
+
+        <label class="forma-campo">
+          <span class="forma-rotulo">
+            <span>{t.descripcion}</span>
+            <small><span data-subir-contador>0</span>/800 · {t.opcional}</small>
+          </span>
+          <textarea
+            class="forma-entrada"
+            name="descripcion"
+            maxlength="800"
+            rows="4"
+            placeholder={t.descripcionAyuda}></textarea>
+        </label>
+
+        <label class="subir-permiso">
+          <input type="checkbox" name="permiso" required />
+          <span>
+            {t.permiso}
+            <a
+              href={conBase('/privacidad#fotos')}
+              target="_blank"
+              class="font-bold underline decoration-2 underline-offset-4 hover:text-rojo"
+            >
+              {t.privacidad}
+            </a>
+          </span>
+        </label>
+
+        {/* La trampa para robots: una persona no la ve ni llega a ella con el
+            tabulador; un script que rellena todo, sí. El Worker contesta que sí
+            y no guarda nada. `web` y no algo obvio como `trampa`. */}
+        <div class="subir-trampa" aria-hidden="true">
+          <label>Web <input name="web" tabindex="-1" autocomplete="off" /></label>
+        </div>
+
+        <p class="subir-queja" role="alert" data-subir-queja></p>
+      </div>
+
+      <footer class="modal-cierre subir-remate">
+        <button type="submit" class="boton boton--amarillo" data-subir-mandar>
+          {t.mandar}
+        </button>
+        <p class="subir-estado" role="status" data-subir-estado></p>
+      </footer>
+    </form>
+
+    {/* Lo que se ve al terminar. Sustituye al formulario en vez de salir
+        encima: el formulario ya no sirve, y dejarlo detrás invita a mandar lo
+        mismo dos veces. */}
+    <div class="subir-listo" data-subir-listo hidden>
+      <p class="display text-6xl leading-none text-rojo sm:text-7xl">{t.listo.titulo}</p>
+      <p class="mt-5 max-w-[44ch] font-mono text-sm leading-relaxed text-tinta/75">
+        {t.listo.cuerpo}
+      </p>
+      <div class="mt-8 flex flex-wrap gap-4">
+        <button type="button" class="boton" data-subir-otra>{t.listo.otra}</button>
+        <button type="button" class="boton boton--papel" data-cierra>{t.listo.cerrar}</button>
+      </div>
+    </div>
+  </div>
+</dialog>

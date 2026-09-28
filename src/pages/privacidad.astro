@@ -38,6 +38,21 @@ import { hayFaro } from '../lib/analitica';
           </p>
         </div>
       )}
+      {/* Siempre: el formulario de la galería está siempre y enlaza aquí. Ver
+          `privacidad.fotos`. `scroll-mt` deja el título a la vista bajo la
+          barra al llegar por el enlace. */}
+      <div
+        id="fotos"
+        class="mt-14 scroll-mt-24 border-t-2 border-tinta/20 pt-10"
+        data-reveal="arriba"
+      >
+        <h3 class="display text-2xl leading-none text-rojo lg:text-3xl">
+          {privacidad.fotos.titulo}
+        </h3>
+        <p class="mt-5 max-w-[65ch] leading-relaxed text-tinta/85">
+          {privacidad.fotos.cuerpo}
+        </p>
+      </div>
 
       <p class="meta mt-16 border-t-2 border-tinta/20 pt-6 text-tinta/50">
         {festival.creditoFooter}
