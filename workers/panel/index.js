@@ -6,13 +6,22 @@
 // Hermano del `archivo-upload` de Guadalajara de Noche, y a propósito: es el
 // mismo esquema (contraseña con hash, bloqueo por intentos, firmas de
 // Cloudinary que nunca sueltan la llave) porque ahí lleva meses aguantando.
-// Las diferencias son dos: aquí sólo hay una contraseña —no hay comunidad
-// mandando material, hay un comité que edita— y aquí lo que se guarda es
-// contenido estructurado, no texto libre, así que se valida antes de entrar.
+// Las diferencias eran dos: aquí sólo hay una contraseña —hay un comité que
+// edita— y aquí lo que se guarda es contenido estructurado, no texto libre, así
+// que se valida antes de entrar.
+//
+// Desde el 28/09 sí hay público mandando material, pero por una sola puerta y
+// sin contraseña: la galería abierta. Cualquiera sube hasta cinco fotos con su
+// título desde `/galeria`, y nada de eso sale en el sitio hasta que el festival
+// lo acepta en el panel. Ver «Galería abierta», más abajo.
 //
 // Rutas públicas (GET, abiertas a cualquier origen — sirven al sitio):
-//   GET /contenido               las cinco colecciones, en un viaje
+//   GET /contenido               las colecciones, en un viaje
 //   GET /contenido/<coleccion>   una sola
+//
+// Rutas del público (POST JSON, origen en lista blanca, SIN contraseña):
+//   envio-abrir   { fotos }                    firma de 1 a 5 fotos para un envío
+//   envio-mandar  { id, titulo, nombre, … }    manda el envío a revisión
 //
 // Rutas de admin (POST JSON, origen en lista blanca, contraseña):
 //   ping          probar la contraseña
@@ -23,6 +32,8 @@
 //   publicar      dispara el rebuild a mano
 //   historial     las últimas 20 versiones
 //   restaurar     { version }                  vuelve atrás
+//   envios        lo que el público mandó y espera revisión
+//   moderar       { id, decision, datos? }     aceptar (→ aportes) o rechazar
 //
 // Cinco contraseñas falladas dejan a esa IP fuera 15 minutos (KV: fail:<ip>).
 //
@@ -34,8 +45,10 @@ import {
   leerTodo, leerColeccion, leerMeta,
   guardarColeccion, podarHistorial, listarHistorial, restaurar,
   puedeDisparar, anotarDisparo, FRENO_SEGUNDOS,
+  abrirSubida, subidaAbierta, cerrarSubida, subidasAbandonadas,
+  guardarEnvio, leerEnvio, borrarEnvio, contarEnvios, listarEnvios,
 } from './lib/contenido.js';
-import { validar } from './lib/validar.js';
+import { validar, validarEnvio, ID_APORTE } from './lib/validar.js';
 import { slug } from './lib/slug.js';
 
 const ORIGENES = new Set([
@@ -58,7 +71,32 @@ const RAIZ = 'cuartasilla';
 /** Dónde se puede subir. Cualquier otra carpeta se rechaza: sin esto, el panel
  *  firma subidas a donde le pidan y deja de ser un panel para ser un disco
  *  duro abierto. */
-const CARPETAS = /^(artistas|marcas|sedes|archivo\/\d{4})$/;
+const CARPETAS = /^(artistas|marcas|sedes|archivo\/\d{4}|aportes\/[a-z0-9]{12,40})$/;
+
+// ── Galería abierta ───────────────────────────────────────────────────────────
+//
+// Los topes de la única puerta sin contraseña. No son de diseño: son frenos,
+// y están puestos pensando en un script, no en una persona. Una persona manda
+// una entrada, dos, cinco si estuvo los cuatro días.
+
+/** Lo que pidió el festival: «máximo 5 fotos por post». El validador lo
+ *  vuelve a mirar al mandar y al aceptar (`TOPES.fotosPorAporte`). */
+const FOTOS_POR_ENVIO = 5;
+
+/** Envíos que puede abrir una misma conexión en una hora. Cuenta los que se
+ *  abren, no los que se mandan: firmar es lo que deja subir a Cloudinary, y es
+ *  eso lo que hay que frenar. */
+const ENVIOS_POR_HORA = 8;
+
+/** Cuántos pueden esperar revisión a la vez. Pasado esto la puerta se cierra
+ *  sola hasta que el festival revise: una cola de quinientos no la revisa nadie,
+ *  y si llega a quinientos es que no la está mandando gente. */
+const COLA_MAX = 150;
+
+/** Pasado este rato, un envío abierto que nunca se mandó se da por perdido y el
+ *  cron borra sus fotos. La firma de Cloudinary caduca a la hora; dos es margen
+ *  para una subida lenta desde el wifi de una sede. */
+const SUBIDA_CADUCA_MS = 2 * 3600 * 1000;
 
 const MIMES = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/avif']);
 
@@ -88,8 +126,9 @@ const CUERPO_MAX = 1_000_000;
  *   1 → sedes, programa, artistas, archivo, marcas
  *   2 → + `sala` en las actividades (descripciones)
  *   3 → + `festival`: el texto de sala del festival y el manifiesto
+ *   4 → + `aportes` y los envíos del público: la galería abierta
  */
-const CONTRATO = 3;
+const CONTRATO = 4;
 
 export default {
   async fetch(request, env, ctx) {
@@ -139,10 +178,28 @@ export default {
       return json({ error: 'JSON inválido' }, 400, cors);
     }
 
+    const ip = request.headers.get('CF-Connecting-IP') || 'sin-ip';
+
+    // ── El público ────────────────────────────────────────────────────────────
+    // Las dos únicas escrituras sin contraseña: abrir un envío de fotos para la
+    // galería y mandarlo a revisión. Van antes del cerrojo de la contraseña, que
+    // si no contaría cada foto mandada como un intento fallido de entrar al
+    // panel — y a la quinta dejaría fuera a esa conexión, que en una sede es la
+    // del wifi de todo el mundo.
+    if (cuerpo.accion === 'envio-abrir' || cuerpo.accion === 'envio-mandar') {
+      try {
+        return cuerpo.accion === 'envio-abrir'
+          ? await envioAbrir(cuerpo, env, ip, cors)
+          : await envioMandar(cuerpo, env, cors);
+      } catch (e) {
+        console.error('galería:', e);
+        return json({ error: 'Algo falló de nuestro lado. Vuelve a intentarlo en un rato.' }, 500, cors);
+      }
+    }
+
     // ── Contraseña ────────────────────────────────────────────────────────────
     // Antes de comparar nada: si esta IP ya falló demasiado, ni se le escucha.
     // Sin esto, adivinar una contraseña es dejar un script corriendo.
-    const ip = request.headers.get('CF-Connecting-IP') || 'sin-ip';
     if (await bloqueada(env, ip)) {
       return json({ error: 'Demasiados intentos fallidos. Espera unos minutos.' }, 429, cors);
     }
@@ -164,6 +221,8 @@ export default {
         case 'estado-build': return await estadoBuild(env, cors);
         case 'historial':    return json({ ok: true, versiones: await listarHistorial(env) }, 200, cors);
         case 'restaurar':    return await volver(cuerpo, env, ctx, cors);
+        case 'envios':       return json({ ok: true, envios: await listarEnvios(env) }, 200, cors);
+        case 'moderar':      return await moderar(cuerpo, env, ctx, cors);
         default:             return json({ error: 'No sé hacer «' + cuerpo.accion + '»' }, 400, cors);
       }
     } catch (e) {
@@ -174,14 +233,270 @@ export default {
 
   // Respaldo semanal a Cloudinary (ver [triggers] en wrangler.toml). Es la
   // tercera copia: KV, el JSON comiteado en el repo, y esto.
+  //
+  // Y de paso, la escoba de la galería abierta: las fotos de los envíos que se
+  // abrieron y nunca se mandaron. Una vez por semana basta — no las ve nadie,
+  // sólo ocupan sitio.
   async scheduled(evento, env, ctx) {
     ctx.waitUntil(
       respaldar(env)
         .then(r => console.log('Respaldo semanal: versión ' + r.version))
         .catch(e => console.error('El respaldo semanal falló:', e)),
     );
+    ctx.waitUntil(
+      barrerSubidas(env)
+        .then(n => n && console.log('Galería: ' + n + ' envío(s) abandonado(s) barridos'))
+        .catch(e => console.error('Barrer los envíos abandonados falló:', e)),
+    );
   },
 };
+
+// ── Galería abierta ───────────────────────────────────────────────────────────
+//
+// Cualquiera puede subir fotos desde `/galeria`: hasta cinco por entrada, con su
+// título, su nombre y, si quiere, su Instagram y unas líneas. Nada de eso se ve
+// en el sitio hasta que el festival lo acepta en el panel.
+//
+// Por qué las fotos no pasan por aquí: un Worker gratis tiene diez milisegundos
+// de CPU por petición, y cinco fotos de teléfono son treinta megas. Se hace lo
+// mismo que en el panel: el Worker firma y el navegador sube directo a
+// Cloudinary. La llave no sale nunca de aquí.
+//
+// Lo que cambia respecto al panel es qué se firma. Allí se firma una carpeta, y
+// con esa firma se puede subir cuanto se quiera durante una hora —da igual, el
+// que la pide tiene la contraseña—. Aquí la pide cualquiera, así que se firma
+// **cada foto por separado, con su nombre puesto** (`aportes/<id>/1` … `/5`) y
+// `overwrite=false`: cada firma sirve para una foto, una sola vez, y no puede
+// pisar la que ya está. Sin eso, una firma pedida para mandar una foto serviría
+// para llenar la cuenta de Cloudinary en una tarde, o para cambiar una foto ya
+// aceptada por otra que nadie revisó.
+
+async function envioAbrir(cuerpo, env, ip, cors) {
+  if (!env.CLOUDINARY_API_SECRET || !env.CLOUDINARY_UPLOAD_PRESET) {
+    return json({ error: 'La galería todavía no recibe fotos.' }, 503, cors);
+  }
+
+  const n = Number(cuerpo.fotos);
+  if (!Number.isInteger(n) || n < 1 || n > FOTOS_POR_ENVIO) {
+    return json({ error: 'Son de una a ' + FOTOS_POR_ENVIO + ' fotos por entrada.' }, 400, cors);
+  }
+
+  // El tope por conexión. La IP se guarda hecha hash: lo único que hace falta
+  // es contar, no saber quién es.
+  const clave = 'cs:tope:' + (await sha256(ip)).slice(0, 32);
+  const hechos = Number(await env.CONTENIDO.get(clave)) || 0;
+  if (hechos >= ENVIOS_POR_HORA) {
+    return json({ error: 'Ya mandaste varias entradas seguidas. Espera un rato y vuelve a intentarlo.' }, 429, cors);
+  }
+
+  if ((await contarEnvios(env)) >= COLA_MAX) {
+    return json({ error: 'Hay muchas fotos esperando revisión. Vuelve a intentarlo en unos días.' }, 503, cors);
+  }
+
+  await env.CONTENIDO.put(clave, String(hechos + 1), { expirationTtl: 3600 });
+
+  const id = nuevoId();
+  await abrirSubida(env, id);
+
+  const folder = RAIZ + '/aportes/' + id;
+  const comunes = {
+    allowed_formats: 'jpg,png,webp,avif',
+    asset_folder: folder,
+    folder,
+    overwrite: 'false',
+    timestamp: String(Math.floor(Date.now() / 1000)),
+    upload_preset: env.CLOUDINARY_UPLOAD_PRESET,
+  };
+  const fotos = await Promise.all(
+    Array.from({ length: n }, async (_, i) => {
+      const params = { ...comunes, public_id: String(i + 1) };
+      return { ...params, signature: await sha256(cadenaFirma(params) + env.CLOUDINARY_API_SECRET) };
+    }),
+  );
+
+  return json({
+    ok: true,
+    id,
+    cloud_name: env.CLOUDINARY_CLOUD_NAME,
+    api_key: env.CLOUDINARY_API_KEY,
+    fotos,
+  }, 200, cors);
+}
+
+async function envioMandar(cuerpo, env, cors) {
+  const id = String(cuerpo.id || '');
+  if (!ID_APORTE.test(id)) return json({ error: 'Falta el envío.' }, 400, cors);
+
+  // La trampa: un campo que una persona no ve y un robot rellena. Se le contesta
+  // que sí —enseñarle que se le cazó sólo le enseña a esquivarlo— y no se guarda
+  // nada. Sus fotos, si subió alguna, se las lleva la escoba del cron.
+  if (String(cuerpo.web || '').trim()) return json({ ok: true }, 200, cors);
+
+  // Un reintento de uno que ya entró —se cortó la red justo al contestar— no es
+  // un error: el envío está, y eso es lo que hay que decir.
+  if (await leerEnvio(env, id)) return json({ ok: true }, 200, cors);
+  if (!(await subidaAbierta(env, id))) {
+    return json({ error: 'Este envío caducó. Vuelve a mandarlo: las fotos siguen en tu pantalla.' }, 410, cors);
+  }
+
+  const { datos, errores } = validarEnvio(cuerpo, {
+    id,
+    fecha: hoyEnGDL(),
+    cloud: env.CLOUDINARY_CLOUD_NAME,
+  });
+  if (errores.length) {
+    return json({ error: 'Falta algo por llenar.', errores }, 400, cors);
+  }
+
+  await guardarEnvio(env, { ...datos, recibido: new Date().toISOString() });
+  return json({ ok: true }, 200, cors);
+}
+
+/**
+ * Aceptar o rechazar un envío.
+ *
+ * **Pasa en el momento, no al darle a Guardar.** Es lo único del panel que
+ * funciona así, y es a propósito: una cola de revisión que se queda «aceptada
+ * pero sin guardar» es una cola en la que no se sabe qué está hecho. El panel lo
+ * pinta en su propia pestaña, lejos del botón de Guardar, por lo mismo.
+ *
+ *   · **rechazar** borra el envío y sus fotos de Cloudinary. No queda nada: lo
+ *     que no se publica no se guarda.
+ *   · **aceptar** pone la entrada ARRIBA de `aportes` —con lo que el festival
+ *     haya corregido: títulos, nombre, las fotos que se quitaron— y lanza el
+ *     rebuild. Es un guardado de verdad: sube la versión y deja su instantánea
+ *     en el historial, así que también se deshace.
+ *
+ * Al aceptar se pueden quitar y reordenar fotos, pero no añadir: una foto que no
+ * vino en el envío no es parte de lo que se está revisando.
+ *
+ * Y se comprueba la versión igual que al guardar. No por la entrada —se pone
+ * encima de lo que haya en KV, no pisa nada—, sino por lo que el panel hace con
+ * la respuesta: se queda con el número de versión nuevo. Si alguien guardó en
+ * medio y el panel adoptara ese número sin enterarse, su siguiente Guardar
+ * pasaría el control de choques con datos viejos y pisaría lo del otro.
+ */
+async function moderar(cuerpo, env, ctx, cors) {
+  const id = String(cuerpo.id || '');
+  const envio = ID_APORTE.test(id) ? await leerEnvio(env, id) : null;
+  if (!envio) {
+    return json({
+      error: 'Ese envío ya no está en la fila: puede que alguien lo haya revisado desde otra pestaña.',
+      noEsta: true,
+    }, 404, cors);
+  }
+
+  if (cuerpo.decision === 'rechazar') {
+    await borrarEnvio(env, id);
+    ctx.waitUntil(borrarFotosDeAporte(env, id, envio.fotos));
+    return json({ ok: true }, 200, cors);
+  }
+  if (cuerpo.decision !== 'aceptar') {
+    return json({ error: 'La decisión es «aceptar» o «rechazar».' }, 400, cors);
+  }
+
+  const vista = cuerpo.version;
+  if (Number.isFinite(vista)) {
+    const { version } = await leerMeta(env);
+    if ((version || 0) !== vista) {
+      return json({
+        error: 'Alguien más guardó mientras revisabas (ibas por la versión ' + vista +
+               ' y ya va la ' + version + ').',
+        conflicto: { tuya: vista, actual: version },
+      }, 409, cors);
+    }
+  }
+
+  const propuesta = cuerpo.datos && typeof cuerpo.datos === 'object' ? cuerpo.datos : {};
+  const originales = new Set(envio.fotos.map(f => f.src));
+  const fotos = Array.isArray(propuesta.fotos)
+    ? propuesta.fotos.filter(f => f && originales.has(f.src)).map(f => ({ src: f.src, pie: f.pie }))
+    : envio.fotos;
+
+  const aporte = { id, fecha: envio.fecha, fotos };
+  for (const k of ['titulo', 'nombre', 'instagram', 'descripcion']) {
+    aporte[k] = k in propuesta ? propuesta[k] : envio[k];
+  }
+
+  const actuales = await leerColeccion(env, 'aportes');
+  const { datos, errores, avisos } = validar('aportes', [aporte, ...actuales.filter(a => a.id !== id)]);
+  if (errores.length) {
+    return json({ error: 'No se aceptó: hay ' + errores.length + ' cosa(s) que revisar', errores, avisos }, 400, cors);
+  }
+
+  const meta = await guardarColeccion(env, 'aportes', datos);
+  await borrarEnvio(env, id);
+  ctx.waitUntil(podarHistorial(env).catch(e => console.error('podar historial:', e)));
+
+  const quedan = new Set(fotos.map(f => f.src));
+  const fuera = envio.fotos.filter(f => !quedan.has(f.src));
+  if (fuera.length) ctx.waitUntil(borrarFotosDeAporte(env, null, fuera));
+
+  const despliegue = await publicarSilencioso(env);
+  return json({ ok: true, ...meta, aportes: datos, avisos, despliegue }, 200, cors);
+}
+
+/** Un id de envío: dieciséis caracteres al azar. Es también el nombre de su
+ *  carpeta en Cloudinary, y nadie tiene que poder adivinar el de otro. */
+function nuevoId() {
+  const bytes = crypto.getRandomValues(new Uint8Array(10));
+  return [...bytes].map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 16);
+}
+
+/** El día de hoy en Guadalajara, `AAAA-MM-DD`. Es la fecha que lleva la entrada:
+ *  una foto mandada el sábado a las once de la noche es del sábado, aunque en
+ *  UTC ya sea domingo. */
+function hoyEnGDL() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Mexico_City', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date());
+}
+
+/** El `public_id` de una URL de entrega: lo que va entre la versión y la
+ *  extensión. `…/upload/v17/cuartasilla/aportes/abc/1.jpg` → `cuartasilla/aportes/abc/1`. */
+function idDeUrl(url) {
+  const m = /\/image\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-z0-9]{2,5})?$/i.exec(String(url));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+/**
+ * Borra fotos de la galería abierta en Cloudinary: las que se nombran y, si se
+ * pasa el `id`, cualquier otra que haya quedado en su carpeta.
+ *
+ * Nunca tira. Se llama después de contestar, y que Cloudinary no conteste no
+ * puede deshacer una decisión que ya se tomó: lo peor que pasa es una foto de
+ * más en la cuenta, que no enlaza nadie.
+ *
+ * El cerrojo es el de siempre, más estrecho: sólo dentro de `cuartasilla/aportes/`.
+ */
+async function borrarFotosDeAporte(env, id, fotos = []) {
+  const dentro = RAIZ + '/aportes/';
+  const ids = fotos.map(f => idDeUrl(f.src)).filter(p => p && p.startsWith(dentro));
+  const pedidos = [];
+  if (ids.length) {
+    const params = new URLSearchParams();
+    ids.forEach(p => params.append('public_ids[]', p));
+    pedidos.push(borrarEnCloudinary(env, params));
+  }
+  if (id && ID_APORTE.test(id)) {
+    pedidos.push(borrarEnCloudinary(env, new URLSearchParams({ prefix: dentro + id + '/' })));
+  }
+  const hechos = await Promise.allSettled(pedidos);
+  for (const h of hechos) {
+    if (h.status === 'rejected') console.error('borrar fotos:', h.reason);
+    else if (!h.value.ok) console.error('borrar fotos: Cloudinary contestó ' + h.value.status);
+  }
+}
+
+/** Los envíos que se abrieron y nunca se mandaron: sus fotos y su marca. */
+async function barrerSubidas(env) {
+  const perdidas = await subidasAbandonadas(env, SUBIDA_CADUCA_MS);
+  for (const id of perdidas) {
+    await borrarFotosDeAporte(env, id);
+    await cerrarSubida(env, id);
+  }
+  return perdidas.length;
+}
 
 // ── Guardar ───────────────────────────────────────────────────────────────────
 
@@ -442,7 +757,7 @@ async function firmar(cuerpo, env, cors) {
 
   const carpeta = String(cuerpo.carpeta || '').trim();
   if (!CARPETAS.test(carpeta)) {
-    return json({ error: 'Carpeta no permitida. Válidas: artistas, marcas, sedes, archivo/<año>' }, 400, cors);
+    return json({ error: 'Carpeta no permitida. Válidas: artistas, marcas, sedes, archivo/<año>, aportes/<id>' }, 400, cors);
   }
 
   // Dentro de artistas cada quien tiene la suya, para poder mirar la cuenta de
@@ -505,12 +820,18 @@ async function borrarMedio(cuerpo, env, cors) {
 
   const params = new URLSearchParams();
   ids.forEach(id => params.append('public_ids[]', id));
-  const res = await fetch(
+  const res = await borrarEnCloudinary(env, params);
+  const datos = await res.json().catch(() => ({}));
+  return json(datos, res.ok ? 200 : 502, cors);
+}
+
+/** Un DELETE a la API de administración de Cloudinary: por `public_ids[]` o
+ *  por `prefix`. El cerrojo de carpeta lo pone quien llama. */
+function borrarEnCloudinary(env, params) {
+  return fetch(
     `https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD_NAME}/resources/image/upload?${params}`,
     { method: 'DELETE', headers: { Authorization: 'Basic ' + basica(env) } },
   );
-  const datos = await res.json().catch(() => ({}));
-  return json(datos, res.ok ? 200 : 502, cors);
 }
 
 async function listarCloudinary(env, prefijo) {
