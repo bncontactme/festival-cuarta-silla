@@ -35,6 +35,7 @@ import {
   registroEventos,
   sedes,
   estadoPrograma,
+  festivalTerminado,
 } from '../../data/site';
 import { artistas } from '../../data/artistas';
 import { archivo } from '../../data/archivo';
@@ -217,27 +218,46 @@ const duracionCinta = ((tira.length * PASO) / VELOCIDAD).toFixed(1);
         `[data-cuenta]` cuando la resta llega a cero. Ya lo hacía —es lo que
         apagaba los números— así que aquí no hay guion nuevo, sólo dos reglas
         en `movil.css` que enseñan una cosa y esconden la otra. */}
-    <div class="portada-tiempo" data-cuenta={festival.inicioISO}>
-      <p class="meta portada-cuando">
-        24 — 27 SEP {festival.anio}
-        <span class="opacity-55" aria-hidden="true">/</span>
-        Guadalajara
-      </p>
-      <dl class="portada-reloj">
-        {
-          cuenta.map(({ campo, label }) => (
-            <div>
-              <dd class="display display-centro" data-campo={campo}>
-                --
-              </dd>
-              <dt class="meta">{label}</dt>
-            </div>
-          ))
-        }
-      </dl>
+    {/* ── Y cuando ya pasó ─────────────────────────────────────────────
+        El tercer oficio del bloque, y el último: con el festival terminado no
+        hay nada que contar ni nada abierto, y lo que quedaba era la cuenta
+        atrás muerta en «00 00 00 00». Ahí va el agradecimiento, parpadeando
+        como un letrero de feria (`.portada-gracias`, en `movil.css`). Sin
+        `data-cuenta`: `motion.ts` no tiene nada que marcar aquí. */}
+    {
+      festivalTerminado ? (
+        <div class="portada-tiempo portada-tiempo--gracias">
+          <p class="meta portada-cuando">
+            24 — 27 SEP {festival.anio}
+            <span class="opacity-55" aria-hidden="true">/</span>
+            Guadalajara
+          </p>
+          <p class="display display-centro portada-gracias">{festival.gracias}</p>
+        </div>
+      ) : (
+        <div class="portada-tiempo" data-cuenta={festival.inicioISO}>
+          <p class="meta portada-cuando">
+            24 — 27 SEP {festival.anio}
+            <span class="opacity-55" aria-hidden="true">/</span>
+            Guadalajara
+          </p>
+          <dl class="portada-reloj">
+            {
+              cuenta.map(({ campo, label }) => (
+                <div>
+                  <dd class="display display-centro" data-campo={campo}>
+                    --
+                  </dd>
+                  <dt class="meta">{label}</dt>
+                </div>
+              ))
+            }
+          </dl>
 
-      <AhoraPortada variante="movil" />
-    </div>
+          <AhoraPortada variante="movil" />
+        </div>
+      )
+    }
 
     {/* ── Patrocinadores ─────────────────────────────────────────────────
         La misma cinta del escritorio, a escala de teléfono. Las fichas son

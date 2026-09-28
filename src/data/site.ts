@@ -26,6 +26,13 @@ export const festival = {
   anio: '2026',
   // Fecha de arranque para la cuenta regresiva (24 sep 2026, 08:00 hora de GDL / UTC-6)
   inicioISO: '2026-09-24T08:00:00-06:00',
+  /** Cuándo se acaba: la medianoche del domingo 27, hora de GDL. De aquí sale
+   *  `festivalTerminado`, más abajo. */
+  finISO: '2026-09-28T00:00:00-06:00',
+  /** Lo que dice la portada cuando el festival ya pasó: en el titular de la
+   *  banda del programa y, parpadeando, en el sitio de la cuenta regresiva del
+   *  teléfono. Pedido del 28/09. */
+  gracias: '¡Gracias por venir!',
   /**
    * La convocatoria CERRÓ. Ya no hay ni un botón que lleve aquí —«ya ese botón
    * muere», 26/08— y por eso no se borra el dato: el PDF sigue circulando en
@@ -50,6 +57,21 @@ export const festival = {
   creditoFooter:
     '© 2026 Creado por Festival De Arte Conceptual La Cuarta Silla',
 };
+
+/**
+ * Si el festival ya pasó. **Se decide al construir, no en el navegador.**
+ *
+ * El sitio se reconstruye con cada publicación y con cada guardado del panel,
+ * y desde el 28/09 cualquier build cae después de `finISO`: no hay un momento
+ * en que una página ya construida tenga que cambiar sola de estado. Decidirlo
+ * aquí deja la portada terminada en HTML quieto, sin un guion que la dé vuelta
+ * después de pintar — que era lo que dejaba la cuenta regresiva del teléfono
+ * congelada en «00 00 00 00» el lunes por la mañana.
+ *
+ * Para la edición que viene: se cambian `inicioISO` y `finISO` y esto vuelve a
+ * `false` solo, con la cuenta regresiva y la banda del ahora de siempre.
+ */
+export const festivalTerminado = Date.now() >= new Date(festival.finISO).getTime();
 
 /** La portada no gasta pestaña: se va por el logo, que es donde todo el mundo
  *  la busca. Sigue entera en el pie. */

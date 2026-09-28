@@ -315,6 +315,37 @@
     display: none;
   }
 
+  /* ── ¡Gracias por venir! ────────────────────────────────────────────────
+     El festival ya pasó: en el sitio de los cuatro números, el agradecimiento
+     a lo ancho de la banda roja, parpadeando como el letrero de una feria.
+
+     Parpadea cambiando de tinta —amarillo, papel, amarillo— y no apagándose:
+     un letrero que desaparece la mitad del tiempo se lee la mitad del tiempo.
+     Un cambio por segundo, lejos de los tres destellos por segundo que no se
+     pueden pasar. Con menos movimiento pedido se queda quieto, en amarillo. */
+  .portada-gracias {
+    padding: 0.6rem 1rem 0.85rem;
+    border-top: 1px solid
+      color-mix(in srgb, var(--color-papel) 25%, transparent);
+    /* A lo ancho de la banda, como un letrero: 12,5vw deja el renglón en el
+       93 % del hueco en cualquier teléfono, del de 320 al de 430. */
+    font-size: 12.5vw;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .portada-gracias {
+      animation: gracias-parpadeo 1.1s steps(1, end) infinite;
+    }
+  }
+
+  @keyframes gracias-parpadeo {
+    50% {
+      color: var(--color-papel);
+    }
+  }
+
   /* ── Patrocinadores ─────────────────────────────────────────────────────
      La misma cinta del escritorio, encogida a la anchura de un teléfono:
      las fichas blancas —`.mosaico`, de global.css— y el `marquee` corriendo
