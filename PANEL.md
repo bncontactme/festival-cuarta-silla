@@ -44,7 +44,7 @@ llene solo conforme se llena eso.
 |---|---|---|
 | **Actualización** | Rebuild automático | El sitio sigue siendo HTML estático. El Gantt son 1685 líneas y el Mapa 1024: reescribirlos para que rendericen en el navegador es rehacer el sitio. Guardar tarda ~60-90 s en verse publicado; para un festival de cuatro días es de sobra. |
 | **Fotos** | Cloudinary, reusando la cuenta de GDN | Carpeta aparte (`cuartasilla/`). Cero trámite, cero credenciales nuevas. Un archivo de cuatro ediciones son cientos de fotos: en git se quedan para siempre y clonar el repo se vuelve lento. |
-| **Permisos** | Una sola contraseña de admin | Se descarta el esquema de dos niveles de GDN. Aquí no hay una comunidad mandando material: hay un comité chico que edita y publica. Menos que explicar y menos que mantener. |
+| **Permisos** | Una sola contraseña de admin | Se descarta el esquema de dos niveles de GDN. Aquí no hay una comunidad mandando material: hay un comité chico que edita y publica. Menos que explicar y menos que mantener. Desde el 28/09 el público sí manda fotos a la galería, pero por una puerta aparte y sin entrar al panel: ver *La galería abierta*. |
 | **Hosting** | GitHub Pages | Era Cloudflare Pages, y se cambió por el dominio: se registró en Wix el 26/07/2026, ICANN no deja transferirlo hasta el 24/09 —el día que arranca el festival— y Wix no deja cambiar los nameservers. Cloudflare Pages no puede servir el dominio raíz con el DNS fuera de Cloudflare; GitHub Pages sí, con registros A. Se paga con las redirecciones viejas en `<meta refresh>` en vez de 301. Cuando el dominio salga de Wix se puede revisar: `public/_redirects` ya está escrito. |
 
 ---
@@ -142,11 +142,19 @@ cs:col:artistas        Artista[]
 cs:col:archivo         Edicion[]
 cs:col:marcas          { patrocinadores: Marca[] }
 cs:col:festival        { sala: SalaFestival, manifiesto: Manifiesto }
+cs:col:aportes         Aporte[]   ← la galería abierta, lo ya aceptado
 
 cs:meta                { version, actualizado, ultimoDeploy }
 cs:hist:<version>      instantánea completa (se conservan las últimas 20)
 cs:build               marca de tiempo del último rebuild disparado
+
+cs:subida:<id>         un envío del público abierto y sin mandar
+cs:envio:<id>          un envío del público esperando revisión
+cs:tope:<hash de ip>   cuántos envíos abrió esa conexión en la última hora
 ```
+
+Las tres últimas no son colecciones: no se versionan, no entran en el historial
+y no salen por `GET /contenido`. Ver *La galería abierta*, más abajo.
 
 Los tipos son **exactamente** los que ya están en `src/data/*.ts`. No se
 inventa un esquema nuevo: `Sede`, `ActividadGantt`, `Artista`, `Edicion`,
@@ -217,7 +225,20 @@ publicar     dispara el rebuild a mano
 estado-build cómo TERMINÓ el último build (se lo pregunta a Actions)
 historial    las últimas 20 versiones
 restaurar    { version } → vuelve atrás
+envios       lo que mandó el público y espera revisión
+moderar      { id, decision, datos?, version } → aceptar (a `aportes`) o rechazar
 ```
+
+### Escrituras del público (POST JSON, origen restringido, SIN contraseña)
+
+```
+envio-abrir  { fotos } → un id y una firma de Cloudinary por foto (de 1 a 5)
+envio-mandar { id, titulo, nombre, instagram?, descripcion?, fotos, permiso }
+```
+
+Son las dos únicas puertas sin contraseña, y van antes del cerrojo de la
+contraseña a propósito: si no, cada envío contaría como un intento fallido de
+entrar al panel, y a la quinta foto se quedaría fuera el wifi entero de una sede.
 
 ### La validación es la mitad del trabajo
 
@@ -342,10 +363,12 @@ decoración, es que se entienda de un vistazo dónde estás.
 No usa el layout del sitio: nada de Lenis, ni cortinas, ni portada. Layout
 propio, denso, de teclado.
 
-**Siete pestañas**: cinco de colección, la de Registro —que no es una colección
-sino el programa mirado por otra puerta— y la de Texto de sala / Manifiesto, que
-sí es una colección pero no es una lista: son dos textos y uno de cada. Las de
-lista, cada una:
+**Ocho pestañas**: cinco de colección —Galería lleva dos tablas, las entradas
+del público y las ediciones—, la de Registro —que no es una colección sino el
+programa mirado por otra puerta—, la de Envíos —la fila de revisión de la
+galería abierta, que tampoco es una colección y no pasa por Guardar— y la de
+Texto de sala / Manifiesto, que sí es una colección pero no es una lista: son
+dos textos y uno de cada. Las de lista, cada una:
 
 - Lista editable, **una fila plegada por elemento**: título y los cuatro datos
   que la identifican. Se abre la que se va a tocar. Diecinueve actividades
@@ -605,6 +628,91 @@ saca la misma máquina que las de las actividades — `imprimirHojasQR()` en
 `sala.ts` dejó de pedir actividades y pide lo que de verdad necesita: un título,
 una dirección y qué pone en el cabecero.
 
+### La galería abierta
+
+Pedido del 28/09: que la galería sea **un archivo compartido**. Cualquiera sube
+fotos desde `/galeria` —hasta cinco por entrada, con título, nombre y, si
+quiere, su Instagram y una descripción— y el festival revisa y acepta sólo lo
+que tenga sentido.
+
+Es la primera vez que entra material del público, y cambia una frase de la
+tabla de decisiones de arriba («aquí no hay una comunidad mandando material»).
+No cambia la contraseña única: el público no entra al panel, entra por una
+puerta aparte que sólo sabe hacer dos cosas.
+
+**Cómo viaja una entrada:**
+
+1. En el navegador, cada foto se **rehace**: a 2400 px como mucho y en JPEG.
+   Una foto de teléfono de hoy son 12 MB y la galería la enseña a 1600; subir
+   el original por el wifi de una sede es un minuto por foto para nada. Y de
+   paso se le caen los metadatos, que en una foto de teléfono incluyen la
+   coordenada GPS de donde se tomó.
+2. `envio-abrir` da un id y **una firma de Cloudinary por foto**, cada una con
+   su nombre puesto (`cuartasilla/aportes/<id>/1` … `/5`) y `overwrite=false`.
+   En el panel se firma una carpeta —y con esa firma se sube lo que se quiera
+   durante una hora—, pero allí la pide quien tiene la contraseña. Aquí la pide
+   cualquiera: una firma sirve para una foto, una vez, y no pisa la que ya está.
+3. Las fotos suben del navegador a Cloudinary directo. Por el Worker no pasa ni
+   un byte de foto: con diez milisegundos de CPU no se mueven treinta megas.
+4. `envio-mandar` manda el resto con las URLs. El Worker comprueba que el id lo
+   dio él y no se usó, que hay permiso, y que cada foto es de su cuenta de
+   Cloudinary **y de la carpeta de este envío** — ni fotos enlazadas de fuera
+   ni las de otro envío. Lo guarda en `cs:envio:<id>`.
+
+**La revisión es la pestaña Envíos** del panel, con la cuenta en rojo mientras
+haya algo esperando. Una tarjeta por envío: las fotos a la izquierda —cada una
+se abre entera— y los textos a la derecha, **editables**: se puede corregir una
+tilde o un nombre en mayúsculas sostenidas, y quitar fotos. Añadir no: una foto
+que no vino en el envío no es parte de lo que se está revisando.
+
+**Aceptar y rechazar pasan en el momento, sin Guardar**, y es lo único del
+panel que funciona así. Una fila de revisión con cosas «aceptadas pero sin
+guardar» es una fila en la que no se sabe qué está hecho. Por eso vive en su
+propia pestaña, lejos del botón de Guardar, y el botón dice lo que hace:
+«Aceptar y publicar».
+
+- **Rechazar** borra el envío y sus fotos de Cloudinary. Lo que no se publica
+  no se guarda.
+- **Aceptar** pone la entrada arriba de `aportes` —una colección como las
+  otras: versión, historial, restaurar— y lanza el rebuild. Desde ahí es una
+  fila más de la tabla «Entradas del público» de la pestaña Galería: se
+  corrige, se reordena arrastrando y se borra con Guardar, como todo.
+
+Aceptar comprueba la versión igual que Guardar, y no por la entrada —se pone
+encima de lo que haya, no pisa nada— sino por lo que el panel hace después:
+se queda con el número de versión nuevo, y si alguien guardó en medio, su
+siguiente Guardar pasaría el control de choques con datos viejos. Si hay 409 y
+en el panel no hay nada sin guardar, se pone al día solo y vuelve a intentar;
+si hay algo sin guardar, lo dice y no toca nada. Por lo mismo, con cambios sin
+guardar en las entradas de la Galería no deja aceptar: aceptar escribe esa
+misma lista.
+
+**En el sitio** hay tres cosas nuevas y ninguna estética nueva: la banda de
+«Sube tus fotos» arriba de todo, siempre —llena o vacía—; las entradas como
+fichas de la casa con una hoja de contactos arriba, antes de las ediciones; y
+un visor a pantalla entera, que es el modal del manifiesto en su versión
+oscura. El formulario es ese mismo modal. Sin JS el botón de subir no se pinta
+—las fotos necesitan la firma que pide el script— y las fotos de las fichas
+abren la imagen en grande en vez del visor.
+
+**Los frenos**, pensados para un script y no para una persona:
+
+| | |
+| --- | --- |
+| Fotos por entrada | 5, en el navegador, al firmar, al mandar y al aceptar |
+| Envíos por conexión | 8 por hora (la IP se guarda hecha hash y caduca a la hora) |
+| Fila de revisión | 150 esperando; pasado eso la puerta se cierra sola hasta que se revise |
+| Trampa | un campo invisible que un robot rellena: se le dice que sí y no se guarda |
+| Abandonados | las fotos de un envío abierto y nunca mandado las barre el cron semanal |
+
+Lo que sale en `/privacidad`: qué se guarda, que lo rechazado se borra, y cómo
+pedir que se retire algo publicado.
+
+Si algún día la fila se llena de basura de verdad, el siguiente paso es
+[Turnstile](https://developers.cloudflare.com/turnstile/), el captcha de
+Cloudflare, delante de `envio-abrir`. No se puso ya porque pide dar de alta una
+clave y añade un script de terceros a la página, y hoy no hay nada que frenar.
+
 ### Que no se pisen dos personas
 
 Guardar era un `put` a secas. Con un comité editando y la semana del festival
@@ -723,6 +831,7 @@ juntar: las fotos de tres ediciones anteriores no las tiene nadie más.
 | **5** | Rebuild automático + respaldo comiteado | ✅ escrito; el rebuild se enciende al poner `GITHUB_TOKEN` y `GITHUB_REPO` |
 | **6** | Registro a eventos: pestaña del panel y `/registro` de verdad | ✅ |
 | **7** | Extras: papelera, gestor de medios de Cloudinary, refresco en vivo de `/programa` | — |
+| **8** | La galería abierta: el público sube, el festival revisa en Envíos | ✅ contrato 4 |
 
 El historial y la vista previa del programa, que estaban apuntados como extras
 de la fase 6, acabaron entrando en la 4: los dos son de las cosas que deciden si
