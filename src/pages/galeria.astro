@@ -61,24 +61,6 @@ const cuenta = [
       }
 
       {
-        hayNada ? (
-          <div class="p-4">
-            {/* Sin el rótulo de «En construcción». La galería no está a medio
-                hacer: está hecha y vacía, que no es lo mismo — y lo segundo lo
-                dice mejor la propia ficha, con lo que falta y cómo ayudar a
-                llenarlo. En escritorio el rótulo sigue: allí la banda es una
-                sección de una página larga y sin él la ficha aparece sin
-                presentación. */}
-            <div class="ficha">
-              <p class="display text-3xl leading-[0.95]">
-                Todavía no hay fotos
-              </p>
-              <p class="mt-4 font-mono text-[0.8rem] leading-relaxed text-tinta/70">
-                {archivo.vacio}
-              </p>
-            </div>
-          </div>
-        ) : (
           ediciones.map((e) => (
             <section class="border-b-2 border-tinta/20 px-4 py-6">
               <p class="meta text-[0.6rem] text-tinta/55">{e.anio}</p>
@@ -103,7 +85,6 @@ const cuenta = [
               </div>
             </section>
           ))
-        )
       }
     </Pantalla>
   </Fragment>
@@ -188,29 +169,6 @@ const cuenta = [
   }
 
   {
-    hayNada ? (
-      <section class="bg-amarillo">
-        {/* Mismo criterio que artistas: sin ediciones cargadas la banda se
-            aprieta. Con `py-32` la ficha quedaba sola en el medio de una
-            pantalla entera de negro — que además era negro, y el negro dejó
-            de ser campo en todo el sitio. Sobre amarillo la ficha se lee como
-            una nota clavada en el tablero y no como una ausencia. */}
-        <div class="px-4 py-14 sm:px-6 lg:px-10 lg:py-16">
-          <div class="ficha ficha--ancha max-w-2xl" data-reveal="escala">
-            <p class="meta flex items-center gap-4 text-tinta">
-              <span class="inline-block h-[2px] w-10 bg-rojo" />
-              {archivo.estado}
-            </p>
-            <p class="display mt-4 text-4xl leading-[0.95] lg:text-5xl">
-              Todavía no hay fotos
-            </p>
-            <p class="mt-5 max-w-[52ch] font-mono text-sm leading-relaxed text-tinta/70">
-              {archivo.vacio}
-            </p>
-          </div>
-        </div>
-      </section>
-    ) : (
       /* Una banda por edición, y dentro una hoja de contactos. El año manda:
          va en display al tamaño de un titular de sección, porque en un
          archivo lo primero que se busca es el año y no el nombre.
@@ -320,7 +278,6 @@ const cuenta = [
         </section>
         );
       })
-    )
   }
 
   <section class="relative overflow-hidden bg-rojo text-amarillo">

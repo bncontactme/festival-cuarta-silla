@@ -24,23 +24,17 @@ import type { Aporte, Edicion, Foto } from './tipos';
  * Las dos listas **las carga el festival desde `/admin`** —las ediciones a mano,
  * las entradas aceptando lo que llega—; aquí sólo queda el texto de la sección.
  *
- * Puede estar vacía y no pasa nada: el hueco está diseñado. Lo que se pinta
- * mientras tanto no cuenta cuántas ediciones hubo ni de cuándo —eso no nos lo
- * han dado y no se deduce del nombre—. Lo que sí hace ahora es pedir fotos,
- * porque ahora sí se juntan: el botón de subir está siempre, lleno o vacío.
+ * Puede estar vacía y no pasa nada. **Vacía no tiene hueco**: había una ficha
+ * de «En construcción / Todavía no hay fotos» debajo de la banda de subir, y
+ * se quitó el 28/09 a pedido del cliente. Con la galería abierta, lo que se lee
+ * sin fotos es la invitación a subirlas, y una segunda caja diciendo que no hay
+ * nada sobraba. Llena, las entradas y las ediciones salen debajo solas.
  */
 
 export type { Foto, Edicion, Aporte };
 
 export const archivo = {
   titulo: 'Galería',
-  estado: 'En construcción',
-  /** Lo que se lee en el hueco mientras no haya ni ediciones ni entradas.
-   *
-   *  No cuenta. Decía «las tres ediciones anteriores» —ese tres no lo sabe
-   *  nadie aquí, se dedujo del nombre—. Pedir, en cambio, ya no lo pide este
-   *  renglón: lo pide la banda de «Sube tus fotos», que está justo encima. */
-  vacio: 'Aquí va a quedar el registro del festival: el de sus ediciones y el de quienes estuvieron.',
   acciones: {
     ver: 'Ver la galería',
     sedes: 'sedes',
