@@ -1,0 +1,113 @@
+---
+import { imagen, juegoDeImagenes } from '../lib/imagen';
+import { archivo, type Aporte } from '../data/archivo';
+
+/**
+ * Una entrada de la galería abierta: las fotos de alguien, juntas, con su
+ * título y su nombre.
+ *
+ * Es **la ficha de la casa** —canto de 2 px, sombra dura, papel— con una hoja
+ * de contactos arriba. Las fotos de una entrada se ven juntas porque se
+ * mandaron juntas: separarlas en la rejilla general sería perder lo único que
+ * las agrupa, que es que las vio la misma persona.
+ *
+ * **El mosaico cambia con cuántas son**, de una a cinco (`.aporte-mosaico--N`
+ * en `global.css`): la primera manda —es la que eligió poner primero quien la
+ * mandó— y el resto se reparte a su lado. Separadas por el mismo filete de 2 px
+ * que separa todo en el sitio, que aquí es el fondo de tinta asomando entre
+ * foto y foto.
+ *
+ * Cada foto es un enlace a sí misma en grande. Sin JS abre la foto y ya; con
+ * JS abre el visor (`data-abre="visor"`, ver `src/scripts/galeria.ts`) en esa
+ * foto, con las demás de la entrada a un toque.
+ *
+ * La misma ficha vive en el teléfono (una por fila) y en el escritorio (tres
+ * por fila): se mide a sí misma, como la de artistas, y el título escala con
+ * su ancho y no con el de la ventana.
+ */
+interface Props {
+  aporte: Aporte;
+  /** Su lugar en la lista: el número de la chapa y el índice del visor. */
+  indice: number;
+  /** Cuánto mide en la página, para que el navegador pida la foto justa. */
+  sizes: string;
+}
+
+const { aporte, indice, sizes } = Astro.props;
+const numero = String(indice + 1).padStart(2, '0');
+const n = aporte.fotos.length;
+
+/* La fecha se escribe al construir, y en UTC a mediodía: `2026-09-27` a secas
+   se lee como la medianoche UTC, que en Guadalajara todavía es el 26. */
+const fecha = new Intl.DateTimeFormat('es-MX', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+}).format(new Date(`${aporte.fecha}T12:00:00Z`));
+
+/* En el mosaico la primera ocupa más que las otras: entera con una, la mitad
+   con dos o cuatro, dos tercios con tres, la mitad con cinco. Las chicas nunca
+   pasan de medio ancho de ficha, así que les basta la escalera corta. */
+const anchos = (i: number) => (i === 0 ? [480, 800, 1200] : [320, 480, 800]);
+---
+
+<li class="aporte ficha flex flex-col" data-reveal="escala" data-retraso={(indice % 3) * 90}>
+  <div class={`aporte-mosaico aporte-mosaico--${n}`}>
+    {
+      aporte.fotos.map((f, i) => (
+        <a
+          href={imagen(f.src, 1600)}
+          class="aporte-foto"
+          data-abre="visor"
+          data-aporte={indice}
+          data-foto={i}
+          aria-label={`${aporte.titulo} — foto ${i + 1} de ${n}`}
+        >
+          <img
+            src={imagen(f.src, i === 0 ? 800 : 480)}
+            srcset={juegoDeImagenes(f.src, anchos(i)) || undefined}
+            sizes={sizes}
+            alt=""
+            width="1200"
+            height="900"
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+      ))
+    }
+    <span class="aporte-chapa meta left-0">{numero}</span>
+    {n > 1 && <span class="aporte-chapa meta right-0">{n} fotos</span>}
+  </div>
+
+  <div class="aporte-pie flex-1">
+    <h3 class="display leading-[0.95]">{aporte.titulo}</h3>
+    <p class="meta mt-3 text-[0.62rem]">
+      {archivo.visor.por} <span class="font-bold">{aporte.nombre}</span>
+    </p>
+    {
+      aporte.descripcion && (
+        <p class="aporte-texto mt-4 font-mono text-[0.8rem] leading-relaxed text-tinta/75">
+          {aporte.descripcion}
+        </p>
+      )
+    }
+    <p class="meta mt-4 text-[0.58rem] text-tinta/50">
+      <time datetime={aporte.fecha}>{fecha}</time>
+    </p>
+  </div>
+
+  {
+    aporte.instagram && (
+      <a
+        href={`https://www.instagram.com/${aporte.instagram}/`}
+        target="_blank"
+        rel="noopener"
+        class="aporte-ig meta border-t-2 border-tinta bg-amarillo text-center font-bold transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
+      >
+        @{aporte.instagram} ↗
+      </a>
+    )
+  }
+</li>

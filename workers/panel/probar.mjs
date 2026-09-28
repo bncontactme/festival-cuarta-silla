@@ -13,7 +13,7 @@
  * todo: cubren lo que rompe el sitio si falla —las sedes que no emparejan, las
  * horas al revés, el registro— y lo que se acaba de tocar.
  */
-import { validar } from './lib/validar.js';
+import { validar, validarEnvio } from './lib/validar.js';
 import { masParecido } from './lib/slug.js';
 
 let fallos = 0;
@@ -232,6 +232,77 @@ r = validar('programa', {
 }, { sedes: SEDES });
 ok('una actividad no puede acuñar /sala/festival',
    r.errores.some((e) => e.includes('texto de sala del festival')), JSON.stringify(r.errores));
+
+console.log('\ngalería abierta › lo que manda el público');
+// La puerta sin contraseña. Lo que se prueba es lo que se vería en el sitio si
+// fallara: fotos de otra parte colándose, entradas de seis fotos, y publicar
+// sin permiso.
+const ID = 'k3j9x0a1b2c3d4e5';
+const FOTO = (n, id = ID) =>
+  `https://res.cloudinary.com/cuenta/image/upload/v1790000000/cuartasilla/aportes/${id}/${n}.jpg`;
+const envio = (extra = {}) => ({
+  titulo: 'Inauguración', nombre: 'Ana', permiso: true, fotos: [FOTO(1), FOTO(2)], ...extra,
+});
+const ctxEnvio = { id: ID, fecha: '2026-09-27', cloud: 'cuenta' };
+
+r = validarEnvio(envio(), ctxEnvio);
+ok('una entrada buena pasa, con id y fecha del Worker',
+   r.errores.length === 0 && r.datos.id === ID && r.datos.fecha === '2026-09-27' && r.datos.fotos.length === 2,
+   JSON.stringify(r.errores));
+
+r = validarEnvio(envio({ permiso: false }), ctxEnvio);
+ok('sin permiso no entra', r.errores.some((e) => e.startsWith('permiso')), JSON.stringify(r.errores));
+
+r = validarEnvio(envio({ fotos: [1, 2, 3, 4, 5, 6].map((n) => FOTO(n)) }), ctxEnvio);
+ok('seis fotos no entran', r.errores.some((e) => e.includes('el tope son 5')), JSON.stringify(r.errores));
+
+r = validarEnvio(envio({ fotos: [] }), ctxEnvio);
+ok('sin fotos no entra', r.errores.some((e) => e.includes('al menos una foto')), JSON.stringify(r.errores));
+
+r = validarEnvio(envio({ fotos: ['https://otra.cosa/foto.jpg'] }), ctxEnvio);
+ok('una foto de fuera de Cloudinary no entra',
+   r.errores.some((e) => e.includes('no es una foto de este envío')), JSON.stringify(r.errores));
+
+r = validarEnvio(envio({ fotos: [FOTO(1, 'otroenvio0000000')] }), ctxEnvio);
+ok('la foto de otro envío no entra',
+   r.errores.some((e) => e.includes('no es una foto de este envío')), JSON.stringify(r.errores));
+
+r = validarEnvio(envio({ titulo: '  ', nombre: '' }), ctxEnvio);
+ok('título y nombre hacen falta',
+   r.errores.some((e) => e.includes('titulo')) && r.errores.some((e) => e.includes('nombre')),
+   JSON.stringify(r.errores));
+
+for (const [escrito, queda] of [
+  ['@Ana.Foto', 'ana.foto'],
+  ['https://www.instagram.com/ana_foto/?hl=es', 'ana_foto'],
+  ['instagram.com/ana', 'ana'],
+]) {
+  r = validarEnvio(envio({ instagram: escrito }), ctxEnvio);
+  ok(`instagram «${escrito}» queda «${queda}»`, r.datos?.instagram === queda, JSON.stringify(r));
+}
+r = validarEnvio(envio({ instagram: 'ana foto!' }), ctxEnvio);
+ok('una cuenta imposible se rechaza', r.errores.some((e) => e.includes('instagram')), JSON.stringify(r.errores));
+
+r = validarEnvio(envio({ descripcion: 'x'.repeat(801) }), ctxEnvio);
+ok('la descripción tiene tope', r.errores.some((e) => e.includes('caben 800')), JSON.stringify(r.errores));
+
+r = validarEnvio(envio({ descripcion: 'Uno.\r\n\r\n\r\nDos.' }), ctxEnvio);
+ok('la descripción conserva los párrafos', r.datos.descripcion === 'Uno.\n\nDos.', JSON.stringify(r.datos));
+
+console.log('\ngalería abierta › lo ya aceptado');
+const aceptada = validarEnvio(envio(), ctxEnvio).datos;
+
+r = validar('aportes', [aceptada], {});
+ok('una entrada aceptada es una colección válida', r.errores.length === 0, JSON.stringify(r.errores));
+
+r = validar('aportes', [aceptada, { ...aceptada, titulo: 'Otra' }], {});
+ok('dos entradas no comparten carpeta', r.errores.some((e) => e.includes('repetido')), JSON.stringify(r.errores));
+
+r = validar('aportes', [{ ...aceptada, id: 'CON MAYÚSCULAS' }], {});
+ok('un id que no acuñó el Worker se rechaza', r.errores.some((e) => e.includes('.id')), JSON.stringify(r.errores));
+
+r = validar('aportes', [{ ...aceptada, fotos: [...aceptada.fotos, { src: FOTO(3) }, { src: FOTO(4) }, { src: FOTO(5) }, { src: FOTO(6) }] }], {});
+ok('tampoco el panel pasa de cinco', r.errores.some((e) => e.includes('el tope son 5')), JSON.stringify(r.errores));
 
 console.log(fallos ? `\n${fallos} fallo(s)\n` : '\nTodo bien\n');
 process.exit(fallos ? 1 : 0);

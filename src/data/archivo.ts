@@ -1,8 +1,9 @@
 import { contenido } from './contenido';
-import type { Edicion, Foto } from './tipos';
+import type { Aporte, Edicion, Foto } from './tipos';
 
 /**
- * El registro histórico del festival: las ediciones anteriores con sus fotos.
+ * El registro histórico del festival: las ediciones anteriores con sus fotos,
+ * y desde el 28/09 también las que manda el público.
  *
  * **Se llama «Galería» de cara al público y «archivo» por dentro**, y no es un
  * despiste. Lo que se guarda es un archivo —ediciones fechadas, con pie de
@@ -14,29 +15,32 @@ import type { Edicion, Foto } from './tipos';
  * Pedido del cliente el 26/08: «necesitamos un apartado de registro histórico
  * del festival, de que subir fotos y así… de las ediciones».
  *
- * La lista **la carga el festival desde `/admin`**; aquí sólo queda el texto de
- * la sección. Los tipos `Edicion` y `Foto` viven en `tipos.ts`, con qué hace
- * falta por edición.
+ * **El archivo abierto.** Pedido del 28/09: que sea «un archivo compartido» en
+ * el que cualquiera suba fotos —hasta cinco por entrada, con título, nombre,
+ * Instagram y descripción— y que el festival revise y acepte «sólo lo que tenga
+ * sentido». Las entradas aceptadas son `aportes`, otra colección: una edición es
+ * del festival y una entrada es de quien la manda. Ver `Aporte` en `tipos.ts`.
+ *
+ * Las dos listas **las carga el festival desde `/admin`** —las ediciones a mano,
+ * las entradas aceptando lo que llega—; aquí sólo queda el texto de la sección.
  *
  * Puede estar vacía y no pasa nada: el hueco está diseñado. Lo que se pinta
  * mientras tanto no cuenta cuántas ediciones hubo ni de cuándo —eso no nos lo
- * han dado y no se deduce del nombre— ni pide fotos a nadie: dice que no hay y
- * para qué es el sitio. Con la primera edición cargada, `/galeria` se llena
- * sola.
+ * han dado y no se deduce del nombre—. Lo que sí hace ahora es pedir fotos,
+ * porque ahora sí se juntan: el botón de subir está siempre, lleno o vacío.
  */
 
-export type { Foto, Edicion };
+export type { Foto, Edicion, Aporte };
 
 export const archivo = {
   titulo: 'Galería',
   estado: 'En construcción',
-  /** Lo que se lee en el hueco mientras no haya ediciones cargadas.
+  /** Lo que se lee en el hueco mientras no haya ni ediciones ni entradas.
    *
-   *  Ni cuenta ni pide. Decía «las tres ediciones anteriores» —ese tres no lo
-   *  sabe nadie aquí, se dedujo del nombre— y después pedía material, que
-   *  tampoco: el festival no está juntando fotos de nadie. Dice para qué es la
-   *  sección y ya. */
-  vacio: 'Aquí va a quedar el registro del festival.',
+   *  No cuenta. Decía «las tres ediciones anteriores» —ese tres no lo sabe
+   *  nadie aquí, se dedujo del nombre—. Pedir, en cambio, ya no lo pide este
+   *  renglón: lo pide la banda de «Sube tus fotos», que está justo encima. */
+  vacio: 'Aquí va a quedar el registro del festival: el de sus ediciones y el de quienes estuvieron.',
   acciones: {
     ver: 'Ver la galería',
     sedes: 'sedes',
@@ -46,4 +50,86 @@ export const archivo = {
    *  más reciente a la más vieja, que es como se lee un archivo. El panel
    *  avisa si se guarda al revés. */
   lista: contenido.archivo,
+  /** **Se acepta en `/admin`**, pestaña Envíos, y se edita en la de Galería.
+   *  La última aceptada va arriba; el orden se cambia arrastrando. */
+  aportes: (contenido.aportes ?? []) as Aporte[],
+
+  /** La banda que invita a subir, encima de todo lo demás. */
+  abierto: {
+    rotulo: 'Archivo abierto',
+    titulo: 'Sube tus fotos',
+    bajada:
+      'Si estuviste en el festival, este archivo también es tuyo. Hasta cinco fotos por entrada, ' +
+      'con un título y tu nombre. Las revisamos antes de publicarlas.',
+    boton: 'Subir fotos',
+    /** El rótulo de la sección de entradas. */
+    entradas: 'Del público',
+  },
+
+  /**
+   * El formulario de subir. Vive en un `<dialog>` —el mismo modal del
+   * manifiesto— y se usa igual desde el teléfono y desde el escritorio.
+   *
+   * `mensajes` viaja entero al script (`src/scripts/galeria.ts`) en un atributo
+   * del formulario: así los textos que sólo se leen cuando algo sale mal siguen
+   * aquí, con el resto, y no escondidos en el código. `{nombre}`, `{n}` y
+   * `{total}` los rellena el script.
+   */
+  subir: {
+    rotulo: 'Galería / Archivo abierto',
+    titulo: 'Sube tus fotos',
+    bajada:
+      'Una entrada son hasta cinco fotos con su título. La revisamos y, si entra, sale en la galería con tu nombre.',
+    fotos: 'Fotos',
+    fotosNota: 'De una a cinco',
+    anadir: 'Añadir fotos',
+    soltar: 'o suéltalas aquí',
+    quitar: 'Quitar esta foto',
+    tituloCampo: 'Título',
+    tituloAyuda: 'Cómo lo llamarías',
+    nombre: 'Tu nombre',
+    nombreAyuda: 'sale publicado',
+    instagram: 'Instagram',
+    opcional: 'opcional',
+    descripcion: 'Descripción',
+    descripcionAyuda: 'Dónde, cuándo, quién sale…',
+    permiso:
+      'Las fotos son mías, o tengo permiso de quien las tomó, y el festival puede publicarlas ' +
+      'en su galería con mi nombre.',
+    privacidad: 'Qué hacemos con estos datos',
+    mandar: 'Mandar a revisión',
+    listo: {
+      titulo: '¡Recibido!',
+      cuerpo:
+        'Tu entrada está en la fila de revisión. Si la aceptamos, sale en la galería en los próximos días.',
+      otra: 'Subir otra',
+      cerrar: 'Cerrar',
+    },
+    mensajes: {
+      sinFotos: 'Falta al menos una foto.',
+      sinTitulo: 'Falta el título.',
+      sinNombre: 'Falta tu nombre.',
+      sinPermiso: 'Marca la casilla del permiso: sin ella no podemos publicarlas.',
+      cuenta: 'Esa cuenta de Instagram no parece válida.',
+      tope: 'Son cinco fotos como máximo por entrada: {n} se quedaron fuera.',
+      topeUna: 'Son cinco fotos como máximo por entrada: una se quedó fuera.',
+      noImagen: '«{nombre}» no es una foto que podamos abrir. Sirven JPG, PNG y WebP.',
+      heic:
+        '«{nombre}» viene en HEIC, el formato del iPhone, y este navegador no lo abre. ' +
+        'Mándatela por WhatsApp o por correo y súbela otra vez: llega convertida.',
+      preparando: 'Preparando las fotos…',
+      subiendo: 'Subiendo foto {n} de {total}…',
+      guardando: 'Mandando…',
+      red: 'No se pudo mandar. Revisa tu conexión y vuelve a intentarlo: todo sigue aquí.',
+    },
+  },
+
+  /** El visor: la entrada a pantalla entera, foto por foto. */
+  visor: {
+    anterior: 'Foto anterior',
+    siguiente: 'Foto siguiente',
+    cerrar: 'Cerrar',
+    /** Lo que se lee delante del nombre, en la ficha y en el visor. */
+    por: 'por',
+  },
 };

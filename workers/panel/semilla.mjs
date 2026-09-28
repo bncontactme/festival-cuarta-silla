@@ -39,12 +39,19 @@ const datos = JSON.parse(await readFile(ORIGEN, 'utf8'));
 
 // Las sedes primero: el programa y las fichas de artistas se validan contra
 // ellas, y contra un panel vacío no habría ninguna que emparejar.
-const ORDEN = ['sedes', 'programa', 'artistas', 'archivo', 'marcas', 'festival'];
+const ORDEN = ['sedes', 'programa', 'artistas', 'archivo', 'marcas', 'festival', 'aportes'];
 
 console.log(`\nSembrando ${PANEL}\ndesde ${ORIGEN}\n`);
 
 let fallos = 0;
 for (const coleccion of ORDEN) {
+  // Una colección que la copia del repo todavía no trae —`aportes`, antes de
+  // que nadie haya aceptado nada— no se siembra: mandarla vacía pisaría lo que
+  // el panel ya tenga, y mandarla `undefined` la rechaza el validador.
+  if (datos[coleccion] === undefined) {
+    console.log(`  · ${coleccion.padEnd(10)} no está en la copia: se deja como está`);
+    continue;
+  }
   const res = await fetch(PANEL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: 'http://localhost' },

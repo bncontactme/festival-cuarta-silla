@@ -25,7 +25,26 @@ const TOPES = {
   ediciones: 20,
   fotosPorEdicion: 300,
   marcas: 100,
+  aportes: 1000,
+  /** Lo que pidió el festival: «máximo 5 fotos por post». */
+  fotosPorAporte: 5,
 };
+
+/** Cuánto cabe en la descripción de una entrada de la galería abierta. Es un
+ *  pie largo, no un ensayo: en la ficha se lee en cuatro renglones y entero en
+ *  el visor. El formulario de `/galeria` corta en el mismo número. */
+export const TOPE_DESCRIPCION = 800;
+
+/**
+ * La forma del `id` de una entrada de la galería abierta.
+ *
+ * No lo escribe nadie: lo acuña el Worker al abrir un envío (`nuevoId()` en
+ * `index.js`) y es también la carpeta de sus fotos en Cloudinary,
+ * `cuartasilla/aportes/<id>/`. Por eso es aleatorio y largo —nadie tiene que
+ * poder adivinar el de otro envío para mandarle fotos— y por eso sólo lleva
+ * minúsculas y números, que es lo que no hay que escapar en ninguna parte.
+ */
+export const ID_APORTE = /^[a-z0-9]{12,40}$/;
 
 /** El centro de Guadalajara, con holgura. Fuera de aquí no es un error —una
  *  sede puede estar en Tlaquepaque o fuera del estado— pero sí un aviso: casi
@@ -71,6 +90,7 @@ export function validar(nombre, datos, ctx = {}) {
     programa: () => v.programa(datos),
     artistas: () => v.artistas(datos),
     archivo:  () => v.archivo(datos),
+    aportes:  () => v.aportes(datos),
     marcas:   () => v.marcas(datos),
     festival: () => v.festival(datos),
   }[nombre];
@@ -86,6 +106,57 @@ export function validar(nombre, datos, ctx = {}) {
     v.error('', String(e.message || e));
   }
   return { datos: v.errores.length ? null : salida, errores: v.errores, avisos: v.avisos };
+}
+
+/**
+ * La puerta del público: una entrada mandada desde el formulario de `/galeria`.
+ *
+ * Es la misma forma que una entrada ya aceptada —pasa por `aporte()`, con los
+ * mismos topes— más las dos cosas que sólo se piden al mandar:
+ *
+ *   · **el permiso.** Quien sube una foto dice que es suya o que tiene permiso,
+ *     y que el festival la puede publicar con su nombre. Sin esa casilla no se
+ *     guarda nada: publicar la foto de otra persona sin preguntar es justo lo
+ *     que un archivo no puede hacer.
+ *   · **que las fotos sean de este envío.** Llegan como URLs, y una URL la
+ *     puede escribir cualquiera. Se aceptan sólo las de la cuenta de Cloudinary
+ *     del festival y dentro de la carpeta que se firmó para este envío
+ *     (`aportes/<id>/`): ni fotos enlazadas de otra parte ni las de otro envío.
+ *
+ * El `id` y la `fecha` no los manda el público: los pone el Worker.
+ *
+ * @param datos lo que llegó del formulario
+ * @param ctx   { id, fecha, cloud } — el envío abierto, el día de hoy en
+ *              Guadalajara y la cuenta de Cloudinary
+ */
+export function validarEnvio(datos, { id, fecha, cloud }) {
+  const v = new Verificador({});
+  const x = datos && typeof datos === 'object' ? datos : {};
+
+  if (x.permiso !== true) {
+    v.error('permiso', 'hace falta decir que las fotos se pueden publicar');
+  }
+
+  const bruto = Array.isArray(x.fotos) ? x.fotos : [];
+  const prefijo = 'https://res.cloudinary.com/' + cloud + '/image/upload/';
+  bruto.forEach((src, j) => {
+    const s = String(src ?? '');
+    if (!s.startsWith(prefijo) || !s.includes('/aportes/' + id + '/')) {
+      v.error('fotos[' + j + ']', 'no es una foto de este envío');
+    }
+  });
+
+  const aporte = v.aporte({
+    id,
+    fecha,
+    titulo: x.titulo,
+    nombre: x.nombre,
+    instagram: x.instagram,
+    descripcion: x.descripcion,
+    fotos: bruto.map((src) => ({ src: String(src ?? '') })),
+  }, 'envio');
+
+  return { datos: v.errores.length ? null : aporte, errores: v.errores };
 }
 
 class Verificador {
@@ -472,6 +543,91 @@ class Verificador {
     }
 
     return ediciones;
+  }
+
+  /**
+   * La galería abierta: las entradas que mandó el público y el festival ya
+   * aceptó.
+   *
+   * Entran por `moderar` —que valida la lista entera con esto antes de poner
+   * la nueva arriba— y después se editan en la pestaña Galería como cualquier
+   * otra colección: corregir un título, quitar una foto, reordenar, borrar.
+   *
+   * El `id` no se repite, y no por prolijidad: es la carpeta de sus fotos en
+   * Cloudinary. Dos entradas con la misma carpeta se estarían repartiendo las
+   * fotos, y rechazar una borraría las de la otra.
+   */
+  aportes(datos) {
+    const vistos = new Set();
+    return this.lista(datos, 'aportes', TOPES.aportes).map((a, i) => {
+      const d = 'aportes[' + i + ']';
+      const aporte = this.aporte(a, d);
+      if (aporte.id && vistos.has(aporte.id)) {
+        this.error(d + '.id', 'repetido: dos entradas no pueden compartir carpeta de fotos');
+      }
+      vistos.add(aporte.id);
+      return aporte;
+    });
+  }
+
+  /**
+   * Una entrada de la galería abierta. La usan la colección de aquí arriba y
+   * `validarEnvio()`, la puerta del público: son la misma forma, y así un tope
+   * no puede ser uno al mandar y otro al aceptar.
+   */
+  aporte(a, d) {
+    const x = a && typeof a === 'object' ? a : {};
+
+    const id = String(x.id ?? '').trim();
+    if (!ID_APORTE.test(id)) this.error(d + '.id', 'falta, o no tiene forma de id');
+
+    const fecha = String(x.fecha ?? '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) this.error(d + '.fecha', 'la fecha va AAAA-MM-DD');
+
+    if (Array.isArray(x.fotos) && x.fotos.length === 0) {
+      this.error(d + '.fotos', 'una entrada lleva al menos una foto');
+    }
+    const fotos = this.lista(x.fotos, d + '.fotos', TOPES.fotosPorAporte).map((f, j) => {
+      const df = d + '.fotos[' + j + ']';
+      const src = this.imagen(f && f.src, df + '.src');
+      if (!src) this.error(df + '.src', 'hace falta la foto');
+      return podar({ src, pie: this.texto(f && f.pie, df + '.pie', { max: 300 }) });
+    });
+
+    return podar({
+      id,
+      titulo:      this.texto(x.titulo, d + '.titulo', { max: 120, requerido: true }),
+      nombre:      this.texto(x.nombre, d + '.nombre', { max: 80, requerido: true }),
+      instagram:   this.cuenta(x.instagram, d + '.instagram'),
+      descripcion: this.parrafo(x.descripcion, d + '.descripcion', { max: TOPE_DESCRIPCION }),
+      fecha,
+      fotos,
+    });
+  }
+
+  /**
+   * Una cuenta de Instagram, guardada como la cuenta a secas: `lacuartasilla`.
+   *
+   * Se acepta como la escriba la gente —con arroba, sin ella, o pegando el
+   * enlace del perfil— porque en un formulario del público las tres llegan el
+   * mismo día. Aquí sí se normaliza, al revés que con las direcciones de sala:
+   * de una cuenta no cuelga ningún papel impreso, y lo único que se hace con
+   * ella es pintarla con su arroba y enlazarla.
+   */
+  cuenta(valor, donde) {
+    const bruto = String(valor ?? '').trim();
+    if (!bruto) return undefined;
+    const s = bruto
+      .replace(/^https?:\/\//i, '')
+      .replace(/^(www\.)?instagram\.com\//i, '')
+      .replace(/^@+/, '')
+      .replace(/[/?#].*$/, '')
+      .toLowerCase();
+    if (!/^[a-z0-9._]{1,30}$/.test(s)) {
+      this.error(donde, 'no parece una cuenta de Instagram: «' + bruto.slice(0, 60) + '»');
+      return undefined;
+    }
+    return s;
   }
 
   /* Una sola lista. Hubo un `colaboradores` al lado que se turnaba la cinta de

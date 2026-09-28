@@ -285,14 +285,17 @@ src/
   lib/analitica.ts    el token del faro de visitas (vacío = no se mide nada)
   scripts/motion.ts   Lenis + reveals + partidor + cuenta + menú + entrada
   scripts/silla-secreta.ts  diez toques a la silla de la portada: al juego
+  scripts/galeria.ts  la galería abierta: el formulario de subir y el visor
   scripts/panel/      el panel: api, esquema, campos, tabla, previa, sala,
-                      registro, festival (los dos textos del festival)
+                      registro, festival (los dos textos del festival),
+                      envios (la fila de revisión de la galería abierta)
   scripts/juego/      el juego de la 404: sprites (los dibujos), mundo (la
                       física, sin DOM) y juego (lienzo, teclas y letreros)
   layouts/Base.astro  head, SEO, JSON-LD, nav, pie, reparto móvil/escritorio
   components/         Nav, Footer, Marquee, Silla, Encabezado, Analitica,
                       TableroSedes (las sedes y lo que pasa en cada una),
-                      Juego (la caja del juego)
+                      Juego (la caja del juego), Aporte, SubirFotos y
+                      Visor (la galería abierta)
   components/movil/   Portada (con la entrada), Pantalla
   pages/              index, programa, artistas, sedes, archivo, registro,
                       privacidad, 404, juego
@@ -381,7 +384,10 @@ dominio salga de Wix y el sitio se mude.
 ## Panel de edición
 
 El programa, las sedes, lxs artistas, el archivo y los patrocinadores **los
-carga el festival desde `/admin`**, no se escriben aquí. El contenido vive en un
+carga el festival desde `/admin`**, no se escriben aquí. La galería, además, es
+un **archivo abierto**: cualquiera sube hasta cinco fotos por entrada desde
+`/galeria`, y el festival las acepta o las rechaza en la pestaña Envíos del
+panel antes de que salgan (ver «La galería abierta» en [PANEL.md](PANEL.md)). El contenido vive en un
 Worker de Cloudflare con KV, las fotos en Cloudinary, y el sitio se lo baja en
 cada build a `src/data/contenido.json` —que se queda comiteado, y por eso el
 sitio construye igual aunque el panel esté caído—.

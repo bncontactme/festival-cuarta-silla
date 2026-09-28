@@ -1508,6 +1508,475 @@
   }
 }
 
+/* — Galería abierta ————————————————————————————————————————————————— */
+/* Lo que el público manda desde `/galeria`: la ficha de cada entrada, el
+   formulario de subir y el visor. No se estrena nada: la ficha es `.ficha`, el
+   formulario y el visor son el `.modal` del manifiesto, y los campos son cajas
+   de canto de 2 px con la sombra dura de los botones. */
+
+/* Lo que sólo tiene sentido con JS —abrir el formulario de subir— no se pinta
+   sin él. La clase `.js` la pone el script en línea del `<head>` antes del
+   primer pintado, así que con JS el botón está desde el principio. */
+html:not(.js) .solo-js {
+  display: none;
+}
+
+/* La ficha: la de la casa sin relleno, porque arriba lleva las fotos a sangre
+   y el relleno va en el pie. Se mide a sí misma, como la de artistas. */
+.aporte.ficha {
+  padding: 0;
+  container-type: inline-size;
+}
+.aporte-pie {
+  padding: clamp(1rem, 5cqw, 1.6rem);
+}
+.aporte-pie .display {
+  font-size: clamp(1.5rem, 8.5cqw, 2.4rem);
+}
+/* En la ficha, cuatro renglones. Entera se lee en el visor. `pre-line` para
+   que los párrafos que escribió quien la mandó no se peguen en uno. */
+.aporte-texto {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+  white-space: pre-line;
+}
+.aporte-ig {
+  display: block;
+  padding: clamp(0.85rem, 3.4cqw, 1.1rem) 1rem;
+}
+
+/* El mosaico. El fondo es tinta y el hueco entre fotos son 2 px: el filete que
+   separa todo en el sitio, aquí asomando entre foto y foto. La primera manda y
+   las demás se reparten a su lado. */
+.aporte-mosaico {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  aspect-ratio: 4 / 3;
+  border-bottom: 2px solid var(--color-tinta);
+  background-color: var(--color-tinta);
+}
+.aporte-mosaico--2 {
+  grid-template-columns: 1fr 1fr;
+}
+.aporte-mosaico--3 {
+  grid-template: 1fr 1fr / 2fr 1fr;
+}
+.aporte-mosaico--4 {
+  grid-template: 1fr 1fr / 1fr 1fr;
+}
+.aporte-mosaico--5 {
+  grid-template: 1fr 1fr / 2fr 1fr 1fr;
+}
+.aporte-mosaico--3 > .aporte-foto:first-child,
+.aporte-mosaico--5 > .aporte-foto:first-child {
+  grid-row: span 2;
+}
+.aporte-foto {
+  position: relative;
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--color-amarillo);
+}
+.aporte-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: scale 0.7s var(--ease-salida);
+}
+.aporte-foto:hover img {
+  scale: 1.04;
+}
+/* El foco va por dentro: por fuera lo taparía la foto de al lado. */
+.aporte-foto:focus-visible {
+  outline: 3px solid var(--color-amarillo);
+  outline-offset: -5px;
+  z-index: 1;
+}
+/* Las dos chapas de la foto, las de la ficha de artista: el número de orden a
+   la izquierda y cuántas fotos trae a la derecha. */
+.aporte-chapa {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  padding: 0.35rem 0.6rem;
+  background-color: var(--color-tinta);
+  color: var(--color-amarillo);
+  font-size: 0.55rem;
+  pointer-events: none;
+}
+
+/* — El formulario ——— */
+.subir {
+  max-width: min(44rem, calc(100vw - 2rem));
+}
+.subir-cuerpo {
+  display: grid;
+  gap: 1.6rem;
+  padding: 1.75rem 1.5rem 2rem;
+}
+@media (width >= 40rem) {
+  .subir-cuerpo {
+    padding: 2.25rem 3rem 2.5rem;
+  }
+}
+
+.forma-campo {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+/* En un `<fieldset>` la leyenda no es hija de la rejilla, así que el hueco lo
+   pone ella. */
+.forma-campo > legend {
+  margin-bottom: 0.55rem;
+}
+.forma-rotulo {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.forma-rotulo small {
+  font-weight: 400;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+}
+
+/* La caja de escribir. 16 px de letra y no menos: con menos, el Safari del
+   iPhone hace zoom al entrar en el campo y deja la página descolocada. Al
+   entrar, la sombra pasa de tinta a roja y crece: el foco se lee en el objeto
+   entero y no en un anillo pegado a un canto que ya es negro. */
+.forma-entrada {
+  width: 100%;
+  border: 2px solid var(--color-tinta);
+  border-radius: 0;
+  background-color: var(--color-papel);
+  color: var(--color-tinta);
+  padding: 0.8rem 0.95rem;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  line-height: 1.4;
+  box-shadow: 4px 4px 0 var(--color-tinta);
+  transition: box-shadow 0.2s var(--ease-salida);
+}
+.forma-entrada::placeholder {
+  color: color-mix(in srgb, var(--color-tinta) 42%, transparent);
+}
+.forma-entrada:focus-visible {
+  outline: none;
+  box-shadow: 6px 6px 0 var(--color-rojo);
+}
+.forma-entrada[aria-invalid='true'] {
+  border-color: var(--color-rojo);
+  box-shadow: 4px 4px 0 var(--color-rojo);
+}
+textarea.forma-entrada {
+  min-height: 7.5rem;
+  resize: vertical;
+}
+
+/* Las fotos elegidas: cuadradas, en fila, cada una con su ✕ y su barra. */
+.subir-fotos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+@media (width >= 40rem) {
+  .subir-fotos {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+.subir-foto {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 2px solid var(--color-tinta);
+  background-color: var(--color-amarillo);
+}
+.subir-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.subir-quitar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  background-color: var(--color-tinta);
+  color: var(--color-amarillo);
+  font-size: 0.75rem;
+  transition: background-color 0.2s var(--ease-salida);
+}
+.subir-quitar:hover {
+  background-color: var(--color-rojo);
+  color: var(--color-papel);
+}
+.subir-quitar:focus-visible {
+  outline-color: var(--color-amarillo);
+  outline-offset: -4px;
+}
+/* Subiendo no se quita nada: la foto ya va de camino. */
+.subir-forma[aria-busy] .subir-quitar {
+  display: none;
+}
+.subir-avance {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: var(--avance, 0%);
+  height: 6px;
+  background-color: var(--color-rojo);
+  transition: width 0.2s linear;
+}
+
+/* El hueco de añadir. Sin fotos todavía, ocupa la fila entera: es lo primero
+   que hay que hacer y tiene que ser el blanco más grande del formulario. */
+.subir-anadir {
+  display: grid;
+  aspect-ratio: 1;
+  place-content: center;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  border: 2px solid var(--color-tinta);
+  background-color: var(--color-papel);
+  color: var(--color-tinta);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease-salida);
+}
+.subir-fotos:not(:has(.subir-foto)) .subir-hueco {
+  grid-column: 1 / -1;
+}
+.subir-fotos:not(:has(.subir-foto)) .subir-anadir {
+  aspect-ratio: auto;
+  min-height: 9.5rem;
+  box-shadow: 4px 4px 0 var(--color-tinta);
+  font-size: 0.7rem;
+}
+.subir-anadir:hover,
+.subir-hueco.soltando .subir-anadir {
+  background-color: var(--color-amarillo);
+}
+/* El input está escondido para la vista y no para el teclado: el anillo se lo
+   pone la caja que lo envuelve. */
+.subir-anadir:focus-within {
+  outline: 3px solid var(--anillo);
+  outline-offset: 3px;
+}
+.subir-soltar {
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  opacity: 0.6;
+}
+@media (hover: none) {
+  .subir-soltar {
+    display: none;
+  }
+}
+fieldset[aria-invalid='true'] .subir-anadir {
+  border-color: var(--color-rojo);
+  box-shadow: 4px 4px 0 var(--color-rojo);
+}
+
+.subir-permiso {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.85rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.subir-permiso input {
+  width: 1.35rem;
+  height: 1.35rem;
+  margin-top: 0.1rem;
+  accent-color: var(--color-rojo);
+}
+.subir-permiso input[aria-invalid='true'] {
+  outline: 3px solid var(--color-rojo);
+  outline-offset: 2px;
+}
+
+/* Para los robots. Fuera de la pantalla y no `display: none`, que algunos se
+   saltan a propósito. */
+.subir-trampa {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.subir-queja {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-rojo);
+}
+.subir-queja:empty {
+  display: none;
+}
+
+/* El remate del modal, con el botón de mandar: tinta, así que el canto del
+   botón y el anillo de foco se vuelcan a amarillo como en cualquier sección
+   oscura. */
+.subir-remate {
+  --canto: var(--color-amarillo);
+  --anillo: var(--color-amarillo);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+.subir-remate .boton[disabled] {
+  cursor: progress;
+  opacity: 0.7;
+  transform: none;
+}
+.subir-estado {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-amarillo);
+}
+.subir-listo {
+  padding: 2.5rem 1.5rem 3rem;
+}
+@media (width >= 40rem) {
+  .subir-listo {
+    padding: 3rem;
+  }
+}
+
+/* — El visor ——— */
+/* El modal a pantalla casi entera, en su versión oscura: la foto sobre tinta,
+   el pie en papel. En escritorio, lado a lado; en el teléfono, la foto arriba
+   y el pie debajo, y el conjunto hace scroll. */
+.visor {
+  width: min(84rem, calc(100vw - 2rem));
+  max-width: none;
+  height: min(54rem, calc(100dvh - 2rem));
+  max-height: none;
+  background-color: var(--color-tinta);
+  --anillo: var(--color-amarillo);
+}
+.visor-caja {
+  display: grid;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  grid-template-rows: minmax(60%, 1fr) auto;
+}
+@media (width >= 64rem) {
+  .visor-caja {
+    grid-template-rows: none;
+    grid-template-columns: minmax(0, 1fr) 24rem;
+    overflow: hidden;
+  }
+}
+.visor-escena {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: 3.5rem 0.75rem 0.75rem;
+  touch-action: pan-y;
+  user-select: none;
+}
+@media (width >= 64rem) {
+  .visor-escena {
+    padding: 2rem 5rem;
+  }
+}
+.visor-foto {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: opacity 0.25s var(--ease-salida);
+}
+.visor-foto.cargando {
+  opacity: 0;
+}
+/* Los pasos: la misma caja cuadrada de la ✕, a los dos lados de la foto. */
+.visor-paso {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  translate: 0 -50%;
+  border: 2px solid var(--color-amarillo);
+  background-color: var(--color-tinta);
+  color: var(--color-amarillo);
+  font-size: 1rem;
+  transition:
+    background-color 0.25s var(--ease-salida),
+    color 0.25s var(--ease-salida);
+}
+.visor-paso:hover {
+  background-color: var(--color-amarillo);
+  color: var(--color-tinta);
+}
+.visor-paso--antes {
+  left: 0.75rem;
+}
+.visor-paso--despues {
+  right: 0.75rem;
+}
+@media (width >= 64rem) {
+  .visor-paso--antes {
+    left: 1.25rem;
+  }
+  .visor-paso--despues {
+    right: 1.25rem;
+  }
+}
+.visor-pie {
+  border-top: 2px solid var(--color-tinta);
+  background-color: var(--color-papel);
+  color: var(--color-tinta);
+  padding: 1.75rem 1.5rem 2.25rem;
+  --anillo: var(--color-tinta);
+}
+@media (width >= 64rem) {
+  .visor-pie {
+    border-top: 0;
+    border-left: 2px solid var(--color-tinta);
+    padding: 5rem 2.25rem 2.5rem;
+    overflow-y: auto;
+  }
+}
+
 /* — Marquee ————————————————————————————————————————————————————————— */
 .marquee {
   display: flex;

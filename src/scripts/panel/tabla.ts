@@ -287,7 +287,7 @@ export function pintarTabla(tabla: Tabla, estado: any, ctx: Ctx, errores: string
       for (const campo of tabla.esquema.campos) rejilla.append(pintarCampo(campo, dato, ctxFila));
 
       const acciones = el('div', { class: 'acciones' },
-        el('button', { type: 'button', class: 'boton suave', onclick: () => {
+        tabla.esquema.duplicable !== false && el('button', { type: 'button', class: 'boton suave', onclick: () => {
           const l = lista();
           const copia = JSON.parse(JSON.stringify(dato));
           l.splice(i + 1, 0, copia);

@@ -15,6 +15,7 @@
 
 import { bloqueActividad, mandoSala } from './bloque';
 import { cruces } from './choques';
+import { pendientes } from './envios';
 
 export type TipoCampo =
   | 'texto' | 'area' | 'url' | 'imagen' | 'sede'
@@ -37,6 +38,9 @@ export type Campo = {
   carpeta?: string | ((fila: any) => string);
   /** De dónde sale la subcarpeta con el nombre propio. */
   nombreDe?: (fila: any) => string | undefined;
+  /** Sólo en `fotos`: cuántas caben. Llegado el tope, el hueco de soltar se va
+   *  — las entradas de la galería abierta son de cinco como mucho. */
+  max?: number;
 };
 
 export type Esquema = {
@@ -84,9 +88,16 @@ export type Esquema = {
    *  y no una esquina: el campo crema de las que ya tienen cartela, el filete
    *  rojo de las que se enciman. */
   clase?(fila: any, previo: any): string;
+
+  /** `false` quita «Duplicar». Una entrada de la galería abierta es de quien la
+   *  mandó y su `id` es la carpeta de sus fotos: una copia sería la misma
+   *  persona dos veces, compartiendo carpeta — y el Worker no la dejaría
+   *  guardar. */
+  duplicable?: boolean;
 };
 
-export type Coleccion = 'sedes' | 'programa' | 'artistas' | 'archivo' | 'marcas' | 'festival';
+export type Coleccion =
+  | 'sedes' | 'programa' | 'artistas' | 'archivo' | 'marcas' | 'festival' | 'aportes';
 
 export type Tabla = {
   clave: string;
@@ -233,6 +244,55 @@ const archivo: Esquema = {
   },
 };
 
+/** Un id de entrada para las que se crean a mano desde el panel. Misma forma que
+ *  los que acuña el Worker al abrir un envío (`ID_APORTE` en `validar.js`). */
+const nuevoIdAporte = () =>
+  [...crypto.getRandomValues(new Uint8Array(10))]
+    .map((b) => b.toString(36).padStart(2, '0')).join('').slice(0, 16);
+
+/** Hoy en Guadalajara, `AAAA-MM-DD`: la fecha de una entrada hecha a mano. */
+const hoyEnGDL = () =>
+  new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Mexico_City', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date());
+
+/**
+ * Las entradas de la galería abierta ya aceptadas.
+ *
+ * Llegan desde la pestaña Envíos —aceptar una la pone arriba de esta lista— y
+ * aquí se tratan como cualquier otra colección: se corrigen, se reordenan
+ * arrastrando y se borran, y nada de eso sale hasta Guardar. Se puede añadir
+ * una a mano, para cuando alguien manda las fotos por otro lado.
+ */
+const aportes: Esquema = {
+  singular: 'entrada',
+  plural: 'entradas',
+  duplicable: false,
+  campos: [
+    { clave: 'titulo', etiqueta: 'Título', tipo: 'texto', requerido: true, ancho: 2 },
+    { clave: 'nombre', etiqueta: 'Nombre', tipo: 'texto', requerido: true,
+      ayuda: 'Cómo quiere salir quien la mandó. Sale publicado.' },
+    { clave: 'instagram', etiqueta: 'Instagram', tipo: 'texto',
+      ayuda: 'La cuenta, con o sin arroba. Se guarda sin ella.' },
+    { clave: 'descripcion', etiqueta: 'Descripción', tipo: 'area', ancho: 4,
+      ayuda: 'Hasta 800 caracteres. En la ficha se leen cuatro renglones; entera, en el visor.' },
+    { clave: 'fotos', etiqueta: 'Fotos', tipo: 'fotos', ancho: 4, max: 5,
+      carpeta: (a) => `aportes/${a.id}`,
+      ayuda: 'De una a cinco. La primera es la grande del mosaico: se cambia el orden con las flechas.' },
+  ],
+  nuevo: () => ({ id: nuevoIdAporte(), titulo: '', nombre: '', fecha: hoyEnGDL(), fotos: [] }),
+  titula: (a) => a.titulo || 'Entrada sin título',
+  resume: (a) => {
+    const n = (a.fotos ?? []).length;
+    return [
+      a.nombre,
+      a.instagram ? '@' + String(a.instagram).replace(/^@/, '') : null,
+      n === 1 ? '1 foto' : `${n} fotos`,
+      a.fecha,
+    ].filter(Boolean).join(' · ');
+  },
+};
+
 const marcas: Esquema = {
   singular: 'marca',
   plural: 'marcas',
@@ -269,9 +329,15 @@ export const TABLAS: Record<string, Tabla> = {
     leer: (e) => e.artistas,
     escribir: (e, l) => { e.artistas = l; },
   },
+  aportes: {
+    clave: 'aportes', titulo: 'Entradas del público', coleccion: 'aportes', esquema: aportes,
+    nota: 'Lo que mandó la gente desde /galeria y ya aceptaste en Envíos. El orden es el que se pinta: arrastra para cambiarlo. Borrar una la quita del sitio al guardar.',
+    leer: (e) => (e.aportes ??= []),
+    escribir: (e, l) => { e.aportes = l; },
+  },
   archivo: {
-    clave: 'archivo', titulo: 'Galería', coleccion: 'archivo', esquema: archivo,
-    nota: 'De la edición más reciente a la más vieja, que es como se lee un archivo.',
+    clave: 'archivo', titulo: 'Ediciones', coleccion: 'archivo', esquema: archivo,
+    nota: 'Las del festival, cargadas a mano. De la más reciente a la más vieja, que es como se lee un archivo.',
     leer: (e) => e.archivo,
     escribir: (e, l) => { e.archivo = l; },
   },
@@ -294,6 +360,9 @@ export type Pestana = {
   /** Lo que sale al lado del nombre en la pestaña. Por defecto, cuántos
    *  elementos hay en sus tablas. */
   cuenta?(estado: any): string;
+  /** Si la cuenta se pinta en rojo: hay algo esperando a que alguien lo mire.
+   *  Hoy sólo Envíos, con la fila de revisión llena. */
+  alerta?(estado: any): boolean;
 };
 
 /**
@@ -325,7 +394,23 @@ export const PESTANAS: Pestana[] = [
   },
   { clave: 'sedes', titulo: 'Sedes', tablas: ['sedes'] },
   { clave: 'artistas', titulo: 'Artistas', tablas: ['artistas'] },
-  { clave: 'archivo', titulo: 'Galería', tablas: ['archivo'] },
+  { clave: 'archivo', titulo: 'Galería', tablas: ['aportes', 'archivo'] },
+  {
+    /**
+     * La fila de revisión de la galería abierta: lo que mandó el público y
+     * todavía no ha visto nadie. No es una colección —no tiene tablas ni pasa
+     * por Guardar—: aceptar y rechazar ocurren en el momento. Ver `envios.ts`.
+     *
+     * Va al lado de Galería, que es adonde van a parar las que se aceptan. La
+     * cuenta es la de las que esperan, y en rojo mientras haya alguna.
+     */
+    clave: 'envios',
+    titulo: 'Envíos',
+    tablas: [],
+    colecciones: [],
+    cuenta: () => String(pendientes()),
+    alerta: () => pendientes() > 0,
+  },
   { clave: 'marcas', titulo: 'Marcas', tablas: ['patrocinadores'] },
   {
     /**

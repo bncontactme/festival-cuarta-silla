@@ -1,0 +1,86 @@
+---
+import { imagen, juegoDeImagenes } from '../lib/imagen';
+import { archivo, type Aporte } from '../data/archivo';
+
+/**
+ * El visor de la galería abierta: una entrada a pantalla entera, foto por foto.
+ *
+ * Es el modal de la casa en su versión oscura. La foto va sobre tinta —una
+ * foto se mira sobre negro, no sobre el amarillo del sitio— y el pie, al lado
+ * en papel: título, nombre, Instagram y la descripción entera, que en la ficha
+ * sale cortada a cuatro renglones.
+ *
+ * **Un solo visor para todas las entradas.** Lo que cambia de una a otra viaja
+ * en un JSON al pie (`#galeria-aportes`) y lo pone `src/scripts/galeria.ts` al
+ * abrir: pintar un diálogo por entrada serían cien diálogos escondidos en la
+ * página, y en el teléfono otros cien.
+ *
+ * Abrir, cerrar, Esc y el clic fuera los hace `iniciarModales()` de
+ * `motion.ts`, como con el manifiesto. Aquí sólo se pasa de foto: flechas del
+ * teclado, los dos botones, o deslizar el dedo.
+ */
+interface Props {
+  aportes: Aporte[];
+}
+const { aportes } = Astro.props;
+
+/* Lo que el script necesita de cada entrada, ya resuelto: las URLs de
+   Cloudinary con su tamaño puesto se calculan aquí, al construir, con la misma
+   `imagen()` de todo el sitio — el navegador no tiene por qué saber cómo se
+   arma una. */
+const datos = aportes.map((a) => ({
+  titulo: a.titulo,
+  nombre: a.nombre,
+  instagram: a.instagram ?? null,
+  parrafos: (a.descripcion ?? '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean),
+  fotos: a.fotos.map((f) => ({
+    src: imagen(f.src, 1600),
+    srcset: juegoDeImagenes(f.src, [800, 1200, 1600, 2000]),
+    pie: f.pie ?? null,
+  })),
+}));
+
+/* Lo que escribe el público va a parar dentro de un `<script>`, y ahí un
+   `</script>` en un título cerraría la etiqueta y lo que viniera detrás se
+   ejecutaría. Que el festival revise cada entrada no es un cerrojo: se le pasa
+   una línea rara entre cincuenta. `<` es el mismo `<` para JSON y para
+   nadie más. */
+const json = JSON.stringify(datos).replace(/</g, '\\u003c');
+
+const t = archivo.visor;
+---
+
+<dialog class="modal visor" data-modal="visor" aria-labelledby="visor-titulo">
+  <button type="button" class="modal-cerrar" data-cierra aria-label={t.cerrar}>✕</button>
+
+  <div class="visor-caja" data-lenis-prevent>
+    <figure class="visor-escena" data-visor-escena>
+      <img class="visor-foto" alt="" data-visor-foto />
+      <button type="button" class="visor-paso visor-paso--antes" data-visor-paso="-1" aria-label={t.anterior}>
+        ←
+      </button>
+      <button type="button" class="visor-paso visor-paso--despues" data-visor-paso="1" aria-label={t.siguiente}>
+        →
+      </button>
+    </figure>
+
+    <div class="visor-pie">
+      <p class="meta text-[0.62rem] text-tinta/55" data-visor-cuenta></p>
+      <h2 id="visor-titulo" class="display mt-4 text-4xl leading-[0.95] lg:text-5xl" data-visor-titulo></h2>
+      <p class="meta mt-4 text-[0.62rem]">
+        {t.por} <span class="font-bold" data-visor-nombre></span>
+      </p>
+      <p class="meta mt-2 text-[0.62rem] text-tinta/60" data-visor-pie-foto hidden></p>
+      <div class="visor-texto mt-6 grid gap-4 font-mono text-sm leading-relaxed text-tinta/80" data-visor-texto></div>
+      <a
+        class="boton boton--papel mt-8"
+        target="_blank"
+        rel="noopener"
+        data-visor-ig
+        hidden
+      ></a>
+    </div>
+  </div>
+
+  <script type="application/json" id="galeria-aportes" set:html={json} />
+</dialog>

@@ -116,14 +116,29 @@ PANEL_URL=http://localhost:8787 CLAVE=… node workers/panel/semilla.mjs
 KV corre en local (no toca el de verdad) y las subidas a Cloudinary no funcionan
 salvo que pongas las credenciales buenas en `.dev.vars`.
 
+La galería abierta se prueba entera sin Cloudinary, con `curl`: `envio-abrir`
+da un id, `envio-mandar` acepta cualquier URL que tenga la forma de las de ese
+envío (`https://res.cloudinary.com/<CLOUDINARY_CLOUD_NAME>/image/upload/…/cuartasilla/aportes/<id>/1.jpg`),
+y `envios` / `moderar` con la contraseña hacen el resto. Al rechazar, el Worker
+intenta borrar las fotos en Cloudinary; con credenciales de mentira eso sale
+como un 401 en el registro y no pasa nada más.
+
+El tope de ocho envíos por hora también corre en local, y a la novena prueba
+deja fuera a tu conexión. Se levanta borrando la clave:
+
+```bash
+npx wrangler kv key list --binding CONTENIDO --local --prefix cs:tope:
+npx wrangler kv key delete --binding CONTENIDO --local 'cs:tope:…'
+```
+
 ---
 
 ## Qué hay aquí
 
 | | |
 |---|---|
-| `index.js` | Rutas, contraseña, bloqueo por intentos, Cloudinary, disparo del build |
-| `lib/contenido.js` | Todo lo que toca KV: leer, guardar, versionar, historial |
+| `index.js` | Rutas, contraseña, bloqueo por intentos, Cloudinary, disparo del build, y la puerta del público de la galería abierta |
+| `lib/contenido.js` | Todo lo que toca KV: leer, guardar, versionar, historial, y la fila de envíos |
 | `lib/validar.js` | La puerta. Nada entra sin pasar por aquí |
 | `lib/slug.js` | Nombres de carpeta y comparación sin tildes |
 | `semilla.mjs` | Volcado inicial desde el repo |
