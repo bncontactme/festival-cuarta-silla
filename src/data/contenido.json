@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 174,
-  "actualizado": "2026-09-29T02:35:35.165Z",
+  "version": 176,
+  "actualizado": "2026-09-29T03:13:42.521Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1849,6 +1849,30 @@
     }
   },
   "aportes": [
+    {
+      "id": "4b450l46130p431s",
+      "titulo": "no museo y expiatorio",
+      "nombre": "Gaby Hernández",
+      "instagram": "gabyhedz19",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790651335/cuartasilla/aportes/4b450l46130p431s/1.jpg"
+        }
+      ]
+    },
+    {
+      "id": "5y1c6u6j5x064u27",
+      "titulo": "la base de un sueño",
+      "nombre": "Gaby Hernández",
+      "instagram": "gabyhedz19",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790651072/cuartasilla/aportes/5y1c6u6j5x064u27/1.jpg"
+        }
+      ]
+    },
     {
       "id": "0x6s3i2v714i4s57",
       "titulo": "4ta silla",
