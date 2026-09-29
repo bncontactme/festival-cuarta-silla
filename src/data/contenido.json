@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 192,
-  "actualizado": "2026-09-29T16:57:42.605Z",
+  "version": 193,
+  "actualizado": "2026-09-29T17:36:26.410Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,61 @@
     }
   },
   "aportes": [
+    {
+      "id": "270z363p2u0l0646",
+      "titulo": "Foro AM",
+      "nombre": "Sol",
+      "instagram": "sol.tinto",
+      "descripcion": "Foro AM, sale Miaulina y Lucano",
+      "fecha": "2026-09-29",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702172/cuartasilla/aportes/270z363p2u0l0646/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702174/cuartasilla/aportes/270z363p2u0l0646/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702175/cuartasilla/aportes/270z363p2u0l0646/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702177/cuartasilla/aportes/270z363p2u0l0646/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702179/cuartasilla/aportes/270z363p2u0l0646/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702181/cuartasilla/aportes/270z363p2u0l0646/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702182/cuartasilla/aportes/270z363p2u0l0646/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702184/cuartasilla/aportes/270z363p2u0l0646/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702185/cuartasilla/aportes/270z363p2u0l0646/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702187/cuartasilla/aportes/270z363p2u0l0646/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702189/cuartasilla/aportes/270z363p2u0l0646/11.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702190/cuartasilla/aportes/270z363p2u0l0646/12.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702193/cuartasilla/aportes/270z363p2u0l0646/13.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702196/cuartasilla/aportes/270z363p2u0l0646/14.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790702197/cuartasilla/aportes/270z363p2u0l0646/15.jpg"
+        }
+      ]
+    },
     {
       "id": "2c5m3a2i310p421j",
       "titulo": "Inauguración y taller industria",
