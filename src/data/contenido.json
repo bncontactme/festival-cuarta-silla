@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 168,
-  "actualizado": "2026-09-29T01:06:48.723Z",
+  "version": 171,
+  "actualizado": "2026-09-29T01:47:05.018Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1849,6 +1849,45 @@
     }
   },
   "aportes": [
+    {
+      "id": "591m5z622s305742",
+      "titulo": "Boing!",
+      "nombre": "Jovany Cuarenta",
+      "instagram": "cuarenta.art",
+      "descripcion": "Tomada por Regina Rubio en la obra moto taxi del maestro RONQUILLO en la entrada de Staditche",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790646303/cuartasilla/aportes/591m5z622s305742/1.jpg"
+        }
+      ]
+    },
+    {
+      "id": "614a6y5x464v4w60",
+      "titulo": "Los novios",
+      "nombre": "Jovany Cuarenta",
+      "instagram": "cuarenta.art",
+      "descripcion": "Una sesión de fotos en el No museo,en el Andador Palestina Libre",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790646157/cuartasilla/aportes/614a6y5x464v4w60/1.jpg"
+        }
+      ]
+    },
+    {
+      "id": "3k0t59101c4m6w6t",
+      "titulo": "¿Anti-Silla?",
+      "nombre": "Jovany Cuarenta",
+      "instagram": "cuarenta.art",
+      "descripcion": "Mi primera silla, mi primer festival,en la sede STADITCHE",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790646036/cuartasilla/aportes/3k0t59101c4m6w6t/1.jpg"
+        }
+      ]
+    },
     {
       "id": "4k1q1a4f026r080c",
       "titulo": "Pruebame",
