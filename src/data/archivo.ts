@@ -73,7 +73,7 @@ export const archivo = {
     rotulo: 'Galería / Archivo abierto',
     titulo: 'Sube tus fotos',
     bajada:
-      'Una entrada son hasta cinco fotos con su título. La revisamos y, si entra, sale en la galería con tu nombre.',
+      'Hasta cinco fotos por entrada. La revisamos y, si entra, sale en la galería con tu nombre.',
     fotos: 'Fotos',
     fotosNota: 'De una a cinco',
     anadir: 'Añadir fotos',
@@ -82,7 +82,7 @@ export const archivo = {
     tituloCampo: 'Título',
     tituloAyuda: 'Cómo lo llamarías',
     nombre: 'Tu nombre',
-    nombreAyuda: 'sale publicado',
+    nombreAyuda: 'Se publica',
     instagram: 'Instagram',
     opcional: 'opcional',
     descripcion: 'Descripción',

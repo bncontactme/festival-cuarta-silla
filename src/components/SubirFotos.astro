@@ -28,18 +28,16 @@ const t = archivo.subir;
   <button type="button" class="modal-cerrar" data-cierra aria-label="Cerrar">✕</button>
 
   <div class="modal-caja" data-lenis-prevent>
-    <header class="modal-cabecera">
+    {/* La cabecera del manifiesto en su versión corta: rótulo, título y la
+        bajada al lado. Aquí lo que importa es el formulario, y en el teléfono
+        la cabecera grande se comía media pantalla antes de la primera foto. */}
+    <header class="modal-cabecera subir-cabecera">
       <div class="cuadricula absolute inset-0 opacity-40" aria-hidden="true"></div>
-      <p class="meta relative mb-6">{t.rotulo}</p>
-      <h2
-        id="subir-titulo"
-        class="display relative max-w-[16ch] text-[11vw] leading-[0.92] sm:text-[5.5vw] lg:text-[3.4vw]"
-      >
-        {t.titulo}
-      </h2>
-      <p class="relative mt-5 max-w-[46ch] font-mono text-sm leading-relaxed text-papel">
-        {t.bajada}
-      </p>
+      <p class="meta relative">{t.rotulo}</p>
+      <div class="subir-cabecera-fila relative">
+        <h2 id="subir-titulo" class="display">{t.titulo}</h2>
+        <p class="subir-bajada">{t.bajada}</p>
+      </div>
     </header>
 
     {/* `novalidate`: las comprobaciones las hace el script, con los mensajes de
@@ -65,17 +63,27 @@ const t = archivo.subir;
             <li class="subir-hueco" data-subir-hueco>
               <label class="subir-anadir">
                 <input
+                  id="subir-archivo"
                   type="file"
                   accept="image/*"
                   multiple
                   class="sr-only"
                   data-subir-archivo
                 />
-                <span aria-hidden="true" class="display text-3xl leading-none">+</span>
+                <span aria-hidden="true" class="subir-mas display">+</span>
                 <span>{t.anadir}</span>
                 <small class="subir-soltar">{t.soltar}</small>
               </label>
             </li>
+            {/* Las casillas que faltan, numeradas: la tira mide siempre cinco,
+                así que el tope se ve antes de leerlo y el formulario no cambia
+                de alto al elegir. Cada una abre el mismo selector; el script
+                esconde una por cada foto elegida (`pintarCuenta`). */}
+            {[2, 3, 4, 5].map((n) => (
+              <li class="subir-vacio" aria-hidden="true" data-subir-vacio>
+                <label for="subir-archivo">{String(n).padStart(2, '0')}</label>
+              </li>
+            ))}
           </ul>
         </fieldset>
 
@@ -91,17 +99,18 @@ const t = archivo.subir;
           />
         </label>
 
-        <div class="grid gap-5 sm:grid-cols-2">
+        <div class="subir-par">
           <label class="forma-campo">
-            <span class="forma-rotulo">
-              <span>{t.nombre}</span>
-              <small>{t.nombreAyuda}</small>
-            </span>
+            {/* «Se publica» va de ayuda dentro de la caja y no al lado del
+                rótulo: en media anchura de teléfono no cabían los dos en un
+                renglón, y el rótulo se partía. */}
+            <span class="forma-rotulo"><span>{t.nombre}</span></span>
             <input
               class="forma-entrada"
               name="nombre"
               maxlength="80"
               autocomplete="name"
+              placeholder={t.nombreAyuda}
               required
             />
           </label>
@@ -131,14 +140,14 @@ const t = archivo.subir;
             class="forma-entrada"
             name="descripcion"
             maxlength="800"
-            rows="4"
+            rows="2"
             placeholder={t.descripcionAyuda}></textarea>
         </label>
 
         <label class="subir-permiso">
           <input type="checkbox" name="permiso" required />
           <span>
-            {t.permiso}
+            {t.permiso}{' '}
             <a
               href={conBase('/privacidad#fotos')}
               target="_blank"

@@ -50,6 +50,32 @@ const fecha = new Intl.DateTimeFormat('es-MX', {
    con dos o cuatro, dos tercios con tres, la mitad con cinco. Las chicas nunca
    pasan de medio ancho de ficha, así que les basta la escalera corta. */
 const anchos = (i: number) => (i === 0 ? [480, 800, 1200] : [320, 480, 800]);
+
+/* Y cuánto de la ficha ocupa cada una, para decírselo al navegador. `sizes`
+   llega con el ancho de la ficha entera, y con ése las chicas del mosaico
+   —un cuarto de ficha en una de cinco— pedían la foto de la ficha entera: en
+   un teléfono de triple densidad, 800 px para pintar 85. Cada foto lleva su
+   `sizes` multiplicado por su parte. */
+const PARTES: Record<number, [number, number]> = {
+  1: [1, 1],
+  2: [1 / 2, 1 / 2],
+  3: [2 / 3, 1 / 3],
+  4: [1 / 2, 1 / 2],
+  5: [1 / 2, 1 / 4],
+};
+const [primera, resto] = PARTES[n] ?? [1, 1];
+const sizesDe = (i: number) => {
+  const parte = i === 0 ? primera : resto;
+  if (parte === 1) return sizes;
+  return sizes
+    .split(',')
+    .map((regla) => {
+      const trozos = regla.trim().split(/\s+(?=[^\s]+$)/);
+      const largo = trozos.pop()!;
+      return [...trozos, `calc(${largo} * ${parte.toFixed(3)})`].join(' ');
+    })
+    .join(', ');
+};
 ---
 
 <li class="aporte ficha flex flex-col" data-reveal="escala" data-retraso={(indice % 3) * 90}>
@@ -67,7 +93,7 @@ const anchos = (i: number) => (i === 0 ? [480, 800, 1200] : [320, 480, 800]);
           <img
             src={imagen(f.src, i === 0 ? 800 : 480)}
             srcset={juegoDeImagenes(f.src, anchos(i)) || undefined}
-            sizes={sizes}
+            sizes={sizesDe(i)}
             alt=""
             width="1200"
             height="900"

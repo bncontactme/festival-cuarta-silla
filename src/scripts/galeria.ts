@@ -92,6 +92,7 @@ function montarSubida(forma: HTMLFormElement, dialogo: HTMLDialogElement) {
 
   const lista = $<HTMLUListElement>('[data-subir-fotos]');
   const hueco = $<HTMLLIElement>('[data-subir-hueco]');
+  const vacios = [...forma.querySelectorAll<HTMLLIElement>('[data-subir-vacio]')];
   const archivo = $<HTMLInputElement>('[data-subir-archivo]');
   const cuenta = $<HTMLElement>('[data-subir-cuenta]');
   const queja = $<HTMLElement>('[data-subir-queja]');
@@ -111,6 +112,10 @@ function montarSubida(forma: HTMLFormElement, dialogo: HTMLDialogElement) {
   function pintarCuenta() {
     cuenta.textContent = elegidas.length ? `${elegidas.length} de ${MAXIMO}` : T.fotosNota;
     hueco.hidden = elegidas.length >= MAXIMO;
+    // La tira mide siempre cinco: cada foto elegida empuja el hueco de añadir
+    // una casilla a la derecha y se come la vacía de más a la izquierda, así
+    // que las que quedan siguen diciendo su número de verdad.
+    vacios.forEach((v, i) => { v.hidden = i < elegidas.length; });
     hueco.closest('fieldset')?.removeAttribute('aria-invalid');
   }
 
