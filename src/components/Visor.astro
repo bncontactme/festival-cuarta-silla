@@ -7,8 +7,9 @@ import { archivo, type Aporte } from '../data/archivo';
  *
  * Es el modal de la casa en su versión oscura. La foto va sobre tinta —una
  * foto se mira sobre negro, no sobre el amarillo del sitio— y el pie, al lado
- * en papel: título, nombre, Instagram y la descripción entera, que en la ficha
- * sale cortada a cuatro renglones.
+ * en papel: título, nombre, la descripción y el Instagram, que la ficha
+ * compacta ya no enseña. En el teléfono va a pantalla entera, con el pie
+ * debajo (ver «El visor» en `global.css`).
  *
  * **Un solo visor para todas las entradas.** Lo que cambia de una a otra viaja
  * en un JSON al pie (`#galeria-aportes`) y lo pone `src/scripts/galeria.ts` al
@@ -66,7 +67,7 @@ const t = archivo.visor;
 
     <div class="visor-pie">
       <p class="meta text-[0.62rem] text-tinta/55" data-visor-cuenta></p>
-      <h2 id="visor-titulo" class="display mt-4 text-4xl leading-[0.95] lg:text-5xl" data-visor-titulo></h2>
+      <h2 id="visor-titulo" class="display" data-visor-titulo></h2>
       <p class="meta mt-4 text-[0.62rem]">
         {t.por} <span class="font-bold" data-visor-nombre></span>
       </p>

@@ -2037,9 +2037,17 @@ fieldset[aria-invalid='true'] .subir-anadir {
 }
 
 /* — El visor ——— */
-/* El modal a pantalla casi entera, en su versión oscura: la foto sobre tinta,
-   el pie en papel. En escritorio, lado a lado; en el teléfono, la foto arriba
-   y el pie debajo, y el conjunto hace scroll. */
+/* La foto sobre tinta, el pie en papel. En escritorio, lado a lado dentro del
+   modal; en el teléfono, a pantalla entera: la foto se queda con todo el alto
+   que sobra y el pie va debajo, corto, con su propio scroll si la descripción
+   es larga.
+
+   **La foto se mide contra su caja, no contra sí misma.** Iba en el flujo con
+   `max-height: 100%`, y ese 100 % de una fila de rejilla sin alto fijo no
+   frenaba nada: una foto vertical se salía de la escena —en escritorio se
+   cortaba por abajo; en el teléfono se montaba encima del título y tapaba el
+   contador—. Ahora va en absoluto, del tamaño de la escena menos sus márgenes,
+   con `object-fit: contain`: entra entera, sea como sea. */
 .visor {
   width: min(84rem, calc(100vw - 2rem));
   max-width: none;
@@ -2050,41 +2058,38 @@ fieldset[aria-invalid='true'] .subir-anadir {
 }
 .visor-caja {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) 24rem;
   height: 100%;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  grid-template-rows: minmax(60%, 1fr) auto;
+  overflow: hidden;
 }
-@media (width >= 64rem) {
-  .visor-caja {
-    grid-template-rows: none;
-    grid-template-columns: minmax(0, 1fr) 24rem;
-    overflow: hidden;
-  }
-}
+
+/* Los márgenes de la foto dentro de la escena: arriba y a los lados dejan
+   sitio a la ✕ y a las flechas. */
 .visor-escena {
+  --arriba: 2rem;
+  --lado: 5rem;
+  --abajo: 2rem;
   position: relative;
-  display: grid;
-  place-items: center;
+  min-width: 0;
   min-height: 0;
-  padding: 3.5rem 0.75rem 0.75rem;
+  margin: 0;
+  overflow: hidden;
   touch-action: pan-y;
   user-select: none;
 }
-@media (width >= 64rem) {
-  .visor-escena {
-    padding: 2rem 5rem;
-  }
-}
 .visor-foto {
-  max-width: 100%;
-  max-height: 100%;
+  position: absolute;
+  top: var(--arriba);
+  left: var(--lado);
+  width: calc(100% - 2 * var(--lado));
+  height: calc(100% - var(--arriba) - var(--abajo));
   object-fit: contain;
   transition: opacity 0.25s var(--ease-salida);
 }
 .visor-foto.cargando {
   opacity: 0;
 }
+
 /* Los pasos: la misma caja cuadrada de la ✕, a los dos lados de la foto. */
 .visor-paso {
   position: absolute;
@@ -2107,32 +2112,84 @@ fieldset[aria-invalid='true'] .subir-anadir {
   color: var(--color-tinta);
 }
 .visor-paso--antes {
-  left: 0.75rem;
+  left: 1.25rem;
 }
 .visor-paso--despues {
-  right: 0.75rem;
+  right: 1.25rem;
 }
-@media (width >= 64rem) {
-  .visor-paso--antes {
-    left: 1.25rem;
-  }
-  .visor-paso--despues {
-    right: 1.25rem;
-  }
-}
+
 .visor-pie {
-  border-top: 2px solid var(--color-tinta);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-left: 2px solid var(--color-tinta);
   background-color: var(--color-papel);
   color: var(--color-tinta);
-  padding: 1.75rem 1.5rem 2.25rem;
+  padding: 5rem 2.25rem 2.5rem;
   --anillo: var(--color-tinta);
 }
-@media (width >= 64rem) {
+.visor-pie h2 {
+  margin-top: 1rem;
+  font-size: 3rem;
+  line-height: 0.95;
+}
+
+/* ── En el teléfono ────────────────────────────────────────────────────
+   A pantalla entera y sin marco: en 375 px, un modal con margen y sombra
+   eran 30 px de foto menos por lado para enseñar un borde. La foto se queda
+   con el alto que sobra; arriba, en la franja de la ✕, van las dos flechas
+   —encima de la foto tapaban justo el centro— y abajo el pie, que no pasa de
+   dos quintos de la pantalla: una descripción larga se lee con scroll dentro
+   del pie, sin empujar la foto. Pasar de foto también se hace deslizando. */
+@media (width < 64rem) {
+  .visor {
+    width: 100%;
+    height: 100dvh;
+    margin: 0;
+    border: 0;
+    box-shadow: none;
+  }
+  .visor-caja {
+    display: flex;
+    flex-direction: column;
+  }
+  .visor-escena {
+    --arriba: 4.25rem;
+    --lado: 0.75rem;
+    --abajo: 0.75rem;
+    flex: 1 1 auto;
+  }
+  .visor-paso {
+    top: 1rem;
+    translate: none;
+  }
+  .visor-paso--antes {
+    left: 1rem;
+  }
+  .visor-paso--despues {
+    left: 4.25rem;
+    right: auto;
+  }
   .visor-pie {
-    border-top: 0;
-    border-left: 2px solid var(--color-tinta);
-    padding: 5rem 2.25rem 2.5rem;
-    overflow-y: auto;
+    flex: none;
+    max-height: 40dvh;
+    border-left: 0;
+    border-top: 2px solid var(--color-tinta);
+    padding: 1rem 1rem 1.25rem;
+  }
+  .visor-pie h2 {
+    margin-top: 0.4rem;
+    font-size: 1.9rem;
+  }
+  .visor-pie h2 + .meta {
+    margin-top: 0.5rem;
+  }
+  .visor-pie .visor-texto {
+    margin-top: 0.75rem;
+    gap: 0.6rem;
+    font-size: 0.8rem;
+  }
+  .visor-pie .boton {
+    margin-top: 1rem;
   }
 }
 
