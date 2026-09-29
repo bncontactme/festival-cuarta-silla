@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 180,
-  "actualizado": "2026-09-29T03:27:25.016Z",
+  "version": 183,
+  "actualizado": "2026-09-29T03:41:22.705Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1849,6 +1849,81 @@
     }
   },
   "aportes": [
+    {
+      "id": "1d470o100l1l5b1r",
+      "titulo": "Coro Inolvidable",
+      "nombre": "Lorea",
+      "instagram": "loreadlpe",
+      "descripcion": "Coro inolvidable en el andador Palestina Libre. Madres y padres buscadores cantan un verso que me hizo llorar.",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653200/cuartasilla/aportes/1d470o100l1l5b1r/1.jpg"
+        }
+      ]
+    },
+    {
+      "id": "4o2d2l0y2u4c5o20",
+      "titulo": "Cuates, chelas y un chingo de arte",
+      "nombre": "Cristina González",
+      "instagram": "cris_bgoiet",
+      "descripcion": "Ánima Galería",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652810/cuartasilla/aportes/4o2d2l0y2u4c5o20/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652812/cuartasilla/aportes/4o2d2l0y2u4c5o20/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652813/cuartasilla/aportes/4o2d2l0y2u4c5o20/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652814/cuartasilla/aportes/4o2d2l0y2u4c5o20/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652815/cuartasilla/aportes/4o2d2l0y2u4c5o20/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652816/cuartasilla/aportes/4o2d2l0y2u4c5o20/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652818/cuartasilla/aportes/4o2d2l0y2u4c5o20/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652819/cuartasilla/aportes/4o2d2l0y2u4c5o20/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652820/cuartasilla/aportes/4o2d2l0y2u4c5o20/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652822/cuartasilla/aportes/4o2d2l0y2u4c5o20/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652824/cuartasilla/aportes/4o2d2l0y2u4c5o20/11.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652825/cuartasilla/aportes/4o2d2l0y2u4c5o20/12.jpg"
+        }
+      ]
+    },
+    {
+      "id": "6x1m0i472u4h000n",
+      "titulo": "CORRÍ-DOS",
+      "nombre": "Cristina González",
+      "instagram": "cris_bgoiet",
+      "descripcion": "Ánima Galería",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652481/cuartasilla/aportes/6x1m0i472u4h000n/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652482/cuartasilla/aportes/6x1m0i472u4h000n/2.jpg"
+        }
+      ]
+    },
     {
       "id": "4c1l1y2h38095v66",
       "titulo": "Felicidad",
