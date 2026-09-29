@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 173,
-  "actualizado": "2026-09-29T01:56:20.019Z",
+  "version": 174,
+  "actualizado": "2026-09-29T02:35:35.165Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1849,6 +1849,30 @@
     }
   },
   "aportes": [
+    {
+      "id": "0x6s3i2v714i4s57",
+      "titulo": "4ta silla",
+      "nombre": "Rojo",
+      "instagram": "elproferojo",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790649294/cuartasilla/aportes/0x6s3i2v714i4s57/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790649296/cuartasilla/aportes/0x6s3i2v714i4s57/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790649297/cuartasilla/aportes/0x6s3i2v714i4s57/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790649298/cuartasilla/aportes/0x6s3i2v714i4s57/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790649299/cuartasilla/aportes/0x6s3i2v714i4s57/5.jpg"
+        }
+      ]
+    },
     {
       "id": "4q3s072t05606345",
       "titulo": "A media pachanga",
