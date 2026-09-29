@@ -1522,35 +1522,40 @@ html:not(.js) .solo-js {
 }
 
 /* La ficha: la de la casa sin relleno, porque arriba lleva las fotos a sangre
-   y el relleno va en el pie. Se mide a sí misma, como la de artistas. */
+   y el relleno va en el pie. Se mide a sí misma, como la de artistas.
+
+   Compacta: el pie es el título, a dos renglones como mucho, y quién la
+   mandó en uno. Lo demás —la descripción, la fecha, el enlace a Instagram—
+   está en el visor. */
 .aporte.ficha {
   padding: 0;
   container-type: inline-size;
 }
 .aporte-pie {
-  padding: clamp(1rem, 5cqw, 1.6rem);
+  padding: 0.4rem 0.65rem 0.65rem;
 }
+/* El `overflow` que corta el título a dos renglones también corta lo que se
+   sale de la caja por arriba, y en Anton los acentos de las mayúsculas se
+   salen: «SÁBADO» salía «SABADO». El relleno de arriba les deja sitio. */
 .aporte-pie .display {
-  font-size: clamp(1.5rem, 8.5cqw, 2.4rem);
-}
-/* En la ficha, cuatro renglones. Entera se lee en el visor. `pre-line` para
-   que los párrafos que escribió quien la mandó no se peguen en uno. */
-.aporte-texto {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  white-space: pre-line;
+  padding-top: 0.15em;
+  font-size: clamp(0.95rem, 9cqw, 1.35rem);
+  line-height: 1.02;
 }
-.aporte-ig {
-  display: block;
-  padding: clamp(0.85rem, 3.4cqw, 1.1rem) 1rem;
+.aporte-por {
+  margin-top: 0.35rem;
+  overflow: hidden;
+  font-size: 0.5rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0.7;
 }
 
-/* El mosaico. El fondo es tinta y el hueco entre fotos son 2 px: el filete que
-   separa todo en el sitio, aquí asomando entre foto y foto. La primera manda y
-   las demás se reparten a su lado. */
 /* El 4:3 se sostiene venga lo que venga: las fotos van en absoluto dentro de
    su casilla y no aportan alto propio. Con la foto en el flujo, una vertical
    —que es como sale casi toda foto de teléfono— empujaba su fila hasta su
@@ -1609,16 +1614,17 @@ html:not(.js) .solo-js {
   outline-offset: -5px;
   z-index: 1;
 }
-/* Las dos chapas de la foto, las de la ficha de artista: el número de orden a
-   la izquierda y cuántas fotos trae a la derecha. */
+/* La chapa de cuántas fotos trae, arriba a la derecha: la de la ficha de
+   artista, a la escala de la ficha chica. */
 .aporte-chapa {
   position: absolute;
   top: 0;
+  right: 0;
   z-index: 2;
-  padding: 0.35rem 0.6rem;
+  padding: 0.25rem 0.45rem;
   background-color: var(--color-tinta);
   color: var(--color-amarillo);
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   pointer-events: none;
 }
 

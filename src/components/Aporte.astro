@@ -1,6 +1,6 @@
 ---
 import { imagen, juegoDeImagenes } from '../lib/imagen';
-import { archivo, type Aporte } from '../data/archivo';
+import type { Aporte } from '../data/archivo';
 
 /**
  * Una entrada de la galería abierta: las fotos de alguien, juntas, con su
@@ -21,30 +21,28 @@ import { archivo, type Aporte } from '../data/archivo';
  * JS abre el visor (`data-abre="visor"`, ver `src/scripts/galeria.ts`) en esa
  * foto, con las demás de la entrada a un toque.
  *
- * La misma ficha vive en el teléfono (una por fila) y en el escritorio (tres
- * por fila): se mide a sí misma, como la de artistas, y el título escala con
- * su ancho y no con el de la ventana.
+ * **Es compacta a propósito**: el mosaico, el título y quién la mandó, y
+ * nada más. La descripción, la fecha y el Instagram con su enlace viven en el
+ * visor, que es donde se lee con calma. Así caben dos por fila en el teléfono
+ * y cuatro en el escritorio —seis y ocho entradas por pantalla, contra una y
+ * tres cuando la ficha lo traía todo—. Elegida el 28/09 entre tres versiones
+ * compactas.
+ *
+ * Se mide a sí misma, como la de artistas: el título escala con su ancho y no
+ * con el de la ventana.
  */
 interface Props {
   aporte: Aporte;
-  /** Su lugar en la lista: el número de la chapa y el índice del visor. */
+  /** Su lugar en la lista: el índice del visor. */
   indice: number;
   /** Cuánto mide en la página, para que el navegador pida la foto justa. */
   sizes: string;
 }
 
 const { aporte, indice, sizes } = Astro.props;
-const numero = String(indice + 1).padStart(2, '0');
 const n = aporte.fotos.length;
-
-/* La fecha se escribe al construir, y en UTC a mediodía: `2026-09-27` a secas
-   se lee como la medianoche UTC, que en Guadalajara todavía es el 26. */
-const fecha = new Intl.DateTimeFormat('es-MX', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-  timeZone: 'UTC',
-}).format(new Date(`${aporte.fecha}T12:00:00Z`));
+/* Quién la mandó, en un renglón: el nombre y, si lo dio, su cuenta. */
+const por = [aporte.nombre, aporte.instagram && `@${aporte.instagram}`].filter(Boolean).join(' · ');
 
 /* En el mosaico la primera ocupa más que las otras: entera con una, la mitad
    con dos o cuatro, dos tercios con tres, la mitad con cinco. Las chicas nunca
@@ -78,7 +76,7 @@ const sizesDe = (i: number) => {
 };
 ---
 
-<li class="aporte ficha flex flex-col" data-reveal="escala" data-retraso={(indice % 3) * 90}>
+<li class="aporte ficha flex flex-col" data-reveal="escala" data-retraso={(indice % 4) * 70}>
   <div class={`aporte-mosaico aporte-mosaico--${n}`}>
     {
       aporte.fotos.map((f, i) => (
@@ -103,37 +101,11 @@ const sizesDe = (i: number) => {
         </a>
       ))
     }
-    <span class="aporte-chapa meta left-0">{numero}</span>
-    {n > 1 && <span class="aporte-chapa meta right-0">{n} fotos</span>}
+    {n > 1 && <span class="aporte-chapa meta">{n} fotos</span>}
   </div>
 
   <div class="aporte-pie flex-1">
-    <h3 class="display leading-[0.95]">{aporte.titulo}</h3>
-    <p class="meta mt-3 text-[0.62rem]">
-      {archivo.visor.por} <span class="font-bold">{aporte.nombre}</span>
-    </p>
-    {
-      aporte.descripcion && (
-        <p class="aporte-texto mt-4 font-mono text-[0.8rem] leading-relaxed text-tinta/75">
-          {aporte.descripcion}
-        </p>
-      )
-    }
-    <p class="meta mt-4 text-[0.58rem] text-tinta/50">
-      <time datetime={aporte.fecha}>{fecha}</time>
-    </p>
+    <h3 class="display">{aporte.titulo}</h3>
+    <p class="aporte-por meta">{por}</p>
   </div>
-
-  {
-    aporte.instagram && (
-      <a
-        href={`https://www.instagram.com/${aporte.instagram}/`}
-        target="_blank"
-        rel="noopener"
-        class="aporte-ig meta border-t-2 border-tinta bg-amarillo text-center font-bold transition-colors duration-300 hover:bg-tinta hover:text-amarillo"
-      >
-        @{aporte.instagram} ↗
-      </a>
-    )
-  }
 </li>
