@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 177,
-  "actualizado": "2026-09-29T03:22:57.108Z",
+  "version": 180,
+  "actualizado": "2026-09-29T03:27:25.016Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1849,6 +1849,92 @@
     }
   },
   "aportes": [
+    {
+      "id": "4c1l1y2h38095v66",
+      "titulo": "Felicidad",
+      "nombre": "Rojo",
+      "instagram": "elproferojo",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652396/cuartasilla/aportes/4c1l1y2h38095v66/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652397/cuartasilla/aportes/4c1l1y2h38095v66/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652398/cuartasilla/aportes/4c1l1y2h38095v66/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652400/cuartasilla/aportes/4c1l1y2h38095v66/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652401/cuartasilla/aportes/4c1l1y2h38095v66/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652402/cuartasilla/aportes/4c1l1y2h38095v66/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652403/cuartasilla/aportes/4c1l1y2h38095v66/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652404/cuartasilla/aportes/4c1l1y2h38095v66/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652406/cuartasilla/aportes/4c1l1y2h38095v66/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652407/cuartasilla/aportes/4c1l1y2h38095v66/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652408/cuartasilla/aportes/4c1l1y2h38095v66/11.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652410/cuartasilla/aportes/4c1l1y2h38095v66/12.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652411/cuartasilla/aportes/4c1l1y2h38095v66/13.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652412/cuartasilla/aportes/4c1l1y2h38095v66/14.jpg"
+        }
+      ]
+    },
+    {
+      "id": "522x5k0f431j292t",
+      "titulo": "La Ceiba no murio",
+      "nombre": "Jovany Cuarenta",
+      "instagram": "cuarenta.art",
+      "descripcion": "Instalación en Anima Galería de esta obra en colaboración con Pascual Gomez",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652342/cuartasilla/aportes/522x5k0f431j292t/1.jpg"
+        }
+      ]
+    },
+    {
+      "id": "6y340k460o0u0n6b",
+      "titulo": "No museo de principio a fin",
+      "nombre": "Tahis",
+      "instagram": "tahiser_",
+      "descripcion": "No Museo en el andador Palestina Libre, amé que estuviera Boing regalando cositas y muchos Boings",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652199/cuartasilla/aportes/6y340k460o0u0n6b/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652200/cuartasilla/aportes/6y340k460o0u0n6b/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652201/cuartasilla/aportes/6y340k460o0u0n6b/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652202/cuartasilla/aportes/6y340k460o0u0n6b/4.jpg"
+        }
+      ]
+    },
     {
       "id": "5g0n120h4v2v0124",
       "titulo": "Recinto del arte",
