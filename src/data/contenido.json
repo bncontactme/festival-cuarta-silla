@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 190,
-  "actualizado": "2026-09-29T05:33:44.872Z",
+  "version": 191,
+  "actualizado": "2026-09-29T07:03:37.105Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,28 @@
     }
   },
   "aportes": [
+    {
+      "id": "3j6n2n186j1p1z5f",
+      "titulo": "Piedras Marchitas",
+      "nombre": "Octavio Durán",
+      "instagram": "tavocuadros",
+      "descripcion": "En “casa dos guayabos” durante la clausura del festival de arte conceptual, algunos de los actores de la puesta en escena “Piedras Marchitas”",
+      "fecha": "2026-09-29",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790663241/cuartasilla/aportes/3j6n2n186j1p1z5f/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790663242/cuartasilla/aportes/3j6n2n186j1p1z5f/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790663243/cuartasilla/aportes/3j6n2n186j1p1z5f/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790663244/cuartasilla/aportes/3j6n2n186j1p1z5f/4.jpg"
+        }
+      ]
+    },
     {
       "id": "6h5m0w6q312z555w",
       "titulo": "El arte es pa, to2",
