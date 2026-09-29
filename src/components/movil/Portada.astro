@@ -23,6 +23,7 @@
 import Silla from '../Silla.astro';
 import AhoraPortada from '../AhoraPortada.astro';
 import Mosaico from '../Mosaico.astro';
+import CierreTalon from './CierreTalon.astro';
 import { conBase } from '../../lib/base';
 import {
   actividadesConRegistro,
@@ -221,19 +222,12 @@ const duracionCinta = ((tira.length * PASO) / VELOCIDAD).toFixed(1);
     {/* ── Y cuando ya pasó ─────────────────────────────────────────────
         El tercer oficio del bloque, y el último: con el festival terminado no
         hay nada que contar ni nada abierto, y lo que quedaba era la cuenta
-        atrás muerta en «00 00 00 00». Ahí va el agradecimiento, parpadeando
-        como un letrero de feria (`.portada-gracias`, en `movil.css`). Sin
+        atrás muerta en «00 00 00 00». Ahí va el talón del boleto de la
+        edición, con el agradecimiento y las cifras (`CierreTalon.astro`). Sin
         `data-cuenta`: `motion.ts` no tiene nada que marcar aquí. */}
     {
       festivalTerminado ? (
-        <div class="portada-tiempo portada-tiempo--gracias">
-          <p class="meta portada-cuando">
-            24 — 27 SEP {festival.anio}
-            <span class="opacity-55" aria-hidden="true">/</span>
-            Guadalajara
-          </p>
-          <p class="display display-centro portada-gracias">{festival.gracias}</p>
-        </div>
+        <CierreTalon />
       ) : (
         <div class="portada-tiempo" data-cuenta={festival.inicioISO}>
           <p class="meta portada-cuando">

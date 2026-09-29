@@ -29,10 +29,6 @@ export const festival = {
   /** Cuándo se acaba: la medianoche del domingo 27, hora de GDL. De aquí sale
    *  `festivalTerminado`, más abajo. */
   finISO: '2026-09-28T00:00:00-06:00',
-  /** Lo que dice la portada cuando el festival ya pasó: en el titular de la
-   *  banda del programa y, parpadeando, en el sitio de la cuenta regresiva del
-   *  teléfono. Pedido del 28/09. */
-  gracias: '¡Gracias por venir!',
   /**
    * La convocatoria CERRÓ. Ya no hay ni un botón que lleve aquí —«ya ese botón
    * muere», 26/08— y por eso no se borra el dato: el PDF sigue circulando en

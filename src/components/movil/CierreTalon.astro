@@ -1,0 +1,142 @@
+---
+import { festival, cierre, programa, actividades, sedes } from '../../data/site';
+import { artistas } from '../../data/artistas';
+
+/**
+ * El cierre de la edición en la portada del teléfono: el talón del boleto.
+ *
+ * En escritorio el cierre es un boleto entero (`CierreEdicion.astro`); aquí
+ * no cabe, y lo que queda en la mano después de un festival tampoco es el
+ * boleto entero: es el talón. Un papel ladeado sobre la banda roja con el
+ * agradecimiento, las cifras en los campos de un boleto de verdad —días,
+ * actividades, sedes, artistas— y, del otro lado de la perforación, la
+ * colilla con el asiento: la silla 04, la Cuarta Silla.
+ *
+ * Ocupa el sitio de la cuenta regresiva, con su clase: la franja entra
+ * barriendo en la secuencia de entrada igual que el reloj (`movil.css`).
+ *
+ * Mockeado el 28/09 junto a una pulsera y una fila de sillas; el cliente
+ * eligió éste, sin el «Admite 1» que llevaba la colilla.
+ */
+
+const dos = (n: number) => String(n).padStart(2, '0');
+
+const campos = [
+  { etiqueta: 'Días', n: programa.dias.length },
+  { etiqueta: 'Actividades', n: actividades.length },
+  { etiqueta: 'Sedes', n: sedes.lista.length },
+  { etiqueta: 'Artistas', n: artistas.lista.length },
+];
+---
+
+<div class="portada-tiempo talon-banda">
+  {/* La sombra dura en una caja aparte, por lo mismo que el boleto de
+      escritorio: la máscara de las muescas recorta todo lo que se sale, y una
+      `box-shadow` se sale. `drop-shadow` en el padre sigue la forma recortada. */}
+  <div class="talon-sombra">
+    <article class="talon">
+      <div class="talon-cuerpo">
+        <p class="meta talon-folio">Edición {festival.anio} · 24—27 Sep · GDL</p>
+        <h2 class="display talon-titulo">{cierre.titulo}</h2>
+        <dl class="talon-campos">
+          {
+            campos.map((c) => (
+              <div>
+                <dt class="meta">{c.etiqueta}</dt>
+                <dd class="display">{dos(c.n)}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+      <p class="talon-colilla">
+        <span class="meta">Silla</span>
+        <span class="display talon-silla">04</span>
+      </p>
+    </article>
+  </div>
+</div>
+
+<style>
+  .talon-banda {
+    padding: 0.7rem 1.1rem 0.95rem 0.85rem;
+  }
+
+  /* Ladeado, como uno que se dejó en la mesa. */
+  .talon-sombra {
+    rotate: -1.5deg;
+    filter: drop-shadow(5px 5px 0 var(--color-tinta));
+  }
+
+  .talon {
+    /* El ancho de la colilla: de ahí salen la perforación y las dos muescas. */
+    --colilla: 4.6rem;
+    display: grid;
+    grid-template-columns: 1fr var(--colilla);
+    background: var(--color-papel);
+    color: var(--color-tinta);
+    border: 2px solid var(--color-tinta);
+    -webkit-mask:
+      radial-gradient(circle 0.5rem at calc(100% - var(--colilla)) 0, #0000 98%, #000) top / 100% 51% no-repeat,
+      radial-gradient(circle 0.5rem at calc(100% - var(--colilla)) 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
+    mask:
+      radial-gradient(circle 0.5rem at calc(100% - var(--colilla)) 0, #0000 98%, #000) top / 100% 51% no-repeat,
+      radial-gradient(circle 0.5rem at calc(100% - var(--colilla)) 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
+  }
+
+  .talon-cuerpo {
+    padding: 0.55rem 0.65rem 0.6rem 0.8rem;
+  }
+  .talon-folio {
+    font-size: 0.48rem;
+    font-weight: 700;
+    color: var(--color-rojo);
+  }
+  .talon-titulo {
+    margin-top: 0.2rem;
+    font-size: 1.42rem;
+    line-height: 0.96;
+  }
+
+  /* Los campos de un boleto —como SECCIÓN, FILA, ASIENTO—, con las cifras de
+     la edición. */
+  .talon-campos {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    justify-content: start;
+    margin-top: 0.5rem;
+    border-top: 1px dotted color-mix(in srgb, var(--color-tinta) 45%, transparent);
+  }
+  .talon-campos > div {
+    padding: 0.25rem 0.6rem 0 0;
+  }
+  .talon-campos > div + div {
+    padding-left: 0.6rem;
+    border-left: 1px dotted color-mix(in srgb, var(--color-tinta) 45%, transparent);
+  }
+  .talon-campos dt {
+    font-size: 0.4rem;
+    color: color-mix(in srgb, var(--color-tinta) 60%, transparent);
+  }
+  .talon-campos dd {
+    font-size: 1.05rem;
+    line-height: 1.1;
+  }
+
+  .talon-colilla {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    border-left: 2px dashed var(--color-tinta);
+    text-align: center;
+  }
+  .talon-colilla .meta {
+    font-size: 0.45rem;
+    font-weight: 700;
+  }
+  .talon-silla {
+    font-size: 2.3rem;
+    line-height: 1;
+    color: var(--color-rojo);
+  }
+</style>
