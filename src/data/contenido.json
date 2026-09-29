@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 193,
-  "actualizado": "2026-09-29T17:36:26.410Z",
+  "version": 195,
+  "actualizado": "2026-09-29T19:35:28.086Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,77 @@
     }
   },
   "aportes": [
+    {
+      "id": "3h46621v575l5273",
+      "titulo": "¿Qué puede hacer el arte en un mundo roto?",
+      "nombre": "Gretel Vela",
+      "instagram": "gretoxoxo",
+      "descripcion": "Cierte del encuentro de arte feminista + inauguración de galería de arte. Sede: Cuerpos Parlantes",
+      "fecha": "2026-09-29",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790709688/cuartasilla/aportes/3h46621v575l5273/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790709690/cuartasilla/aportes/3h46621v575l5273/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790709692/cuartasilla/aportes/3h46621v575l5273/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790709694/cuartasilla/aportes/3h46621v575l5273/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790709696/cuartasilla/aportes/3h46621v575l5273/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790709701/cuartasilla/aportes/3h46621v575l5273/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790709705/cuartasilla/aportes/3h46621v575l5273/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790709708/cuartasilla/aportes/3h46621v575l5273/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790709711/cuartasilla/aportes/3h46621v575l5273/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790709714/cuartasilla/aportes/3h46621v575l5273/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790709717/cuartasilla/aportes/3h46621v575l5273/11.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790709720/cuartasilla/aportes/3h46621v575l5273/12.jpg"
+        }
+      ]
+    },
+    {
+      "id": "3l5t283v463c6r1m",
+      "titulo": "Pruébame",
+      "nombre": "Mars",
+      "instagram": "m.m.a.r.s",
+      "descripcion": "Dias Feriados",
+      "fecha": "2026-09-29",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790707544/cuartasilla/aportes/3l5t283v463c6r1m/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790707545/cuartasilla/aportes/3l5t283v463c6r1m/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790707546/cuartasilla/aportes/3l5t283v463c6r1m/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790707547/cuartasilla/aportes/3l5t283v463c6r1m/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790707548/cuartasilla/aportes/3l5t283v463c6r1m/5.jpg"
+        }
+      ]
+    },
     {
       "id": "270z363p2u0l0646",
       "titulo": "Foro AM",
