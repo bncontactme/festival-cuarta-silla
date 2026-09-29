@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 191,
-  "actualizado": "2026-09-29T07:03:37.105Z",
+  "version": 192,
+  "actualizado": "2026-09-29T16:57:42.605Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,31 @@
     }
   },
   "aportes": [
+    {
+      "id": "2c5m3a2i310p421j",
+      "titulo": "Inauguración y taller industria",
+      "nombre": "Andrea",
+      "instagram": "torrencialandrea",
+      "descripcion": "No museo, taller industria y performance",
+      "fecha": "2026-09-29",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790698845/cuartasilla/aportes/2c5m3a2i310p421j/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790698847/cuartasilla/aportes/2c5m3a2i310p421j/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790698848/cuartasilla/aportes/2c5m3a2i310p421j/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790698850/cuartasilla/aportes/2c5m3a2i310p421j/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790698851/cuartasilla/aportes/2c5m3a2i310p421j/5.jpg"
+        }
+      ]
+    },
     {
       "id": "3j6n2n186j1p1z5f",
       "titulo": "Piedras Marchitas",
