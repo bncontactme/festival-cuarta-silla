@@ -48,13 +48,14 @@ export const archivo = {
    *  La última aceptada va arriba; el orden se cambia arrastrando. */
   aportes: (contenido.aportes ?? []) as Aporte[],
 
-  /** La banda que invita a subir, encima de todo lo demás. */
+  /** La franja que invita a subir, encima de todo lo demás
+   *  (`SubirBanda.astro`). Corta y como se habla: la versión anterior sonaba a
+   *  traducción. */
   abierto: {
     rotulo: 'Archivo abierto',
+    pregunta: '¿Fuiste al festival?',
     titulo: 'Sube tus fotos',
-    bajada:
-      'Si estuviste en el festival, este archivo también es tuyo. Hasta cinco fotos por entrada, ' +
-      'con un título y tu nombre. Las revisamos antes de publicarlas.',
+    bajada: 'Hasta 5 fotos, con un título y tu nombre. Las revisamos y salen aquí.',
     boton: 'Subir fotos',
     /** El rótulo de la sección de entradas. */
     entradas: 'Del público',

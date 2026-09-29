@@ -1,0 +1,102 @@
+---
+import { archivo } from '../data/archivo';
+
+/**
+ * La invitación a subir fotos, arriba de la galería: una franja negra con la
+ * pregunta, una línea de cómo funciona y el botón que abre el formulario
+ * (`SubirFotos.astro`).
+ *
+ * Fue una banda blanca con rótulo, titular y un párrafo, y al cliente no le
+ * gustó ni la banda ni el texto. Se mockearon tres versiones sencillas el
+ * 28/09 —dentro del encabezado amarillo, una banda roja y ésta— y eligió
+ * ésta: un renglón que se lee de un vistazo y un botón.
+ *
+ * El botón sólo existe con JS (`.solo-js`): sin el script no hay manera de
+ * subir nada, y un botón que no hace nada miente.
+ */
+interface Props {
+  /** La versión del teléfono: apilada y con el botón a todo lo ancho, que en
+   *  el teléfono es donde está la cámara. */
+  movil?: boolean;
+}
+
+const { movil = false } = Astro.props;
+const t = archivo.abierto;
+---
+
+<section class:list={['subir-banda', { 'subir-banda--movil': movil }]}>
+  <div class="subir-banda-fila" data-reveal={movil ? undefined : 'arriba'}>
+    <p>
+      <b class="display">{t.pregunta} {t.titulo}.</b>
+      <span>{t.bajada}</span>
+    </p>
+    <button type="button" class="boton boton--amarillo solo-js" data-abre="subir">
+      {t.boton} ↑
+    </button>
+  </div>
+</section>
+
+<style>
+  .subir-banda {
+    /* Sobre tinta, el canto del botón va en amarillo, como en cualquier
+       sección oscura. */
+    --canto: var(--color-amarillo);
+    --anillo: var(--color-amarillo);
+    border-bottom: 2px solid var(--color-tinta);
+    background-color: var(--color-tinta);
+    color: var(--color-papel);
+    padding: 1.6rem 0;
+  }
+
+  .subir-banda-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
+    padding: 0 1rem;
+  }
+  @media (width >= 40rem) {
+    .subir-banda-fila {
+      padding: 0 1.5rem;
+    }
+  }
+  @media (width >= 64rem) {
+    .subir-banda-fila {
+      padding: 0 2.5rem;
+    }
+  }
+
+  .subir-banda b {
+    display: block;
+    font-size: 2.4rem;
+    line-height: 1;
+    color: var(--color-amarillo);
+  }
+  .subir-banda span {
+    display: block;
+    margin-top: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  .subir-banda--movil {
+    padding: 1.4rem 0 1.6rem;
+  }
+  .subir-banda--movil .subir-banda-fila {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .subir-banda--movil b {
+    font-size: 8.4vw;
+    line-height: 1.02;
+  }
+  .subir-banda--movil span {
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+  .subir-banda--movil .boton {
+    width: 100%;
+    justify-content: center;
+  }
+</style>
