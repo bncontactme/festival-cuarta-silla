@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 186,
-  "actualizado": "2026-09-29T03:58:10.009Z",
+  "version": 187,
+  "actualizado": "2026-09-29T04:15:22.874Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1793,10 +1793,6 @@
       {
         "nombre": "Gin Marin",
         "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384277/cuartasilla/marcas/x28fxexuhk3wvxugt08g.webp"
-      },
-      {
-        "nombre": "Soda Mate",
-        "logo": "https://res.cloudinary.com/duog120j4/image/upload/v1788384291/cuartasilla/marcas/w763i3zdx3xmvvlzdisj.webp"
       },
       {
         "nombre": "Inquietos Running Club",
