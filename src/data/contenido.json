@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 183,
-  "actualizado": "2026-09-29T03:41:22.705Z",
+  "version": 186,
+  "actualizado": "2026-09-29T03:58:10.009Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1849,6 +1849,87 @@
     }
   },
   "aportes": [
+    {
+      "id": "5h3m0d5v0l3w6j0z",
+      "titulo": "Entre los detalles",
+      "nombre": "Jesus",
+      "instagram": "jedejesus",
+      "descripcion": "Ex-convento de Santa Teresa / 26|09|2026",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653855/cuartasilla/aportes/5h3m0d5v0l3w6j0z/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653857/cuartasilla/aportes/5h3m0d5v0l3w6j0z/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653859/cuartasilla/aportes/5h3m0d5v0l3w6j0z/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653861/cuartasilla/aportes/5h3m0d5v0l3w6j0z/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653862/cuartasilla/aportes/5h3m0d5v0l3w6j0z/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653864/cuartasilla/aportes/5h3m0d5v0l3w6j0z/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653866/cuartasilla/aportes/5h3m0d5v0l3w6j0z/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653868/cuartasilla/aportes/5h3m0d5v0l3w6j0z/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653871/cuartasilla/aportes/5h3m0d5v0l3w6j0z/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653874/cuartasilla/aportes/5h3m0d5v0l3w6j0z/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653879/cuartasilla/aportes/5h3m0d5v0l3w6j0z/11.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653881/cuartasilla/aportes/5h3m0d5v0l3w6j0z/12.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653883/cuartasilla/aportes/5h3m0d5v0l3w6j0z/13.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653885/cuartasilla/aportes/5h3m0d5v0l3w6j0z/14.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653888/cuartasilla/aportes/5h3m0d5v0l3w6j0z/15.jpg"
+        }
+      ]
+    },
+    {
+      "id": "0b2g6i546l642f6p",
+      "titulo": "“Como se vela el campo”",
+      "nombre": "Lorea de la Peña",
+      "instagram": "loreadlpe",
+      "descripcion": "Un registro dos tres de pieza “Cómo se vela el campo” en staditche.",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653424/cuartasilla/aportes/0b2g6i546l642f6p/1.jpg"
+        }
+      ]
+    },
+    {
+      "id": "2e2g0r0s5x5j2045",
+      "titulo": "Rostros frente a coro de madres buscadoras.",
+      "nombre": "Lorea de la Peña",
+      "instagram": "loreadlpe",
+      "descripcion": "Madres buscadoras cantan en el andador palestina libre frente a retrato de sus hijos desaparecidos.",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790653318/cuartasilla/aportes/2e2g0r0s5x5j2045/1.jpg"
+        }
+      ]
+    },
     {
       "id": "1d470o100l1l5b1r",
       "titulo": "Coro Inolvidable",
