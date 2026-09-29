@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 187,
-  "actualizado": "2026-09-29T04:15:22.874Z",
+  "version": 190,
+  "actualizado": "2026-09-29T05:33:44.872Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,138 @@
     }
   },
   "aportes": [
+    {
+      "id": "6h5m0w6q312z555w",
+      "titulo": "El arte es pa, to2",
+      "nombre": "Tahis",
+      "instagram": "tahiser_",
+      "descripcion": "Algunas capturas de la gente disfrutando de los eventos",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659510/cuartasilla/aportes/6h5m0w6q312z555w/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659511/cuartasilla/aportes/6h5m0w6q312z555w/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659513/cuartasilla/aportes/6h5m0w6q312z555w/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659514/cuartasilla/aportes/6h5m0w6q312z555w/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659515/cuartasilla/aportes/6h5m0w6q312z555w/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659515/cuartasilla/aportes/6h5m0w6q312z555w/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659517/cuartasilla/aportes/6h5m0w6q312z555w/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659518/cuartasilla/aportes/6h5m0w6q312z555w/8.jpg"
+        }
+      ]
+    },
+    {
+      "id": "6z2j366j693r4i18",
+      "titulo": "PACA DE ORO",
+      "nombre": "Aura Aceves",
+      "instagram": "oro_radio",
+      "descripcion": "Sábado 26 septiembre, rambla Cataluña",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659218/cuartasilla/aportes/6z2j366j693r4i18/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659222/cuartasilla/aportes/6z2j366j693r4i18/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659224/cuartasilla/aportes/6z2j366j693r4i18/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659227/cuartasilla/aportes/6z2j366j693r4i18/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659230/cuartasilla/aportes/6z2j366j693r4i18/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659234/cuartasilla/aportes/6z2j366j693r4i18/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659238/cuartasilla/aportes/6z2j366j693r4i18/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659242/cuartasilla/aportes/6z2j366j693r4i18/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659246/cuartasilla/aportes/6z2j366j693r4i18/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659250/cuartasilla/aportes/6z2j366j693r4i18/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659255/cuartasilla/aportes/6z2j366j693r4i18/11.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659258/cuartasilla/aportes/6z2j366j693r4i18/12.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659261/cuartasilla/aportes/6z2j366j693r4i18/13.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659263/cuartasilla/aportes/6z2j366j693r4i18/14.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790659266/cuartasilla/aportes/6z2j366j693r4i18/15.jpg"
+        }
+      ]
+    },
+    {
+      "id": "4w483x5g5v2e1e2l",
+      "titulo": "Observar desde el ojo de una aguja",
+      "nombre": "Bruno",
+      "instagram": "princesa.cyberpunk",
+      "descripcion": "Ex-Convento de Santa Teresa, 25 de Septiembre, 2026\nEstudio Arechiga,26 de Septiembre, 2026\nNo Museo, 26 de Septiembre, 2026",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790658192/cuartasilla/aportes/4w483x5g5v2e1e2l/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790658193/cuartasilla/aportes/4w483x5g5v2e1e2l/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790658195/cuartasilla/aportes/4w483x5g5v2e1e2l/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790658196/cuartasilla/aportes/4w483x5g5v2e1e2l/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790658197/cuartasilla/aportes/4w483x5g5v2e1e2l/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790658198/cuartasilla/aportes/4w483x5g5v2e1e2l/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790658199/cuartasilla/aportes/4w483x5g5v2e1e2l/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790658201/cuartasilla/aportes/4w483x5g5v2e1e2l/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790658202/cuartasilla/aportes/4w483x5g5v2e1e2l/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790658203/cuartasilla/aportes/4w483x5g5v2e1e2l/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790658204/cuartasilla/aportes/4w483x5g5v2e1e2l/11.jpg"
+        }
+      ]
+    },
     {
       "id": "5h3m0d5v0l3w6j0z",
       "titulo": "Entre los detalles",
