@@ -73,6 +73,25 @@ export const festival = {
  */
 export const festivalTerminado = Date.now() >= new Date(festival.finISO).getTime();
 
+/**
+ * La banda de cierre de la portada: la que ocupa el sitio del Programa cuando
+ * el festival ya pasó (`festivalTerminado`). Ver `CierreEdicion.astro`.
+ *
+ * Las cifras del boleto no están aquí: salen solas del contenido del panel —el
+ * programa, las sedes, lxs artistas y las marcas—, así que dicen lo que hubo y
+ * no lo que alguien se acordó de escribir.
+ */
+export const cierre = {
+  rotulo: 'Cierre',
+  titulo: '¡Gracias por ser parte de esta edición!',
+  bajada:
+    'El programa se queda como registro de lo que pasó, y la galería sigue abierta para tus fotos.',
+  programa: 'Ver el programa',
+  fotos: 'Sube tus fotos',
+  /** El sello del total del boleto. */
+  total: '¡Gracias!',
+};
+
 /** La portada no gasta pestaña: se va por el logo, que es donde todo el mundo
  *  la busca. Sigue entera en el pie. */
 export const inicio = { label: 'Inicio', href: '/' };

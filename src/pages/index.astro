@@ -8,6 +8,7 @@ import Mosaico from '../components/Mosaico.astro';
 import Portada from '../components/movil/Portada.astro';
 import AhoraPortada from '../components/AhoraPortada.astro';
 import AvisoPrograma from '../components/AvisoPrograma.astro';
+import CierreEdicion from '../components/CierreEdicion.astro';
 import Mapa from '../components/Mapa.astro';
 import {
   festival,
@@ -394,20 +395,22 @@ const sillasSedes = [
       portada se lea como un solo bloque. La ficha del mini-programa se queda
       blanca dentro del campo rojo — la misma gramática que el retrato montado
       sobre rojo en el feed. */}
+  {/* Con el festival pasado, esta banda da las gracias: un boleto con lo que
+      dejó la edición, contado. Ver `CierreEdicion.astro` y `festivalTerminado`
+      en `site.ts`. La del programa se queda tal cual para la edición que
+      viene. */}
+  {festivalTerminado ? (
+  <CierreEdicion />
+  ) : (
   <section class="relative overflow-hidden border-b-2 border-tinta bg-rojo">
     {/* Izquierda y abajo, detrás de la ficha blanca del mini-programa: es
         opaca, se le monta encima y deja asomar la estrella por el hueco. Así
         queda lejos del botón —arriba a la derecha— y de la lista de días, que
         es texto y no la taparía. */}
-    {/* Terminado, ya no hay ficha que la tape por la izquierda: se asomaba
-        detrás del titular —amarillo sobre amarillo— y se comía la primera
-        letra. Vuelve a la derecha, como en el resto de las secciones. */}
-    <Estrella tinta="amarilla" alto="abajo" lado={festivalTerminado ? 'derecha' : 'izquierda'} />
+    <Estrella tinta="amarilla" alto="abajo" lado="izquierda" />
     <div class="relative px-4 pt-12 pb-14 sm:px-6 lg:px-10 lg:pt-16 lg:pb-20">
-      {/* El filete separa la cabecera de lo que va debajo. Terminado, debajo
-          no va nada, y un filete sobre un hueco rojo era la mitad del charco. */}
       <div
-        class={`flex flex-wrap items-end justify-between gap-6 ${festivalTerminado ? '' : 'border-b-2 border-tinta pb-8'}`}
+        class="flex flex-wrap items-end justify-between gap-6 border-b-2 border-tinta pb-8"
       >
         <div>
           <p
@@ -422,15 +425,12 @@ const sillasSedes = [
               campo amarillo. Ahora lo que las separa es el campo —una
               amarilla, la otra roja—, así que el cuerpo puede igualarse y
               bajar. La jerarquía la lleva el color, no el tamaño. */}
-          {/* Con el festival pasado, el titular da las gracias. El rótulo de
-              arriba sigue diciendo «Programa» y el botón sigue llevando a él:
-              la rejilla se queda en `/programa` como registro de lo que hubo. */}
           <h2
             class="display text-[9vw] leading-[0.9] text-amarillo lg:text-[4.5vw]"
             data-lineas
             data-reveal="lineas"
           >
-            {festivalTerminado ? festival.gracias : programa.titulo}
+            {programa.titulo}
           </h2>
         </div>
         <a href={conBase("/programa")} class="boton boton--amarillo" data-reveal="arriba">
@@ -451,11 +451,8 @@ const sillasSedes = [
           pierde — vive en `/programa`, que es a donde lleva el botón de esta
           misma cabecera; lo que se pierde es una portada que pregunta qué
           quieres mirar antes de enseñarte nada. */}
-      {/* Terminado, la banda del ahora no tiene qué contestar —se escondía
-          sola, y dejaba debajo del filete un charco rojo del alto de la
-          ficha—, así que ni se pinta: la sección se queda en su cabecera. */}
       {
-        festivalTerminado ? null : programaPublicado ? (
+        programaPublicado ? (
         <div class="mt-10 lg:mt-12">
           <AhoraPortada />
         </div>
@@ -467,6 +464,7 @@ const sillasSedes = [
       }
     </div>
   </section>
+  )}
 
   <!-- ══ PATROCINADORES ══════════════════════════════════════════════════
        Una cinta y una sola: aquí había un relevo entre Patrocinadores y

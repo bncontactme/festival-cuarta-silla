@@ -1,0 +1,267 @@
+---
+import { conBase } from '../lib/base';
+import Estrella from './Estrella.astro';
+import { festival, cierre, programa, actividades, sedes, patrocinadores } from '../data/site';
+import { artistas } from '../data/artistas';
+
+/**
+ * La banda de cierre de la portada: el festival ya pasó, y en el sitio del
+ * Programa se da las gracias con lo que la edición dejó, contado.
+ *
+ * **Es un boleto.** Un festival se vive con uno en el bolsillo, y al acabar lo
+ * que queda es eso: un papel usado con el nombre y la fecha. Aquí el boleto es
+ * el recibo de la edición —días, actividades, sedes, artistas, marcas— con el
+ * wordmark gótico en la cabecera, renglones de puntitos como los de una caja
+ * registradora, un código de barras con las fechas y, en el total, un sello de
+ * goma que dice gracias. El folio es el Nº 0004: la Cuarta Silla.
+ *
+ * Todo sale del contenido del panel —nada de cifras escritas a mano— y es el
+ * papel, la tinta, el rojo y el amarillo de siempre, con la estrella de la
+ * casa asomando por detrás. Sólo en escritorio: el teléfono tiene su portada, y
+ * ahí el agradecimiento parpadea en la banda del reloj (`movil/Portada.astro`).
+ *
+ * Mockeado en tres versiones el 28/09 —el boleto, un cartel de cifras y un
+ * gráfico de sillas— y el cliente eligió ésta, «no tan grande».
+ */
+
+const nDias = programa.dias.length;
+const nActividades = actividades.length;
+const nSedes = sedes.lista.length;
+const nArtistas = artistas.lista.length;
+const nMarcas = patrocinadores.lista.length;
+
+const PLURAL = { muestra: 'muestras', escena: 'escenas', charla: 'charlas', taller: 'talleres' };
+const porTipo = (['muestra', 'escena', 'charla', 'taller'] as const)
+  .map((tipo) => ({ tipo, n: actividades.filter((a) => a.tipo === tipo).length }))
+  .filter((t) => t.n > 0);
+
+const renglones = [
+  { etiqueta: 'Días', n: nDias },
+  { etiqueta: 'Actividades', n: nActividades, detalle: porTipo.map((t) => `${t.n} ${PLURAL[t.tipo]}`).join(' · ') },
+  { etiqueta: 'Sedes', n: nSedes },
+  { etiqueta: 'Artistas', n: nArtistas },
+  { etiqueta: 'Marcas', n: nMarcas },
+];
+
+const dos = (n: number) => String(n).padStart(2, '0');
+
+/* El renglón de debajo de las barras: el folio y las dos fechas, como los
+   números de un boleto de verdad. `24092026` sale de `inicioISO` y el último
+   día, de `finISO` menos un día. */
+const fecha = (iso: string) => iso.slice(8, 10) + iso.slice(5, 7) + iso.slice(0, 4);
+const ultimo = new Date(new Date(festival.finISO).getTime() - 86_400_000).toISOString();
+const folio = `0004 · ${fecha(festival.inicioISO)} · ${fecha(ultimo)} · GDL`;
+---
+
+<section class="cierre relative overflow-hidden border-b-2 border-tinta bg-rojo">
+  <Estrella tinta="amarilla" alto="centro" />
+
+  <div class="relative grid items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:gap-10 lg:px-10 lg:py-16">
+    <div>
+      <p class="meta mb-6 inline-block bg-amarillo px-3 py-1.5 text-tinta" data-reveal="lado">
+        03 / {cierre.rotulo}
+      </p>
+      <h2
+        class="display max-w-[21ch] text-[9vw] leading-[0.94] text-amarillo lg:text-[4.4vw]"
+        data-lineas
+        data-reveal="lineas"
+      >
+        {cierre.titulo}
+      </h2>
+      <p
+        class="mt-6 max-w-[44ch] font-mono text-sm leading-relaxed text-papel"
+        data-reveal="arriba"
+      >
+        {festival.fechas} · Guadalajara. {cierre.bajada}
+      </p>
+      <div class="mt-8 flex flex-wrap gap-4" data-reveal="arriba" data-retraso="100">
+        <a href={conBase('/programa')} class="boton boton--amarillo">{cierre.programa}</a>
+        <a href={conBase('/galeria')} class="boton boton--papel">{cierre.fotos} ↑</a>
+      </div>
+    </div>
+
+    <div class="boleto-escena" data-reveal="escala" data-retraso="150">
+      {/* La sombra dura va en una caja aparte: la máscara de las muescas recorta
+          todo lo que se sale del boleto, y una `box-shadow` se sale. Con
+          `drop-shadow` en el padre, la sombra sigue la forma ya recortada. */}
+      <div class="boleto-sombra">
+        <article class="boleto" aria-label="La edición, en cifras">
+          <header class="boleto-cabeza">
+            <img
+              src={conBase('/logos/wordmark-roja.svg')}
+              alt={festival.nombreCorto}
+              class="boleto-marca"
+              width="300"
+              height="60"
+            />
+            <p class="meta">{festival.nombre}</p>
+            <p class="meta boleto-folio">Edición {festival.anio} · Nº 0004</p>
+          </header>
+
+          <dl class="boleto-renglones">
+            {
+              renglones.map((r) => (
+                <div>
+                  <div class="boleto-renglon">
+                    <dt>{r.etiqueta}</dt>
+                    <i aria-hidden="true" />
+                    <dd>{dos(r.n)}</dd>
+                  </div>
+                  {r.detalle && <p class="boleto-detalle">{r.detalle}</p>}
+                </div>
+              ))
+            }
+          </dl>
+
+          <p class="boleto-total">
+            <span class="meta">Total</span>
+            <span class="boleto-sello display">{cierre.total}</span>
+          </p>
+
+          <div class="boleto-barras" aria-hidden="true">
+            <span></span>
+            <span class="meta">{folio}</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .boleto-escena {
+    display: grid;
+    place-items: center;
+    padding: 0.5rem 1.5rem 1rem 0;
+  }
+
+  /* Ladeado, como uno que se dejó caer sobre la mesa. Al pasar el cursor se
+     endereza un poco y se levanta: lo que hace un boleto cuando alguien lo
+     recoge. */
+  .boleto-sombra {
+    width: 21rem;
+    rotate: -4deg;
+    filter: drop-shadow(12px 12px 0 var(--color-tinta));
+    transition:
+      rotate 0.6s var(--ease-salida),
+      translate 0.6s var(--ease-salida),
+      filter 0.6s var(--ease-salida);
+  }
+  .boleto-escena:hover .boleto-sombra {
+    rotate: -1.5deg;
+    translate: -4px -6px;
+    filter: drop-shadow(18px 18px 0 var(--color-tinta));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .boleto-sombra {
+      transition: none;
+    }
+  }
+
+  .boleto {
+    background: var(--color-papel);
+    color: var(--color-tinta);
+    border: 2px solid var(--color-tinta);
+    /* Las dos muescas del talón, a la altura del total. Cada medio boleto se
+       enmascara por su lado. */
+    -webkit-mask:
+      radial-gradient(circle 0.75rem at 0 76%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 0.75rem at 100% 76%, #0000 98%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle 0.75rem at 0 76%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 0.75rem at 100% 76%, #0000 98%, #000) right / 51% 100% no-repeat;
+  }
+
+  .boleto-cabeza {
+    padding: 1.1rem 1.3rem 0.9rem;
+    border-bottom: 2px dashed var(--color-tinta);
+    text-align: center;
+  }
+  .boleto-marca {
+    width: 82%;
+    height: auto;
+    margin: 0 auto 0.45rem;
+  }
+  .boleto-cabeza .meta {
+    font-size: 0.55rem;
+  }
+  .boleto-folio {
+    margin-top: 0.3rem;
+    color: var(--color-rojo);
+    font-weight: 700;
+  }
+
+  .boleto-renglones {
+    display: grid;
+    gap: 0.4rem;
+    padding: 0.95rem 1.3rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .boleto-renglon {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+  }
+  .boleto-renglon i {
+    flex: 1;
+    translate: 0 -0.25em;
+    border-bottom: 2px dotted color-mix(in srgb, var(--color-tinta) 40%, transparent);
+  }
+  .boleto-renglon dd {
+    font-weight: 700;
+  }
+  .boleto-detalle {
+    margin-top: 0.15rem;
+    padding-left: 0.9rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--color-tinta) 60%, transparent);
+  }
+
+  .boleto-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 1.3rem;
+    padding: 0.75rem 0 0.85rem;
+    border-top: 2px solid var(--color-tinta);
+    border-bottom: 2px dashed var(--color-tinta);
+  }
+  .boleto-total .meta {
+    font-size: 0.6rem;
+  }
+  /* El total es un sello de goma: rojo, doble filete, ladeado al revés que el
+     boleto y con la tinta un poco comida, como uno de verdad. */
+  .boleto-sello {
+    padding: 0.3rem 0.65rem 0.25rem;
+    rotate: -7deg;
+    border: 4px double var(--color-rojo);
+    color: var(--color-rojo);
+    font-size: 1.9rem;
+    line-height: 0.9;
+    -webkit-mask: repeating-linear-gradient(35deg, #000 0 6px, #000b 6px 8px);
+    mask: repeating-linear-gradient(35deg, #000 0 6px, #000b 6px 8px);
+  }
+
+  .boleto-barras {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.8rem 1.3rem 1rem;
+    text-align: center;
+  }
+  .boleto-barras span:first-child {
+    height: 2rem;
+    background: repeating-linear-gradient(90deg,
+      var(--color-tinta) 0 2px, transparent 2px 5px,
+      var(--color-tinta) 5px 9px, transparent 9px 11px,
+      var(--color-tinta) 11px 12px, transparent 12px 16px);
+  }
+  .boleto-barras .meta {
+    font-size: 0.5rem;
+    opacity: 0.6;
+  }
+</style>
