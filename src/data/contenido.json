@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 166,
-  "actualizado": "2026-09-29T00:41:11.620Z",
+  "version": 167,
+  "actualizado": "2026-09-29T00:42:28.934Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1848,19 +1848,5 @@
       "publicado": true
     }
   },
-  "aportes": [
-    {
-      "id": "1314366e3x2h2x5p",
-      "titulo": "TEST",
-      "nombre": "TES",
-      "instagram": "t",
-      "descripcion": "TEST",
-      "fecha": "2026-09-28",
-      "fotos": [
-        {
-          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790642437/cuartasilla/aportes/1314366e3x2h2x5p/1.jpg"
-        }
-      ]
-    }
-  ]
+  "aportes": []
 }
