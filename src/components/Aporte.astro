@@ -13,7 +13,9 @@ import type { Aporte } from '../data/archivo';
  *
  * **El mosaico cambia con cuántas son**, de una a cinco (`.aporte-mosaico--N`
  * en `global.css`): la primera manda —es la que eligió poner primero quien la
- * mandó— y el resto se reparte a su lado. Separadas por el mismo filete de 2 px
+ * mandó— y el resto se reparte a su lado. Una entrada trae hasta quince; si
+ * son más de cinco, la quinta lleva encima cuántas faltan («+10») y el visor
+ * las tiene todas. Separadas por el mismo filete de 2 px
  * que separa todo en el sitio, que aquí es el fondo de tinta asomando entre
  * foto y foto.
  *
@@ -41,6 +43,12 @@ interface Props {
 
 const { aporte, indice, sizes } = Astro.props;
 const n = aporte.fotos.length;
+/* El mosaico enseña cinco como mucho; si trae más, la quinta lleva encima
+   cuántas faltan y el visor las tiene todas. */
+const EN_MOSAICO = 5;
+const mosaico = aporte.fotos.slice(0, EN_MOSAICO);
+const m = mosaico.length;
+const faltan = n - m;
 /* Quién la mandó, en un renglón: el nombre y, si lo dio, su cuenta. */
 const por = [aporte.nombre, aporte.instagram && `@${aporte.instagram}`].filter(Boolean).join(' · ');
 
@@ -61,7 +69,7 @@ const PARTES: Record<number, [number, number]> = {
   4: [1 / 2, 1 / 2],
   5: [1 / 2, 1 / 4],
 };
-const [primera, resto] = PARTES[n] ?? [1, 1];
+const [primera, resto] = PARTES[m] ?? [1, 1];
 const sizesDe = (i: number) => {
   const parte = i === 0 ? primera : resto;
   if (parte === 1) return sizes;
@@ -77,9 +85,9 @@ const sizesDe = (i: number) => {
 ---
 
 <li class="aporte ficha flex flex-col" data-reveal="escala" data-retraso={(indice % 4) * 70}>
-  <div class={`aporte-mosaico aporte-mosaico--${n}`}>
+  <div class={`aporte-mosaico aporte-mosaico--${m}`}>
     {
-      aporte.fotos.map((f, i) => (
+      mosaico.map((f, i) => (
         <a
           href={imagen(f.src, 1600)}
           class="aporte-foto"
@@ -98,6 +106,7 @@ const sizesDe = (i: number) => {
             loading="lazy"
             decoding="async"
           />
+          {i === m - 1 && faltan > 0 && <span class="aporte-mas display" aria-hidden="true">+{faltan}</span>}
         </a>
       ))
     }

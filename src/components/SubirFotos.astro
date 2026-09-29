@@ -3,7 +3,7 @@ import { conBase } from '../lib/base';
 import { archivo } from '../data/archivo';
 
 /**
- * El formulario de la galería abierta: hasta cinco fotos, un título, un nombre,
+ * El formulario de la galería abierta: hasta quince fotos, un título, un nombre,
  * y si se quiere el Instagram y unas líneas.
  *
  * **Es el modal del manifiesto**, no uno nuevo: la cabecera roja con
@@ -57,7 +57,9 @@ const t = archivo.subir;
           </legend>
           <ul class="subir-fotos" data-subir-fotos>
             {/* Las elegidas las pinta el script aquí delante, con su ✕ y su
-                barra de avance. El hueco de añadir es un `<label>` del input:
+                barra de avance, y la rejilla crece con ellas: de cinco en
+                cinco, hasta tres filas. Sin fotos, el hueco de añadir es un
+                botón a lo ancho. El hueco es un `<label>` del input:
                 así el selector de archivos del teléfono se abre sin JS de
                 por medio, que en iOS es la diferencia entre abrirse o no. */}
             <li class="subir-hueco" data-subir-hueco>
@@ -75,15 +77,6 @@ const t = archivo.subir;
                 <small class="subir-soltar">{t.soltar}</small>
               </label>
             </li>
-            {/* Las casillas que faltan, numeradas: la tira mide siempre cinco,
-                así que el tope se ve antes de leerlo y el formulario no cambia
-                de alto al elegir. Cada una abre el mismo selector; el script
-                esconde una por cada foto elegida (`pintarCuenta`). */}
-            {[2, 3, 4, 5].map((n) => (
-              <li class="subir-vacio" aria-hidden="true" data-subir-vacio>
-                <label for="subir-archivo">{String(n).padStart(2, '0')}</label>
-              </li>
-            ))}
           </ul>
         </fieldset>
 

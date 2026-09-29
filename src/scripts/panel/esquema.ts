@@ -39,7 +39,7 @@ export type Campo = {
   /** De dónde sale la subcarpeta con el nombre propio. */
   nombreDe?: (fila: any) => string | undefined;
   /** Sólo en `fotos`: cuántas caben. Llegado el tope, el hueco de soltar se va
-   *  — las entradas de la galería abierta son de cinco como mucho. */
+   *  — las entradas de la galería abierta son de quince como mucho. */
   max?: number;
 };
 
@@ -275,10 +275,10 @@ const aportes: Esquema = {
     { clave: 'instagram', etiqueta: 'Instagram', tipo: 'texto',
       ayuda: 'La cuenta, con o sin arroba. Se guarda sin ella.' },
     { clave: 'descripcion', etiqueta: 'Descripción', tipo: 'area', ancho: 4,
-      ayuda: 'Hasta 800 caracteres. En la ficha se leen cuatro renglones; entera, en el visor.' },
-    { clave: 'fotos', etiqueta: 'Fotos', tipo: 'fotos', ancho: 4, max: 5,
+      ayuda: 'Hasta 800 caracteres. Se lee en el visor, al abrir una foto de la entrada.' },
+    { clave: 'fotos', etiqueta: 'Fotos', tipo: 'fotos', ancho: 4, max: 15,
       carpeta: (a) => `aportes/${a.id}`,
-      ayuda: 'De una a cinco. La primera es la grande del mosaico: se cambia el orden con las flechas.' },
+      ayuda: 'De una a quince. La primera es la grande del mosaico, y en la ficha se ven cinco: se cambia el orden con las flechas.' },
   ],
   nuevo: () => ({ id: nuevoIdAporte(), titulo: '', nombre: '', fecha: hoyEnGDL(), fotos: [] }),
   titula: (a) => a.titulo || 'Entrada sin título',

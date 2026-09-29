@@ -349,7 +349,7 @@ function fotos(campo: Campo, fila: any, ctx: Ctx) {
         ),
       );
     }
-    // Con tope —las entradas de la galería abierta son de cinco— el hueco se
+    // Con tope —las entradas de la galería abierta son de quince— el hueco se
     // va al llegar: un soltadero que sólo puede decir «ya no caben» es una
     // pregunta que nadie hizo.
     const tope = campo.max ?? Infinity;

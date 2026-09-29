@@ -23,9 +23,10 @@
 import { PANEL_URL } from '../lib/panel';
 import { reducir } from '../lib/reducir';
 
-/** Lo que pidió el festival: «máximo 5 fotos por post». El Worker lo vuelve a
- *  mirar; esto sólo evita subir la sexta para que la rechacen. */
-const MAXIMO = 5;
+/** Lo que pidió el festival: «máximo 5 fotos por post», y el 28/09, quince.
+ *  El Worker lo vuelve a mirar; esto sólo evita subir la dieciséis para que la
+ *  rechacen. */
+const MAXIMO = 15;
 
 /** Lo que Cloudinary acepta si una foto no se puede rehacer aquí y hay que
  *  mandarla tal cual. Coincide con `allowed_formats` de la firma. */
@@ -37,7 +38,7 @@ const rellenar = (plantilla: string, datos: Record<string, string | number>) =>
 
 /** Misma regla que `cuenta()` en `workers/panel/lib/validar.js`: con arroba, sin
  *  ella o el enlace del perfil. Se mira aquí para decirlo en el campo y no
- *  después de subir cinco fotos. */
+ *  después de subir quince fotos. */
 const cuentaValida = (s: string) =>
   /^[a-z0-9._]{1,30}$/.test(
     s.trim()
@@ -92,7 +93,6 @@ function montarSubida(forma: HTMLFormElement, dialogo: HTMLDialogElement) {
 
   const lista = $<HTMLUListElement>('[data-subir-fotos]');
   const hueco = $<HTMLLIElement>('[data-subir-hueco]');
-  const vacios = [...forma.querySelectorAll<HTMLLIElement>('[data-subir-vacio]')];
   const archivo = $<HTMLInputElement>('[data-subir-archivo]');
   const cuenta = $<HTMLElement>('[data-subir-cuenta]');
   const queja = $<HTMLElement>('[data-subir-queja]');
@@ -112,10 +112,6 @@ function montarSubida(forma: HTMLFormElement, dialogo: HTMLDialogElement) {
   function pintarCuenta() {
     cuenta.textContent = elegidas.length ? `${elegidas.length} de ${MAXIMO}` : T.fotosNota;
     hueco.hidden = elegidas.length >= MAXIMO;
-    // La tira mide siempre cinco: cada foto elegida empuja el hueco de añadir
-    // una casilla a la derecha y se come la vacía de más a la izquierda, así
-    // que las que quedan siguen diciendo su número de verdad.
-    vacios.forEach((v, i) => { v.hidden = i < elegidas.length; });
     hueco.closest('fieldset')?.removeAttribute('aria-invalid');
   }
 

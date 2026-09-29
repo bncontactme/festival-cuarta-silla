@@ -246,7 +246,7 @@ export type Edicion = {
  * `/galeria` y el festival aceptó en el panel.
  *
  * Pedido del cliente el 28/09: que la galería sea «un archivo compartido» al
- * que cualquiera suba fotos, «máximo 5 por post», agrupadas en una entrada con
+ * que cualquiera suba fotos, «máximo 5 por post» —quince desde el mismo día—, agrupadas en una entrada con
  * título, nombre, Instagram y descripción, y que el festival revise y acepte
  * sólo lo que tenga sentido.
  *
@@ -271,7 +271,7 @@ export type Aporte = {
   instagram?: string;
   /** Los párrafos se separan con una línea en blanco. Hasta 800 caracteres. */
   descripcion?: string;
-  /** De una a cinco. La primera es la portada de la entrada. */
+  /** De una a quince. La primera es la portada de la entrada. */
   fotos: Foto[];
   /** El día que llegó, en Guadalajara: `AAAA-MM-DD`. */
   fecha: string;

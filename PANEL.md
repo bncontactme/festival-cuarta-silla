@@ -631,7 +631,7 @@ una dirección y qué pone en el cabecero.
 ### La galería abierta
 
 Pedido del 28/09: que la galería sea **un archivo compartido**. Cualquiera sube
-fotos desde `/galeria` —hasta cinco por entrada, con título, nombre y, si
+fotos desde `/galeria` —hasta quince por entrada (eran cinco hasta el 28/09), con título, nombre y, si
 quiere, su Instagram y una descripción— y el festival revisa y acepta sólo lo
 que tenga sentido.
 
@@ -699,10 +699,10 @@ abren la imagen en grande en vez del visor.
 
 | | |
 | --- | --- |
-| Fotos por entrada | 5, en el navegador, al firmar, al mandar y al aceptar |
+| Fotos por entrada | 15, en el navegador, al firmar, al mandar y al aceptar |
 | Tamaño de cada foto | 2000 px de lado largo, en JPEG: el navegador la achica antes de subir (`src/lib/reducir.ts`) y Cloudinary la vuelve a topar al recibir (`alRecibir()`, firmado) |
 | Envíos por conexión | 5 por hora (la IP se guarda hecha hash y caduca a la hora) |
-| Envíos de todo el mundo | 60 al día, a medianoche de Guadalajara vuelve a cero |
+| Fotos de todo el mundo | 300 al día (las mismas que daban 60 envíos de 5), a medianoche de Guadalajara vuelve a cero |
 | Fila de revisión | 60 esperando; pasado eso la puerta se cierra sola hasta que se revise |
 | Trampa | un campo invisible que un robot rellena: se le dice que sí y no se guarda |
 | Abandonados | las fotos de un envío abierto y nunca mandado las barre un cron diario |

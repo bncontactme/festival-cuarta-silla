@@ -11,7 +11,7 @@
 // que se valida antes de entrar.
 //
 // Desde el 28/09 sí hay público mandando material, pero por una sola puerta y
-// sin contraseña: la galería abierta. Cualquiera sube hasta cinco fotos con su
+// sin contraseña: la galería abierta. Cualquiera sube hasta quince fotos con su
 // título desde `/galeria`, y nada de eso sale en el sitio hasta que el festival
 // lo acepta en el panel. Ver «Galería abierta», más abajo.
 //
@@ -20,7 +20,7 @@
 //   GET /contenido/<coleccion>   una sola
 //
 // Rutas del público (POST JSON, origen en lista blanca, SIN contraseña):
-//   envio-abrir   { fotos }                    firma de 1 a 5 fotos para un envío
+//   envio-abrir   { fotos }                    firma de 1 a 15 fotos para un envío
 //   envio-mandar  { id, titulo, nombre, … }    manda el envío a revisión
 //
 // Rutas de admin (POST JSON, origen en lista blanca, contraseña):
@@ -79,21 +79,24 @@ const CARPETAS = /^(artistas|marcas|sedes|archivo\/\d{4}|aportes\/[a-z0-9]{12,40
 // y están puestos pensando en un script, no en una persona. Una persona manda
 // una entrada, dos, cinco si estuvo los cuatro días.
 
-/** Lo que pidió el festival: «máximo 5 fotos por post». El validador lo
- *  vuelve a mirar al mandar y al aceptar (`TOPES.fotosPorAporte`). */
-const FOTOS_POR_ENVIO = 5;
+/** Lo que pidió el festival: «máximo 5 fotos por post», y el 28/09, quince.
+ *  El validador lo vuelve a mirar al mandar y al aceptar
+ *  (`TOPES.fotosPorAporte`). */
+const FOTOS_POR_ENVIO = 15;
 
 /** Envíos que puede abrir una misma conexión en una hora. Cuenta los que se
  *  abren, no los que se mandan: firmar es lo que deja subir a Cloudinary, y es
  *  eso lo que hay que frenar. */
 const ENVIOS_POR_HORA = 5;
 
-/** Envíos que se abren al día entre TODO el mundo. El de arriba frena a una
+/** Fotos que se firman al día entre TODO el mundo. El de arriba frena a una
  *  conexión; éste, a muchas a la vez — que es como se llena una cuenta de
- *  Cloudinary en una noche. Sesenta al día son trescientas fotos y unos
- *  doscientos megas en el peor caso: la cuenta ni lo nota, y un festival de
- *  cuatro días no manda tanto. Se reinicia a medianoche de Guadalajara. */
-const ENVIOS_POR_DIA = 60;
+ *  Cloudinary en una noche. Cuenta fotos y no envíos: era de sesenta envíos
+ *  cuando cada uno traía cinco, y al subir a quince por entrada se quedó en
+ *  las mismas trescientas fotos —unos doscientos megas en el peor caso—, que
+ *  la cuenta ni nota y un festival de cuatro días no manda. Se reinicia a
+ *  medianoche de Guadalajara. */
+const FOTOS_POR_DIA = 300;
 
 /** Cuántos pueden esperar revisión a la vez. Pasado esto la puerta se cierra
  *  sola hasta que el festival revise: una fila de cien no la revisa nadie, y si
@@ -297,7 +300,7 @@ export default {
 
 // ── Galería abierta ───────────────────────────────────────────────────────────
 //
-// Cualquiera puede subir fotos desde `/galeria`: hasta cinco por entrada, con su
+// Cualquiera puede subir fotos desde `/galeria`: hasta quince por entrada, con su
 // título, su nombre y, si quiere, su Instagram y unas líneas. Nada de eso se ve
 // en el sitio hasta que el festival lo acepta en el panel.
 //
@@ -309,7 +312,7 @@ export default {
 // Lo que cambia respecto al panel es qué se firma. Allí se firma una carpeta, y
 // con esa firma se puede subir cuanto se quiera durante una hora —da igual, el
 // que la pide tiene la contraseña—. Aquí la pide cualquiera, así que se firma
-// **cada foto por separado, con su nombre puesto** (`aportes/<id>/1` … `/5`) y
+// **cada foto por separado, con su nombre puesto** (`aportes/<id>/1` … `/15`) y
 // `overwrite=false`: cada firma sirve para una foto, una sola vez, y no puede
 // pisar la que ya está. Sin eso, una firma pedida para mandar una foto serviría
 // para llenar la cuenta de Cloudinary en una tarde, o para cambiar una foto ya
@@ -333,11 +336,11 @@ async function envioAbrir(cuerpo, env, ip, cors) {
     return json({ error: 'Ya mandaste varias entradas seguidas. Espera un rato y vuelve a intentarlo.' }, 429, cors);
   }
 
-  // El tope de todo el mundo, por día de Guadalajara. Caduca solo al segundo
-  // día: no hace falta barrerlo.
-  const claveDia = 'cs:tope:dia:' + hoyEnGDL();
+  // El tope de todo el mundo, en fotos y por día de Guadalajara. Caduca solo
+  // al segundo día: no hace falta barrerlo.
+  const claveDia = 'cs:tope:fotos:' + hoyEnGDL();
   const delDia = Number(await env.CONTENIDO.get(claveDia)) || 0;
-  if (delDia >= ENVIOS_POR_DIA) {
+  if (delDia + n > FOTOS_POR_DIA) {
     return json({ error: 'Hoy ya llegaron muchas fotos. Vuelve a intentarlo mañana.' }, 429, cors);
   }
 
@@ -346,7 +349,7 @@ async function envioAbrir(cuerpo, env, ip, cors) {
   }
 
   await env.CONTENIDO.put(clave, String(hechos + 1), { expirationTtl: 3600 });
-  await env.CONTENIDO.put(claveDia, String(delDia + 1), { expirationTtl: 2 * 86400 });
+  await env.CONTENIDO.put(claveDia, String(delDia + n), { expirationTtl: 2 * 86400 });
 
   const id = nuevoId();
   await abrirSubida(env, id);

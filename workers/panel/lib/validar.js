@@ -26,8 +26,9 @@ const TOPES = {
   fotosPorEdicion: 300,
   marcas: 100,
   aportes: 1000,
-  /** Lo que pidió el festival: «máximo 5 fotos por post». */
-  fotosPorAporte: 5,
+  /** Lo que pidió el festival: «máximo 5 fotos por post», y desde el 28/09,
+   *  quince. */
+  fotosPorAporte: 15,
 };
 
 /** Cuánto cabe en la descripción de una entrada de la galería abierta. Es un

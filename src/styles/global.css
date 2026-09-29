@@ -1608,6 +1608,19 @@ html:not(.js) .solo-js {
 .aporte-foto:hover img {
   scale: 1.04;
 }
+/* Las que no caben en el mosaico: la quinta foto, velada, con cuántas más
+   trae la entrada. Abre el visor igual que las otras. */
+.aporte-mas {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background-color: color-mix(in srgb, var(--color-tinta) 55%, transparent);
+  color: var(--color-amarillo);
+  font-size: clamp(1.2rem, 11cqw, 2.2rem);
+  line-height: 1;
+}
+
 /* El foco va por dentro: por fuera lo taparía la foto de al lado. */
 .aporte-foto:focus-visible {
   outline: 3px solid var(--color-amarillo);
@@ -1791,11 +1804,11 @@ textarea.forma-entrada {
   }
 }
 
-/* ── La tira de fotos ──────────────────────────────────────────────────
-   Cinco casillas cuadradas, siempre: las fotos elegidas, el hueco de añadir y
-   las que faltan, numeradas. Así el tope se ve sin leerlo, las miniaturas
-   ocupan una sola fila —eran dos filas de tres en el teléfono— y el
-   formulario no cambia de alto al elegir. */
+/* ── Las fotos elegidas ────────────────────────────────────────────────
+   Cinco por fila, cuadradas, y la rejilla crece con ellas: una fila con
+   cinco, tres con quince. Hubo cinco casillas fijas y numeradas mientras el
+   tope fue cinco; con quince eran tres filas de casillas vacías antes de
+   elegir nada. Ahora, sin fotos, el hueco de añadir es un botón a lo ancho. */
 .subir-fotos {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -1862,8 +1875,8 @@ textarea.forma-entrada {
   transition: width 0.2s linear;
 }
 
-/* El hueco de añadir: la casilla con canto y sombra, la única que parece un
-   botón. */
+/* El hueco de añadir: la casilla con canto y sombra que va detrás de la
+   última foto. */
 .subir-anadir {
   display: grid;
   aspect-ratio: 1;
@@ -1926,30 +1939,19 @@ fieldset[aria-invalid='true'] .subir-anadir {
   box-shadow: 4px 4px 0 var(--color-rojo);
 }
 
-/* Las que faltan: el canto punteado y el número, del mismo gris que las
-   notas. Cada una abre el selector, como el hueco. */
-.subir-vacio label {
-  display: grid;
-  aspect-ratio: 1;
-  place-items: center;
-  border: 2px dashed color-mix(in srgb, var(--color-tinta) 35%, transparent);
-  color: color-mix(in srgb, var(--color-tinta) 40%, transparent);
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition:
-    background-color 0.2s var(--ease-salida),
-    border-color 0.2s var(--ease-salida);
+/* Sin fotos todavía, el hueco ocupa la fila entera y se lee en un renglón:
+   es lo primero que hay que hacer y el blanco más grande del formulario. */
+.subir-fotos:not(:has(.subir-foto)) .subir-hueco {
+  grid-column: 1 / -1;
 }
-@media (width >= 40rem) {
-  .subir-vacio label {
-    font-size: 1.6rem;
-  }
-}
-.subir-vacio label:hover,
-.subir-fotos:has(.soltando) .subir-vacio label {
-  border-color: var(--color-tinta);
-  background-color: color-mix(in srgb, var(--color-amarillo) 45%, transparent);
+.subir-fotos:not(:has(.subir-foto)) .subir-anadir {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  aspect-ratio: auto;
+  min-height: 4.5rem;
+  font-size: 0.62rem;
 }
 
 .subir-permiso {

@@ -385,7 +385,7 @@ dominio salga de Wix y el sitio se mude.
 
 El programa, las sedes, lxs artistas, el archivo y los patrocinadores **los
 carga el festival desde `/admin`**, no se escriben aquí. La galería, además, es
-un **archivo abierto**: cualquiera sube hasta cinco fotos por entrada desde
+un **archivo abierto**: cualquiera sube hasta quince fotos por entrada desde
 `/galeria`, y el festival las acepta o las rechaza en la pestaña Envíos del
 panel antes de que salgan (ver «La galería abierta» en [PANEL.md](PANEL.md)). El contenido vive en un
 Worker de Cloudflare con KV, las fotos en Cloudinary, y el sitio se lo baja en

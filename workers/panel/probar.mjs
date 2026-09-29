@@ -253,8 +253,8 @@ ok('una entrada buena pasa, con id y fecha del Worker',
 r = validarEnvio(envio({ permiso: false }), ctxEnvio);
 ok('sin permiso no entra', r.errores.some((e) => e.startsWith('permiso')), JSON.stringify(r.errores));
 
-r = validarEnvio(envio({ fotos: [1, 2, 3, 4, 5, 6].map((n) => FOTO(n)) }), ctxEnvio);
-ok('seis fotos no entran', r.errores.some((e) => e.includes('el tope son 5')), JSON.stringify(r.errores));
+r = validarEnvio(envio({ fotos: Array.from({ length: 16 }, (_, k) => FOTO(k + 1)) }), ctxEnvio);
+ok('dieciséis fotos no entran', r.errores.some((e) => e.includes('el tope son 15')), JSON.stringify(r.errores));
 
 r = validarEnvio(envio({ fotos: [] }), ctxEnvio);
 ok('sin fotos no entra', r.errores.some((e) => e.includes('al menos una foto')), JSON.stringify(r.errores));
@@ -301,8 +301,11 @@ ok('dos entradas no comparten carpeta', r.errores.some((e) => e.includes('repeti
 r = validar('aportes', [{ ...aceptada, id: 'CON MAYÚSCULAS' }], {});
 ok('un id que no acuñó el Worker se rechaza', r.errores.some((e) => e.includes('.id')), JSON.stringify(r.errores));
 
-r = validar('aportes', [{ ...aceptada, fotos: [...aceptada.fotos, { src: FOTO(3) }, { src: FOTO(4) }, { src: FOTO(5) }, { src: FOTO(6) }] }], {});
-ok('tampoco el panel pasa de cinco', r.errores.some((e) => e.includes('el tope son 5')), JSON.stringify(r.errores));
+r = validar('aportes', [{ ...aceptada, fotos: Array.from({ length: 15 }, (_, k) => ({ src: FOTO(k + 1) })) }], {});
+ok('quince fotos caben en una entrada', r.errores.length === 0, JSON.stringify(r.errores));
+
+r = validar('aportes', [{ ...aceptada, fotos: Array.from({ length: 16 }, (_, k) => ({ src: FOTO(k + 1) })) }], {});
+ok('tampoco el panel pasa de quince', r.errores.some((e) => e.includes('el tope son 15')), JSON.stringify(r.errores));
 
 console.log(fallos ? `\n${fallos} fallo(s)\n` : '\nTodo bien\n');
 process.exit(fallos ? 1 : 0);

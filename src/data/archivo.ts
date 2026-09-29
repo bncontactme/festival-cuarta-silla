@@ -16,7 +16,7 @@ import type { Aporte, Edicion, Foto } from './tipos';
  * del festival, de que subir fotos y así… de las ediciones».
  *
  * **El archivo abierto.** Pedido del 28/09: que sea «un archivo compartido» en
- * el que cualquiera suba fotos —hasta cinco por entrada, con título, nombre,
+ * el que cualquiera suba fotos —hasta quince por entrada, con título, nombre,
  * Instagram y descripción— y que el festival revise y acepte «sólo lo que tenga
  * sentido». Las entradas aceptadas son `aportes`, otra colección: una edición es
  * del festival y una entrada es de quien la manda. Ver `Aporte` en `tipos.ts`.
@@ -55,7 +55,7 @@ export const archivo = {
     rotulo: 'Archivo abierto',
     pregunta: '¿Fuiste al festival?',
     titulo: 'Sube tus fotos',
-    bajada: 'Hasta 5 fotos, con un título y tu nombre. Las revisamos y salen aquí.',
+    bajada: 'Hasta 15 fotos, con un título y tu nombre. Las revisamos y salen aquí.',
     boton: 'Subir fotos',
     /** El rótulo de la sección de entradas. */
     entradas: 'Del público',
@@ -74,9 +74,9 @@ export const archivo = {
     rotulo: 'Galería / Archivo abierto',
     titulo: 'Sube tus fotos',
     bajada:
-      'Hasta cinco fotos por entrada. La revisamos y, si entra, sale en la galería con tu nombre.',
+      'Hasta 15 fotos por entrada. La revisamos y, si entra, sale en la galería con tu nombre.',
     fotos: 'Fotos',
-    fotosNota: 'De una a cinco',
+    fotosNota: 'Hasta 15',
     anadir: 'Añadir fotos',
     soltar: 'o suéltalas aquí',
     quitar: 'Quitar esta foto',
@@ -106,8 +106,8 @@ export const archivo = {
       sinNombre: 'Falta tu nombre.',
       sinPermiso: 'Marca la casilla del permiso: sin ella no podemos publicarlas.',
       cuenta: 'Esa cuenta de Instagram no parece válida.',
-      tope: 'Son cinco fotos como máximo por entrada: {n} se quedaron fuera.',
-      topeUna: 'Son cinco fotos como máximo por entrada: una se quedó fuera.',
+      tope: 'Son 15 fotos como máximo por entrada: {n} se quedaron fuera.',
+      topeUna: 'Son 15 fotos como máximo por entrada: una se quedó fuera.',
       noImagen: '«{nombre}» no es una foto que podamos abrir. Sirven JPG, PNG y WebP.',
       heic:
         '«{nombre}» viene en HEIC, el formato del iPhone, y este navegador no lo abre. ' +
