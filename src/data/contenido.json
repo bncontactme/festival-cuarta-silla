@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 176,
-  "actualizado": "2026-09-29T03:13:42.521Z",
+  "version": 177,
+  "actualizado": "2026-09-29T03:22:57.108Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1849,6 +1849,25 @@
     }
   },
   "aportes": [
+    {
+      "id": "5g0n120h4v2v0124",
+      "titulo": "Recinto del arte",
+      "nombre": "Andrea Esquivel",
+      "instagram": "andyeuni",
+      "descripcion": "Ex convento de santa teresa",
+      "fecha": "2026-09-28",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652035/cuartasilla/aportes/5g0n120h4v2v0124/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652037/cuartasilla/aportes/5g0n120h4v2v0124/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790652038/cuartasilla/aportes/5g0n120h4v2v0124/3.jpg"
+        }
+      ]
+    },
     {
       "id": "4b450l46130p431s",
       "titulo": "no museo y expiatorio",
