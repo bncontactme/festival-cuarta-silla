@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 197,
-  "actualizado": "2026-09-30T02:25:08.938Z",
+  "version": 198,
+  "actualizado": "2026-09-30T04:17:32.382Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,40 @@
     }
   },
   "aportes": [
+    {
+      "id": "2n335f0i1p2d730g",
+      "titulo": "Sangre de mi Sangre",
+      "nombre": "Isobel Jauregui",
+      "instagram": "is0bel_",
+      "descripcion": "Montaje del tejido de la Colectiva Hilos en Estudio Arechiga y performance “Entretejiendo arrullos” de Liz Mercado",
+      "fecha": "2026-09-29",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790738403/cuartasilla/aportes/2n335f0i1p2d730g/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790738404/cuartasilla/aportes/2n335f0i1p2d730g/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790738406/cuartasilla/aportes/2n335f0i1p2d730g/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790738407/cuartasilla/aportes/2n335f0i1p2d730g/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790738408/cuartasilla/aportes/2n335f0i1p2d730g/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790738409/cuartasilla/aportes/2n335f0i1p2d730g/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790738410/cuartasilla/aportes/2n335f0i1p2d730g/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790738411/cuartasilla/aportes/2n335f0i1p2d730g/8.jpg"
+        }
+      ]
+    },
     {
       "id": "2i661x5515380o1x",
       "titulo": "En algunos momentos",
