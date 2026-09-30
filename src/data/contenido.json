@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 198,
-  "actualizado": "2026-09-30T04:17:32.382Z",
+  "version": 200,
+  "actualizado": "2026-09-30T21:04:37.390Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,74 @@
     }
   },
   "aportes": [
+    {
+      "id": "1l3r203z211r1c0y",
+      "titulo": "BURDO (Gabriela Girbau)",
+      "nombre": "PLVS VLTRA",
+      "instagram": "plvsvltra_art",
+      "descripcion": "Algunas imagenes de la inauguración de \"BURDO\" de Gabriela Girbau,formó parte también de @festivaldearteconceptual con obra de @ivanlaffontt , @torrencial.andrea , @lilith.sin.cabeza en TALLER INDUSTRIA\n\nCon instalación de @medusa.riosantiago\n\nY performance de @neofantasias",
+      "fecha": "2026-09-30",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799382/cuartasilla/aportes/1l3r203z211r1c0y/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799383/cuartasilla/aportes/1l3r203z211r1c0y/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799385/cuartasilla/aportes/1l3r203z211r1c0y/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799386/cuartasilla/aportes/1l3r203z211r1c0y/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799387/cuartasilla/aportes/1l3r203z211r1c0y/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799388/cuartasilla/aportes/1l3r203z211r1c0y/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799389/cuartasilla/aportes/1l3r203z211r1c0y/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799390/cuartasilla/aportes/1l3r203z211r1c0y/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799391/cuartasilla/aportes/1l3r203z211r1c0y/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799393/cuartasilla/aportes/1l3r203z211r1c0y/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799394/cuartasilla/aportes/1l3r203z211r1c0y/11.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799396/cuartasilla/aportes/1l3r203z211r1c0y/12.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799397/cuartasilla/aportes/1l3r203z211r1c0y/13.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799398/cuartasilla/aportes/1l3r203z211r1c0y/14.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790799399/cuartasilla/aportes/1l3r203z211r1c0y/15.jpg"
+        }
+      ]
+    },
+    {
+      "id": "0m440z2u3s726p1u",
+      "titulo": "SERES: Enigmas de la Desconexión",
+      "nombre": "Jovany Cuarenta",
+      "instagram": "cuarenta.art",
+      "descripcion": "Foto tomada por Arigarlo en Ala rota en la marcha del arte",
+      "fecha": "2026-09-30",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790798668/cuartasilla/aportes/0m440z2u3s726p1u/1.jpg"
+        }
+      ]
+    },
     {
       "id": "2n335f0i1p2d730g",
       "titulo": "Sangre de mi Sangre",
