@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 196,
-  "actualizado": "2026-09-30T00:39:10.443Z",
+  "version": 197,
+  "actualizado": "2026-09-30T02:25:08.938Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,55 @@
     }
   },
   "aportes": [
+    {
+      "id": "2i661x5515380o1x",
+      "titulo": "En algunos momentos",
+      "nombre": "Andee",
+      "instagram": "berdevotella",
+      "descripcion": "Primer día, no museo, backstage, portal",
+      "fecha": "2026-09-29",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732961/cuartasilla/aportes/2i661x5515380o1x/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732962/cuartasilla/aportes/2i661x5515380o1x/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732963/cuartasilla/aportes/2i661x5515380o1x/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732964/cuartasilla/aportes/2i661x5515380o1x/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732965/cuartasilla/aportes/2i661x5515380o1x/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732966/cuartasilla/aportes/2i661x5515380o1x/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732967/cuartasilla/aportes/2i661x5515380o1x/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732968/cuartasilla/aportes/2i661x5515380o1x/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732969/cuartasilla/aportes/2i661x5515380o1x/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732970/cuartasilla/aportes/2i661x5515380o1x/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732971/cuartasilla/aportes/2i661x5515380o1x/11.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732972/cuartasilla/aportes/2i661x5515380o1x/12.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790732973/cuartasilla/aportes/2i661x5515380o1x/13.jpg"
+        }
+      ]
+    },
     {
       "id": "1m0n5j5c394b3p58",
       "titulo": "Marcha del arte",
