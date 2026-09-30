@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 195,
-  "actualizado": "2026-09-29T19:35:28.086Z",
+  "version": 196,
+  "actualizado": "2026-09-30T00:39:10.443Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,49 @@
     }
   },
   "aportes": [
+    {
+      "id": "1m0n5j5c394b3p58",
+      "titulo": "Marcha del arte",
+      "nombre": "Melissa",
+      "instagram": "meldemiiel",
+      "descripcion": "Se visitaron varias sedes del festival, caminámos por las calles con megáfono y bocina. El sábado 26, acompañados de las organizadores del festival, artistas y amantes del arte",
+      "fecha": "2026-09-29",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790726846/cuartasilla/aportes/1m0n5j5c394b3p58/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790726847/cuartasilla/aportes/1m0n5j5c394b3p58/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790726848/cuartasilla/aportes/1m0n5j5c394b3p58/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790726849/cuartasilla/aportes/1m0n5j5c394b3p58/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790726850/cuartasilla/aportes/1m0n5j5c394b3p58/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790726851/cuartasilla/aportes/1m0n5j5c394b3p58/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790726852/cuartasilla/aportes/1m0n5j5c394b3p58/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790726853/cuartasilla/aportes/1m0n5j5c394b3p58/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790726854/cuartasilla/aportes/1m0n5j5c394b3p58/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790726855/cuartasilla/aportes/1m0n5j5c394b3p58/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790726857/cuartasilla/aportes/1m0n5j5c394b3p58/11.jpg"
+        }
+      ]
+    },
     {
       "id": "3h46621v575l5273",
       "titulo": "¿Qué puede hacer el arte en un mundo roto?",
