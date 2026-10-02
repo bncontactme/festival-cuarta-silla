@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 200,
-  "actualizado": "2026-09-30T21:04:37.390Z",
+  "version": 204,
+  "actualizado": "2026-10-02T18:56:46.871Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,127 @@
     }
   },
   "aportes": [
+    {
+      "id": "1r0r591x40065d6u",
+      "titulo": "Montaje Ánima Galería",
+      "nombre": "David Landgrave Romo",
+      "instagram": "ap0p.tosis",
+      "descripcion": "Fotografía tomada durante mi visita a Ánima Galería previo a la inauguración. 24-09-2026",
+      "fecha": "2026-10-02",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960982/cuartasilla/aportes/1r0r591x40065d6u/1.jpg"
+        }
+      ]
+    },
+    {
+      "id": "2r6r210g3u5k473g",
+      "titulo": "LIBERTAD DE PRESA",
+      "nombre": "David Landgrave Romo",
+      "instagram": "ap0p.tosis",
+      "descripcion": "Registro de la Acción \"Libertad de presa\" en la Casa Rosa Luis Barragán (Chapalita). 25-09-2026",
+      "fecha": "2026-10-02",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960912/cuartasilla/aportes/2r6r210g3u5k473g/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960913/cuartasilla/aportes/2r6r210g3u5k473g/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960914/cuartasilla/aportes/2r6r210g3u5k473g/3.jpg"
+        }
+      ]
+    },
+    {
+      "id": "2m3l34061s2z0o4x",
+      "titulo": "LIBERTAD DE PRESA",
+      "nombre": "David Landgrave Romo",
+      "instagram": "ap0p.tosis",
+      "descripcion": "Registro de la Acción \"Libertad de presa\" en Ánima Galeria.\n26-09-2026",
+      "fecha": "2026-10-02",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960827/cuartasilla/aportes/2m3l34061s2z0o4x/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960828/cuartasilla/aportes/2m3l34061s2z0o4x/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960829/cuartasilla/aportes/2m3l34061s2z0o4x/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960831/cuartasilla/aportes/2m3l34061s2z0o4x/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960832/cuartasilla/aportes/2m3l34061s2z0o4x/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960834/cuartasilla/aportes/2m3l34061s2z0o4x/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960835/cuartasilla/aportes/2m3l34061s2z0o4x/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960836/cuartasilla/aportes/2m3l34061s2z0o4x/8.jpg"
+        }
+      ]
+    },
+    {
+      "id": "022t5t09286q3b1j",
+      "titulo": "LIBERTAD DE PRESA",
+      "nombre": "David Lansgrave Romo",
+      "instagram": "ap0p.tosis",
+      "descripcion": "Resgistro de la Acción \"Libertad de presa\" en el NO-MUSEO.\n26-09-2026",
+      "fecha": "2026-10-02",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960741/cuartasilla/aportes/022t5t09286q3b1j/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960743/cuartasilla/aportes/022t5t09286q3b1j/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960744/cuartasilla/aportes/022t5t09286q3b1j/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960745/cuartasilla/aportes/022t5t09286q3b1j/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960746/cuartasilla/aportes/022t5t09286q3b1j/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960747/cuartasilla/aportes/022t5t09286q3b1j/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960748/cuartasilla/aportes/022t5t09286q3b1j/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960749/cuartasilla/aportes/022t5t09286q3b1j/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960751/cuartasilla/aportes/022t5t09286q3b1j/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960752/cuartasilla/aportes/022t5t09286q3b1j/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960753/cuartasilla/aportes/022t5t09286q3b1j/11.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960754/cuartasilla/aportes/022t5t09286q3b1j/12.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960755/cuartasilla/aportes/022t5t09286q3b1j/13.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960756/cuartasilla/aportes/022t5t09286q3b1j/14.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1790960758/cuartasilla/aportes/022t5t09286q3b1j/15.jpg"
+        }
+      ]
+    },
     {
       "id": "1l3r203z211r1c0y",
       "titulo": "BURDO (Gabriela Girbau)",
