@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 205,
-  "actualizado": "2026-10-04T01:06:39.729Z",
+  "version": 206,
+  "actualizado": "2026-10-04T20:58:40.445Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,19 @@
     }
   },
   "aportes": [
+    {
+      "id": "5k235438532k5z2t",
+      "titulo": "Insecta infecta",
+      "nombre": "Catarsis",
+      "instagram": "jesusmurioenatemajac",
+      "descripcion": "Casa feria, Santuario III, Micrófono abierto, participación de Jesús murió en Atemajac",
+      "fecha": "2026-10-03",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791091672/cuartasilla/aportes/5k235438532k5z2t/1.jpg"
+        }
+      ]
+    },
     {
       "id": "6u6s2o5l0a6w0t6n",
       "titulo": "No museo+ días feriados+ ceviche",
