@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 204,
-  "actualizado": "2026-10-02T18:56:46.871Z",
+  "version": 205,
+  "actualizado": "2026-10-04T01:06:39.729Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,37 @@
     }
   },
   "aportes": [
+    {
+      "id": "6u6s2o5l0a6w0t6n",
+      "titulo": "No museo+ días feriados+ ceviche",
+      "nombre": "Maldita sea",
+      "instagram": "maldita_sda__",
+      "descripcion": "La primera foto es de mi obra expuesta en no museo, el cartel de Cobian , la reja de inti ti (? Y la tierra zona crujiente de génesis , mural rio de caca por leo arcencio y ya gracias",
+      "fecha": "2026-10-03",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791053210/cuartasilla/aportes/6u6s2o5l0a6w0t6n/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791053211/cuartasilla/aportes/6u6s2o5l0a6w0t6n/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791053213/cuartasilla/aportes/6u6s2o5l0a6w0t6n/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791053214/cuartasilla/aportes/6u6s2o5l0a6w0t6n/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791053215/cuartasilla/aportes/6u6s2o5l0a6w0t6n/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791053217/cuartasilla/aportes/6u6s2o5l0a6w0t6n/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791053218/cuartasilla/aportes/6u6s2o5l0a6w0t6n/7.jpg"
+        }
+      ]
+    },
     {
       "id": "1r0r591x40065d6u",
       "titulo": "Montaje Ánima Galería",
