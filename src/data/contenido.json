@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 206,
-  "actualizado": "2026-10-04T20:58:40.445Z",
+  "version": 207,
+  "actualizado": "2026-10-05T03:08:01.449Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,61 @@
     }
   },
   "aportes": [
+    {
+      "id": "2w15352w2c6o5m6a",
+      "titulo": "Staditche en la primera noche",
+      "nombre": "Bohemia",
+      "instagram": "camaritadebohemia",
+      "descripcion": "Pedita de inauguración en staditche",
+      "fecha": "2026-10-04",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169585/cuartasilla/aportes/2w15352w2c6o5m6a/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169586/cuartasilla/aportes/2w15352w2c6o5m6a/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169587/cuartasilla/aportes/2w15352w2c6o5m6a/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169589/cuartasilla/aportes/2w15352w2c6o5m6a/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169591/cuartasilla/aportes/2w15352w2c6o5m6a/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169593/cuartasilla/aportes/2w15352w2c6o5m6a/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169595/cuartasilla/aportes/2w15352w2c6o5m6a/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169596/cuartasilla/aportes/2w15352w2c6o5m6a/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169598/cuartasilla/aportes/2w15352w2c6o5m6a/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169600/cuartasilla/aportes/2w15352w2c6o5m6a/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169602/cuartasilla/aportes/2w15352w2c6o5m6a/11.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169603/cuartasilla/aportes/2w15352w2c6o5m6a/12.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169605/cuartasilla/aportes/2w15352w2c6o5m6a/13.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169607/cuartasilla/aportes/2w15352w2c6o5m6a/14.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791169609/cuartasilla/aportes/2w15352w2c6o5m6a/15.jpg"
+        }
+      ]
+    },
     {
       "id": "5k235438532k5z2t",
       "titulo": "Insecta infecta",
