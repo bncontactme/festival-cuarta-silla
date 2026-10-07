@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 207,
-  "actualizado": "2026-10-05T03:08:01.449Z",
+  "version": 208,
+  "actualizado": "2026-10-07T05:56:19.592Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,34 @@
     }
   },
   "aportes": [
+    {
+      "id": "344q3q563h4r4y1r",
+      "titulo": "Presentacion fanzine",
+      "nombre": "Lucano",
+      "instagram": "estudiovanidad",
+      "descripcion": "Foro AM",
+      "fecha": "2026-10-06",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791312150/cuartasilla/aportes/344q3q563h4r4y1r/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791312152/cuartasilla/aportes/344q3q563h4r4y1r/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791312153/cuartasilla/aportes/344q3q563h4r4y1r/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791312153/cuartasilla/aportes/344q3q563h4r4y1r/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791312154/cuartasilla/aportes/344q3q563h4r4y1r/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791312156/cuartasilla/aportes/344q3q563h4r4y1r/6.jpg"
+        }
+      ]
+    },
     {
       "id": "2w15352w2c6o5m6a",
       "titulo": "Staditche en la primera noche",
