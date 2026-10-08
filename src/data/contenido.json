@@ -1,7 +1,7 @@
 {
   "contrato": 4,
-  "version": 208,
-  "actualizado": "2026-10-07T05:56:19.592Z",
+  "version": 210,
+  "actualizado": "2026-10-08T17:33:00.275Z",
   "sedes": [
     {
       "nombre": "Cuerpos Parlantes",
@@ -1845,6 +1845,76 @@
     }
   },
   "aportes": [
+    {
+      "id": "2u4q624d5k6s000t",
+      "titulo": "Espinas del rosal",
+      "nombre": "Alex Rúa",
+      "instagram": "alexandrorua",
+      "fecha": "2026-10-07",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791437909/cuartasilla/aportes/2u4q624d5k6s000t/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791437911/cuartasilla/aportes/2u4q624d5k6s000t/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791437914/cuartasilla/aportes/2u4q624d5k6s000t/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791437916/cuartasilla/aportes/2u4q624d5k6s000t/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791437920/cuartasilla/aportes/2u4q624d5k6s000t/5.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791437923/cuartasilla/aportes/2u4q624d5k6s000t/6.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791437925/cuartasilla/aportes/2u4q624d5k6s000t/7.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791437927/cuartasilla/aportes/2u4q624d5k6s000t/8.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791437932/cuartasilla/aportes/2u4q624d5k6s000t/9.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791437933/cuartasilla/aportes/2u4q624d5k6s000t/10.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791437937/cuartasilla/aportes/2u4q624d5k6s000t/11.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791437941/cuartasilla/aportes/2u4q624d5k6s000t/12.jpg"
+        }
+      ]
+    },
+    {
+      "id": "3e6v0w1p24721h3i",
+      "titulo": "Modelo",
+      "nombre": "Luna Domínguez Díaz",
+      "instagram": "luna_model123",
+      "descripcion": "Hola soy Luna, una modelo emergente que ha participado en varios comerciales para restaurantes, en colecciones de @melancolia.brand y @badpeoplesc y trabajado con el fotógrafo @junedaysx.\n\nEstoy disponible y encantada para trabajar en proyectos donde se requieran modelos y/o preformance",
+      "fecha": "2026-10-07",
+      "fotos": [
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791413381/cuartasilla/aportes/3e6v0w1p24721h3i/1.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791413382/cuartasilla/aportes/3e6v0w1p24721h3i/2.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791413383/cuartasilla/aportes/3e6v0w1p24721h3i/3.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791413385/cuartasilla/aportes/3e6v0w1p24721h3i/4.jpg"
+        },
+        {
+          "src": "https://res.cloudinary.com/duog120j4/image/upload/v1791413386/cuartasilla/aportes/3e6v0w1p24721h3i/5.jpg"
+        }
+      ]
+    },
     {
       "id": "344q3q563h4r4y1r",
       "titulo": "Presentacion fanzine",
